@@ -20,6 +20,7 @@ import Account from "./pages/Account";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import RefundPolicy from "./pages/RefundPolicy";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/account" element={<Account />} />
                 <Route path="/account/orders" element={<Orders />} />
+                <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-conditions" element={<TermsConditions />} />
                 <Route path="/refund-policy" element={<RefundPolicy />} />
