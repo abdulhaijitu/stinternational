@@ -22,6 +22,13 @@ import CategoryNavMenu from "./CategoryNavMenu";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
 import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "@/assets/logo.png";
+import { cn } from "@/lib/utils";
+
+// Fixed heights for header sections to prevent layout shift
+const TOP_BAR_HEIGHT = 40; // px
+const MAIN_HEADER_HEIGHT = 80; // px (md)
+const MAIN_HEADER_HEIGHT_MOBILE = 64; // px
+const NAV_HEIGHT = 48; // px
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,16 +54,26 @@ const Header = () => {
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  // Calculate total header height for mobile menu offset
+  const mobileMenuOffset = isCompact 
+    ? MAIN_HEADER_HEIGHT_MOBILE 
+    : MAIN_HEADER_HEIGHT_MOBILE + TOP_BAR_HEIGHT;
+
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-200 ${
-      isScrolled ? 'shadow-md' : ''
-    }`}>
-      {/* Top Bar - Hide on scroll for compact mode */}
-      <div className={`bg-primary text-primary-foreground transition-all duration-200 overflow-hidden ${
-        isCompact ? 'max-h-0 py-0' : 'max-h-16 py-2'
-      }`}>
-        <div className="container-premium">
-          <div className="flex items-center justify-between text-sm">
+    <header className="sticky top-0 z-50 w-full">
+      {/* Top Bar - Uses transform for smooth hide/show without layout shift */}
+      <div 
+        className={cn(
+          "bg-primary text-primary-foreground will-change-transform",
+          "transition-transform duration-200 ease-out"
+        )}
+        style={{ 
+          height: TOP_BAR_HEIGHT,
+          transform: isCompact ? `translateY(-${TOP_BAR_HEIGHT}px)` : 'translateY(0)',
+        }}
+      >
+        <div className="container-premium h-full">
+          <div className="flex items-center justify-between h-full text-sm">
             <div className="hidden md:flex items-center gap-6">
               <a href="tel:+8801715575665" className="flex items-center gap-2 hover:text-accent transition-colors">
                 <Phone className="h-3.5 w-3.5" />
@@ -79,22 +96,32 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Main Header */}
-      <div className={`bg-background border-b border-border transition-all duration-200 ${
-        isCompact ? 'shadow-sm' : ''
-      }`}>
+      {/* Main Header - Fixed height, uses transform for compact state */}
+      <div 
+        className={cn(
+          "bg-background border-b border-border will-change-transform",
+          "transition-all duration-200 ease-out",
+          isScrolled && "shadow-md"
+        )}
+        style={{
+          transform: isCompact ? `translateY(-${TOP_BAR_HEIGHT}px)` : 'translateY(0)',
+        }}
+      >
         <div className="container-premium">
-          <div className={`flex items-center justify-between transition-all duration-200 ${
-            isCompact ? 'h-14' : 'h-16 md:h-20'
-          }`}>
-            {/* Logo */}
+          <div 
+            className="flex items-center justify-between"
+            style={{ height: `${MAIN_HEADER_HEIGHT_MOBILE}px` }}
+          >
+            {/* Logo - Uses scale transform instead of height change */}
             <Link to="/" className="flex items-center shrink-0">
               <img 
                 src={logo} 
                 alt="ST International" 
-                className={`w-auto transition-all duration-200 ${
-                  isCompact ? 'h-10 md:h-12' : 'h-12 md:h-16'
-                }`}
+                className={cn(
+                  "h-12 md:h-14 w-auto will-change-transform",
+                  "transition-transform duration-200 ease-out origin-left",
+                  isCompact && "scale-90"
+                )}
               />
             </Link>
 
@@ -111,28 +138,58 @@ const Header = () => {
               {/* Language Switcher - Mobile in header */}
               <LanguageSwitcher className="md:hidden" variant="compact" />
               
-              <Link to="/account" className="hidden md:flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                <User className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span>{t.nav.account}</span>}
+              <Link 
+                to="/account" 
+                className={cn(
+                  "hidden md:flex items-center gap-2 text-sm font-medium",
+                  "text-foreground hover:text-primary transition-colors"
+                )}
+              >
+                <User className="h-5 w-5" />
+                <span className={cn(
+                  "transition-opacity duration-200",
+                  isCompact && "opacity-0 w-0 overflow-hidden"
+                )}>
+                  {t.nav.account}
+                </span>
               </Link>
-              <Link to="/wishlist" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                <Heart className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span className="hidden md:inline">{t.nav.wishlist}</span>}
+              
+              <Link 
+                to="/wishlist" 
+                className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <Heart className="h-5 w-5" />
+                <span className={cn(
+                  "hidden md:inline transition-opacity duration-200",
+                  isCompact && "opacity-0 w-0 overflow-hidden"
+                )}>
+                  {t.nav.wishlist}
+                </span>
                 {user && wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {wishlistCount > 9 ? '9+' : wishlistCount}
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                <ShoppingCart className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span className="hidden md:inline">{t.nav.cart}</span>}
+              
+              <Link 
+                to="/cart" 
+                className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className={cn(
+                  "hidden md:inline transition-opacity duration-200",
+                  isCompact && "opacity-0 w-0 overflow-hidden"
+                )}>
+                  {t.nav.cart}
+                </span>
                 {cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-accent-foreground text-xs rounded-full flex items-center justify-center font-medium">
                     {cartItemCount > 9 ? '9+' : cartItemCount}
                   </span>
                 )}
               </Link>
+              
               <Button
                 variant="ghost"
                 size="icon"
@@ -146,33 +203,52 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className={`hidden lg:block bg-muted/30 border-b border-border transition-all duration-200 ${
-        isCompact ? 'h-10' : 'h-12'
-      }`}>
+      {/* Navigation - Fixed height */}
+      <nav 
+        className={cn(
+          "hidden lg:block bg-muted/30 border-b border-border will-change-transform",
+          "transition-transform duration-200 ease-out"
+        )}
+        style={{
+          height: NAV_HEIGHT,
+          transform: isCompact ? `translateY(-${TOP_BAR_HEIGHT}px)` : 'translateY(0)',
+        }}
+      >
         <div className="container-premium h-full">
           <div className="flex items-center gap-8 h-full">
             {/* Categories Dropdown - New Shadcn Style */}
             <CategoryNavMenu isCompact={isCompact} />
 
-            <Link to="/products" className={`font-medium text-foreground hover:text-primary transition-colors ${
-              isCompact ? 'text-xs' : 'text-sm'
-            }`}>
+            <Link 
+              to="/products" 
+              className={cn(
+                "font-medium text-foreground hover:text-primary transition-colors text-sm"
+              )}
+            >
               {t.nav.products}
             </Link>
-            <Link to="/request-quote" className={`font-medium text-foreground hover:text-primary transition-colors ${
-              isCompact ? 'text-xs' : 'text-sm'
-            }`}>
+            <Link 
+              to="/request-quote" 
+              className={cn(
+                "font-medium text-foreground hover:text-primary transition-colors text-sm"
+              )}
+            >
               {t.nav.requestQuote}
             </Link>
-            <Link to="/about" className={`font-medium text-foreground hover:text-primary transition-colors ${
-              isCompact ? 'text-xs' : 'text-sm'
-            }`}>
+            <Link 
+              to="/about" 
+              className={cn(
+                "font-medium text-foreground hover:text-primary transition-colors text-sm"
+              )}
+            >
               {t.nav.about}
             </Link>
-            <Link to="/contact" className={`font-medium text-foreground hover:text-primary transition-colors ${
-              isCompact ? 'text-xs' : 'text-sm'
-            }`}>
+            <Link 
+              to="/contact" 
+              className={cn(
+                "font-medium text-foreground hover:text-primary transition-colors text-sm"
+              )}
+            >
               {t.nav.contact}
             </Link>
           </div>
@@ -181,7 +257,10 @@ const Header = () => {
 
       {/* Mobile Menu - Clean Drawer Style */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-[108px] bg-background z-40 overflow-hidden animate-fade-in">
+        <div 
+          className="lg:hidden fixed inset-x-0 bottom-0 bg-background z-40 overflow-hidden animate-fade-in"
+          style={{ top: mobileMenuOffset }}
+        >
           <div className="h-full flex flex-col">
             {/* Mobile Search */}
             <div className="p-4 border-b border-border">

@@ -8,52 +8,42 @@ interface ProductCardSkeletonProps {
 const ProductCardSkeleton = ({ variant = "default" }: ProductCardSkeletonProps) => {
   const isCompact = variant === "compact";
 
-  if (isCompact) {
-    return (
-      <div className="flex flex-row bg-card rounded-lg border border-border overflow-hidden">
-        <Skeleton className="w-24 h-24 shrink-0 rounded-none" />
-        <div className="flex-1 p-3 space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-5 w-20 mt-auto" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-card rounded-lg border border-border overflow-hidden">
       {/* Image skeleton */}
-      <Skeleton className="aspect-square w-full rounded-none" />
+      <Skeleton className={cn(
+        "w-full rounded-none",
+        isCompact ? "aspect-[4/3]" : "aspect-square"
+      )} />
       
       {/* Content skeleton */}
-      <div className="p-4 space-y-3">
-        {/* Category */}
-        <Skeleton className="h-3 w-16" />
+      <div className={cn(
+        "space-y-2",
+        isCompact ? "p-2.5" : "p-4 space-y-3"
+      )}>
+        {/* Category - only for default */}
+        {!isCompact && <Skeleton className="h-3 w-16" />}
         
         {/* Title */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className={cn("w-3/4", isCompact ? "h-3" : "h-4")} />
         </div>
         
-        {/* SKU */}
-        <Skeleton className="h-3 w-20" />
+        {/* SKU - only for default */}
+        {!isCompact && <Skeleton className="h-3 w-20" />}
         
         {/* Price */}
-        <div className="pt-1">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-3 w-14 mt-1.5" />
+        <div className={isCompact ? "pt-1" : "pt-1"}>
+          <Skeleton className={cn(isCompact ? "h-5 w-16" : "h-6 w-24")} />
+          {!isCompact && <Skeleton className="h-3 w-14 mt-1.5" />}
         </div>
         
-        {/* Buttons */}
-        <div className="flex gap-2 pt-1">
-          <Skeleton className="h-9 flex-1" />
-          <Skeleton className="h-9 w-9" />
-        </div>
+        {/* Button */}
+        <Skeleton className={cn(isCompact ? "h-7 w-full" : "h-9 w-full")} />
         
-        {/* RFQ link */}
-        <Skeleton className="h-3 w-28" />
+        {/* RFQ link - only for default */}
+        {!isCompact && <Skeleton className="h-3 w-28" />}
       </div>
     </div>
   );

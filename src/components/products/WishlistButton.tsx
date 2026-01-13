@@ -8,10 +8,11 @@ import { toast } from "sonner";
 interface WishlistButtonProps {
   productId: string;
   variant?: "icon" | "button";
+  size?: "sm" | "default";
   className?: string;
 }
 
-const WishlistButton = ({ productId, variant = "icon", className }: WishlistButtonProps) => {
+const WishlistButton = ({ productId, variant = "icon", size = "default", className }: WishlistButtonProps) => {
   const { user } = useAuth();
   const { isInWishlist, toggleWishlist, isToggling } = useWishlist();
   
@@ -48,22 +49,26 @@ const WishlistButton = ({ productId, variant = "icon", className }: WishlistButt
     );
   }
 
+  const iconSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const padding = size === "sm" ? "p-1.5" : "p-2";
+
   return (
     <button
       onClick={handleClick}
       disabled={isToggling}
       className={cn(
-        "p-2 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm",
+        "rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm",
         "transition-all duration-200 hover:scale-110",
+        padding,
         inWishlist ? "text-red-500" : "text-muted-foreground hover:text-red-500",
         className
       )}
       aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
     >
       {isToggling ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <Loader2 className={cn(iconSize, "animate-spin")} />
       ) : (
-        <Heart className={cn("h-5 w-5", inWishlist && "fill-current")} />
+        <Heart className={cn(iconSize, inWishlist && "fill-current")} />
       )}
     </button>
   );

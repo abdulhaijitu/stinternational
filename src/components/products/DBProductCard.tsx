@@ -52,27 +52,34 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
       className={cn(
         "group relative bg-card rounded-lg border border-border overflow-hidden",
         "transition-all duration-200 ease-out",
-        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5",
-        isCompact && "flex flex-row"
+        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5"
       )}
     >
       {/* Image Container */}
       <div 
         className={cn(
           "relative bg-muted/30 overflow-hidden",
-          isCompact ? "w-24 h-24 shrink-0" : "aspect-square"
+          isCompact ? "aspect-[4/3]" : "aspect-square"
         )}
       >
         {/* Wishlist Button - Top Right */}
-        <div className="absolute top-2.5 right-2.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <WishlistButton productId={product.id} />
+        <div className={cn(
+          "absolute z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+          isCompact ? "top-1.5 right-1.5" : "top-2.5 right-2.5"
+        )}>
+          <WishlistButton productId={product.id} size={isCompact ? "sm" : "default"} />
         </div>
         
         {/* Discount Badge - Top Left */}
         {discountPercent > 0 && (
           <Badge 
             variant="default" 
-            className="absolute top-2.5 left-2.5 z-10 bg-accent text-accent-foreground font-semibold text-xs px-2 py-0.5"
+            className={cn(
+              "absolute z-10 bg-accent text-accent-foreground font-semibold",
+              isCompact 
+                ? "top-1.5 left-1.5 text-[10px] px-1.5 py-0" 
+                : "top-2.5 left-2.5 text-xs px-2 py-0.5"
+            )}
           >
             -{discountPercent}%
           </Badge>
@@ -95,7 +102,10 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
         {/* Out of Stock Overlay */}
         {!product.in_stock && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center">
-            <span className="text-muted-foreground font-medium text-sm">
+            <span className={cn(
+              "text-muted-foreground font-medium",
+              isCompact ? "text-xs" : "text-sm"
+            )}>
               {t.products.outOfStock}
             </span>
           </div>
@@ -103,7 +113,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
       </div>
 
       {/* Content Container */}
-      <div className={cn("flex flex-col", isCompact ? "flex-1 p-3" : "p-4")}>
+      <div className={cn("flex flex-col", isCompact ? "p-2.5" : "p-4")}>
         {/* Category Tag */}
         {categoryFields && !isCompact && (
           <Link
@@ -117,7 +127,9 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
         {/* Product Name */}
         <h3 className={cn(
           "font-medium text-foreground leading-snug",
-          isCompact ? "text-sm line-clamp-2" : "text-[15px] line-clamp-2 min-h-[2.5rem]"
+          isCompact 
+            ? "text-xs line-clamp-2 min-h-[2rem]" 
+            : "text-[15px] line-clamp-2 min-h-[2.5rem]"
         )}>
           <Link 
             to={`/product/${product.slug}`} 
@@ -127,7 +139,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           </Link>
         </h3>
 
-        {/* SKU or Short Spec - Compact only for default variant */}
+        {/* SKU or Short Spec - Only for default variant */}
         {product.sku && !isCompact && (
           <p className="text-xs text-muted-foreground mt-1">
             SKU: {product.sku}
@@ -138,15 +150,18 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
         <div className="flex-1" />
 
         {/* Price Section */}
-        <div className={cn("mt-3", isCompact && "mt-2")}>
-          <div className="flex items-baseline gap-2">
+        <div className={cn(isCompact ? "mt-2" : "mt-3")}>
+          <div className={cn(
+            "flex items-baseline",
+            isCompact ? "gap-1" : "gap-2"
+          )}>
             <span className={cn(
               "font-bold text-foreground",
               isCompact ? "text-sm" : "text-lg"
             )}>
               {formatPrice(product.price)}
             </span>
-            {product.compare_price && (
+            {product.compare_price && !isCompact && (
               <span className="text-sm text-muted-foreground line-through">
                 {formatPrice(product.compare_price)}
               </span>
@@ -169,8 +184,19 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           )}
         </div>
 
-        {/* CTA Buttons - Show on hover for default, always for compact */}
-        {!isCompact && (
+        {/* CTA Buttons - Show on hover for default, simpler for compact */}
+        {isCompact ? (
+          <Button
+            variant="default"
+            size="sm"
+            className="mt-2 w-full h-7 text-xs font-medium active:scale-[0.97] transition-transform"
+            asChild
+          >
+            <Link to={`/product/${product.slug}`}>
+              {t.products.view}
+            </Link>
+          </Button>
+        ) : (
           <div className={cn(
             "mt-4 flex gap-2",
             "opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
@@ -201,7 +227,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           </div>
         )}
 
-        {/* RFQ Link - Subtle, always visible */}
+        {/* RFQ Link - Subtle, always visible (default only) */}
         {!isCompact && (
           <Link
             to={`/request-quote?product=${encodeURIComponent(product.name)}`}

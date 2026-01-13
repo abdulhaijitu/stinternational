@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2, LayoutGrid, List } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useGridDensity, GridDensity } from "@/hooks/useGridDensity";
+import GridDensityToggle from "@/components/products/GridDensityToggle";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,7 @@ const Products = () => {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { t } = useLanguage();
   const { getCategoryFields } = useBilingualContent();
+  const { density, setDensity } = useGridDensity();
 
   // Filter state
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -471,15 +474,21 @@ const Products = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Grid Density Toggle - Desktop only */}
+                  <GridDensityToggle 
+                    density={density}
+                    onDensityChange={setDensity}
+                    className="hidden md:flex"
+                  />
+
                   {/* Infinite Scroll Toggle (desktop compact) */}
-                  <div className="hidden md:flex items-center gap-2 mr-2">
-                    <LayoutGrid className={`h-4 w-4 ${!infiniteScroll ? "text-primary" : "text-muted-foreground"}`} />
+                  <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground border border-border rounded-md px-2 py-1">
+                    <span>{t.products.infiniteScroll}</span>
                     <Switch
                       checked={infiniteScroll}
                       onCheckedChange={handleInfiniteScrollToggle}
-                      className="data-[state=checked]:bg-primary"
+                      className="data-[state=checked]:bg-primary scale-75"
                     />
-                    <List className={`h-4 w-4 ${infiniteScroll ? "text-primary" : "text-muted-foreground"}`} />
                   </div>
 
                   {/* Per Page Selector - only show when not infinite scroll */}
@@ -516,9 +525,13 @@ const Products = () => {
 
               {/* Products */}
               {isLoading ? (
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                <div className={
+                  density === 'compact' 
+                    ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"
+                    : "grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"
+                }>
                   {Array.from({ length: perPage }).map((_, index) => (
-                    <ProductCardSkeleton key={index} />
+                    <ProductCardSkeleton key={index} variant={density === 'compact' ? 'compact' : 'default'} />
                   ))}
                 </div>
               ) : filteredProducts.length === 0 ? (
@@ -536,12 +549,17 @@ const Products = () => {
                 </div>
               ) : (
                 <>
-                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                  <div className={
+                    density === 'compact' 
+                      ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 transition-all duration-200"
+                      : "grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 transition-all duration-200"
+                  }>
                     {displayedProducts.map((product) => (
                       <DBProductCard
                         key={product.id}
                         product={product}
                         onQuickView={handleQuickView}
+                        variant={density === 'compact' ? 'compact' : 'default'}
                       />
                     ))}
                   </div>

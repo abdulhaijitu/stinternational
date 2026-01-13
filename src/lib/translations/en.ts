@@ -98,6 +98,9 @@ export const en = {
 
   // Products
   products: {
+    comfortable: "Comfortable",
+    compact: "Compact",
+    gridDensity: "Grid Density",
     allProducts: "All Products",
     featuredProducts: "Featured Products",
     relatedProducts: "Related Products",
