@@ -6,6 +6,8 @@ import CtaAnalyticsWidget from "@/components/admin/CtaAnalyticsWidget";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { Badge } from "@/components/ui/badge";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface DashboardStats {
   totalProducts: number;
@@ -19,6 +21,7 @@ interface DashboardStats {
 }
 
 const AdminDashboard = () => {
+  const { t, language } = useAdminLanguage();
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalOrders: 0,
@@ -87,34 +90,22 @@ const AdminDashboard = () => {
   };
 
   const statCards = [
-    { label: "মোট পণ্য", value: stats.totalProducts, icon: Package, color: "text-blue-600", bgColor: "bg-blue-50" },
-    { label: "মোট অর্ডার (B2C)", value: stats.totalOrders, icon: ShoppingCart, color: "text-green-600", bgColor: "bg-green-50" },
-    { label: "কোটেশন রিকোয়েস্ট (B2B)", value: stats.totalQuotes, icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50" },
-    { label: "মোট রেভিনিউ", value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-amber-600", bgColor: "bg-amber-50" },
+    { label: t.dashboard.totalProducts, value: stats.totalProducts, icon: Package, color: "text-blue-600", bgColor: "bg-blue-50" },
+    { label: t.dashboard.totalOrders, value: stats.totalOrders, icon: ShoppingCart, color: "text-green-600", bgColor: "bg-green-50" },
+    { label: t.dashboard.quoteRequests, value: stats.totalQuotes, icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50" },
+    { label: t.dashboard.totalRevenue, value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-amber-600", bgColor: "bg-amber-50" },
   ];
 
-  const statusLabels: Record<string, string> = {
-    pending_payment: "পেমেন্ট বাকি",
-    paid: "পেমেন্ট সম্পন্ন",
-    processing: "প্রসেসিং",
-    shipped: "শিপিং হয়েছে",
-    delivered: "ডেলিভারি সম্পন্ন",
-    cancelled: "বাতিল",
-  };
-
-  const quoteStatusLabels: Record<string, string> = {
-    pending: "পেন্ডিং",
-    reviewed: "রিভিউড",
-    quoted: "কোটেড",
-    closed: "ক্লোজড",
+  const getStatusLabel = (status: string) => {
+    return t.status[status as keyof typeof t.status] || status;
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
         <div>
-          <h1 className="text-2xl font-bold">ড্যাশবোর্ড</h1>
-          <p className="text-muted-foreground">B2B ও B2C উভয় ব্যবসার সারসংক্ষেপ</p>
+          <h1 className="text-2xl font-bold">{t.dashboard.title}</h1>
+          <p className="text-muted-foreground">{t.dashboard.subtitle}</p>
         </div>
 
         {/* Stats Cards */}
@@ -142,18 +133,18 @@ const AdminDashboard = () => {
                 <User className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold">B2C - সরাসরি অর্ডার</h3>
-                <p className="text-sm text-muted-foreground">ব্যক্তিগত ক্রেতাদের অর্ডার</p>
+                <h3 className="font-semibold">{t.dashboard.b2cDirect}</h3>
+                <p className="text-sm text-muted-foreground">{t.dashboard.b2cDescription}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <p className="text-2xl font-bold text-green-600">{stats.b2cOrders}</p>
-                <p className="text-xs text-muted-foreground">মোট অর্ডার</p>
+                <p className="text-xs text-muted-foreground">{t.dashboard.totalOrders2}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <p className="text-2xl font-bold text-amber-600">{stats.pendingOrders}</p>
-                <p className="text-xs text-muted-foreground">পেন্ডিং</p>
+                <p className="text-xs text-muted-foreground">{t.dashboard.pending}</p>
               </div>
             </div>
           </div>
@@ -164,18 +155,18 @@ const AdminDashboard = () => {
                 <Building2 className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <h3 className="font-semibold">B2B - প্রাতিষ্ঠানিক</h3>
-                <p className="text-sm text-muted-foreground">কোটেশন রিকোয়েস্ট ও প্রাতিষ্ঠানিক অর্ডার</p>
+                <h3 className="font-semibold">{t.dashboard.b2bInstitutional}</h3>
+                <p className="text-sm text-muted-foreground">{t.dashboard.b2bDescription}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <p className="text-2xl font-bold text-purple-600">{stats.totalQuotes}</p>
-                <p className="text-xs text-muted-foreground">মোট কোটেশন</p>
+                <p className="text-xs text-muted-foreground">{t.dashboard.totalQuotes}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <p className="text-2xl font-bold text-amber-600">{stats.pendingQuotes}</p>
-                <p className="text-xs text-muted-foreground">পেন্ডিং</p>
+                <p className="text-xs text-muted-foreground">{t.dashboard.pending}</p>
               </div>
             </div>
           </div>
@@ -188,25 +179,25 @@ const AdminDashboard = () => {
             <div className="p-6 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5 text-green-600" />
-                <h2 className="font-semibold">সাম্প্রতিক অর্ডার</h2>
+                <h2 className="font-semibold">{t.dashboard.recentOrders}</h2>
               </div>
               <Link to="/admin/orders" className="text-sm text-primary hover:underline">
-                সব দেখুন
+                {t.common.viewAll}
               </Link>
             </div>
             <div className="overflow-x-auto">
               {loading ? (
-                <div className="p-8 text-center text-muted-foreground">লোড হচ্ছে...</div>
+                <div className="p-8 text-center text-muted-foreground">{t.common.loading}</div>
               ) : recentOrders.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">কোনো অর্ডার নেই</div>
+                <div className="p-8 text-center text-muted-foreground">{t.dashboard.noOrders}</div>
               ) : (
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">অর্ডার</th>
-                      <th className="text-left p-4 text-sm font-medium">গ্রাহক</th>
-                      <th className="text-left p-4 text-sm font-medium">মোট</th>
-                      <th className="text-left p-4 text-sm font-medium">স্ট্যাটাস</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.order}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.customer}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.total}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -229,7 +220,7 @@ const AdminDashboard = () => {
                             order.status === "cancelled" ? "bg-red-100 text-red-700" :
                             "bg-blue-100 text-blue-700"
                           }`}>
-                            {statusLabels[order.status] || order.status}
+                            {getStatusLabel(order.status)}
                           </span>
                         </td>
                       </tr>
@@ -245,24 +236,24 @@ const AdminDashboard = () => {
             <div className="p-6 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-purple-600" />
-                <h2 className="font-semibold">সাম্প্রতিক কোটেশন রিকোয়েস্ট</h2>
+                <h2 className="font-semibold">{t.dashboard.recentQuotes}</h2>
               </div>
               <Link to="/admin/quotes" className="text-sm text-primary hover:underline">
-                সব দেখুন
+                {t.common.viewAll}
               </Link>
             </div>
             <div className="overflow-x-auto">
               {loading ? (
-                <div className="p-8 text-center text-muted-foreground">লোড হচ্ছে...</div>
+                <div className="p-8 text-center text-muted-foreground">{t.common.loading}</div>
               ) : recentQuotes.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">কোনো কোটেশন রিকোয়েস্ট নেই</div>
+                <div className="p-8 text-center text-muted-foreground">{t.dashboard.noQuotes}</div>
               ) : (
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">প্রতিষ্ঠান</th>
-                      <th className="text-left p-4 text-sm font-medium">ক্যাটাগরি</th>
-                      <th className="text-left p-4 text-sm font-medium">স্ট্যাটাস</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.institution}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.category}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -280,7 +271,7 @@ const AdminDashboard = () => {
                             quote.status === "reviewed" ? "bg-blue-100 text-blue-700" :
                             "bg-gray-100 text-gray-700"
                           }`}>
-                            {quoteStatusLabels[quote.status] || quote.status}
+                            {getStatusLabel(quote.status)}
                           </span>
                         </td>
                       </tr>
