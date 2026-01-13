@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-[0.98]",
-        outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground active:scale-[0.98]",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 active:scale-[0.98]",
-        ghost: "hover:bg-muted hover:text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-95 transition-all duration-200",
+        outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all duration-200",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 active:scale-95 transition-all duration-200",
+        ghost: "hover:bg-muted hover:text-foreground transition-all duration-200",
+        link: "text-primary underline-offset-4 hover:underline transition-all duration-200",
         // Premium B2B Variants
-        accent: "bg-accent text-accent-foreground shadow-sm hover:bg-accent/90 active:scale-[0.98]",
-        "accent-outline": "border-2 border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
-        hero: "bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:shadow-xl active:scale-[0.98]",
-        "hero-secondary": "bg-white/10 text-white border border-white/20 backdrop-blur-sm hover:bg-white/20 active:scale-[0.98]",
-        success: "bg-success text-success-foreground shadow-sm hover:bg-success/90 active:scale-[0.98]",
+        accent: "bg-accent text-accent-foreground shadow-sm hover:bg-accent/90 active:scale-95 transition-all duration-200",
+        "accent-outline": "border-2 border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-200",
+        hero: "bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:shadow-xl active:scale-95 transition-all duration-200",
+        "hero-secondary": "bg-white/10 text-white border border-white/20 backdrop-blur-sm hover:bg-white/20 active:scale-95 transition-all duration-200",
+        success: "bg-success text-success-foreground shadow-sm hover:bg-success/90 active:scale-95 transition-all duration-200",
       },
       size: {
         default: "h-10 px-5 py-2",
