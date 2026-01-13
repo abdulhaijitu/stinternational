@@ -4,8 +4,22 @@
 
 /* ST International - Premium B2B Swiss Design System */
 
-/* Fonts: Inter for English, Hind Siliguri for Bangla */
+/* 
+ * CRITICAL: Font preloading is handled in index.html for LCP optimization
+ * Fonts: Inter for English, Hind Siliguri for Bangla 
+ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+
+/* Font display optimization */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Siliguri';
+  font-display: swap;
+}
 
 @layer base {
   :root {
@@ -88,24 +102,46 @@
   }
 
   .dark {
-    --background: 215 55% 6%;
+    /* Background & Surface - Soft dark, NOT pure black */
+    --background: 215 50% 8%;
     --foreground: 215 15% 95%;
     
-    --card: 215 50% 10%;
+    /* Cards & Elevated Surfaces */
+    --card: 215 45% 12%;
     --card-foreground: 215 15% 95%;
     
-    --muted: 215 45% 15%;
+    /* Subtle Backgrounds */
+    --muted: 215 40% 16%;
     --muted-foreground: 215 10% 65%;
     
-    --secondary: 215 45% 18%;
+    /* Secondary */
+    --secondary: 215 40% 18%;
     --secondary-foreground: 215 15% 92%;
     
-    --popover: 215 50% 10%;
+    /* Popover */
+    --popover: 215 45% 12%;
     --popover-foreground: 215 15% 95%;
     
-    --border: 215 40% 20%;
-    --input: 215 40% 20%;
+    /* Borders & Inputs */
+    --border: 215 35% 22%;
+    --input: 215 35% 22%;
     --ring: 38 92% 50%;
+    
+    /* Success State - Dark mode adjusted */
+    --success: 152 50% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Destructive - Dark mode adjusted */
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Primary - Slightly brighter for dark mode */
+    --primary: 215 50% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Accent - Maintained for consistency */
+    --accent: 38 92% 50%;
+    --accent-foreground: 215 50% 8%;
   }
 }
 
@@ -185,17 +221,17 @@
 }
 
 @layer components {
-  /* Premium Container */
+  /* Premium Container - Unified spacing */
   .container-premium {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
   
-  /* Swiss Grid */
+  /* Swiss Grid - Consistent gap system */
   .swiss-grid {
     @apply grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-6;
   }
   
-  /* Card Hover Effect */
+  /* Unified Card Hover Effect - ≤200ms transitions */
   .card-hover {
     @apply transition-all duration-200 ease-out;
   }
@@ -205,12 +241,12 @@
     box-shadow: var(--shadow-card-hover);
   }
   
-  /* Trust Badge */
+  /* Trust Badge - Consistent styling */
   .trust-badge {
     @apply inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground text-sm font-medium rounded-md;
   }
   
-  /* Section Divider */
+  /* Section Divider - Unified border */
   .section-divider {
     @apply border-t border-border;
   }
@@ -220,7 +256,7 @@
     background: var(--hero-gradient);
   }
   
-  /* Product Spec Table */
+  /* Product Spec Table - Consistent typography */
   .spec-table {
     @apply w-full text-sm;
   }
@@ -241,7 +277,7 @@
     @apply text-muted-foreground font-medium pr-4;
   }
   
-  /* Subtle Focus Ring */
+  /* Unified Focus Ring - Accessibility */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
   }
@@ -281,6 +317,35 @@
     @apply bg-background text-foreground px-4 py-2 rounded-md shadow-lg border border-border;
     @apply focus:outline-none focus:ring-2 focus:ring-ring;
   }
+
+  /* Admin Panel - Enterprise Styling (Dark mode compatible) */
+  .admin-card {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+  }
+
+  .admin-table {
+    @apply w-full;
+  }
+
+  .admin-table th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50;
+  }
+
+  .admin-table td {
+    @apply px-4 py-3 text-sm border-t border-border;
+  }
+
+  /* Unified Button States - 200ms max transition */
+  .btn-transition {
+    @apply transition-all duration-150 ease-out;
+  }
+
+  /* Bangla Font Class */
+  .font-siliguri {
+    font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
 }
 
 @layer utilities {
@@ -289,8 +354,33 @@
     text-wrap: balance;
   }
   
-  /* Smooth Page Transitions */
+  /* Smooth Page Transitions - ≤200ms as per spec */
   .page-transition {
     @apply transition-opacity duration-200 ease-out;
+  }
+
+  /* CLS Prevention - Reserve space for async content */
+  .aspect-card {
+    @apply aspect-square;
+  }
+
+  /* Prevent layout shift during loading */
+  .skeleton-container {
+    @apply animate-pulse bg-muted rounded-md;
+  }
+
+  /* Smooth scroll behavior */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
