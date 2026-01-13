@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
 // Slide animation types for each industry
 type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
@@ -237,6 +238,7 @@ const useKeyboardNavigation = (onPrev: () => void, onNext: () => void, isEnabled
 
 const HeroSlider = () => {
   const { t } = useLanguage();
+  const { trackHeroSlide } = useUXTelemetry();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
@@ -246,6 +248,7 @@ const HeroSlider = () => {
   const sliderRef = useRef<HTMLElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTrackedSlideRef = useRef<number>(-1);
 
   // Generate translated slide data
   const heroSlides = useMemo(() => slideConfig.map(slide => ({
@@ -274,8 +277,15 @@ const HeroSlider = () => {
     setIsTransitioning(true);
     setCurrentSlide(index);
     setProgress(0); // Reset progress on slide change
+    
+    // Track slide view
+    if (lastTrackedSlideRef.current !== index) {
+      trackHeroSlide(index, 'view');
+      lastTrackedSlideRef.current = index;
+    }
+    
     setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
-  }, [isTransitioning]);
+  }, [isTransitioning, trackHeroSlide]);
 
   const nextSlide = useCallback(() => {
     goToSlide((currentSlide + 1) % heroSlides.length);
@@ -398,6 +408,7 @@ const HeroSlider = () => {
                     asChild 
                     size="lg" 
                     className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-200 group"
+                    onClick={() => trackHeroSlide(index, 'click')}
                   >
                     <Link to={slide.primaryCta.href}>
                       <span>{slide.primaryCta.label}</span>
@@ -410,6 +421,7 @@ const HeroSlider = () => {
                     variant="outline" 
                     size="lg" 
                     className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/50 transition-all duration-200"
+                    onClick={() => trackHeroSlide(index, 'click')}
                   >
                     <Link to={slide.secondaryCta.href}>
                       <FileText className="mr-2 h-4 w-4" />
