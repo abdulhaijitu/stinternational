@@ -98,6 +98,9 @@ export const bn = {
 
   // Products
   products: {
+    comfortable: "আরামদায়ক",
+    compact: "সংক্ষিপ্ত",
+    gridDensity: "গ্রিড ঘনত্ব",
     allProducts: "সকল পণ্য",
     featuredProducts: "বিশেষ পণ্য",
     relatedProducts: "সম্পর্কিত পণ্য",
