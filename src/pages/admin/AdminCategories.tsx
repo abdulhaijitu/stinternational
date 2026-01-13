@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 interface Category {
   id: string;
@@ -22,6 +23,7 @@ interface Category {
   description: string | null;
   parent_group: string | null;
   display_order: number;
+  image_url: string | null;
 }
 
 const AdminCategories = () => {
@@ -35,6 +37,7 @@ const AdminCategories = () => {
     slug: "",
     description: "",
     parent_group: "",
+    image_url: "",
   });
 
   useEffect(() => {
@@ -74,10 +77,11 @@ const AdminCategories = () => {
         slug: category.slug,
         description: category.description || "",
         parent_group: category.parent_group || "",
+        image_url: category.image_url || "",
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: "", slug: "", description: "", parent_group: "" });
+      setFormData({ name: "", slug: "", description: "", parent_group: "", image_url: "" });
     }
     setDialogOpen(true);
   };
@@ -98,6 +102,7 @@ const AdminCategories = () => {
             slug: formData.slug,
             description: formData.description || null,
             parent_group: formData.parent_group || null,
+            image_url: formData.image_url || null,
           })
           .eq("id", editingCategory.id);
 
@@ -109,6 +114,7 @@ const AdminCategories = () => {
           slug: formData.slug,
           description: formData.description || null,
           parent_group: formData.parent_group || null,
+          image_url: formData.image_url || null,
           display_order: categories.length + 1,
         }]);
 
@@ -168,7 +174,7 @@ const AdminCategories = () => {
                   {editingCategory ? "ক্যাটাগরি সম্পাদনা" : "নতুন ক্যাটাগরি"}
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
                 <div className="space-y-2">
                   <Label htmlFor="name">নাম *</Label>
                   <Input
@@ -209,6 +215,14 @@ const AdminCategories = () => {
                     rows={3}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>ক্যাটাগরির ছবি</Label>
+                  <ImageUpload
+                    value={formData.image_url}
+                    onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    folder="categories"
+                  />
+                </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setDialogOpen(false)}>
                     বাতিল
@@ -242,9 +256,22 @@ const AdminCategories = () => {
                 <div className="divide-y divide-border">
                   {cats.map((category) => (
                     <div key={category.id} className="flex items-center justify-between p-4">
-                      <div>
-                        <p className="font-medium">{category.name}</p>
-                        <p className="text-sm text-muted-foreground">/{category.slug}</p>
+                      <div className="flex items-center gap-4">
+                        {category.image_url ? (
+                          <img
+                            src={category.image_url}
+                            alt={category.name}
+                            className="w-12 h-12 object-cover rounded-lg border border-border"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                            <span className="text-muted-foreground text-xs">No img</span>
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{category.name}</p>
+                          <p className="text-sm text-muted-foreground">/{category.slug}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(category)}>
