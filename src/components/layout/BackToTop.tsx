@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
 const SCROLL_THRESHOLD = 400;
 
 const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const { trackUtility } = useUXTelemetry();
 
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY;
@@ -40,6 +42,7 @@ const BackToTop = () => {
   }, [handleScroll]);
 
   const scrollToTop = () => {
+    trackUtility('back_to_top');
     window.scrollTo({
       top: 0,
       behavior: "smooth",

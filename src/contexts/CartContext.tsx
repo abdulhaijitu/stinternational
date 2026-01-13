@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { getUXTelemetry } from "@/hooks/useUXTelemetry";
 
 export interface CartItem {
   id: string;
@@ -39,6 +40,20 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [items]);
 
   const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
+    // Track add to cart event
+    try {
+      const telemetry = getUXTelemetry();
+      telemetry.trackEvent({
+        event_type: 'add_to_cart',
+        event_category: 'conversion',
+        event_action: 'add',
+        event_label: item.name,
+        event_value: item.slug,
+      });
+    } catch (e) {
+      // Telemetry should not break the app
+    }
+    
     setItems((prev) => {
       const existingIndex = prev.findIndex((i) => i.id === item.id);
       if (existingIndex >= 0) {
