@@ -120,8 +120,11 @@ const QuickRfqForm = () => {
               <CheckCircle className="h-8 w-8 text-success" />
             </div>
             <h3 className="text-xl font-semibold mb-3">Request Received</h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-4">
               Thank you for your inquiry. Our team will review your requirements and contact you within 24 business hours.
+            </p>
+            <p className="text-xs text-muted-foreground mb-6">
+              Operated by ST International, Dhaka, Bangladesh
             </p>
             <Button
               variant="outline"

@@ -86,8 +86,8 @@ const TermsConditions = () => {
                 <h2 className="text-xl font-semibold mb-4">8. Contact Information</h2>
                 <p className="text-muted-foreground leading-relaxed">
                   For questions about these Terms & Conditions, please contact us at:<br />
-                  Email: info@stinternational.com.bd<br />
-                  Phone: +880 1234 567 890
+                  Email: info@stinternationalbd.com<br />
+                  Phone: +880 2-7165562, 01715-575665
                 </p>
               </div>
             </div>

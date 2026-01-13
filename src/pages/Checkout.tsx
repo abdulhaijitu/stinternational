@@ -146,8 +146,11 @@ const Checkout = () => {
               আপনার অর্ডার নম্বর:
             </p>
             <p className="text-xl font-bold text-primary mb-6">{orderNumber}</p>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground mb-6">
               আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব। ধন্যবাদ!
+            </p>
+            <p className="text-xs text-muted-foreground mb-8">
+              Operated by ST International, Dhaka, Bangladesh
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button onClick={() => navigate("/account")}>

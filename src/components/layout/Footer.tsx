@@ -38,8 +38,11 @@ const Footer = () => {
                 className="h-16 w-auto brightness-0 invert"
               />
             </div>
-            <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
+            <p className="text-sm text-primary-foreground/80 mb-2 leading-relaxed">
               <strong className="text-primary-foreground">ST International</strong>
+            </p>
+            <p className="text-sm text-primary-foreground/70 mb-4 leading-relaxed">
+              Dhaka, Bangladesh
             </p>
             <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
               Your trusted partner for scientific, industrial, and educational equipment in Bangladesh. 
@@ -98,7 +101,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/contact" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
-                  Contact Us
+                  Contact
                 </Link>
               </li>
               <li>
@@ -131,25 +134,30 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-accent shrink-0 mt-0.5" />
                 <span className="text-sm text-primary-foreground/80">
-                  123 Bangla Motor, Dhaka-1000<br />
-                  Bangladesh
+                  Mamun Mansion, 52/2,<br />
+                  Toyeanbee Circular Road,<br />
+                  Hatkhola, Tikatuli,<br />
+                  Dhaka-1203, Bangladesh
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-accent shrink-0" />
                 <div className="text-sm text-primary-foreground/80">
-                  <a href="tel:+8801234567890" className="hover:text-accent transition-colors duration-200 block">
-                    +880 1234 567 890
+                  <a href="tel:+88027165562" className="hover:text-accent transition-colors duration-200 block">
+                    +880 2-7165562
                   </a>
-                  <a href="tel:+8801234567891" className="hover:text-accent transition-colors duration-200 block">
-                    +880 1234 567 891
+                  <a href="tel:+8801715575665" className="hover:text-accent transition-colors duration-200 block">
+                    01715-575665
+                  </a>
+                  <a href="tel:+8801713297170" className="hover:text-accent transition-colors duration-200 block">
+                    01713-297170
                   </a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-accent shrink-0" />
-                <a href="mailto:info@stinternational.com.bd" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200">
-                  info@stinternational.com.bd
+                <a href="mailto:info@stinternationalbd.com" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200">
+                  info@stinternationalbd.com
                 </a>
               </li>
               <li className="flex items-center gap-3">
@@ -167,16 +175,17 @@ const Footer = () => {
       <div className="border-t border-primary-foreground/10">
         <div className="container-premium py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/60">
-            <p>© {new Date().getFullYear()} ST International. All rights reserved.</p>
-            <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
-              <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Secure Checkout
-              </span>
-              <span>•</span>
-              <span>Cash on Delivery</span>
-              <span>•</span>
-              <span>Bank Transfer</span>
+            <p>© 2026 ST International. All rights reserved.</p>
+            <div className="flex items-center gap-2 text-center md:text-right">
+              <span>Design & Developed by</span>
+              <a 
+                href="http://creationtechbd.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary-foreground/80 hover:text-accent transition-colors duration-200 font-medium"
+              >
+                Creation Tech
+              </a>
             </div>
           </div>
         </div>

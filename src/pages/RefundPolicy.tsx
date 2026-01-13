@@ -80,8 +80,8 @@ const RefundPolicy = () => {
                 <h2 className="text-xl font-semibold mb-4">7. Contact for Returns</h2>
                 <p className="text-muted-foreground leading-relaxed">
                   To initiate a return or for questions about our refund policy:<br />
-                  Email: returns@stinternational.com.bd<br />
-                  Phone: +880 1234 567 890<br />
+                  Email: info@stinternationalbd.com<br />
+                  Phone: +880 2-7165562, 01715-575665<br />
                   Hours: Saturday - Thursday, 9:00 AM - 6:00 PM
                 </p>
               </div>

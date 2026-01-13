@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Building2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -7,17 +7,34 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    details: ["123 Bangla Motor", "Dhaka-1000, Bangladesh"],
+    details: [
+      "Mamun Mansion, 52/2,",
+      "Toyeanbee Circular Road,",
+      "Hatkhola, Tikatuli,",
+      "Dhaka-1203, Bangladesh"
+    ],
   },
   {
     icon: Phone,
     title: "Call Us",
-    details: ["+880 1234 567 890", "+880 1234 567 891"],
+    details: [
+      "+880 2-7165562 (Office)",
+      "01715-575665",
+      "01713-297170"
+    ],
+    links: [
+      { href: "tel:+88027165562", text: "+880 2-7165562" },
+      { href: "tel:+8801715575665", text: "01715-575665" },
+      { href: "tel:+8801713297170", text: "01713-297170" }
+    ],
   },
   {
     icon: Mail,
     title: "Email Us",
-    details: ["info@stinternational.com.bd", "sales@stinternational.com.bd"],
+    details: ["info@stinternationalbd.com"],
+    links: [
+      { href: "mailto:info@stinternationalbd.com", text: "info@stinternationalbd.com" }
+    ],
   },
   {
     icon: Clock,
@@ -71,11 +88,46 @@ const Contact = () => {
                   <item.icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
-                {item.details.map((detail, i) => (
-                  <p key={i} className="text-sm text-muted-foreground">{detail}</p>
-                ))}
+                {item.links ? (
+                  item.links.map((link, i) => (
+                    <a 
+                      key={i} 
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors block"
+                    >
+                      {link.text}
+                    </a>
+                  ))
+                ) : (
+                  item.details.map((detail, i) => (
+                    <p key={i} className="text-sm text-muted-foreground">{detail}</p>
+                  ))
+                )}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Official Business Info Banner */}
+      <section className="py-8 bg-muted/50 border-y border-border">
+        <div className="container-premium">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-center md:text-left">
+            <div className="flex items-center gap-3">
+              <Building2 className="h-5 w-5 text-primary shrink-0" />
+              <span className="font-semibold">ST International</span>
+            </div>
+            <span className="hidden md:block text-muted-foreground">•</span>
+            <span className="text-sm text-muted-foreground">
+              Hatkhola, Tikatuli, Dhaka-1203
+            </span>
+            <span className="hidden md:block text-muted-foreground">•</span>
+            <a 
+              href="tel:+88027165562" 
+              className="text-sm text-primary hover:text-accent transition-colors"
+            >
+              +880 2-7165562
+            </a>
           </div>
         </div>
       </section>
@@ -187,7 +239,8 @@ const Contact = () => {
                       Interactive map will be displayed here
                     </p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      123 Bangla Motor, Dhaka-1000
+                      Mamun Mansion, 52/2, Toyeanbee Circular Road,<br />
+                      Hatkhola, Tikatuli, Dhaka-1203
                     </p>
                   </div>
                 </div>
