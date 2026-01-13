@@ -68,9 +68,9 @@ const PrivacyPolicy = () => {
                 <h2 className="text-xl font-semibold mb-4">6. Contact Us</h2>
                 <p className="text-muted-foreground leading-relaxed">
                   If you have questions about this Privacy Policy, please contact us at:<br />
-                  Email: info@stinternational.com.bd<br />
-                  Phone: +880 1234 567 890<br />
-                  Address: 123 Bangla Motor, Dhaka-1000, Bangladesh
+                  Email: info@stinternationalbd.com<br />
+                  Phone: +880 2-7165562, 01715-575665<br />
+                  Address: Mamun Mansion, 52/2, Toyeanbee Circular Road, Hatkhola, Tikatuli, Dhaka-1203, Bangladesh
                 </p>
               </div>
             </div>

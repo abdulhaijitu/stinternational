@@ -35,13 +35,13 @@ const Header = () => {
         <div className="container-premium">
           <div className="flex items-center justify-between py-2 text-sm">
             <div className="hidden md:flex items-center gap-6">
-              <a href="tel:+8801234567890" className="flex items-center gap-2 hover:text-accent transition-colors">
+              <a href="tel:+8801715575665" className="flex items-center gap-2 hover:text-accent transition-colors">
                 <Phone className="h-3.5 w-3.5" />
-                <span>+880 1234 567 890</span>
+                <span>01715-575665</span>
               </a>
-              <a href="mailto:info@stinternational.com.bd" className="flex items-center gap-2 hover:text-accent transition-colors">
+              <a href="mailto:info@stinternationalbd.com" className="flex items-center gap-2 hover:text-accent transition-colors">
                 <Mail className="h-3.5 w-3.5" />
-                <span>info@stinternational.com.bd</span>
+                <span>info@stinternationalbd.com</span>
               </a>
             </div>
             <div className="flex items-center gap-2 text-xs md:text-sm">
