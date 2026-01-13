@@ -16,7 +16,8 @@ import {
   ExternalLink,
   ChevronRight,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Users
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminLanguageSwitcher from "./AdminLanguageSwitcher";
+import { AdminThemeToggle } from "./AdminThemeToggle";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -75,6 +77,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/logos", label: t.nav.logos, icon: Building2, module: "logos", group: "content" },
     { href: "/admin/testimonials", label: t.nav.testimonials, icon: Quote, module: "testimonials", group: "content" },
     { href: "/admin/ux-insights", label: t.nav.uxInsights, icon: BarChart3, module: "ux-insights", group: "analytics" },
+    { href: "/admin/users", label: language === "bn" ? "ব্যবহারকারী" : "Users", icon: Users, module: "users", group: "settings" },
     { href: "/admin/roles", label: t.nav.roles, icon: Shield, module: "roles", group: "settings" },
   ];
 
@@ -93,6 +96,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (isSuperAdmin) return true;
     if (item.module === "dashboard") return true;
     if (item.module === "roles") return isSuperAdmin;
+    if (item.module === "users") return isSuperAdmin;
     return canAccessModule(item.module);
   });
 
@@ -321,6 +325,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </Button>
             
             <div className="h-5 w-px bg-border" />
+            
+            <AdminThemeToggle />
             
             <AdminLanguageSwitcher variant="compact" />
             

@@ -10,11 +10,11 @@ import {
   Phone, 
   Mail,
   Building2,
-  Calendar,
   CreditCard,
   FileText,
   Loader2,
-  Lock
+  Lock,
+  FileDown
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
+import { downloadInvoice } from "@/lib/invoice-generator";
 import { toast } from "sonner";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
@@ -170,6 +171,36 @@ const AdminOrderDetail = () => {
     toast.success(language === "bn" ? "অর্ডার এক্সপোর্ট হয়েছে" : "Order exported");
   };
 
+  const handleDownloadInvoice = () => {
+    if (!order) return;
+    
+    downloadInvoice({
+      orderNumber: order.order_number,
+      orderDate: order.created_at,
+      customerName: order.customer_name,
+      customerEmail: order.customer_email,
+      customerPhone: order.customer_phone,
+      companyName: order.company_name,
+      shippingAddress: order.shipping_address,
+      shippingCity: order.shipping_city,
+      shippingPostalCode: order.shipping_postal_code,
+      items: items.map(item => ({
+        name: item.product_name,
+        sku: item.product_sku,
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        totalPrice: item.total_price,
+      })),
+      subtotal: order.subtotal,
+      shippingCost: order.shipping_cost || 0,
+      total: order.total,
+      paymentMethod: order.payment_method,
+      language,
+    });
+    
+    toast.success(language === "bn" ? "ইনভয়েস ডাউনলোড হয়েছে" : "Invoice downloaded");
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
       year: "numeric",
@@ -243,6 +274,10 @@ const AdminOrderDetail = () => {
           </div>
           
           <div className="flex items-center gap-2 print:hidden">
+            <Button variant="default" size="sm" onClick={handleDownloadInvoice}>
+              <FileDown className="h-4 w-4 mr-2" />
+              {language === "bn" ? "ইনভয়েস" : "Invoice"}
+            </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" />
               {language === "bn" ? "প্রিন্ট" : "Print"}
