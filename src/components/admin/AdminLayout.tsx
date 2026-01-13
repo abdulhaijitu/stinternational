@@ -163,21 +163,22 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           <TooltipTrigger asChild>
             <div
               className={cn(
-                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                "group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150",
                 "text-muted-foreground/40 cursor-not-allowed",
-                collapsed && "justify-center px-2"
+                collapsed && "justify-center px-1.5"
               )}
             >
               <div className={cn(
-                "flex items-center justify-center rounded-lg bg-muted/30",
-                collapsed ? "w-10 h-10" : "w-9 h-9"
+                "flex items-center justify-center rounded-md",
+                collapsed ? "w-8 h-8" : "w-7 h-7",
+                "bg-muted/30"
               )}>
-                <item.icon className="h-[18px] w-[18px]" />
+                <item.icon className="h-4 w-4" />
               </div>
               {!collapsed && (
                 <>
-                  <span className="flex-1 font-medium">{item.label}</span>
-                  <Lock className="h-3.5 w-3.5 opacity-50" />
+                  <span className="flex-1 text-[13px]">{item.label}</span>
+                  <Lock className="h-3 w-3 opacity-40" />
                 </>
               )}
             </div>
@@ -194,43 +195,38 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         to={item.href}
         onClick={() => setSidebarOpen(false)}
         className={cn(
-          "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+          "group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150",
           isActive 
             ? "bg-primary text-primary-foreground shadow-sm" 
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-          collapsed && "justify-center px-2"
+            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          collapsed && "justify-center px-1.5"
         )}
       >
         <div className={cn(
-          "relative flex items-center justify-center rounded-lg transition-colors duration-200",
-          collapsed ? "w-10 h-10" : "w-9 h-9",
-          isActive 
-            ? "bg-primary-foreground/10" 
-            : "bg-muted/50 group-hover:bg-muted"
+          "relative flex items-center justify-center rounded-md transition-colors duration-150",
+          collapsed ? "w-8 h-8" : "w-7 h-7",
+          isActive ? "bg-primary-foreground/15" : "bg-transparent"
         )}>
-          <item.icon className="h-[18px] w-[18px]" />
+          <item.icon className="h-4 w-4" />
           {collapsed && badgeCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-4 min-w-4 p-0 flex items-center justify-center text-[10px]"
-            >
+            <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] font-semibold bg-destructive text-destructive-foreground rounded-full">
               {badgeCount > 99 ? "99+" : badgeCount}
-            </Badge>
+            </span>
           )}
         </div>
         {!collapsed && (
           <>
-            <span className="flex-1 font-medium">{item.label}</span>
+            <span className="flex-1 text-[13px] font-medium">{item.label}</span>
             {badgeCount > 0 && (
-              <Badge 
-                variant={isActive ? "secondary" : "destructive"} 
-                className="h-5 min-w-5 px-1.5 text-[10px]"
-              >
+              <span className={cn(
+                "h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] font-semibold rounded-full",
+                isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-destructive text-destructive-foreground"
+              )}>
                 {badgeCount > 99 ? "99+" : badgeCount}
-              </Badge>
+              </span>
             )}
             {isActive && badgeCount === 0 && (
-              <ChevronRight className="h-4 w-4 opacity-60" />
+              <ChevronRight className="h-3.5 w-3.5 opacity-70" />
             )}
           </>
         )}
@@ -243,12 +239,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           <TooltipTrigger asChild>
             {linkContent}
           </TooltipTrigger>
-          <TooltipContent side="right" className="flex items-center gap-2">
+          <TooltipContent side="right" className="flex items-center gap-2 text-xs">
             <span>{item.label}</span>
             {badgeCount > 0 && (
-              <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[10px]">
+              <span className="h-4 min-w-4 px-1 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground rounded-full">
                 {badgeCount}
-              </Badge>
+              </span>
             )}
           </TooltipContent>
         </Tooltip>
@@ -266,18 +262,18 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       if (!items || items.length === 0) return null;
 
       return (
-        <div key={groupKey} className={cn(index > 0 && "mt-6")}>
+        <div key={groupKey} className={cn(index > 0 && "mt-4")}>
           {groupKey !== "main" && !collapsed && (
-            <div className="px-3 mb-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            <div className="px-2.5 mb-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
                 {language === "bn" ? groupLabels[groupKey].bn : groupLabels[groupKey].en}
               </span>
             </div>
           )}
           {groupKey !== "main" && collapsed && (
-            <div className="my-3 mx-2 border-t border-border" />
+            <div className="my-2 mx-1.5 border-t border-border/50" />
           )}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {items.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
@@ -371,40 +367,40 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {/* Sidebar */}
           <aside className={cn(
             "fixed lg:sticky inset-y-0 lg:top-14 left-0 z-50 lg:z-10 bg-card border-r border-border",
-            "transform transition-all duration-300 ease-out",
+            "transform transition-all duration-200 ease-out",
             "lg:h-[calc(100vh-3.5rem)] overflow-hidden",
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-            collapsed ? "w-[70px]" : "w-72"
+            collapsed ? "w-[60px]" : "w-60"
           )}>
             {/* Mobile sidebar header */}
-            <div className="lg:hidden p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src={logo} alt="ST International" className="h-8 w-auto" />
-                <span className="font-semibold">{t.nav.admin}</span>
+            <div className="lg:hidden p-3 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={logo} alt="ST International" className="h-7 w-auto" />
+                <span className="font-semibold text-sm">{t.nav.admin}</span>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
-                <X className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSidebarOpen(false)}>
+                <X className="h-4 w-4" />
               </Button>
             </div>
 
             <ScrollArea className={cn(
-              collapsed ? "h-[calc(100%-4rem)]" : "h-[calc(100%-8rem)] lg:h-[calc(100%-5rem)]"
+              collapsed ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-7rem)] lg:h-[calc(100%-3.5rem)]"
             )}>
-              <nav className={cn("p-4", collapsed && "p-2")}>
+              <nav className={cn("p-2", collapsed && "p-1.5")}>
                 {renderNavGroups()}
                 
                 {/* Locked items section */}
                 {lockedItems.length > 0 && (
-                  <div className="mt-6">
+                  <div className="mt-4">
                     {!collapsed && (
-                      <div className="px-3 mb-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/40">
-                          {language === "bn" ? "সীমিত অ্যাক্সেস" : "Restricted"}
+                      <div className="px-2.5 mb-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
+                          {language === "bn" ? "সীমিত" : "Restricted"}
                         </span>
                       </div>
                     )}
-                    {collapsed && <div className="my-3 mx-2 border-t border-border" />}
-                    <div className="space-y-1">
+                    {collapsed && <div className="my-2 mx-1.5 border-t border-border/50" />}
+                    <div className="space-y-0.5">
                       {lockedItems.map((item) => (
                         <NavLink key={item.href} item={item} isLocked />
                       ))}
@@ -418,31 +414,31 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-card">
               {/* Mobile: Show user info */}
               {!collapsed && (
-                <div className="lg:hidden p-4 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-sm font-semibold shadow-sm">
+                <div className="lg:hidden p-3 border-b border-border">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-xs font-semibold">
                       {user?.email?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{user?.email}</p>
-                      <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
+                      <p className="text-sm font-medium truncate">{user?.email?.split('@')[0]}</p>
+                      <p className="text-[11px] text-muted-foreground">{getPrimaryRoleLabel()}</p>
                     </div>
                   </div>
                 </div>
               )}
               
               {/* Logout button */}
-              <div className={cn("p-3", collapsed && "p-2")}>
+              <div className={cn("p-2", collapsed && "p-1.5")}>
                 {collapsed ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="w-full h-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="w-full h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={handleSignOut}
                       >
-                        <LogOut className="h-[18px] w-[18px]" />
+                        <LogOut className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="right">
@@ -452,13 +448,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 ) : (
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors" 
+                    className="w-full justify-start gap-2.5 h-9 px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" 
                     onClick={handleSignOut}
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/50">
-                      <LogOut className="h-[18px] w-[18px]" />
+                    <div className="flex items-center justify-center w-7 h-7 rounded-md">
+                      <LogOut className="h-4 w-4" />
                     </div>
-                    <span className="font-medium">{t.nav.logout}</span>
+                    <span className="text-[13px] font-medium">{t.nav.logout}</span>
                   </Button>
                 )}
               </div>

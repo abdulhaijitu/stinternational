@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { Loader2, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Loader2, Lock, Eye } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -30,6 +33,7 @@ interface Order {
 }
 
 const AdminOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -166,18 +170,19 @@ const AdminOrders = () => {
                       <th className="text-left p-4 text-sm font-medium">{t.orders.paymentMethod}</th>
                       <th className="text-left p-4 text-sm font-medium">{t.orders.status}</th>
                       <th className="text-left p-4 text-sm font-medium">{t.orders.date}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.common.actions}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredOrders.map((order) => (
-                      <tr key={order.id} className="border-t border-border">
+                      <tr key={order.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                         <td className="p-4 text-sm font-medium">{order.order_number}</td>
                         <td className="p-4">
                           <p className="text-sm font-medium">{order.customer_name}</p>
                           <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
                         </td>
                         <td className="p-4 text-sm">{order.shipping_city}</td>
-                        <td className="p-4 text-sm font-medium">{formatPrice(order.total)}</td>
+                        <td className="p-4 text-sm font-medium">{formatPrice(order.total, language)}</td>
                         <td className="p-4 text-sm">
                           {getPaymentMethodLabel(order.payment_method)}
                         </td>
@@ -202,10 +207,10 @@ const AdminOrders = () => {
                           ) : (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-xs px-2 py-1 bg-muted rounded cursor-not-allowed">
-                                  <Lock className="h-3 w-3" />
+                                <Badge variant="secondary" className="cursor-not-allowed">
+                                  <Lock className="h-3 w-3 mr-1" />
                                   {getStatusLabel(order.status)}
-                                </div>
+                                </Badge>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>{t.orders.noStatusPermission}</p>
@@ -215,6 +220,17 @@ const AdminOrders = () => {
                         </td>
                         <td className="p-4 text-sm text-muted-foreground">
                           {formatDate(order.created_at)}
+                        </td>
+                        <td className="p-4">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => navigate(`/admin/orders/${order.id}`)}
+                            className="h-8"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            {t.orders.viewDetails || "View"}
+                          </Button>
                         </td>
                       </tr>
                     ))}
