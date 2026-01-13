@@ -4,11 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { triggerHaptic } from "@/hooks/useHapticFeedback";
 import { cn } from "@/lib/utils";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   Sheet,
   SheetContent,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
 import CategoryAwareSearch from "./CategoryAwareSearch";
@@ -41,6 +47,22 @@ const MobileBottomNav = () => {
     return location.pathname.startsWith(path);
   }, [location.pathname]);
 
+  // Haptic feedback handlers
+  const handleNavTap = useCallback((action?: () => void) => {
+    triggerHaptic('light');
+    action?.();
+  }, []);
+
+  const handleCategoryOpen = useCallback(() => {
+    triggerHaptic('medium');
+    setIsCategoryOpen(true);
+  }, []);
+
+  const handleSearchOpen = useCallback(() => {
+    triggerHaptic('medium');
+    setIsSearchOpen(true);
+  }, []);
+
   const navItems = [
     { 
       path: '/', 
@@ -53,14 +75,14 @@ const MobileBottomNav = () => {
       icon: Grid3X3, 
       label: t.nav.categories,
       isLink: false,
-      action: () => setIsCategoryOpen(true)
+      action: handleCategoryOpen
     },
     { 
       path: '/search', 
       icon: Search, 
       label: t.common.search,
       isLink: false,
-      action: () => setIsSearchOpen(true)
+      action: handleSearchOpen
     },
     { 
       path: '/cart', 
@@ -131,9 +153,10 @@ const MobileBottomNav = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="touch-manipulation"
+                  className="touch-manipulation select-none"
                   aria-label={item.label}
                   aria-current={active ? 'page' : undefined}
+                  onClick={() => handleNavTap()}
                 >
                   {content}
                 </Link>
@@ -144,7 +167,7 @@ const MobileBottomNav = () => {
               <button
                 key={item.path}
                 onClick={item.action}
-                className="touch-manipulation"
+                className="touch-manipulation select-none"
                 aria-label={item.label}
                 aria-expanded={item.path === '/categories' ? isCategoryOpen : isSearchOpen}
               >
@@ -155,22 +178,22 @@ const MobileBottomNav = () => {
         </div>
       </nav>
 
-      {/* Category Drawer */}
-      <Sheet open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-center py-3 border-b border-border">
-              <div className="w-12 h-1 rounded-full bg-muted-foreground/30" />
-            </div>
-            <h2 className="text-lg font-semibold px-4 py-2">{t.nav.categories}</h2>
-            <div className="flex-1 overflow-hidden">
-              <MobileCategoryDrawer onCategoryClick={() => setIsCategoryOpen(false)} />
-            </div>
+      {/* Category Drawer - using vaul Drawer for native swipe gestures */}
+      <Drawer open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
+        <DrawerContent className="h-[85vh] max-h-[85vh]">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle>{t.nav.categories}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-hidden">
+            <MobileCategoryDrawer onCategoryClick={() => {
+              triggerHaptic('selection');
+              setIsCategoryOpen(false);
+            }} />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
-      {/* Search Drawer */}
+      {/* Search Sheet */}
       <Sheet open={isSearchOpen} onOpenChange={setIsSearchOpen}>
         <SheetContent side="top" className="pt-safe-top">
           <div className="py-4">
