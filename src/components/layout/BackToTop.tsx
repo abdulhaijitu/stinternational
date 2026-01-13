@@ -5,7 +5,7 @@ import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const SCROLL_THRESHOLD = 400;
-const BOTTOM_NAV_HEIGHT = 64; // Must match MobileBottomNav height
+const BOTTOM_NAV_HEIGHT = 72; // Increased to ensure clearance from bottom nav
 
 const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
