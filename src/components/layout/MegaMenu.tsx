@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useActiveCategoriesByGroup, DBCategory } from "@/hooks/useCategories";
 import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+import { useMegaMenuAnalytics } from "@/hooks/useMegaMenuAnalytics";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
@@ -19,16 +20,19 @@ interface MegaMenuProps {
 const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(-1);
+  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(-1);
   
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const categoryRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const featuredRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   
   const { groups, isLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: featuredLoading } = useFeaturedProducts();
   const { getCategoryFields, getProductFields } = useBilingualContent();
   const { t } = useLanguage();
+  const { trackFeaturedProductClick } = useMegaMenuAnalytics();
 
   // Flatten all categories for navigation
   const allCategories = groups.flatMap(g => g.categories);
@@ -85,8 +89,19 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
 
   const handleCategorySelect = () => {
     setIsOpen(false);
+    setActiveFeaturedIndex(-1);
     onCategoryClick?.();
   };
+
+  // Handle featured product click with analytics
+  const handleFeaturedProductClick = useCallback((product: { id: string; slug: string; category?: { name: string } | null }) => {
+    trackFeaturedProductClick({
+      productId: product.id,
+      productSlug: product.slug,
+      categoryName: product.category?.name,
+    });
+    handleCategorySelect();
+  }, [trackFeaturedProductClick]);
 
   // Show only 4 featured products
   const displayedProducts = featuredProducts?.slice(0, 4) || [];
@@ -221,16 +236,23 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
                   </div>
                 ) : displayedProducts.length > 0 ? (
                   <div className="space-y-1">
-                    {displayedProducts.map((product) => {
+                    {displayedProducts.map((product, index) => {
                       const { name: productName } = getProductFields(product);
                       return (
                         <Link
                           key={product.id}
+                          ref={(el) => {
+                            if (el) featuredRefs.current.set(product.id, el);
+                          }}
                           to={`/product/${product.slug}`}
-                          onClick={handleCategorySelect}
+                          onClick={() => handleFeaturedProductClick(product)}
+                          onMouseEnter={() => setActiveFeaturedIndex(index)}
+                          onMouseLeave={() => setActiveFeaturedIndex(-1)}
                           className={cn(
                             "flex items-center gap-3 p-2 rounded-lg transition-all duration-150",
-                            "hover:bg-background group"
+                            "hover:bg-background group",
+                            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset",
+                            activeFeaturedIndex === index && "bg-background"
                           )}
                         >
                           <div className="h-14 w-14 rounded-md bg-background border border-border/50 overflow-hidden shrink-0">

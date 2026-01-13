@@ -16,6 +16,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
+import IconPicker from "@/components/admin/IconPicker";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 
 interface Category {
   id: string;
@@ -25,6 +27,7 @@ interface Category {
   parent_group: string | null;
   display_order: number;
   image_url: string | null;
+  icon_name: string | null;
   is_active: boolean;
 }
 
@@ -40,6 +43,7 @@ const AdminCategories = () => {
     description: "",
     parent_group: "",
     image_url: "",
+    icon_name: "",
     is_active: true,
   });
 
@@ -81,11 +85,12 @@ const AdminCategories = () => {
         description: category.description || "",
         parent_group: category.parent_group || "",
         image_url: category.image_url || "",
+        icon_name: category.icon_name || "",
         is_active: category.is_active ?? true,
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: "", slug: "", description: "", parent_group: "", image_url: "", is_active: true });
+      setFormData({ name: "", slug: "", description: "", parent_group: "", image_url: "", icon_name: "", is_active: true });
     }
     setDialogOpen(true);
   };
@@ -107,6 +112,7 @@ const AdminCategories = () => {
             description: formData.description || null,
             parent_group: formData.parent_group || null,
             image_url: formData.image_url || null,
+            icon_name: formData.icon_name || null,
             is_active: formData.is_active,
           })
           .eq("id", editingCategory.id);
@@ -120,6 +126,7 @@ const AdminCategories = () => {
           description: formData.description || null,
           parent_group: formData.parent_group || null,
           image_url: formData.image_url || null,
+          icon_name: formData.icon_name || null,
           is_active: formData.is_active,
           display_order: categories.length + 1,
         }]);
@@ -281,6 +288,10 @@ const AdminCategories = () => {
                     folder="categories"
                   />
                 </div>
+                <IconPicker
+                  value={formData.icon_name}
+                  onChange={(iconName) => setFormData({ ...formData, icon_name: iconName })}
+                />
                 <div className="flex items-center justify-between py-2">
                   <div>
                     <Label htmlFor="is_active">Visible to public</Label>
@@ -368,6 +379,16 @@ const AdminCategories = () => {
                             <ArrowDown className="h-3 w-3" />
                           </Button>
                         </div>
+                        
+                        {/* Icon */}
+                        {(() => {
+                          const IconComponent = getCategoryIcon(category.icon_name);
+                          return (
+                            <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center border border-border">
+                              <IconComponent className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          );
+                        })()}
                         
                         {/* Image */}
                         {category.image_url ? (

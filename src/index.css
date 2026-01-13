@@ -239,6 +239,21 @@
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
   }
   
+  /* Premium Focus States - Keyboard Navigation */
+  .focus-visible-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  
+  /* Menu Item Focus - Subtle but visible */
+  .menu-focus {
+    @apply focus:outline-none focus-visible:bg-muted/60 focus-visible:text-foreground;
+  }
+  
+  /* Header Link Focus */
+  .header-link-focus {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-sm;
+  }
+  
   /* Animated Underline */
   .animated-underline {
     @apply relative;
@@ -251,6 +266,13 @@
   
   .animated-underline:hover::after {
     @apply w-full;
+  }
+  
+  /* Skip to Content Link (Accessibility) */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100];
+    @apply bg-background text-foreground px-4 py-2 rounded-md shadow-lg border border-border;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring;
   }
 }
 
