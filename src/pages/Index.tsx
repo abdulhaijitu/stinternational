@@ -147,7 +147,7 @@ const Index = () => {
                 </Link>
               </Button>
               <Button variant="hero-secondary" size="xl" asChild className="active:scale-95">
-                <Link to="/contact">Request a Quote</Link>
+                <Link to="/request-quote">Request a Quote</Link>
               </Button>
             </div>
           </div>
@@ -347,7 +347,7 @@ const Index = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button variant="accent" size="lg" asChild className="active:scale-95">
-                  <Link to="/contact">
+                  <Link to="/request-quote">
                     Request a Quote
                     <ArrowRight className="h-4 w-4" />
                   </Link>
