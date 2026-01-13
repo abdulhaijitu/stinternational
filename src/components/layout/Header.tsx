@@ -75,6 +75,14 @@ const Header = () => {
 
   return (
     <>
+      {/* Skip to main content link for keyboard users */}
+      <a 
+        href="#main-content" 
+        className="skip-link"
+      >
+        Skip to main content
+      </a>
+      
       {/* Spacer to prevent layout shift - reserves space for sticky header */}
       <div 
         className="w-full"
@@ -235,25 +243,25 @@ const Header = () => {
 
               <Link 
                 to="/products" 
-                className="font-medium text-foreground hover:text-primary transition-colors text-sm"
+                className="font-medium text-foreground hover:text-primary transition-colors text-sm header-link-focus"
               >
                 {t.nav.products}
               </Link>
               <Link 
                 to="/request-quote" 
-                className="font-medium text-foreground hover:text-primary transition-colors text-sm"
+                className="font-medium text-foreground hover:text-primary transition-colors text-sm header-link-focus"
               >
                 {t.nav.requestQuote}
               </Link>
               <Link 
                 to="/about" 
-                className="font-medium text-foreground hover:text-primary transition-colors text-sm"
+                className="font-medium text-foreground hover:text-primary transition-colors text-sm header-link-focus"
               >
                 {t.nav.about}
               </Link>
               <Link 
                 to="/contact" 
-                className="font-medium text-foreground hover:text-primary transition-colors text-sm"
+                className="font-medium text-foreground hover:text-primary transition-colors text-sm header-link-focus"
               >
                 {t.nav.contact}
               </Link>
