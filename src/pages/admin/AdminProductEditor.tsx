@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 interface Category {
   id: string;
@@ -275,35 +276,41 @@ const AdminProductEditor = () => {
             </div>
           </div>
 
-          {/* Category & Image */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">ক্যাটাগরি</Label>
-              <Select
-                value={formData.category_id}
-                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image_url">ছবির URL</Label>
-              <Input
-                id="image_url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
+          {/* Category */}
+          <div className="space-y-2">
+            <Label htmlFor="category">ক্যাটাগরি</Label>
+            <Select
+              value={formData.category_id}
+              onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Product Image */}
+          <div className="space-y-2">
+            <Label>পণ্যের ছবি</Label>
+            <ImageUpload
+              value={formData.image_url}
+              onChange={(url) => setFormData({ ...formData, image_url: url })}
+            />
+            <p className="text-xs text-muted-foreground">
+              অথবা সরাসরি URL দিন:
+            </p>
+            <Input
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              placeholder="https://..."
+            />
           </div>
 
           {/* Stock */}
