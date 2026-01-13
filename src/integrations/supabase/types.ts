@@ -283,6 +283,72 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_requests: {
+        Row: {
+          additional_notes: string | null
+          budget_range: string | null
+          company_name: string
+          company_type: string
+          contact_person: string
+          created_at: string
+          delivery_address: string
+          delivery_city: string
+          delivery_urgency: string
+          email: string
+          id: string
+          phone: string
+          preferred_payment: string | null
+          product_category: string
+          product_details: string
+          quantity: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          budget_range?: string | null
+          company_name: string
+          company_type: string
+          contact_person: string
+          created_at?: string
+          delivery_address: string
+          delivery_city: string
+          delivery_urgency: string
+          email: string
+          id?: string
+          phone: string
+          preferred_payment?: string | null
+          product_category: string
+          product_details: string
+          quantity: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          budget_range?: string | null
+          company_name?: string
+          company_type?: string
+          contact_person?: string
+          created_at?: string
+          delivery_address?: string
+          delivery_city?: string
+          delivery_urgency?: string
+          email?: string
+          id?: string
+          phone?: string
+          preferred_payment?: string | null
+          product_category?: string
+          product_details?: string
+          quantity?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
