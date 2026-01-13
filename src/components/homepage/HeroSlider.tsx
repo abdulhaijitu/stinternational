@@ -4,7 +4,10 @@ import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConi
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Slide data - professional B2B+B2C messaging
+// Slide animation types for each industry
+type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
+
+// Slide data - professional B2B+B2C messaging with unique animations
 const heroSlides = [
   {
     id: 1,
@@ -16,6 +19,7 @@ const heroSlides = [
     secondaryCta: { label: "Request a Quote", href: "/request-quote" },
     visual: "laboratory",
     icon: FlaskConical,
+    animation: "fade-up" as SlideAnimation,
   },
   {
     id: 2,
@@ -27,6 +31,7 @@ const heroSlides = [
     secondaryCta: { label: "Request a Quote", href: "/request-quote" },
     visual: "measurement",
     icon: Gauge,
+    animation: "fade-right" as SlideAnimation,
   },
   {
     id: 3,
@@ -38,6 +43,7 @@ const heroSlides = [
     secondaryCta: { label: "Request a Quote", href: "/request-quote" },
     visual: "engineering",
     icon: HardHat,
+    animation: "zoom-in" as SlideAnimation,
   },
   {
     id: 4,
@@ -49,15 +55,58 @@ const heroSlides = [
     secondaryCta: { label: "Request a Quote", href: "/request-quote" },
     visual: "general",
     icon: Building2,
+    animation: "fade-left" as SlideAnimation,
   },
 ];
 
+// Animation classes for different slide effects
+const getSlideAnimationClasses = (animation: SlideAnimation, isActive: boolean) => {
+  const baseClasses = "transition-all duration-500 ease-out";
+  
+  if (isActive) {
+    return cn(baseClasses, "opacity-100 translate-x-0 translate-y-0 scale-100 relative");
+  }
+  
+  // Exit states based on animation type
+  switch (animation) {
+    case "fade-up":
+      return cn(baseClasses, "opacity-0 translate-y-6 absolute inset-0 pointer-events-none");
+    case "fade-right":
+      return cn(baseClasses, "opacity-0 translate-x-6 absolute inset-0 pointer-events-none");
+    case "fade-left":
+      return cn(baseClasses, "opacity-0 -translate-x-6 absolute inset-0 pointer-events-none");
+    case "zoom-in":
+      return cn(baseClasses, "opacity-0 scale-95 absolute inset-0 pointer-events-none");
+    default:
+      return cn(baseClasses, "opacity-0 translate-y-4 absolute inset-0 pointer-events-none");
+  }
+};
+
+// Visual animation classes based on slide type
+const getVisualAnimationClasses = (animation: SlideAnimation, isActive: boolean) => {
+  const baseClasses = "absolute inset-0 transition-all duration-700 ease-out";
+  
+  if (isActive) {
+    return cn(baseClasses, "opacity-100 translate-x-0 translate-y-0 scale-100");
+  }
+  
+  switch (animation) {
+    case "fade-up":
+      return cn(baseClasses, "opacity-0 translate-y-8");
+    case "fade-right":
+      return cn(baseClasses, "opacity-0 translate-x-8");
+    case "fade-left":
+      return cn(baseClasses, "opacity-0 -translate-x-8");
+    case "zoom-in":
+      return cn(baseClasses, "opacity-0 scale-90");
+    default:
+      return cn(baseClasses, "opacity-0");
+  }
+};
+
 // Abstract visual components for each industry
-const SlideVisual = ({ type, isActive }: { type: string; isActive: boolean }) => {
-  const baseClasses = cn(
-    "absolute inset-0 transition-opacity duration-500",
-    isActive ? "opacity-100" : "opacity-0"
-  );
+const SlideVisual = ({ type, isActive, animation }: { type: string; isActive: boolean; animation: SlideAnimation }) => {
+  const visualClasses = getVisualAnimationClasses(animation, isActive);
 
   const iconMap: Record<string, typeof FlaskConical> = {
     laboratory: FlaskConical,
@@ -69,27 +118,48 @@ const SlideVisual = ({ type, isActive }: { type: string; isActive: boolean }) =>
   const Icon = iconMap[type] || Building2;
 
   return (
-    <div className={baseClasses}>
+    <div className={visualClasses}>
       {/* Abstract geometric shapes */}
       <div className="relative w-full h-full">
         {/* Main floating card */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary-foreground/10 rounded-2xl backdrop-blur-sm border border-primary-foreground/20 shadow-2xl flex items-center justify-center">
-          <Icon className="h-24 w-24 text-primary-foreground/40" strokeWidth={1} />
+        <div className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary-foreground/10 rounded-2xl backdrop-blur-sm border border-primary-foreground/20 shadow-2xl flex items-center justify-center transition-transform duration-700 delay-100",
+          isActive ? "rotate-0" : "rotate-3"
+        )}>
+          <Icon className={cn(
+            "h-24 w-24 text-primary-foreground/40 transition-all duration-500 delay-200",
+            isActive ? "scale-100 opacity-100" : "scale-90 opacity-0"
+          )} strokeWidth={1} />
         </div>
         
-        {/* Floating accent elements */}
-        <div className="absolute top-1/4 right-1/4 w-20 h-20 bg-accent/30 rounded-xl rotate-12 backdrop-blur-sm" />
-        <div className="absolute bottom-1/3 left-1/4 w-16 h-16 bg-primary-foreground/15 rounded-lg -rotate-6" />
-        <div className="absolute top-1/3 left-1/3 w-12 h-12 bg-accent/20 rounded-full" />
+        {/* Floating accent elements with staggered animations */}
+        <div className={cn(
+          "absolute top-1/4 right-1/4 w-20 h-20 bg-accent/30 rounded-xl backdrop-blur-sm transition-all duration-500 delay-150",
+          isActive ? "rotate-12 opacity-100 translate-y-0" : "rotate-0 opacity-0 translate-y-4"
+        )} />
+        <div className={cn(
+          "absolute bottom-1/3 left-1/4 w-16 h-16 bg-primary-foreground/15 rounded-lg transition-all duration-500 delay-200",
+          isActive ? "-rotate-6 opacity-100 translate-x-0" : "rotate-0 opacity-0 -translate-x-4"
+        )} />
+        <div className={cn(
+          "absolute top-1/3 left-1/3 w-12 h-12 bg-accent/20 rounded-full transition-all duration-500 delay-250",
+          isActive ? "opacity-100 scale-100" : "opacity-0 scale-75"
+        )} />
         
         {/* Stats card */}
-        <div className="absolute top-16 right-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border">
+        <div className={cn(
+          "absolute top-16 right-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-300",
+          isActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+        )}>
           <div className="text-2xl font-bold text-foreground">5000+</div>
           <div className="text-xs text-muted-foreground">Products</div>
         </div>
         
         {/* Experience card */}
-        <div className="absolute bottom-16 left-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border">
+        <div className={cn(
+          "absolute bottom-16 left-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-350",
+          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )}>
           <div className="text-2xl font-bold text-foreground">19+</div>
           <div className="text-xs text-muted-foreground">Years Experience</div>
         </div>
@@ -132,11 +202,36 @@ const useSwipeGesture = (onSwipeLeft: () => void, onSwipeRight: () => void, thre
   return { onTouchStart, onTouchMove, onTouchEnd };
 };
 
+// Custom hook for keyboard navigation
+const useKeyboardNavigation = (onPrev: () => void, onNext: () => void, isEnabled: boolean) => {
+  useEffect(() => {
+    if (!isEnabled) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          onPrev();
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          onNext();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onPrev, onNext, isEnabled]);
+};
+
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
+  const sliderRef = useRef<HTMLElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -162,6 +257,9 @@ const HeroSlider = () => {
 
   // Swipe gesture support
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture(nextSlide, prevSlide);
+
+  // Keyboard navigation support
+  useKeyboardNavigation(prevSlide, nextSlide, isFocused);
 
   // Auto-slide with pause on hover
   useEffect(() => {
@@ -193,9 +291,16 @@ const HeroSlider = () => {
 
   return (
     <section 
-      className="hero-gradient text-primary-foreground relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y"
+      ref={sliderRef}
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Hero slider - Use arrow keys to navigate"
+      className="hero-gradient text-primary-foreground relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -234,12 +339,11 @@ const HeroSlider = () => {
             {heroSlides.map((slide, index) => (
               <div
                 key={slide.id}
-                className={cn(
-                  "transition-all duration-500 ease-out",
-                  currentSlide === index
-                    ? "opacity-100 translate-y-0 relative"
-                    : "opacity-0 translate-y-4 absolute inset-0 pointer-events-none"
-                )}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${heroSlides.length}: ${slide.headline}`}
+                aria-hidden={currentSlide !== index}
+                className={getSlideAnimationClasses(slide.animation, currentSlide === index)}
               >
                 {/* Trust Badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm mb-6 md:mb-8">
@@ -300,12 +404,13 @@ const HeroSlider = () => {
           </div>
 
           {/* Right Column - Visual */}
-          <div className="hidden lg:block relative h-[400px]">
+          <div className="hidden lg:block relative h-[400px]" aria-hidden="true">
             {heroSlides.map((slide, index) => (
               <SlideVisual 
                 key={slide.id} 
                 type={slide.visual} 
                 isActive={currentSlide === index}
+                animation={slide.animation}
               />
             ))}
           </div>
