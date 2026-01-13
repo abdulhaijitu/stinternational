@@ -1,11 +1,16 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingCart, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DBProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import WishlistButton from "./WishlistButton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -86,6 +91,23 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
             <ShoppingCart className="h-4 w-4" />
             কিনুন
           </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="shrink-0 bg-background/90"
+                asChild
+              >
+                <Link to={`/request-quote?product=${encodeURIComponent(product.name)}`}>
+                  <FileText className="h-4 w-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>কোটেশন নিন</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

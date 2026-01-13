@@ -198,7 +198,7 @@ const ProductPage = () => {
                     </button>
                   </div>
                 </div>
-                <div className="flex gap-4">
+              <div className="flex gap-4">
                   <Button
                     variant="accent"
                     size="lg"
@@ -209,9 +209,27 @@ const ProductPage = () => {
                     <ShoppingCart className="h-5 w-5" />
                     কার্টে যোগ করুন
                   </Button>
-                  <Button variant="outline" size="lg" className="flex-1">
-                    কোটেশন নিন
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="flex-1"
+                    asChild
+                  >
+                    <Link to={`/request-quote?product=${encodeURIComponent(product.name)}&category=${product.category?.slug || ''}`}>
+                      কোটেশন নিন
+                    </Link>
                   </Button>
+                </div>
+                
+                {/* B2B Message */}
+                <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">প্রাতিষ্ঠানিক ক্রয়ের জন্য?</strong>{" "}
+                    বাল্ক অর্ডার ও বিশেষ মূল্যের জন্য{" "}
+                    <Link to="/request-quote" className="text-primary hover:underline font-medium">
+                      কোটেশন রিকোয়েস্ট করুন
+                    </Link>
+                  </p>
                 </div>
               </div>
 

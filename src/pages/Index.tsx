@@ -26,27 +26,27 @@ import HeroCta from "@/components/homepage/HeroCta";
 import Testimonials from "@/components/homepage/Testimonials";
 import IndustryHeroVisual from "@/components/homepage/IndustryHeroVisual";
 
-// Trust signals data
+// Trust signals data - speaks to both B2B and B2C
 const trustSignals = [
   {
     icon: Building2,
-    title: "Trusted by Institutions",
-    description: "Serving 2000+ research labs, universities & factories",
+    title: "Trusted Partner",
+    description: "Serving 2000+ institutions and individual professionals",
   },
   {
     icon: Truck,
     title: "Nationwide Delivery",
-    description: "Fast, reliable shipping across Bangladesh",
+    description: "Fast shipping for orders of any size across Bangladesh",
   },
   {
     icon: Headphones,
-    title: "Professional Support",
-    description: "Expert technical assistance & after-sales service",
+    title: "Expert Support",
+    description: "Technical assistance for all customers, big or small",
   },
   {
     icon: Shield,
     title: "Certified Products",
-    description: "100% authentic equipment with warranty",
+    description: "Authentic equipment with warranty & documentation",
   },
 ];
 
@@ -168,8 +168,8 @@ const Index = () => {
               </h1>
               
               <p className="text-lg md:text-xl text-primary-foreground/80 max-w-xl mb-10 leading-relaxed">
-                Your trusted source for certified laboratory, measurement, and industrial equipment. 
-                Serving research institutions and businesses with nationwide delivery since 2005.
+                Your trusted source for certified laboratory, measurement, and industrial equipment.
+                Whether you're an individual professional or an institution — nationwide delivery since 2005.
               </p>
               
               <HeroCta />

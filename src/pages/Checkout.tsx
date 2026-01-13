@@ -199,7 +199,7 @@ const Checkout = () => {
                 {/* Contact Info */}
                 <div className="bg-card border border-border rounded-lg p-6">
                   <h2 className="font-semibold text-lg mb-4">যোগাযোগের তথ্য</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="customer_name">নাম *</Label>
                       <Input
@@ -210,11 +210,12 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="company_name">কোম্পানির নাম</Label>
+                      <Label htmlFor="company_name">কোম্পানি / প্রতিষ্ঠান (ঐচ্ছিক)</Label>
                       <Input
                         id="company_name"
                         value={formData.company_name}
                         onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                        placeholder="ব্যক্তিগত ক্রয়ের জন্য খালি রাখুন"
                       />
                     </div>
                     <div className="space-y-2">
