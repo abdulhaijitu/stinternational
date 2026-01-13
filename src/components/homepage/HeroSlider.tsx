@@ -98,19 +98,57 @@ const SlideVisual = ({ type, isActive }: { type: string; isActive: boolean }) =>
   );
 };
 
+// Custom hook for swipe gestures
+const useSwipeGesture = (onSwipeLeft: () => void, onSwipeRight: () => void, threshold = 50) => {
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = null;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+
+    const diff = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        onSwipeLeft();
+      } else {
+        onSwipeRight();
+      }
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  }, [onSwipeLeft, onSwipeRight, threshold]);
+
+  return { onTouchStart, onTouchMove, onTouchEnd };
+};
+
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressRef = useRef<NodeJS.Timeout | null>(null);
 
   const SLIDE_INTERVAL = 6000; // 6 seconds
   const TRANSITION_DURATION = 500; // 500ms
+  const PROGRESS_UPDATE_INTERVAL = 50; // Update progress every 50ms
 
   const goToSlide = useCallback((index: number) => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentSlide(index);
+    setProgress(0); // Reset progress on slide change
     setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
   }, [isTransitioning]);
 
@@ -122,28 +160,54 @@ const HeroSlider = () => {
     goToSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length);
   }, [currentSlide, goToSlide]);
 
+  // Swipe gesture support
+  const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture(nextSlide, prevSlide);
+
   // Auto-slide with pause on hover
   useEffect(() => {
     if (isPaused) {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progressRef.current) clearInterval(progressRef.current);
       return;
     }
 
+    // Reset progress when starting
+    setProgress(0);
+
+    // Progress bar animation
+    progressRef.current = setInterval(() => {
+      setProgress((prev) => {
+        const newProgress = prev + (100 / (SLIDE_INTERVAL / PROGRESS_UPDATE_INTERVAL));
+        return Math.min(newProgress, 100);
+      });
+    }, PROGRESS_UPDATE_INTERVAL);
+
+    // Auto-slide interval
     intervalRef.current = setInterval(nextSlide, SLIDE_INTERVAL);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progressRef.current) clearInterval(progressRef.current);
     };
-  }, [isPaused, nextSlide]);
-
-  const currentData = heroSlides[currentSlide];
+  }, [isPaused, nextSlide, currentSlide]);
 
   return (
     <section 
-      className="hero-gradient text-primary-foreground relative overflow-hidden min-h-[600px] md:min-h-[650px]"
+      className="hero-gradient text-primary-foreground relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
+      {/* Progress Bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-primary-foreground/10 z-20">
+        <div 
+          className="h-full bg-accent transition-all duration-100 ease-linear"
+          style={{ width: `${isPaused ? progress : progress}%` }}
+        />
+      </div>
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[120px] transform translate-x-1/2" />
@@ -221,7 +285,7 @@ const HeroSlider = () => {
                 </div>
 
                 {/* B2B+B2C indicators */}
-                <div className="flex items-center gap-6 mt-8 justify-center lg:justify-start text-sm text-primary-foreground/70">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 justify-center lg:justify-start text-sm text-primary-foreground/70">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-accent" />
                     <span>Direct purchase available</span>
@@ -249,20 +313,30 @@ const HeroSlider = () => {
 
         {/* Navigation Controls */}
         <div className="flex items-center justify-between mt-8 md:mt-12">
-          {/* Dots Indicator */}
+          {/* Dots Indicator with Progress */}
           <div className="flex items-center gap-2">
             {heroSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                className={cn(
-                  "h-2 rounded-full transition-all duration-300",
-                  currentSlide === index
-                    ? "w-8 bg-accent"
-                    : "w-2 bg-primary-foreground/30 hover:bg-primary-foreground/50"
+                className="relative h-2 overflow-hidden rounded-full transition-all duration-300"
+                style={{ width: currentSlide === index ? '32px' : '8px' }}
+              >
+                <div className={cn(
+                  "absolute inset-0 transition-colors duration-200",
+                  currentSlide === index ? "bg-primary-foreground/30" : "bg-primary-foreground/30 hover:bg-primary-foreground/50"
+                )} />
+                {currentSlide === index && (
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-accent transition-all duration-100 ease-linear"
+                    style={{ width: `${progress}%` }}
+                  />
                 )}
-              />
+                {currentSlide !== index && (
+                  <div className="absolute inset-0 bg-primary-foreground/30 hover:bg-primary-foreground/50 transition-colors" />
+                )}
+              </button>
             ))}
           </div>
 
@@ -290,6 +364,13 @@ const HeroSlider = () => {
         {/* Slide Counter */}
         <div className="absolute bottom-4 right-4 text-xs text-primary-foreground/50 font-mono">
           {String(currentSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
+        </div>
+
+        {/* Swipe hint for mobile */}
+        <div className="lg:hidden absolute bottom-4 left-4 text-xs text-primary-foreground/40 flex items-center gap-1">
+          <ChevronLeft className="h-3 w-3" />
+          <span>Swipe</span>
+          <ChevronRight className="h-3 w-3" />
         </div>
       </div>
     </section>
