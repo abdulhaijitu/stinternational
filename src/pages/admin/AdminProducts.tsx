@@ -196,7 +196,7 @@ const AdminProducts = () => {
                           </td>
                           <td className="p-4 text-sm text-muted-foreground">{product.sku || "-"}</td>
                           <td className="p-4 text-sm">{product.category?.name || "-"}</td>
-                          <td className="p-4 text-sm font-medium">{formatPrice(product.price)}</td>
+                          <td className="p-4 text-sm font-medium">{formatPrice(product.price, language)}</td>
                           <td className="p-4 text-sm">{product.stock_quantity}</td>
                           <td className="p-4">
                             <span className={cn("text-xs px-2 py-1 rounded-full font-medium", status.className)}>
