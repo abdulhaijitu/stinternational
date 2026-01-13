@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Eye, Loader2 } from "lucide-react";
+import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DBProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
@@ -8,13 +8,15 @@ import { toast } from "sonner";
 
 interface DBProductCardProps {
   product: DBProduct;
+  onQuickView?: (product: DBProduct) => void;
 }
 
-const DBProductCard = ({ product }: DBProductCardProps) => {
+const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     addItem({
       id: product.id,
       name: product.name,
@@ -24,6 +26,12 @@ const DBProductCard = ({ product }: DBProductCardProps) => {
       sku: product.sku,
     });
     toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+  };
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onQuickView?.(product);
   };
 
   const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
@@ -49,12 +57,19 @@ const DBProductCard = ({ product }: DBProductCardProps) => {
         )}
         {/* Quick Actions */}
         <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
-          <Button variant="secondary" size="sm" className="flex-1" asChild>
-            <Link to={`/product/${product.slug}`}>
+          {onQuickView ? (
+            <Button variant="secondary" size="sm" className="flex-1" onClick={handleQuickView}>
               <Eye className="h-4 w-4" />
               দেখুন
-            </Link>
-          </Button>
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" className="flex-1" asChild>
+              <Link to={`/product/${product.slug}`}>
+                <Eye className="h-4 w-4" />
+                দেখুন
+              </Link>
+            </Button>
+          )}
           <Button 
             variant="accent" 
             size="sm" 

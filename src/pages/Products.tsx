@@ -1,11 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2, LayoutGrid, List } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -26,11 +27,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import DBProductCard from "@/components/products/DBProductCard";
-import { useAllProducts, useCategories } from "@/hooks/useProducts";
+import ProductQuickView from "@/components/products/ProductQuickView";
+import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
 const PER_PAGE_OPTIONS = [12, 24, 48, 96];
+const INFINITE_SCROLL_BATCH = 12;
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,7 +59,18 @@ const Products = () => {
   const [perPage, setPerPage] = useState(
     parseInt(searchParams.get("perPage") || "12", 10)
   );
+  const [infiniteScroll, setInfiniteScroll] = useState(
+    searchParams.get("scroll") === "infinite"
+  );
+  const [visibleCount, setVisibleCount] = useState(INFINITE_SCROLL_BATCH);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Quick view state
+  const [quickViewProduct, setQuickViewProduct] = useState<DBProduct | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+
+  // Infinite scroll ref
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Apply filters and sorting
   const filteredProducts = useMemo(() => {
@@ -111,19 +125,48 @@ const Products = () => {
         break;
       case "newest":
       default:
-        // Already sorted by created_at desc from the API
         break;
     }
 
     return filtered;
   }, [allProducts, search, selectedCategories, priceRange, inStockOnly, sortBy]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / perPage);
-  const paginatedProducts = useMemo(() => {
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(INFINITE_SCROLL_BATCH);
+  }, [search, selectedCategories, priceRange, inStockOnly, sortBy]);
+
+  // Pagination / Infinite scroll products
+  const displayedProducts = useMemo(() => {
+    if (infiniteScroll) {
+      return filteredProducts.slice(0, visibleCount);
+    }
     const startIndex = (currentPage - 1) * perPage;
     return filteredProducts.slice(startIndex, startIndex + perPage);
-  }, [filteredProducts, currentPage, perPage]);
+  }, [filteredProducts, currentPage, perPage, infiniteScroll, visibleCount]);
+
+  const totalPages = Math.ceil(filteredProducts.length / perPage);
+  const hasMore = infiniteScroll && visibleCount < filteredProducts.length;
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!infiniteScroll) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setVisibleCount((prev) => Math.min(prev + INFINITE_SCROLL_BATCH, filteredProducts.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [infiniteScroll, hasMore, filteredProducts.length]);
 
   // Reset to page 1 when filters change
   const updateSearchParams = (resetPage = true) => {
@@ -135,6 +178,7 @@ const Products = () => {
     if (inStockOnly) params.set("inStock", "true");
     if (sortBy !== "newest") params.set("sort", sortBy);
     if (perPage !== 12) params.set("perPage", perPage.toString());
+    if (infiniteScroll) params.set("scroll", "infinite");
     if (!resetPage && currentPage > 1) params.set("page", currentPage.toString());
     setSearchParams(params);
     if (resetPage) setCurrentPage(1);
@@ -154,7 +198,6 @@ const Products = () => {
       params.delete("page");
     }
     setSearchParams(params);
-    // Scroll to top of products
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
@@ -172,11 +215,30 @@ const Products = () => {
     setSearchParams(params);
   };
 
+  const handleInfiniteScrollToggle = (enabled: boolean) => {
+    setInfiniteScroll(enabled);
+    setVisibleCount(INFINITE_SCROLL_BATCH);
+    setCurrentPage(1);
+    const params = new URLSearchParams(searchParams);
+    if (enabled) {
+      params.set("scroll", "infinite");
+      params.delete("page");
+    } else {
+      params.delete("scroll");
+    }
+    setSearchParams(params);
+  };
+
   const handleCategoryToggle = (slug: string) => {
     setSelectedCategories((prev) =>
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
   };
+
+  const handleQuickView = useCallback((product: DBProduct) => {
+    setQuickViewProduct(product);
+    setQuickViewOpen(true);
+  }, []);
 
   const clearFilters = () => {
     setSearch("");
@@ -185,6 +247,7 @@ const Products = () => {
     setInStockOnly(false);
     setSortBy("newest");
     setCurrentPage(1);
+    setVisibleCount(INFINITE_SCROLL_BATCH);
     setSearchParams({});
   };
 
@@ -265,6 +328,20 @@ const Products = () => {
         </label>
       </div>
 
+      {/* Infinite Scroll Toggle */}
+      <div className="py-2 border-t border-border pt-4">
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-sm font-medium">ইনফিনিট স্ক্রোল</span>
+          <Switch
+            checked={infiniteScroll}
+            onCheckedChange={handleInfiniteScrollToggle}
+          />
+        </label>
+        <p className="text-xs text-muted-foreground mt-1">
+          স্ক্রোল করলে আরো পণ্য লোড হবে
+        </p>
+      </div>
+
       {/* Apply/Clear Buttons */}
       <div className="space-y-2 pt-4 border-t border-border">
         <Button onClick={() => updateSearchParams(true)} className="w-full">
@@ -281,6 +358,13 @@ const Products = () => {
 
   return (
     <Layout>
+      {/* Quick View Modal */}
+      <ProductQuickView
+        product={quickViewProduct}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+      />
+
       {/* Page Header */}
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-8 md:py-12">
@@ -343,6 +427,11 @@ const Products = () => {
                   {/* Results Count */}
                   <span className="text-sm text-muted-foreground">
                     {filteredProducts.length}টি পণ্য
+                    {infiniteScroll && filteredProducts.length > 0 && (
+                      <span className="ml-1">
+                        (দেখানো হচ্ছে {Math.min(visibleCount, filteredProducts.length)}টি)
+                      </span>
+                    )}
                   </span>
 
                   {/* Active Filter Tags */}
@@ -360,19 +449,32 @@ const Products = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Per Page Selector */}
-                  <Select value={perPage.toString()} onValueChange={handlePerPageChange}>
-                    <SelectTrigger className="w-28">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PER_PAGE_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option.toString()}>
-                          {option}টি
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {/* Infinite Scroll Toggle (desktop compact) */}
+                  <div className="hidden md:flex items-center gap-2 mr-2">
+                    <LayoutGrid className={`h-4 w-4 ${!infiniteScroll ? "text-primary" : "text-muted-foreground"}`} />
+                    <Switch
+                      checked={infiniteScroll}
+                      onCheckedChange={handleInfiniteScrollToggle}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                    <List className={`h-4 w-4 ${infiniteScroll ? "text-primary" : "text-muted-foreground"}`} />
+                  </div>
+
+                  {/* Per Page Selector - only show when not infinite scroll */}
+                  {!infiniteScroll && (
+                    <Select value={perPage.toString()} onValueChange={handlePerPageChange}>
+                      <SelectTrigger className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PER_PAGE_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option.toString()}>
+                            {option}টি
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
 
                   {/* Sort Dropdown */}
                   <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
@@ -411,13 +513,33 @@ const Products = () => {
               ) : (
                 <>
                   <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {paginatedProducts.map((product) => (
-                      <DBProductCard key={product.id} product={product} />
+                    {displayedProducts.map((product) => (
+                      <DBProductCard
+                        key={product.id}
+                        product={product}
+                        onQuickView={handleQuickView}
+                      />
                     ))}
                   </div>
 
-                  {/* Pagination */}
-                  {totalPages > 1 && (
+                  {/* Infinite Scroll Loader */}
+                  {infiniteScroll && (
+                    <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+                      {hasMore ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>আরো পণ্য লোড হচ্ছে...</span>
+                        </div>
+                      ) : filteredProducts.length > INFINITE_SCROLL_BATCH && (
+                        <span className="text-sm text-muted-foreground">
+                          সব পণ্য দেখানো হয়েছে
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pagination - only show when not infinite scroll */}
+                  {!infiniteScroll && totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8">
                       <Button
                         variant="outline"
