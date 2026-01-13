@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import CategoryQuickViewPopover from "@/components/products/CategoryQuickViewPopover";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
 interface CategoryNavMenuProps {
   isCompact?: boolean;
@@ -30,6 +31,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
   const { groups, isLoading } = useActiveCategoriesByGroup();
   const { getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
+  const { trackCategoryInteraction } = useUXTelemetry();
 
   // Flatten all categories for the simple list view
   const allCategories = groups.flatMap(g => g.categories);
@@ -87,7 +89,10 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
     }, 150);
   };
 
-  const handleCategorySelect = () => {
+  const handleCategorySelect = (category?: { slug: string; name: string }) => {
+    if (category) {
+      trackCategoryInteraction(category.slug, category.name, 'click');
+    }
     setIsOpen(false);
     setHoveredCategory(null);
     onCategoryClick?.();
@@ -102,10 +107,13 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
       left: rect.right + 8,
     });
     
+    // Track category hover
+    trackCategoryInteraction(category.slug, category.name, 'hover');
+    
     popoverTimeoutRef.current = setTimeout(() => {
       setHoveredCategory({ slug: category.slug, name: category.name });
     }, 300);
-  }, []);
+  }, [trackCategoryInteraction]);
 
   const handleCategoryLeave = useCallback(() => {
     if (popoverTimeoutRef.current) clearTimeout(popoverTimeoutRef.current);
@@ -183,7 +191,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
                       if (el) categoryRefs.current.set(category.id, el);
                     }}
                     to={`/category/${category.slug}`}
-                    onClick={handleCategorySelect}
+                    onClick={() => handleCategorySelect({ slug: category.slug, name: getCategoryName(category) })}
                     onMouseEnter={(e) => {
                       setActiveCategoryIndex(index);
                       handleCategoryHover(category, e);
@@ -216,7 +224,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
             <div className="border-t border-border bg-muted/30">
               <Link
                 to="/categories"
-                onClick={handleCategorySelect}
+                onClick={() => handleCategorySelect()}
                 className="flex items-center justify-center gap-2 py-3 text-sm font-medium text-primary hover:text-primary/80 hover:bg-muted/50 transition-colors duration-150"
               >
                 <ChevronDown className="h-4 w-4" />

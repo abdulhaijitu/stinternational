@@ -11,6 +11,7 @@ import CompareCheckbox from "./CompareCheckbox";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -33,6 +34,7 @@ const DBProductCard = ({
   const { addItem } = useCart();
   const { getProductFields, getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
+  const { trackProductClick } = useUXTelemetry();
 
   // Get bilingual fields
   const productFields = getProductFields(product);
@@ -122,7 +124,11 @@ const DBProductCard = ({
         </div>
 
         {/* Product Image with lazy loading */}
-        <Link to={`/product/${product.slug}`} className="block w-full h-full">
+        <Link 
+          to={`/product/${product.slug}`} 
+          className="block w-full h-full"
+          onClick={() => trackProductClick(product.slug, productFields.name, 'card')}
+        >
           <img
             src={imageUrl}
             alt={productFields.name}
@@ -171,6 +177,7 @@ const DBProductCard = ({
           <Link 
             to={`/product/${product.slug}`} 
             className="hover:text-primary transition-colors duration-150"
+            onClick={() => trackProductClick(product.slug, productFields.name, 'card')}
           >
             {productFields.name}
           </Link>

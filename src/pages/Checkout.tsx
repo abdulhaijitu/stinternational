@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, getSubtotal, clearCart } = useCart();
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
@@ -51,13 +53,13 @@ const Checkout = () => {
     e.preventDefault();
     
     if (!user) {
-      toast.error("অর্ডার দিতে লগইন করুন");
+      toast.error(t.checkout.loginRequired);
       navigate("/account");
       return;
     }
 
     if (items.length === 0) {
-      toast.error("কার্ট খালি");
+      toast.error(t.checkout.cartEmpty);
       return;
     }
 
@@ -112,10 +114,10 @@ const Checkout = () => {
       setOrderNumber(order.order_number);
       setOrderPlaced(true);
       clearCart();
-      toast.success("অর্ডার সফলভাবে জমা হয়েছে!");
+      toast.success(t.checkout.orderSuccess);
     } catch (error) {
       console.error("Order error:", error);
-      toast.error("অর্ডার জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+      toast.error(t.checkout.orderError);
     } finally {
       setLoading(false);
     }
@@ -125,9 +127,9 @@ const Checkout = () => {
     return (
       <Layout>
         <div className="container-premium py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">লগইন করুন</h1>
-          <p className="text-muted-foreground mb-6">অর্ডার দিতে আপনাকে লগইন করতে হবে</p>
-          <Button onClick={() => navigate("/account")}>লগইন করুন</Button>
+          <h1 className="text-2xl font-bold mb-4">{t.nav.login}</h1>
+          <p className="text-muted-foreground mb-6">{t.checkout.loginToOrder}</p>
+          <Button onClick={() => navigate("/account")}>{t.nav.login}</Button>
         </div>
       </Layout>
     );
@@ -141,23 +143,23 @@ const Checkout = () => {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-10 w-10 text-green-600" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">অর্ডার সফল হয়েছে!</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.checkout.orderSuccessTitle}</h1>
             <p className="text-muted-foreground mb-2">
-              আপনার অর্ডার নম্বর:
+              {t.checkout.orderNumber}:
             </p>
             <p className="text-xl font-bold text-primary mb-6">{orderNumber}</p>
             <p className="text-muted-foreground mb-6">
-              আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব। ধন্যবাদ!
+              {t.checkout.orderConfirmationMessage}
             </p>
             <p className="text-xs text-muted-foreground mb-8">
               Operated by ST International, Dhaka, Bangladesh
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button onClick={() => navigate("/account")}>
-                অর্ডার দেখুন
+                {t.checkout.viewOrders}
               </Button>
               <Button variant="outline" onClick={() => navigate("/categories")}>
-                আরও কেনাকাটা করুন
+                {t.checkout.continueShopping}
               </Button>
             </div>
           </div>
@@ -170,9 +172,9 @@ const Checkout = () => {
     return (
       <Layout>
         <div className="container-premium py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">কার্ট খালি</h1>
-          <p className="text-muted-foreground mb-6">চেকআউটের জন্য পণ্য যোগ করুন</p>
-          <Button onClick={() => navigate("/categories")}>পণ্য দেখুন</Button>
+          <h1 className="text-2xl font-bold mb-4">{t.cart.cartEmpty}</h1>
+          <p className="text-muted-foreground mb-6">{t.checkout.addProductsToCheckout}</p>
+          <Button onClick={() => navigate("/categories")}>{t.checkout.browseProducts}</Button>
         </div>
       </Layout>
     );
@@ -184,9 +186,9 @@ const Checkout = () => {
         <div className="container-premium py-6 md:py-8">
           <Link to="/cart" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
             <ArrowLeft className="h-4 w-4" />
-            কার্টে ফিরে যান
+            {t.checkout.backToCart}
           </Link>
-          <h1 className="text-2xl md:text-3xl font-bold">চেকআউট</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{t.checkout.checkout}</h1>
         </div>
       </section>
 
@@ -198,10 +200,10 @@ const Checkout = () => {
               <div className="lg:col-span-2 space-y-8">
                 {/* Contact Info */}
                 <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4">যোগাযোগের তথ্য</h2>
+                  <h2 className="font-semibold text-lg mb-4">{t.checkout.contactInformation}</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="customer_name">নাম *</Label>
+                      <Label htmlFor="customer_name">{t.checkout.fullName} *</Label>
                       <Input
                         id="customer_name"
                         value={formData.customer_name}
@@ -210,16 +212,16 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="company_name">কোম্পানি / প্রতিষ্ঠান (ঐচ্ছিক)</Label>
+                      <Label htmlFor="company_name">{t.checkout.companyOptional}</Label>
                       <Input
                         id="company_name"
                         value={formData.company_name}
                         onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                        placeholder="ব্যক্তিগত ক্রয়ের জন্য খালি রাখুন"
+                        placeholder={t.checkout.leaveBlankForPersonal}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="customer_email">ইমেইল *</Label>
+                      <Label htmlFor="customer_email">{t.checkout.email} *</Label>
                       <Input
                         id="customer_email"
                         type="email"
@@ -229,7 +231,7 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="customer_phone">ফোন *</Label>
+                      <Label htmlFor="customer_phone">{t.checkout.phone} *</Label>
                       <Input
                         id="customer_phone"
                         value={formData.customer_phone}
@@ -245,31 +247,31 @@ const Checkout = () => {
                 <div className="bg-card border border-border rounded-lg p-6">
                   <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
                     <Truck className="h-5 w-5" />
-                    ডেলিভারি ঠিকানা
+                    {t.checkout.deliveryAddress}
                   </h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="md:col-span-2 space-y-2">
-                      <Label htmlFor="shipping_address">ঠিকানা *</Label>
+                      <Label htmlFor="shipping_address">{t.checkout.address} *</Label>
                       <Input
                         id="shipping_address"
                         value={formData.shipping_address}
                         onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
-                        placeholder="সড়ক, বাড়ি নম্বর, এলাকা"
+                        placeholder={t.checkout.addressPlaceholder}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="shipping_city">শহর *</Label>
+                      <Label htmlFor="shipping_city">{t.checkout.city} *</Label>
                       <Input
                         id="shipping_city"
                         value={formData.shipping_city}
                         onChange={(e) => setFormData({ ...formData, shipping_city: e.target.value })}
-                        placeholder="ঢাকা"
+                        placeholder={t.checkout.cityPlaceholder}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="shipping_postal_code">পোস্টাল কোড</Label>
+                      <Label htmlFor="shipping_postal_code">{t.checkout.postalCode}</Label>
                       <Input
                         id="shipping_postal_code"
                         value={formData.shipping_postal_code}
@@ -284,7 +286,7 @@ const Checkout = () => {
                 <div className="bg-card border border-border rounded-lg p-6">
                   <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    পেমেন্ট পদ্ধতি
+                    {t.checkout.paymentMethod}
                   </h2>
                   <RadioGroup
                     value={formData.payment_method}
@@ -297,8 +299,8 @@ const Checkout = () => {
                         <div className="flex items-center gap-3">
                           <Truck className="h-5 w-5 text-primary" />
                           <div>
-                            <p className="font-medium">ক্যাশ অন ডেলিভারি</p>
-                            <p className="text-sm text-muted-foreground">পণ্য হাতে পেয়ে টাকা দিন</p>
+                            <p className="font-medium">{t.checkout.cashOnDelivery}</p>
+                            <p className="text-sm text-muted-foreground">{t.checkout.cashOnDeliveryDesc}</p>
                           </div>
                         </div>
                       </Label>
@@ -309,8 +311,8 @@ const Checkout = () => {
                         <div className="flex items-center gap-3">
                           <Building2 className="h-5 w-5 text-primary" />
                           <div>
-                            <p className="font-medium">ব্যাংক ট্রান্সফার</p>
-                            <p className="text-sm text-muted-foreground">সরাসরি ব্যাংকে টাকা পাঠান</p>
+                            <p className="font-medium">{t.checkout.bankTransfer}</p>
+                            <p className="text-sm text-muted-foreground">{t.checkout.bankTransferDesc}</p>
                           </div>
                         </div>
                       </Label>
@@ -319,22 +321,22 @@ const Checkout = () => {
 
                   {formData.payment_method === "bank_transfer" && (
                     <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
-                      <p className="font-medium mb-2">ব্যাংক তথ্য:</p>
-                      <p>ব্যাংক: Dutch-Bangla Bank Limited</p>
-                      <p>অ্যাকাউন্ট নাম: ST International</p>
-                      <p>অ্যাকাউন্ট নম্বর: 1234567890</p>
-                      <p>ব্রাঞ্চ: বাংলা মোটর, ঢাকা</p>
+                      <p className="font-medium mb-2">{t.checkout.bankInfo}:</p>
+                      <p>{t.checkout.bankName}: Dutch-Bangla Bank Limited</p>
+                      <p>{t.checkout.accountName}: ST International</p>
+                      <p>{t.checkout.accountNumber}: 1234567890</p>
+                      <p>{t.checkout.branch}: Bangla Motor, Dhaka</p>
                     </div>
                   )}
                 </div>
 
                 {/* Notes */}
                 <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4">অতিরিক্ত নোট</h2>
+                  <h2 className="font-semibold text-lg mb-4">{t.checkout.additionalNotes}</h2>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="বিশেষ কোনো নির্দেশনা থাকলে লিখুন..."
+                    placeholder={t.checkout.notesPlaceholder}
                     rows={3}
                   />
                 </div>
@@ -343,7 +345,7 @@ const Checkout = () => {
               {/* Order Summary */}
               <div className="lg:col-span-1">
                 <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
-                  <h2 className="font-semibold text-lg mb-4">অর্ডার সারাংশ</h2>
+                  <h2 className="font-semibold text-lg mb-4">{t.checkout.orderSummary}</h2>
                   
                   <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
                     {items.map((item) => (
@@ -372,20 +374,20 @@ const Checkout = () => {
 
                   <div className="border-t border-border pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">সাবটোটাল</span>
+                      <span className="text-muted-foreground">{t.common.subtotal}</span>
                       <span>{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">ডেলিভারি</span>
-                      <span>{shippingCost === 0 ? "ফ্রি" : formatPrice(shippingCost)}</span>
+                      <span className="text-muted-foreground">{t.checkout.delivery}</span>
+                      <span>{shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}</span>
                     </div>
                     {subtotal < 10000 && (
                       <p className="text-xs text-muted-foreground">
-                        ৳১০,০০০+ অর্ডারে ফ্রি ডেলিভারি
+                        {t.checkout.freeShippingThreshold}
                       </p>
                     )}
                     <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-                      <span>মোট</span>
+                      <span>{t.common.total}</span>
                       <span className="text-primary">{formatPrice(total)}</span>
                     </div>
                   </div>
@@ -399,18 +401,20 @@ const Checkout = () => {
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        অপেক্ষা করুন...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t.checkout.processing}
                       </>
                     ) : (
-                      "অর্ডার নিশ্চিত করুন"
+                      <>
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        {t.checkout.placeOrder}
+                      </>
                     )}
                   </Button>
 
-                  <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground mt-4">
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>নিরাপদ চেকআউট</span>
-                  </div>
+                  <p className="text-xs text-center text-muted-foreground mt-4">
+                    {t.checkout.secureCheckout}
+                  </p>
                 </div>
               </div>
             </div>
