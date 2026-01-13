@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { getProductBySlug, formatPrice, getFeaturedProducts } from "@/lib/products";
 import { getAllCategories } from "@/lib/categories";
 import ProductCard from "@/components/products/ProductCard";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const product = slug ? getProductBySlug(slug) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "specifications">("specifications");
+  const { addItem } = useCart();
 
   const category = product 
     ? getAllCategories().find(c => c.id === product.categoryId)
@@ -169,12 +172,28 @@ const ProductPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <Button variant="accent" size="lg" className="flex-1" disabled={!product.inStock}>
+                  <Button
+                    variant="accent"
+                    size="lg"
+                    className="flex-1"
+                    disabled={!product.inStock}
+                    onClick={() => {
+                      addItem({
+                        id: product.id,
+                        name: product.name,
+                        slug: product.slug,
+                        price: product.price,
+                        image_url: product.images[0] || null,
+                        sku: product.sku,
+                      }, quantity);
+                      toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+                    }}
+                  >
                     <ShoppingCart className="h-5 w-5" />
-                    Add to Cart
+                    কার্টে যোগ করুন
                   </Button>
                   <Button variant="outline" size="lg" className="flex-1">
-                    Request Quote
+                    কোটেশন নিন
                   </Button>
                 </div>
               </div>
