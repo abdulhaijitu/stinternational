@@ -235,7 +235,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/10">
-        <div className="container-premium py-6">
+        <div className="container-premium py-6 pb-8 lg:pb-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/60">
             <p>© 2026 ST International. All rights reserved.</p>
             {/* Adjusted spacing to avoid Back to Top button overlap */}

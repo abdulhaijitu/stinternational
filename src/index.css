@@ -383,4 +383,31 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Safe area insets for mobile devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Touch-friendly targets - minimum 44px */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mobile-optimized touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Prevent text selection on interactive elements */
+  .select-none-touch {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
 }
