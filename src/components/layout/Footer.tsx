@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Clock, Facebook, Linkedin, Youtube } from "lucide-react";
 import { categoryGroups } from "@/lib/categories";
-
+import logo from "@/assets/logo.png";
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -10,14 +10,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-accent rounded flex items-center justify-center">
-                <span className="text-accent-foreground font-bold text-xl">ST</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold">ST International</h3>
-                <p className="text-xs text-primary-foreground/70">Scientific & Industrial Solutions</p>
-              </div>
+            <div className="mb-6">
+              <img 
+                src={logo} 
+                alt="ST International" 
+                className="h-16 w-auto brightness-0 invert"
+              />
             </div>
             <p className="text-sm text-primary-foreground/80 mb-6 leading-relaxed">
               Your trusted partner for scientific, industrial, and educational equipment in Bangladesh. 

@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { categoryGroups } from "@/lib/categories";
-
+import logo from "@/assets/logo.png";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
@@ -47,14 +47,12 @@ const Header = () => {
         <div className="container-premium">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg md:text-xl">ST</span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold text-foreground leading-tight">ST International</h1>
-                <p className="text-xs text-muted-foreground">Scientific & Industrial Solutions</p>
-              </div>
+            <Link to="/" className="flex items-center">
+              <img 
+                src={logo} 
+                alt="ST International" 
+                className="h-12 md:h-16 w-auto"
+              />
             </Link>
 
             {/* Search Bar - Desktop */}
