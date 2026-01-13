@@ -36,6 +36,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import UXRecommendations from "@/components/admin/UXRecommendations";
 import {
   useTelemetrySummary,
   useTopCategories,
@@ -168,6 +169,19 @@ const AdminUXInsights = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Recommendations Section */}
+        <UXRecommendations 
+          data={{
+            summary,
+            topCategories,
+            topProducts,
+            funnel,
+            hero,
+            utility,
+          }}
+          isLoading={summaryLoading}
+        />
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="navigation" className="space-y-4">

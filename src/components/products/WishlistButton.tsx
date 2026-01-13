@@ -2,6 +2,7 @@ import { Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -14,6 +15,7 @@ interface WishlistButtonProps {
 
 const WishlistButton = ({ productId, variant = "icon", size = "default", className }: WishlistButtonProps) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { isInWishlist, toggleWishlist, isToggling } = useWishlist();
   
   const inWishlist = isInWishlist(productId);
@@ -23,7 +25,7 @@ const WishlistButton = ({ productId, variant = "icon", size = "default", classNa
     e.stopPropagation();
     
     if (!user) {
-      toast.error("উইশলিস্টে যোগ করতে লগইন করুন");
+      toast.error(t.products.addToWishlist);
       return;
     }
     
@@ -44,7 +46,7 @@ const WishlistButton = ({ productId, variant = "icon", size = "default", classNa
         ) : (
           <Heart className={cn("h-5 w-5 mr-2", inWishlist && "fill-current")} />
         )}
-        {inWishlist ? "উইশলিস্টে আছে" : "উইশলিস্টে যোগ করুন"}
+        {inWishlist ? t.products.removeFromWishlist : t.products.addToWishlist}
       </Button>
     );
   }
@@ -63,7 +65,7 @@ const WishlistButton = ({ productId, variant = "icon", size = "default", classNa
         inWishlist ? "text-red-500" : "text-muted-foreground hover:text-red-500",
         className
       )}
-      aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+      aria-label={inWishlist ? t.products.removeFromWishlist : t.products.addToWishlist}
     >
       {isToggling ? (
         <Loader2 className={cn(iconSize, "animate-spin")} />
