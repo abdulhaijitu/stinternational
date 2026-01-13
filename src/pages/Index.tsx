@@ -1,43 +1,68 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle, Truck, Shield, Headphones } from "lucide-react";
+import { ArrowRight, CheckCircle, Truck, Shield, Headphones, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categoryGroups } from "@/lib/categories";
-import { getFeaturedProducts, formatPrice } from "@/lib/products";
+import { useCategoriesByGroup, useFeaturedProducts } from "@/hooks/useProducts";
 import Layout from "@/components/layout/Layout";
-import ProductCard from "@/components/products/ProductCard";
+import DBProductCard from "@/components/products/DBProductCard";
+import { 
+  FlaskConical, 
+  Microscope, 
+  Scale, 
+  HardHat, 
+  TestTube, 
+  GraduationCap,
+  Timer,
+  Ruler,
+  ShieldCheck
+} from "lucide-react";
+
+const iconMap: Record<string, any> = {
+  FlaskConical,
+  Microscope,
+  Scale,
+  HardHat,
+  TestTube,
+  GraduationCap,
+  Timer,
+  Ruler,
+  ShieldCheck,
+  Weight: Scale,
+  Shield: ShieldCheck,
+};
 
 const trustBadges = [
   {
     icon: Truck,
-    title: "Nationwide Delivery",
-    description: "Fast shipping across Bangladesh",
+    title: "সারাদেশে ডেলিভারি",
+    description: "বাংলাদেশের সর্বত্র দ্রুত ডেলিভারি",
   },
   {
     icon: Shield,
-    title: "Genuine Products",
-    description: "100% authentic equipment",
+    title: "অরিজিনাল পণ্য",
+    description: "১০০% অথেনটিক যন্ত্রপাতি",
   },
   {
     icon: Headphones,
-    title: "Expert Support",
-    description: "Technical assistance available",
+    title: "বিশেষজ্ঞ সাপোর্ট",
+    description: "প্রযুক্তিগত সহায়তা",
   },
   {
     icon: CheckCircle,
-    title: "Secure Payments",
-    description: "COD & Bank Transfer accepted",
+    title: "নিরাপদ পেমেন্ট",
+    description: "ক্যাশ অন ডেলিভারি ও ব্যাংক ট্রান্সফার",
   },
 ];
 
 const stats = [
-  { value: "19+", label: "Years Experience" },
-  { value: "5000+", label: "Products" },
-  { value: "2000+", label: "Happy Clients" },
-  { value: "50+", label: "Brands" },
+  { value: "১৯+", label: "বছরের অভিজ্ঞতা" },
+  { value: "৫০০০+", label: "পণ্য" },
+  { value: "২০০০+", label: "সন্তুষ্ট গ্রাহক" },
+  { value: "৫০+", label: "ব্র্যান্ড" },
 ];
 
 const Index = () => {
-  const featuredProducts = getFeaturedProducts();
+  const { groups, isLoading: categoriesLoading } = useCategoriesByGroup();
+  const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
 
   return (
     <Layout>
@@ -48,25 +73,25 @@ const Index = () => {
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span>Trusted by 2000+ institutions in Bangladesh</span>
+                <span>বাংলাদেশের ২০০০+ প্রতিষ্ঠানের বিশ্বস্ত পার্টনার</span>
               </div>
               <h1 className="text-balance">
-                Scientific & Industrial Equipment for{" "}
-                <span className="text-accent">Professional Excellence</span>
+                বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি{" "}
+                <span className="text-accent">পেশাদার মানের জন্য</span>
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/80 max-w-xl leading-relaxed">
-                Your reliable partner for laboratory, educational, and industrial equipment. 
-                Serving research institutions, universities, and businesses since 2005.
+                ল্যাবরেটরি, শিক্ষা এবং শিল্প যন্ত্রপাতির জন্য আপনার নির্ভরযোগ্য পার্টনার।
+                ২০০৫ সাল থেকে গবেষণা প্রতিষ্ঠান, বিশ্ববিদ্যালয় এবং ব্যবসায়ী প্রতিষ্ঠানকে সেবা দিচ্ছি।
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button variant="hero" size="xl" asChild>
                   <Link to="/categories">
-                    Browse Products
+                    পণ্য দেখুন
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>
                 <Button variant="hero-secondary" size="xl" asChild>
-                  <Link to="/contact">Request Quote</Link>
+                  <Link to="/contact">কোটেশন নিন</Link>
                 </Button>
               </div>
             </div>
@@ -74,13 +99,11 @@ const Index = () => {
               <div className="aspect-square bg-primary-foreground/5 rounded-lg border border-primary-foreground/10 flex items-center justify-center">
                 <div className="text-center space-y-4 p-8">
                   <div className="w-24 h-24 mx-auto bg-accent/20 rounded-full flex items-center justify-center">
-                    <svg className="w-12 h-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
+                    <Microscope className="w-12 h-12 text-accent" />
                   </div>
-                  <h3 className="text-xl font-semibold">Premium Equipment</h3>
+                  <h3 className="text-xl font-semibold">প্রিমিয়াম যন্ত্রপাতি</h3>
                   <p className="text-primary-foreground/60 text-sm">
-                    Laboratory, Industrial & Educational Solutions
+                    ল্যাবরেটরি, শিল্প ও শিক্ষা সমাধান
                   </p>
                 </div>
               </div>
@@ -112,45 +135,54 @@ const Index = () => {
       <section className="py-16 md:py-24">
         <div className="container-premium">
           <div className="text-center mb-12">
-            <h2 className="mb-4">Product Categories</h2>
+            <h2 className="mb-4">পণ্য ক্যাটাগরি</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive range of scientific, measurement, and industrial equipment for your professional needs
+              আপনার প্রয়োজনে বৈজ্ঞানিক, পরিমাপ এবং শিল্প যন্ত্রপাতির সম্পূর্ণ সংগ্রহ
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categoryGroups.map((group) => (
-              <div
-                key={group.id}
-                className="bg-card border border-border rounded-lg p-6 card-hover"
-              >
-                <h3 className="text-xl font-semibold mb-2">{group.name}</h3>
-                <p className="text-muted-foreground text-sm mb-6">{group.description}</p>
-                <ul className="space-y-3 mb-6">
-                  {group.categories.slice(0, 4).map((category) => (
-                    <li key={category.id}>
-                      <Link
-                        to={`/category/${category.slug}`}
-                        className="flex items-center justify-between text-sm group"
-                      >
-                        <span className="flex items-center gap-2 text-foreground group-hover:text-primary transition-colors">
-                          <category.icon className="h-4 w-4 text-muted-foreground" />
-                          {category.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{category.productCount} products</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to={`/categories#${group.slug}`}
-                  className="text-sm font-medium text-primary hover:text-accent transition-colors inline-flex items-center gap-1"
+          
+          {categoriesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {groups.map((group) => (
+                <div
+                  key={group.slug}
+                  className="bg-card border border-border rounded-lg p-6 card-hover"
                 >
-                  View All
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            ))}
-          </div>
+                  <h3 className="text-xl font-semibold mb-2">{group.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    {group.categories.length}টি ক্যাটাগরি
+                  </p>
+                  <ul className="space-y-3 mb-6">
+                    {group.categories.slice(0, 4).map((category) => {
+                      const IconComponent = iconMap[category.icon_name || ""] || FlaskConical;
+                      return (
+                        <li key={category.id}>
+                          <Link
+                            to={`/category/${category.slug}`}
+                            className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
+                          >
+                            <IconComponent className="h-4 w-4 text-muted-foreground" />
+                            {category.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <Link
+                    to={`/categories#${group.slug}`}
+                    className="text-sm font-medium text-primary hover:text-accent transition-colors inline-flex items-center gap-1"
+                  >
+                    সব দেখুন
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -159,26 +191,38 @@ const Index = () => {
         <div className="container-premium">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="mb-2">Featured Products</h2>
-              <p className="text-muted-foreground">Top-selling equipment trusted by professionals</p>
+              <h2 className="mb-2">জনপ্রিয় পণ্য</h2>
+              <p className="text-muted-foreground">পেশাদারদের পছন্দের সেরা যন্ত্রপাতি</p>
             </div>
             <Link
               to="/categories"
               className="hidden md:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent transition-colors"
             >
-              View All Products
+              সব পণ্য দেখুন
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          
+          {productsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : featuredProducts && featuredProducts.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <DBProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              কোনো ফিচার্ড পণ্য নেই
+            </div>
+          )}
+          
           <div className="mt-8 text-center md:hidden">
             <Button variant="outline" asChild>
               <Link to="/categories">
-                View All Products
+                সব পণ্য দেখুন
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -190,9 +234,9 @@ const Index = () => {
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container-premium">
           <div className="text-center mb-12">
-            <h2 className="mb-4">Why Choose ST International?</h2>
+            <h2 className="mb-4">কেন ST International বেছে নেবেন?</h2>
             <p className="text-primary-foreground/70 max-w-2xl mx-auto">
-              Decades of experience serving Bangladesh's leading institutions with premium scientific and industrial equipment
+              দশকের অভিজ্ঞতায় বাংলাদেশের শীর্ষস্থানীয় প্রতিষ্ঠানগুলোকে প্রিমিয়াম বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহ
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -210,21 +254,21 @@ const Index = () => {
       <section className="py-16 md:py-24">
         <div className="container-premium">
           <div className="bg-muted rounded-lg p-8 md:p-12 text-center">
-            <h2 className="mb-4">Need Bulk Pricing or Custom Quotes?</h2>
+            <h2 className="mb-4">বাল্ক প্রাইসিং বা কাস্টম কোটেশন দরকার?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              We offer special pricing for institutions, government bodies, and bulk orders. 
-              Contact our team for personalized quotes and expert consultation.
+              আমরা প্রতিষ্ঠান, সরকারি সংস্থা এবং বড় অর্ডারের জন্য বিশেষ মূল্য অফার করি।
+              ব্যক্তিগত কোটেশন এবং বিশেষজ্ঞ পরামর্শের জন্য আমাদের টিমের সাথে যোগাযোগ করুন।
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="accent" size="lg" asChild>
                 <Link to="/contact">
-                  Request Quote
+                  কোটেশন নিন
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <a href="tel:+8801234567890">
-                  Call: +880 1234 567 890
+                  কল করুন: +880 1234 567 890
                 </a>
               </Button>
             </div>

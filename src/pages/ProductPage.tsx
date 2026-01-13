@@ -1,42 +1,65 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, ShoppingCart, Truck, Shield, Phone, Minus, Plus, Check } from "lucide-react";
+import { ChevronRight, ShoppingCart, Truck, Shield, Phone, Minus, Plus, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { getProductBySlug, formatPrice, getFeaturedProducts } from "@/lib/products";
-import { getAllCategories } from "@/lib/categories";
-import ProductCard from "@/components/products/ProductCard";
+import { useProduct, useFeaturedProducts } from "@/hooks/useProducts";
+import DBProductCard from "@/components/products/DBProductCard";
 import { useCart } from "@/contexts/CartContext";
+import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const product = slug ? getProductBySlug(slug) : undefined;
+  const { data: product, isLoading, error } = useProduct(slug || "");
+  const { data: featuredProducts } = useFeaturedProducts();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "specifications">("specifications");
   const { addItem } = useCart();
 
-  const category = product 
-    ? getAllCategories().find(c => c.id === product.categoryId)
-    : undefined;
+  const relatedProducts = featuredProducts?.filter(p => p.id !== product?.id).slice(0, 4) || [];
 
-  const relatedProducts = getFeaturedProducts().filter(p => p.id !== product?.id).slice(0, 4);
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container-premium py-16 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <Layout>
         <div className="container-premium py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+          <h1 className="text-2xl font-bold mb-4">পণ্য পাওয়া যায়নি</h1>
           <p className="text-muted-foreground mb-8">
-            The product you're looking for doesn't exist or has been removed.
+            আপনি যে পণ্যটি খুঁজছেন সেটি পাওয়া যায়নি।
           </p>
           <Button asChild>
-            <Link to="/categories">Browse Products</Link>
+            <Link to="/categories">পণ্য দেখুন</Link>
           </Button>
         </div>
       </Layout>
     );
   }
+
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      image_url: product.image_url || product.images?.[0] || null,
+      sku: product.sku,
+    }, quantity);
+    toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+  };
+
+  const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
+  const specifications = product.specifications || {};
+  const features = product.features || [];
 
   return (
     <Layout>
@@ -45,20 +68,20 @@ const ProductPage = () => {
         <div className="container-premium py-4">
           <nav className="flex items-center gap-2 text-sm flex-wrap">
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              Home
+              হোম
             </Link>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
             <Link to="/categories" className="text-muted-foreground hover:text-foreground transition-colors">
-              Products
+              পণ্য
             </Link>
-            {category && (
+            {product.category && (
               <>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 <Link 
-                  to={`/category/${category.slug}`} 
+                  to={`/category/${product.category.slug}`} 
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {category.name}
+                  {product.category.name}
                 </Link>
               </>
             )}
@@ -76,12 +99,12 @@ const ProductPage = () => {
             <div className="space-y-4">
               <div className="aspect-square bg-muted/50 rounded-lg border border-border overflow-hidden">
                 <img
-                  src={product.images[0]}
+                  src={imageUrl}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              {product.images.length > 1 && (
+              {product.images && product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-4">
                   {product.images.slice(0, 4).map((image, index) => (
                     <button
@@ -99,19 +122,17 @@ const ProductPage = () => {
             <div className="space-y-6">
               {/* Header */}
               <div>
-                {category && (
+                {product.category && (
                   <Link
-                    to={`/category/${category.slug}`}
+                    to={`/category/${product.category.slug}`}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {category.name}
+                    {product.category.name}
                   </Link>
                 )}
                 <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3">{product.name}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <span>SKU: {product.sku}</span>
-                  {product.brand && <span>Brand: <strong className="text-foreground">{product.brand}</strong></span>}
-                  {product.model && <span>Model: {product.model}</span>}
+                  {product.sku && <span>SKU: {product.sku}</span>}
                 </div>
               </div>
 
@@ -121,38 +142,40 @@ const ProductPage = () => {
                   <span className="text-3xl font-bold text-foreground">
                     {formatPrice(product.price)}
                   </span>
-                  {product.comparePrice && (
+                  {product.compare_price && (
                     <>
                       <span className="text-lg text-muted-foreground line-through">
-                        {formatPrice(product.comparePrice)}
+                        {formatPrice(product.compare_price)}
                       </span>
                       <span className="bg-accent text-accent-foreground text-sm font-semibold px-2 py-1 rounded">
-                        {Math.round((1 - product.price / product.comparePrice) * 100)}% OFF
+                        {Math.round((1 - product.price / product.compare_price) * 100)}% OFF
                       </span>
                     </>
                   )}
                 </div>
                 <div className="mt-2">
-                  {product.inStock ? (
-                    <span className="inline-flex items-center gap-1.5 text-success font-medium">
+                  {product.in_stock ? (
+                    <span className="inline-flex items-center gap-1.5 text-green-600 font-medium">
                       <Check className="h-4 w-4" />
-                      In Stock ({product.stockQuantity} available)
+                      স্টকে আছে ({product.stock_quantity}টি)
                     </span>
                   ) : (
-                    <span className="text-destructive font-medium">Out of Stock</span>
+                    <span className="text-destructive font-medium">স্টক নেই</span>
                   )}
                 </div>
               </div>
 
               {/* Short Description */}
-              <p className="text-muted-foreground leading-relaxed">
-                {product.shortDescription}
-              </p>
+              {product.short_description && (
+                <p className="text-muted-foreground leading-relaxed">
+                  {product.short_description}
+                </p>
+              )}
 
               {/* Quantity & Add to Cart */}
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">Quantity:</span>
+                  <span className="text-sm font-medium">পরিমাণ:</span>
                   <div className="flex items-center border border-border rounded-md">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -176,18 +199,8 @@ const ProductPage = () => {
                     variant="accent"
                     size="lg"
                     className="flex-1"
-                    disabled={!product.inStock}
-                    onClick={() => {
-                      addItem({
-                        id: product.id,
-                        name: product.name,
-                        slug: product.slug,
-                        price: product.price,
-                        image_url: product.images[0] || null,
-                        sku: product.sku,
-                      }, quantity);
-                      toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
-                    }}
+                    disabled={!product.in_stock}
+                    onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     কার্টে যোগ করুন
@@ -202,15 +215,15 @@ const ProductPage = () => {
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-border">
                 <div className="text-center">
                   <Truck className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">Nationwide Delivery</span>
+                  <span className="text-xs text-muted-foreground">সারাদেশে ডেলিভারি</span>
                 </div>
                 <div className="text-center">
                   <Shield className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">{product.warranty || "Warranty"}</span>
+                  <span className="text-xs text-muted-foreground">ওয়ারেন্টি</span>
                 </div>
                 <div className="text-center">
                   <Phone className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">Expert Support</span>
+                  <span className="text-xs text-muted-foreground">বিশেষজ্ঞ সাপোর্ট</span>
                 </div>
               </div>
             </div>
@@ -231,7 +244,7 @@ const ProductPage = () => {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              Specifications
+              স্পেসিফিকেশন
             </button>
             <button
               onClick={() => setActiveTab("description")}
@@ -241,44 +254,48 @@ const ProductPage = () => {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              Description
+              বিবরণ
             </button>
           </div>
 
           {/* Tab Content */}
           {activeTab === "specifications" && (
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-card border border-border rounded-lg p-6">
-                <h3 className="font-semibold mb-4">Technical Specifications</h3>
-                <table className="spec-table">
-                  <tbody>
-                    {Object.entries(product.specifications).map(([key, value]) => (
-                      <tr key={key}>
-                        <td>{key}</td>
-                        <td className="font-medium text-foreground">{value}</td>
-                      </tr>
+              {Object.keys(specifications).length > 0 && (
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <h3 className="font-semibold mb-4">প্রযুক্তিগত স্পেসিফিকেশন</h3>
+                  <table className="spec-table">
+                    <tbody>
+                      {Object.entries(specifications).map(([key, value]) => (
+                        <tr key={key}>
+                          <td>{key}</td>
+                          <td className="font-medium text-foreground">{value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {features.length > 0 && (
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <h3 className="font-semibold mb-4">মূল বৈশিষ্ট্য</h3>
+                  <ul className="space-y-3">
+                    {features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="bg-card border border-border rounded-lg p-6">
-                <h3 className="font-semibold mb-4">Key Features</h3>
-                <ul className="space-y-3">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-success shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "description" && (
             <div className="bg-card border border-border rounded-lg p-6 max-w-3xl">
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {product.description}
+                {product.description || "কোনো বিবরণ নেই"}
               </p>
             </div>
           )}
@@ -289,10 +306,10 @@ const ProductPage = () => {
       {relatedProducts.length > 0 && (
         <section className="py-12 md:py-16">
           <div className="container-premium">
-            <h2 className="text-2xl font-bold mb-8">Related Products</h2>
+            <h2 className="text-2xl font-bold mb-8">সম্পর্কিত পণ্য</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {relatedProducts.map((relatedProduct) => (
+                <DBProductCard key={relatedProduct.id} product={relatedProduct} />
               ))}
             </div>
           </div>
