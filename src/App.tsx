@@ -36,6 +36,7 @@ import AdminTestimonials from "./pages/admin/AdminTestimonials";
 
 const queryClient = new QueryClient();
 
+// Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
