@@ -19,6 +19,9 @@ import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { Skeleton } from "@/components/ui/skeleton";
+import InstitutionLogos from "@/components/homepage/InstitutionLogos";
+import QuickRfqForm from "@/components/homepage/QuickRfqForm";
+import HeroCta from "@/components/homepage/HeroCta";
 
 // Trust signals data
 const trustSignals = [
@@ -139,17 +142,7 @@ const Index = () => {
               Serving research institutions, universities, and businesses with nationwide delivery since 2005.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="xl" asChild className="active:scale-95">
-                <Link to="/categories">
-                  Browse Products
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="hero-secondary" size="xl" asChild className="active:scale-95">
-                <Link to="/request-quote">Request a Quote</Link>
-              </Button>
-            </div>
+            <HeroCta />
           </div>
         </div>
       </section>
@@ -175,6 +168,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Institution Logos Section */}
+      <InstitutionLogos />
 
       {/* Product Category Entry Section */}
       <section className="py-16 md:py-20">
@@ -335,36 +331,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Conversion Support Section */}
-      <section className="py-16 md:py-20">
-        <div className="container-premium">
-          <div className="bg-muted rounded-lg p-8 md:p-12">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="mb-4">Need Bulk Quantity or Institutional Pricing?</h2>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                We offer special pricing for institutions, government agencies, and bulk orders. 
-                Get personalized quotations and expert consultation from our team.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="accent" size="lg" asChild className="active:scale-95">
-                  <Link to="/request-quote">
-                    Request a Quote
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button variant="outline" size="lg" asChild className="active:scale-95">
-                  <Link to="/contact">
-                    Contact Us
-                  </Link>
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-6">
-                Or call us directly: <a href="tel:+8801234567890" className="text-primary hover:text-accent font-medium">+880 1234 567 890</a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Quick RFQ Form Section */}
+      <QuickRfqForm />
     </Layout>
   );
 };
