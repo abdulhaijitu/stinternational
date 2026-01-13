@@ -30,7 +30,7 @@ import { useAllProducts, useCategories } from "@/hooks/useProducts";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
-const PRODUCTS_PER_PAGE = 12;
+const PER_PAGE_OPTIONS = [12, 24, 48, 96];
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -52,6 +52,9 @@ const Products = () => {
   );
   const [currentPage, setCurrentPage] = useState(
     parseInt(searchParams.get("page") || "1", 10)
+  );
+  const [perPage, setPerPage] = useState(
+    parseInt(searchParams.get("perPage") || "12", 10)
   );
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -116,11 +119,11 @@ const Products = () => {
   }, [allProducts, search, selectedCategories, priceRange, inStockOnly, sortBy]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProducts.length / perPage);
   const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+    const startIndex = (currentPage - 1) * perPage;
+    return filteredProducts.slice(startIndex, startIndex + perPage);
+  }, [filteredProducts, currentPage, perPage]);
 
   // Reset to page 1 when filters change
   const updateSearchParams = (resetPage = true) => {
@@ -131,6 +134,7 @@ const Products = () => {
     if (priceRange.max) params.set("maxPrice", priceRange.max);
     if (inStockOnly) params.set("inStock", "true");
     if (sortBy !== "newest") params.set("sort", sortBy);
+    if (perPage !== 12) params.set("perPage", perPage.toString());
     if (!resetPage && currentPage > 1) params.set("page", currentPage.toString());
     setSearchParams(params);
     if (resetPage) setCurrentPage(1);
@@ -152,6 +156,20 @@ const Products = () => {
     setSearchParams(params);
     // Scroll to top of products
     window.scrollTo({ top: 300, behavior: "smooth" });
+  };
+
+  const handlePerPageChange = (value: string) => {
+    const newPerPage = parseInt(value, 10);
+    setPerPage(newPerPage);
+    setCurrentPage(1);
+    const params = new URLSearchParams(searchParams);
+    if (newPerPage !== 12) {
+      params.set("perPage", value);
+    } else {
+      params.delete("perPage");
+    }
+    params.delete("page");
+    setSearchParams(params);
   };
 
   const handleCategoryToggle = (slug: string) => {
@@ -341,19 +359,35 @@ const Products = () => {
                   )}
                 </div>
 
-                {/* Sort Dropdown */}
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <SelectTrigger className="w-44">
-                    <SelectValue placeholder="সর্ট করুন" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">নতুন প্রথমে</SelectItem>
-                    <SelectItem value="price-asc">দাম: কম থেকে বেশি</SelectItem>
-                    <SelectItem value="price-desc">দাম: বেশি থেকে কম</SelectItem>
-                    <SelectItem value="name-asc">নাম: A-Z</SelectItem>
-                    <SelectItem value="name-desc">নাম: Z-A</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  {/* Per Page Selector */}
+                  <Select value={perPage.toString()} onValueChange={handlePerPageChange}>
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PER_PAGE_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={option.toString()}>
+                          {option}টি
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Sort Dropdown */}
+                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                    <SelectTrigger className="w-44">
+                      <SelectValue placeholder="সর্ট করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">নতুন প্রথমে</SelectItem>
+                      <SelectItem value="price-asc">দাম: কম থেকে বেশি</SelectItem>
+                      <SelectItem value="price-desc">দাম: বেশি থেকে কম</SelectItem>
+                      <SelectItem value="name-asc">নাম: A-Z</SelectItem>
+                      <SelectItem value="name-desc">নাম: Z-A</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Products */}
