@@ -1,7 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { 
   ArrowRight, 
-  CheckCircle, 
   Truck, 
   Shield, 
   Headphones, 
@@ -15,16 +14,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFeaturedProducts } from "@/hooks/useProducts";
-import { useActiveCategoriesByGroup, useCategoryBySlug, getIndustryFromCategory } from "@/hooks/useCategories";
+import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { Skeleton } from "@/components/ui/skeleton";
 import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 import QuickRfqForm from "@/components/homepage/QuickRfqForm";
-import HeroCta from "@/components/homepage/HeroCta";
 import Testimonials from "@/components/homepage/Testimonials";
-import IndustryHeroVisual from "@/components/homepage/IndustryHeroVisual";
+import HeroSlider from "@/components/homepage/HeroSlider";
 
 // Trust signals data - speaks to both B2B and B2C
 const trustSignals = [
@@ -121,67 +119,13 @@ const ProductSkeleton = () => (
 );
 
 const Index = () => {
-  const location = useLocation();
   const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
-  
-  // Determine industry from referrer category (if coming from a category page)
-  const referrerCategory = new URLSearchParams(location.search).get('from');
-  const { data: categoryData } = useCategoryBySlug(referrerCategory || '');
-  const industry = getIndustryFromCategory(categoryData);
 
   return (
     <Layout>
-      {/* Hero Section - Above the Fold */}
-      <section className="hero-gradient text-primary-foreground relative overflow-hidden">
-        {/* Background Visual Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Gradient Orbs */}
-          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] transform translate-x-1/2" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
-          
-          {/* Geometric Pattern */}
-          <div className="absolute inset-y-0 right-0 w-1/2 opacity-[0.03]">
-            <svg viewBox="0 0 400 400" className="w-full h-full">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="container-premium py-16 md:py-20 lg:py-24 relative">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Column - Content */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm mb-8">
-                <CheckCircle className="h-4 w-4 text-accent" />
-                <span>Trusted Partner for 2000+ Institutions</span>
-              </div>
-              
-              <h1 className="text-balance mb-6">
-                Reliable Scientific & Industrial{" "}
-                <span className="text-accent">Equipment Supplier</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-primary-foreground/80 max-w-xl mb-10 leading-relaxed">
-                Your trusted source for certified laboratory, measurement, and industrial equipment.
-                Whether you're an individual professional or an institution — nationwide delivery since 2005.
-              </p>
-              
-              <HeroCta />
-            </div>
-
-            {/* Right Column - Industry-aware Visual */}
-            <div className="hidden lg:block relative">
-              <IndustryHeroVisual industry={industry} />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Slider Section */}
+      <HeroSlider />
 
       {/* Trust Signals Section */}
       <section className="bg-muted/50 border-b border-border">
