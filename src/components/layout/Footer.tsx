@@ -1,10 +1,31 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Facebook, Linkedin, Youtube } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Facebook, Linkedin, Youtube, Shield, Truck, CreditCard } from "lucide-react";
 import { categoryGroups } from "@/lib/categories";
 import logo from "@/assets/logo.png";
+
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
+      {/* Trust Reinforcement Bar */}
+      <div className="border-b border-primary-foreground/10">
+        <div className="container-premium py-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+            <div className="flex items-center justify-center md:justify-start gap-3">
+              <Shield className="h-5 w-5 text-accent" />
+              <span className="text-sm text-primary-foreground/80">100% Authentic Products</span>
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <Truck className="h-5 w-5 text-accent" />
+              <span className="text-sm text-primary-foreground/80">Nationwide Delivery</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-end gap-3">
+              <CreditCard className="h-5 w-5 text-accent" />
+              <span className="text-sm text-primary-foreground/80">Secure Payment Options</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
       <div className="container-premium py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
@@ -17,18 +38,33 @@ const Footer = () => {
                 className="h-16 w-auto brightness-0 invert"
               />
             </div>
-            <p className="text-sm text-primary-foreground/80 mb-6 leading-relaxed">
+            <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
+              <strong className="text-primary-foreground">ST International</strong>
+            </p>
+            <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
               Your trusted partner for scientific, industrial, and educational equipment in Bangladesh. 
               Serving institutions and businesses since 2005.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105"
+                aria-label="Facebook"
+              >
                 <Facebook className="h-4 w-4" />
               </a>
-              <a href="#" className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105"
+                aria-label="LinkedIn"
+              >
                 <Linkedin className="h-4 w-4" />
               </a>
-              <a href="#" className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors">
+              <a 
+                href="#" 
+                className="w-9 h-9 bg-primary-foreground/10 rounded flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-all duration-200 hover:scale-105"
+                aria-label="YouTube"
+              >
                 <Youtube className="h-4 w-4" />
               </a>
             </div>
@@ -42,7 +78,7 @@ const Footer = () => {
                 <li key={group.id}>
                   <Link 
                     to={`/categories#${group.slug}`} 
-                    className="text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                    className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200"
                   >
                     {group.name}
                   </Link>
@@ -56,27 +92,32 @@ const Footer = () => {
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/about" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Link to="/about" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Link to="/contact" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Link to="/products" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms-conditions" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Link to="/terms-conditions" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
                   Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link to="/refund-policy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Link to="/refund-policy" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors duration-200">
                   Refund Policy
                 </Link>
               </li>
@@ -97,17 +138,17 @@ const Footer = () => {
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-accent shrink-0" />
                 <div className="text-sm text-primary-foreground/80">
-                  <a href="tel:+8801234567890" className="hover:text-accent transition-colors block">
+                  <a href="tel:+8801234567890" className="hover:text-accent transition-colors duration-200 block">
                     +880 1234 567 890
                   </a>
-                  <a href="tel:+8801234567891" className="hover:text-accent transition-colors block">
+                  <a href="tel:+8801234567891" className="hover:text-accent transition-colors duration-200 block">
                     +880 1234 567 891
                   </a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-accent shrink-0" />
-                <a href="mailto:info@stinternational.com.bd" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors">
+                <a href="mailto:info@stinternational.com.bd" className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200">
                   info@stinternational.com.bd
                 </a>
               </li>
@@ -126,9 +167,12 @@ const Footer = () => {
       <div className="border-t border-primary-foreground/10">
         <div className="container-premium py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/60">
-            <p>© 2024 ST International. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <span>Secure Checkout</span>
+            <p>© {new Date().getFullYear()} ST International. All rights reserved.</p>
+            <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
+              <span className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Secure Checkout
+              </span>
               <span>•</span>
               <span>Cash on Delivery</span>
               <span>•</span>
