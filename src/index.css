@@ -2,95 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ST International - Premium B2B Swiss Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
+    /* Primary Navy - Trust & Professionalism */
+    --primary: 215 50% 10%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Background & Surface */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 215 50% 10%;
+    
+    /* Cards & Elevated Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 50% 10%;
+    
+    /* Subtle Backgrounds */
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 20% 40%;
+    
+    /* Secondary - Professional Gray */
+    --secondary: 210 15% 92%;
+    --secondary-foreground: 215 50% 15%;
+    
+    /* Accent - Amber for CTAs */
+    --accent: 35 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Success State */
+    --success: 142 70% 35%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --popover-foreground: 215 50% 10%;
+    
+    /* Destructive */
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders & Inputs */
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 215 50% 10%;
+    
+    /* Radius - Sharp, Professional */
+    --radius: 0.375rem;
+    
+    /* Sidebar */
+    --sidebar-background: 215 50% 8%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 35 92% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 45% 15%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 215 40% 18%;
+    --sidebar-ring: 35 92% 50%;
+    
+    /* Custom Semantic Tokens */
+    --hero-gradient: linear-gradient(135deg, hsl(215 50% 10%) 0%, hsl(215 45% 18%) 100%);
+    --surface-elevated: 0 0% 100%;
+    --surface-sunken: 210 20% 97%;
+    --text-primary: 215 50% 10%;
+    --text-secondary: 215 20% 40%;
+    --text-tertiary: 215 15% 60%;
+    --divider: 210 20% 90%;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-card-hover: 0 12px 24px -4px rgb(0 0 0 / 0.12);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 215 50% 6%;
+    --foreground: 210 20% 95%;
+    
+    --card: 215 45% 10%;
+    --card-foreground: 210 20% 95%;
+    
+    --muted: 215 40% 15%;
+    --muted-foreground: 210 15% 65%;
+    
+    --secondary: 215 40% 18%;
+    --secondary-foreground: 210 20% 90%;
+    
+    --popover: 215 45% 10%;
+    --popover-foreground: 210 20% 95%;
+    
+    --border: 215 35% 20%;
+    --input: 215 35% 20%;
+    --ring: 35 92% 50%;
   }
 }
 
@@ -98,8 +105,127 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Swiss Typography Scale */
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+  
+  h5 {
+    @apply text-lg md:text-xl font-medium;
+  }
+  
+  h6 {
+    @apply text-base md:text-lg font-medium;
+  }
+}
+
+@layer components {
+  /* Premium Container */
+  .container-premium {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Swiss Grid */
+  .swiss-grid {
+    @apply grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-6;
+  }
+  
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  /* Trust Badge */
+  .trust-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground text-sm font-medium rounded-md;
+  }
+  
+  /* Section Divider */
+  .section-divider {
+    @apply border-t border-border;
+  }
+  
+  /* Hero Gradient Background */
+  .hero-gradient {
+    background: var(--hero-gradient);
+  }
+  
+  /* Product Spec Table */
+  .spec-table {
+    @apply w-full text-sm;
+  }
+  
+  .spec-table tr {
+    @apply border-b border-border;
+  }
+  
+  .spec-table tr:last-child {
+    @apply border-b-0;
+  }
+  
+  .spec-table td {
+    @apply py-3;
+  }
+  
+  .spec-table td:first-child {
+    @apply text-muted-foreground font-medium pr-4;
+  }
+  
+  /* Subtle Focus Ring */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+  
+  /* Animated Underline */
+  .animated-underline {
+    @apply relative;
+  }
+  
+  .animated-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-200;
+  }
+  
+  .animated-underline:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  /* Text Balance for Headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Smooth Page Transitions */
+  .page-transition {
+    @apply transition-opacity duration-200 ease-out;
   }
 }
