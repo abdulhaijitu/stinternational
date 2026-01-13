@@ -238,7 +238,8 @@ const Footer = () => {
         <div className="container-premium py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/60">
             <p>© 2026 ST International. All rights reserved.</p>
-            <div className="flex items-center gap-2 text-center md:text-right">
+            {/* Adjusted spacing to avoid Back to Top button overlap */}
+            <div className="flex items-center gap-2 text-center md:text-right md:pr-16">
               <span>Design & Developed by</span>
               <a 
                 href="http://creationtechbd.com/" 
