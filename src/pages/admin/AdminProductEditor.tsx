@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -35,9 +36,12 @@ const AdminProductEditor = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    name_bn: "",
     slug: "",
     description: "",
+    description_bn: "",
     short_description: "",
+    short_description_bn: "",
     price: "",
     compare_price: "",
     sku: "",
@@ -79,9 +83,12 @@ const AdminProductEditor = () => {
 
       setFormData({
         name: data.name,
+        name_bn: data.name_bn || "",
         slug: data.slug,
         description: data.description || "",
+        description_bn: data.description_bn || "",
         short_description: data.short_description || "",
+        short_description_bn: data.short_description_bn || "",
         price: String(data.price),
         compare_price: data.compare_price ? String(data.compare_price) : "",
         sku: data.sku || "",
@@ -138,9 +145,12 @@ const AdminProductEditor = () => {
 
       const productData = {
         name: formData.name,
+        name_bn: formData.name_bn || null,
         slug: formData.slug,
         description: formData.description || null,
+        description_bn: formData.description_bn || null,
         short_description: formData.short_description || null,
+        short_description_bn: formData.short_description_bn || null,
         price: parseFloat(formData.price),
         compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
         sku: formData.sku || null,
@@ -205,50 +215,99 @@ const AdminProductEditor = () => {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">পণ্যের নাম *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                    slug: isNew ? generateSlug(e.target.value) : formData.slug,
-                  });
-                }}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">স্লাগ *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              />
-            </div>
-          </div>
+          {/* Bilingual Name & Description Tabs */}
+          <Tabs defaultValue="english" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="english">English</TabsTrigger>
+              <TabsTrigger value="bangla">বাংলা</TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="short_description">সংক্ষিপ্ত বিবরণ</Label>
-            <Input
-              id="short_description"
-              value={formData.short_description}
-              onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-            />
-          </div>
+            <TabsContent value="english" className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Product Name (English) *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        name: e.target.value,
+                        slug: isNew ? generateSlug(e.target.value) : formData.slug,
+                      });
+                    }}
+                    placeholder="e.g., Digital Weighing Scale"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug *</Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    placeholder="e.g., digital-weighing-scale"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">বিস্তারিত বিবরণ</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="short_description">Short Description (English)</Label>
+                <Input
+                  id="short_description"
+                  value={formData.short_description}
+                  onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                  placeholder="Brief product description"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Full Description (English)</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  placeholder="Detailed product description"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bangla" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name_bn">পণ্যের নাম (বাংলা)</Label>
+                <Input
+                  id="name_bn"
+                  value={formData.name_bn}
+                  onChange={(e) => setFormData({ ...formData, name_bn: e.target.value })}
+                  placeholder="যেমন: ডিজিটাল ওজন মাপার যন্ত্র"
+                  className="font-bengali"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="short_description_bn">সংক্ষিপ্ত বিবরণ (বাংলা)</Label>
+                <Input
+                  id="short_description_bn"
+                  value={formData.short_description_bn}
+                  onChange={(e) => setFormData({ ...formData, short_description_bn: e.target.value })}
+                  placeholder="পণ্যের সংক্ষিপ্ত বিবরণ"
+                  className="font-bengali"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description_bn">বিস্তারিত বিবরণ (বাংলা)</Label>
+                <Textarea
+                  id="description_bn"
+                  value={formData.description_bn}
+                  onChange={(e) => setFormData({ ...formData, description_bn: e.target.value })}
+                  rows={4}
+                  placeholder="পণ্যের বিস্তারিত বিবরণ লিখুন"
+                  className="font-bengali"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Pricing */}
           <div className="grid md:grid-cols-3 gap-4">
@@ -309,7 +368,6 @@ const AdminProductEditor = () => {
                 setFormData({ 
                   ...formData, 
                   images: urls,
-                  // Auto-set main image_url from first gallery image if not set
                   image_url: formData.image_url || (urls.length > 0 ? urls[0] : "")
                 });
               }}

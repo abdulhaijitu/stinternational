@@ -175,6 +175,9 @@ export const bn = {
     shopByCategory: "ক্যাটাগরি অনুযায়ী কিনুন",
     exploreCategory: "{category} অন্বেষণ করুন",
     productsInCategory: "এই ক্যাটাগরিতে {count}টি পণ্য",
+    notFound: "ক্যাটাগরি পাওয়া যায়নি",
+    notFoundDesc: "আপনি যে ক্যাটাগরি খুঁজছেন তা বিদ্যমান নেই।",
+    browseAll: "সব ক্যাটাগরি দেখুন",
   },
 
   // Cart

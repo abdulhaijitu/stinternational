@@ -175,6 +175,9 @@ export const en = {
     shopByCategory: "Shop by Category",
     exploreCategory: "Explore {category}",
     productsInCategory: "{count} products in this category",
+    notFound: "Category Not Found",
+    notFoundDesc: "The category you're looking for doesn't exist.",
+    browseAll: "Browse All Categories",
   },
 
   // Cart

@@ -39,3 +39,29 @@ export const useTopProductsByCategory = (categorySlug: string, limit: number = 4
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 };
+
+// Fetch all products by category ID
+export const useProductsByCategory = (categoryId: string | undefined) => {
+  return useQuery({
+    queryKey: ["products", "category", categoryId],
+    queryFn: async () => {
+      if (!categoryId) return [];
+      
+      const { data: products, error } = await supabase
+        .from("products")
+        .select(`
+          *,
+          category:categories(id, name, name_bn, slug, description, description_bn)
+        `)
+        .eq("category_id", categoryId)
+        .eq("is_active", true)
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return products as DBProduct[];
+    },
+    enabled: !!categoryId,
+    staleTime: 5 * 60 * 1000,
+  });
+};

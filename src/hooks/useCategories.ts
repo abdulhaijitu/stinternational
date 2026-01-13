@@ -5,8 +5,10 @@ import { toast } from "sonner";
 export interface DBCategory {
   id: string;
   name: string;
+  name_bn: string | null;
   slug: string;
   description: string | null;
+  description_bn: string | null;
   image_url: string | null;
   parent_group: string | null;
   icon_name: string | null;
