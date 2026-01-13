@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { translations, Language, TranslationKeys, languageNames } from '@/lib/translations';
+
+// Language Context for bilingual support - English and Bangla
 
 interface LanguageContextType {
   language: Language;
