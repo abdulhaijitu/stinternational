@@ -1,10 +1,24 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, ShoppingCart, Truck, Shield, Phone, Minus, Plus, Check, Loader2 } from "lucide-react";
+import { 
+  ChevronRight, 
+  ShoppingCart, 
+  Truck, 
+  Shield, 
+  Phone, 
+  Minus, 
+  Plus, 
+  Check, 
+  Package,
+  FileText
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useProduct, useFeaturedProducts } from "@/hooks/useProducts";
-import DBProductCard from "@/components/products/DBProductCard";
+import RelatedProducts from "@/components/products/RelatedProducts";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { useCart } from "@/contexts/CartContext";
@@ -13,13 +27,47 @@ import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
+
+// Product Page Skeleton
+const ProductPageSkeleton = () => (
+  <div className="container-premium py-8 md:py-12">
+    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      {/* Image Skeleton */}
+      <div className="space-y-4">
+        <Skeleton className="aspect-square w-full rounded-xl" />
+        <div className="flex gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="w-20 h-20 rounded-lg" />
+          ))}
+        </div>
+      </div>
+      
+      {/* Content Skeleton */}
+      <div className="space-y-6">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-4 w-20" />
+        <Separator />
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <Skeleton className="h-20 w-full" />
+        <div className="flex gap-4">
+          <Skeleton className="h-12 flex-1" />
+          <Skeleton className="h-12 flex-1" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useProduct(slug || "");
-  const { data: featuredProducts } = useFeaturedProducts();
+  const { data: featuredProducts, isLoading: featuredLoading } = useFeaturedProducts();
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<"description" | "specifications">("specifications");
   const { addItem } = useCart();
   const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
   const { getProductFields, getCategoryFields } = useBilingualContent();
@@ -50,9 +98,7 @@ const ProductPage = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container-premium py-16 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <ProductPageSkeleton />
       </Layout>
     );
   }
@@ -61,13 +107,16 @@ const ProductPage = () => {
     return (
       <Layout>
         <div className="container-premium py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">{t.products.noProductsFound}</h1>
-          <p className="text-muted-foreground mb-8">
-            {t.errors.pageNotFoundMessage}
-          </p>
-          <Button asChild>
-            <Link to="/categories">{t.hero.browseProducts}</Link>
-          </Button>
+          <div className="max-w-md mx-auto">
+            <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h1 className="text-2xl font-semibold mb-2">{t.products.noProductsFound}</h1>
+            <p className="text-muted-foreground mb-6">
+              {t.errors.pageNotFoundMessage}
+            </p>
+            <Button asChild>
+              <Link to="/products">{t.hero.browseProducts}</Link>
+            </Button>
+          </div>
         </div>
       </Layout>
     );
@@ -85,26 +134,28 @@ const ProductPage = () => {
     toast.success(t.products.addedToCart.replace('{name}', productFields.name));
   };
 
-  const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
   const specifications = product.specifications || {};
   const features = product.features || [];
+  const discountPercent = product.compare_price 
+    ? Math.round((1 - product.price / product.compare_price) * 100)
+    : 0;
 
   return (
     <Layout>
       {/* Breadcrumb */}
-      <div className="bg-muted/50 border-b border-border">
-        <div className="container-premium py-4">
-          <nav className="flex items-center gap-2 text-sm flex-wrap">
+      <div className="bg-muted/30 border-b border-border">
+        <div className="container-premium py-3">
+          <nav className="flex items-center gap-1.5 text-sm flex-wrap">
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
               {t.nav.home}
             </Link>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            <Link to="/categories" className="text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors">
               {t.nav.products}
             </Link>
             {categoryFields && product.category && (
               <>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                 <Link 
                   to={`/category/${product.category.slug}`} 
                   className="text-muted-foreground hover:text-foreground transition-colors"
@@ -113,44 +164,56 @@ const ProductPage = () => {
                 </Link>
               </>
             )}
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            <span className="text-foreground font-medium truncate max-w-[200px]">{productFields.name}</span>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-foreground font-medium truncate max-w-[200px]">
+              {productFields.name}
+            </span>
           </nav>
         </div>
       </div>
 
-      {/* Product Details */}
+      {/* Product Details Section */}
       <section className="py-8 md:py-12">
         <div className="container-premium">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Image Gallery */}
-            <ProductImageGallery
-              images={product.images || []}
-              mainImage={product.image_url}
-              productName={productFields.name}
-            />
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16">
+            {/* Left: Image Gallery */}
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <ProductImageGallery
+                images={product.images || []}
+                mainImage={product.image_url}
+                productName={productFields.name}
+              />
+            </div>
 
-            {/* Product Info */}
+            {/* Right: Product Information */}
             <div className="space-y-6">
-              {/* Header */}
+              {/* Category */}
+              {categoryFields && product.category && (
+                <Link
+                  to={`/category/${product.category.slug}`}
+                  className="inline-block text-sm text-primary hover:underline transition-colors"
+                >
+                  {categoryFields.name}
+                </Link>
+              )}
+
+              {/* Title */}
               <div>
-                {categoryFields && product.category && (
-                  <Link
-                    to={`/category/${product.category.slug}`}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {categoryFields.name}
-                  </Link>
+                <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
+                  {productFields.name}
+                </h1>
+                {product.sku && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {t.products.sku}: {product.sku}
+                  </p>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3">{productFields.name}</h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  {product.sku && <span>{t.products.sku}: {product.sku}</span>}
-                </div>
               </div>
 
-              {/* Price */}
-              <div className="py-4 border-y border-border">
-                <div className="flex items-baseline gap-3">
+              <Separator />
+
+              {/* Price Block */}
+              <div className="space-y-2">
+                <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="text-3xl font-bold text-foreground">
                     {formatPrice(product.price)}
                   </span>
@@ -159,20 +222,30 @@ const ProductPage = () => {
                       <span className="text-lg text-muted-foreground line-through">
                         {formatPrice(product.compare_price)}
                       </span>
-                      <span className="bg-accent text-accent-foreground text-sm font-semibold px-2 py-1 rounded">
-                        {Math.round((1 - product.price / product.compare_price) * 100)}% {t.products.off}
+                      <span className="bg-accent/10 text-accent-foreground text-sm font-semibold px-2.5 py-1 rounded-md border border-accent/20">
+                        {discountPercent}% {t.products.off}
                       </span>
                     </>
                   )}
                 </div>
-                <div className="mt-2">
+                
+                {/* Stock Status */}
+                <div className="flex items-center gap-2">
                   {product.in_stock ? (
-                    <span className="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                      <Check className="h-4 w-4" />
-                      {t.products.inStock} ({product.stock_quantity}{t.common.quantity.charAt(0)})
-                    </span>
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="text-sm text-green-600 dark:text-green-500 font-medium">
+                        {t.products.inStock}
+                        {product.stock_quantity && ` (${product.stock_quantity} ${t.common.available || 'available'})`}
+                      </span>
+                    </>
                   ) : (
-                    <span className="text-destructive font-medium">{t.products.outOfStock}</span>
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-destructive" />
+                      <span className="text-sm text-destructive font-medium">
+                        {t.products.outOfStock}
+                      </span>
+                    </>
                   )}
                 </div>
               </div>
@@ -184,76 +257,98 @@ const ProductPage = () => {
                 </p>
               )}
 
-              {/* Quantity & Add to Cart */}
+              <Separator />
+
+              {/* Quantity Selector & Add to Cart */}
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">{t.common.quantity}:</span>
-                  <div className="flex items-center border border-border rounded-md">
+                  <label className="text-sm font-medium text-foreground">
+                    {t.common.quantity}:
+                  </label>
+                  <div className="flex items-center border border-border rounded-lg overflow-hidden">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="h-10 w-10 flex items-center justify-center hover:bg-muted transition-colors"
+                      className={cn(
+                        "h-10 w-10 flex items-center justify-center",
+                        "hover:bg-muted transition-colors",
+                        "active:scale-95"
+                      )}
+                      aria-label="Decrease quantity"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="h-10 w-12 flex items-center justify-center border-x border-border font-medium">
+                    <span className="h-10 w-14 flex items-center justify-center border-x border-border font-medium tabular-nums">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="h-10 w-10 flex items-center justify-center hover:bg-muted transition-colors"
+                      className={cn(
+                        "h-10 w-10 flex items-center justify-center",
+                        "hover:bg-muted transition-colors",
+                        "active:scale-95"
+                      )}
+                      aria-label="Increase quantity"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-              <div className="flex gap-4">
+
+                {/* CTA Buttons */}
+                <div className="flex gap-3">
                   <Button
-                    variant="accent"
                     size="lg"
-                    className="flex-1"
+                    className="flex-1 h-12 text-base font-medium active:scale-[0.98] transition-transform"
                     disabled={!product.in_stock}
                     onClick={handleAddToCart}
                   >
-                    <ShoppingCart className="h-5 w-5" />
+                    <ShoppingCart className="h-5 w-5 mr-2" />
                     {t.common.addToCart}
                   </Button>
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="flex-1"
+                    className="flex-1 h-12 text-base font-medium active:scale-[0.98] transition-transform"
                     asChild
                   >
                     <Link to={`/request-quote?product=${encodeURIComponent(product.name)}&category=${product.category?.slug || ''}`}>
+                      <FileText className="h-5 w-5 mr-2" />
                       {t.common.getQuote}
                     </Link>
                   </Button>
                 </div>
-                
-                {/* B2B Message */}
-                <div className="bg-muted/50 rounded-lg p-4 border border-border">
-                  <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">{t.rfq.forInstitutional}</strong>{" "}
-                    {t.rfq.bulkOrderMessage}{" "}
-                    <Link to="/request-quote" className="text-primary hover:underline font-medium">
-                      {t.nav.requestQuote}
-                    </Link>
-                  </p>
-                </div>
+              </div>
+
+              {/* B2B Message Box */}
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">{t.rfq.forInstitutional}</strong>{" "}
+                  {t.rfq.bulkOrderMessage}{" "}
+                  <Link to="/request-quote" className="text-primary hover:underline font-medium">
+                    {t.nav.requestQuote}
+                  </Link>
+                </p>
               </div>
 
               {/* Trust Badges */}
-              <div className="grid grid-cols-3 gap-4 py-4 border-t border-border">
-                <div className="text-center">
-                  <Truck className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">{t.trustBadges.nationwide}</span>
+              <div className="grid grid-cols-3 gap-4 pt-2">
+                <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/30">
+                  <Truck className="h-5 w-5 text-muted-foreground mb-1.5" />
+                  <span className="text-xs text-muted-foreground leading-tight">
+                    {t.trustBadges.nationwide}
+                  </span>
                 </div>
-                <div className="text-center">
-                  <Shield className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">{t.trustBadges.warranty}</span>
+                <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/30">
+                  <Shield className="h-5 w-5 text-muted-foreground mb-1.5" />
+                  <span className="text-xs text-muted-foreground leading-tight">
+                    {t.trustBadges.warranty}
+                  </span>
                 </div>
-                <div className="text-center">
-                  <Phone className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">{t.trustBadges.expertSupport}</span>
+                <div className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/30">
+                  <Phone className="h-5 w-5 text-muted-foreground mb-1.5" />
+                  <span className="text-xs text-muted-foreground leading-tight">
+                    {t.trustBadges.expertSupport}
+                  </span>
                 </div>
               </div>
             </div>
@@ -261,90 +356,111 @@ const ProductPage = () => {
         </div>
       </section>
 
-      {/* Tabs: Description & Specifications */}
-      <section className="py-8 md:py-12 bg-muted/30">
+      {/* Product Details Tabs */}
+      <section className="py-8 md:py-12 bg-muted/20 border-y border-border">
         <div className="container-premium">
-          {/* Tab Headers */}
-          <div className="flex border-b border-border mb-8">
-            <button
-              onClick={() => setActiveTab("specifications")}
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === "specifications"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.products.specifications}
-            </button>
-            <button
-              onClick={() => setActiveTab("description")}
-              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === "description"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.products.description}
-            </button>
-          </div>
+          <Tabs defaultValue="specifications" className="w-full">
+            <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 mb-8">
+              <TabsTrigger 
+                value="specifications" 
+                className={cn(
+                  "rounded-none border-b-2 border-transparent px-6 py-3",
+                  "data-[state=active]:border-primary data-[state=active]:bg-transparent",
+                  "data-[state=active]:shadow-none"
+                )}
+              >
+                {t.products.specifications}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="description"
+                className={cn(
+                  "rounded-none border-b-2 border-transparent px-6 py-3",
+                  "data-[state=active]:border-primary data-[state=active]:bg-transparent",
+                  "data-[state=active]:shadow-none"
+                )}
+              >
+                {t.products.description}
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Tab Content */}
-          {activeTab === "specifications" && (
-            <div className="grid md:grid-cols-2 gap-8">
-              {Object.keys(specifications).length > 0 && (
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4">{t.products.technicalSpecs}</h3>
-                  <table className="spec-table">
-                    <tbody>
+            {/* Specifications Tab */}
+            <TabsContent value="specifications" className="mt-0">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Technical Specifications */}
+                {Object.keys(specifications).length > 0 && (
+                  <div className="bg-card border border-border rounded-xl p-6">
+                    <h3 className="font-semibold text-foreground mb-4">
+                      {t.products.technicalSpecs}
+                    </h3>
+                    <div className="divide-y divide-border">
                       {Object.entries(specifications).map(([key, value]) => (
-                        <tr key={key}>
-                          <td>{key}</td>
-                          <td className="font-medium text-foreground">{value}</td>
-                        </tr>
+                        <div 
+                          key={key} 
+                          className="flex justify-between py-3 text-sm"
+                        >
+                          <span className="text-muted-foreground">{key}</span>
+                          <span className="font-medium text-foreground text-right max-w-[60%]">
+                            {String(value)}
+                          </span>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              {features.length > 0 && (
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4">{t.products.keyFeatures}</h3>
-                  <ul className="space-y-3">
-                    {features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+                    </div>
+                  </div>
+                )}
 
-          {activeTab === "description" && (
-            <div className="bg-card border border-border rounded-lg p-6 max-w-3xl">
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {productFields.description || t.products.noDescription}
-              </p>
-            </div>
-          )}
+                {/* Key Features */}
+                {features.length > 0 && (
+                  <div className="bg-card border border-border rounded-xl p-6">
+                    <h3 className="font-semibold text-foreground mb-4">
+                      {t.products.keyFeatures}
+                    </h3>
+                    <ul className="space-y-3">
+                      {features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                          <span className="text-sm text-muted-foreground">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* No specifications message */}
+                {Object.keys(specifications).length === 0 && features.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-muted-foreground">
+                    {t.products.noSpecifications || "No specifications available for this product."}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Description Tab */}
+            <TabsContent value="description" className="mt-0">
+              <div className="bg-card border border-border rounded-xl p-6 max-w-3xl">
+                <div className="prose prose-sm max-w-none text-muted-foreground">
+                  {productFields.description ? (
+                    <p className="whitespace-pre-line leading-relaxed">
+                      {productFields.description}
+                    </p>
+                  ) : (
+                    <p className="text-center py-4">
+                      {t.products.noDescription}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className="py-12 md:py-16">
-          <div className="container-premium">
-            <h2 className="text-2xl font-bold mb-8">{t.products.relatedProducts}</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <DBProductCard key={relatedProduct.id} product={relatedProduct} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <RelatedProducts 
+        products={relatedProducts} 
+        isLoading={featuredLoading}
+        maxItems={4}
+      />
+
       {/* Recently Viewed Products */}
       <RecentlyViewedProducts excludeProductId={product.id} maxItems={6} />
     </Layout>

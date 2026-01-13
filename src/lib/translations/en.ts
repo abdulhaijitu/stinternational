@@ -31,6 +31,7 @@ export const en = {
     back: "Back",
     submit: "Submit",
     close: "Close",
+    available: "available",
   },
 
   // Navigation
@@ -128,6 +129,8 @@ export const en = {
     technicalSpecs: "Technical Specifications",
     keyFeatures: "Key Features",
     noDescription: "No description available",
+    noSpecifications: "No specifications available for this product.",
+    youMayAlsoLike: "Products you may also be interested in",
   },
 
   // Categories
