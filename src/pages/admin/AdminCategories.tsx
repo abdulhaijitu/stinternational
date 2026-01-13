@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ interface Category {
   parent_group: string | null;
   display_order: number;
   image_url: string | null;
+  is_active: boolean;
 }
 
 const AdminCategories = () => {
@@ -38,6 +40,7 @@ const AdminCategories = () => {
     description: "",
     parent_group: "",
     image_url: "",
+    is_active: true,
   });
 
   useEffect(() => {
@@ -55,7 +58,7 @@ const AdminCategories = () => {
       setCategories(data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      toast.error("ক্যাটাগরি লোড করতে সমস্যা হয়েছে");
+      toast.error("Failed to load categories");
     } finally {
       setLoading(false);
     }
@@ -78,17 +81,18 @@ const AdminCategories = () => {
         description: category.description || "",
         parent_group: category.parent_group || "",
         image_url: category.image_url || "",
+        is_active: category.is_active ?? true,
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: "", slug: "", description: "", parent_group: "", image_url: "" });
+      setFormData({ name: "", slug: "", description: "", parent_group: "", image_url: "", is_active: true });
     }
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (!formData.name || !formData.slug) {
-      toast.error("নাম এবং স্লাগ আবশ্যক");
+      toast.error("Name and slug are required");
       return;
     }
 
@@ -103,11 +107,12 @@ const AdminCategories = () => {
             description: formData.description || null,
             parent_group: formData.parent_group || null,
             image_url: formData.image_url || null,
+            is_active: formData.is_active,
           })
           .eq("id", editingCategory.id);
 
         if (error) throw error;
-        toast.success("ক্যাটাগরি আপডেট হয়েছে");
+        toast.success("Category updated");
       } else {
         const { error } = await supabase.from("categories").insert([{
           name: formData.name,
@@ -115,39 +120,92 @@ const AdminCategories = () => {
           description: formData.description || null,
           parent_group: formData.parent_group || null,
           image_url: formData.image_url || null,
+          is_active: formData.is_active,
           display_order: categories.length + 1,
         }]);
 
         if (error) throw error;
-        toast.success("ক্যাটাগরি তৈরি হয়েছে");
+        toast.success("Category created");
       }
 
       setDialogOpen(false);
       fetchCategories();
     } catch (error: any) {
       console.error("Error saving category:", error);
-      toast.error(error.message || "সংরক্ষণে সমস্যা হয়েছে");
+      toast.error(error.message || "Failed to save");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`"${name}" মুছে ফেলতে চান?`)) return;
+    if (!confirm(`Delete "${name}"?`)) return;
 
     try {
       const { error } = await supabase.from("categories").delete().eq("id", id);
       if (error) throw error;
       setCategories(categories.filter((c) => c.id !== id));
-      toast.success("ক্যাটাগরি মুছে ফেলা হয়েছে");
+      toast.success("Category deleted");
     } catch (error) {
       console.error("Error deleting category:", error);
-      toast.error("মুছতে সমস্যা হয়েছে");
+      toast.error("Failed to delete");
+    }
+  };
+
+  const handleToggleVisibility = async (category: Category) => {
+    try {
+      const { error } = await supabase
+        .from("categories")
+        .update({ is_active: !category.is_active })
+        .eq("id", category.id);
+
+      if (error) throw error;
+      
+      setCategories(categories.map(c => 
+        c.id === category.id ? { ...c, is_active: !c.is_active } : c
+      ));
+      toast.success(`Category ${category.is_active ? 'hidden' : 'shown'}`);
+    } catch (error) {
+      console.error("Error toggling visibility:", error);
+      toast.error("Failed to update visibility");
+    }
+  };
+
+  const handleMoveCategory = async (category: Category, direction: 'up' | 'down') => {
+    const groupCategories = categories.filter(c => c.parent_group === category.parent_group);
+    const currentIndex = groupCategories.findIndex(c => c.id === category.id);
+    
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === groupCategories.length - 1) return;
+
+    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const swapCategory = groupCategories[swapIndex];
+
+    try {
+      // Swap display orders
+      const updates = [
+        { id: category.id, display_order: swapCategory.display_order },
+        { id: swapCategory.id, display_order: category.display_order },
+      ];
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("categories")
+          .update({ display_order: update.display_order })
+          .eq("id", update.id);
+        if (error) throw error;
+      }
+
+      await fetchCategories();
+      toast.success("Order updated");
+    } catch (error) {
+      console.error("Error moving category:", error);
+      toast.error("Failed to reorder");
     }
   };
 
   const groupedCategories = categories.reduce((acc, cat) => {
-    const group = cat.parent_group || "অন্যান্য";
+    const group = cat.parent_group || "Other";
     if (!acc[group]) acc[group] = [];
     acc[group].push(cat);
     return acc;
@@ -158,25 +216,25 @@ const AdminCategories = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">ক্যাটাগরি</h1>
-            <p className="text-muted-foreground">পণ্যের ক্যাটাগরি ম্যানেজ করুন</p>
+            <h1 className="text-2xl font-bold">Categories</h1>
+            <p className="text-muted-foreground">Manage product categories, ordering, and visibility</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()}>
                 <Plus className="h-4 w-4" />
-                নতুন ক্যাটাগরি
+                New Category
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {editingCategory ? "ক্যাটাগরি সম্পাদনা" : "নতুন ক্যাটাগরি"}
+                  {editingCategory ? "Edit Category" : "New Category"}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
                 <div className="space-y-2">
-                  <Label htmlFor="name">নাম *</Label>
+                  <Label htmlFor="name">Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -190,7 +248,7 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">স্লাগ *</Label>
+                  <Label htmlFor="slug">Slug *</Label>
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -198,7 +256,7 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="parent_group">প্যারেন্ট গ্রুপ</Label>
+                  <Label htmlFor="parent_group">Parent Group</Label>
                   <Input
                     id="parent_group"
                     value={formData.parent_group}
@@ -207,7 +265,7 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">বিবরণ</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -216,25 +274,44 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>ক্যাটাগরির ছবি</Label>
+                  <Label>Category Image</Label>
                   <ImageUpload
                     value={formData.image_url}
                     onChange={(url) => setFormData({ ...formData, image_url: url })}
                     folder="categories"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <Label htmlFor="is_active">Visible to public</Label>
+                    <p className="text-xs text-muted-foreground">Toggle to show/hide category</p>
+                  </div>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                    বাতিল
+                    Cancel
                   </Button>
                   <Button onClick={handleSave} disabled={saving}>
                     {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    সংরক্ষণ
+                    Save
                   </Button>
                 </div>
               </div>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Info Banner */}
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>Tip:</strong> Use the arrow buttons to reorder categories within each group. 
+            Toggle visibility to hide/show categories on the public site without deleting them.
+          </p>
         </div>
 
         {/* Categories List */}
@@ -244,19 +321,55 @@ const AdminCategories = () => {
           </div>
         ) : categories.length === 0 ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center text-muted-foreground">
-            কোনো ক্যাটাগরি নেই
+            No categories found
           </div>
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedCategories).map(([group, cats]) => (
               <div key={group} className="bg-card border border-border rounded-lg overflow-hidden">
-                <div className="bg-muted/50 p-4 border-b border-border">
+                <div className="bg-muted/50 p-4 border-b border-border flex items-center justify-between">
                   <h3 className="font-semibold">{group}</h3>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    {cats.length} categories
+                  </span>
                 </div>
                 <div className="divide-y divide-border">
-                  {cats.map((category) => (
-                    <div key={category.id} className="flex items-center justify-between p-4">
+                  {cats.map((category, index) => (
+                    <div 
+                      key={category.id} 
+                      className={`flex items-center justify-between p-4 ${
+                        !category.is_active ? 'bg-muted/30 opacity-60' : ''
+                      }`}
+                    >
                       <div className="flex items-center gap-4">
+                        {/* Drag Handle Visual */}
+                        <div className="text-muted-foreground/50">
+                          <GripVertical className="h-5 w-5" />
+                        </div>
+                        
+                        {/* Order Controls */}
+                        <div className="flex flex-col gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleMoveCategory(category, 'up')}
+                            disabled={index === 0}
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleMoveCategory(category, 'down')}
+                            disabled={index === cats.length - 1}
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        
+                        {/* Image */}
                         {category.image_url ? (
                           <img
                             src={category.image_url}
@@ -268,15 +381,42 @@ const AdminCategories = () => {
                             <span className="text-muted-foreground text-xs">No img</span>
                           </div>
                         )}
+                        
+                        {/* Info */}
                         <div>
-                          <p className="font-medium">{category.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{category.name}</p>
+                            {!category.is_active && (
+                              <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded">
+                                Hidden
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">/{category.slug}</p>
                         </div>
                       </div>
+                      
                       <div className="flex items-center gap-2">
+                        {/* Visibility Toggle */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleToggleVisibility(category)}
+                          title={category.is_active ? 'Hide category' : 'Show category'}
+                        >
+                          {category.is_active ? (
+                            <Eye className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                        
+                        {/* Edit */}
                         <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(category)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
+                        
+                        {/* Delete */}
                         <Button
                           variant="ghost"
                           size="icon"

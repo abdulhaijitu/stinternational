@@ -22,6 +22,7 @@ export type Database = {
           icon_name: string | null
           id: string
           image_url: string | null
+          is_active: boolean | null
           name: string
           parent_group: string | null
           slug: string
@@ -34,6 +35,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
           name: string
           parent_group?: string | null
           slug: string
@@ -46,6 +48,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
           name?: string
           parent_group?: string | null
           slug?: string
