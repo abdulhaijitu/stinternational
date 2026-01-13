@@ -4,7 +4,8 @@
 
 /* ST International - Premium B2B Swiss Design System */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Fonts: Inter for English, Hind Siliguri for Bangla */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -110,9 +111,44 @@
     @apply scroll-smooth;
   }
   
+  /* Default English font */
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Bangla font when language is Bangla */
+  html.font-bangla body {
+    font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Ensure smooth font transition */
+  html.font-bangla body,
+  html.font-english body {
+    transition: font-family 0.2s ease-out;
+  }
+  
+  /* Bangla-specific typography adjustments */
+  html.font-bangla h1,
+  html.font-bangla h2,
+  html.font-bangla h3,
+  html.font-bangla h4,
+  html.font-bangla h5,
+  html.font-bangla h6 {
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  
+  html.font-bangla p,
+  html.font-bangla span,
+  html.font-bangla a,
+  html.font-bangla button,
+  html.font-bangla label,
+  html.font-bangla input,
+  html.font-bangla textarea {
+    line-height: 1.8;
   }
   
   /* Swiss Typography Scale */

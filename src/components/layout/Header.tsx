@@ -16,9 +16,11 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSmartHeader } from "@/hooks/useSmartHeader";
+import { useLanguage } from "@/contexts/LanguageContext";
 import CategoryAwareSearch from "./CategoryAwareSearch";
 import CategoryNavMenu from "./CategoryNavMenu";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
+import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
@@ -28,6 +30,7 @@ const Header = () => {
   const { wishlist } = useWishlist();
   const location = useLocation();
   const { isScrolled, isCompact } = useSmartHeader(100);
+  const { t } = useLanguage();
   
   const cartItemCount = getItemCount();
   const wishlistCount = wishlist.length;
@@ -64,9 +67,13 @@ const Header = () => {
                 <span>info@stinternationalbd.com</span>
               </a>
             </div>
-            <div className="flex items-center gap-2 text-xs md:text-sm">
-              <MapPin className="h-3.5 w-3.5" />
-              <span>Dhaka, Bangladesh</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
+                <MapPin className="h-3.5 w-3.5" />
+                <span>{t.header.topBarLocation}</span>
+              </div>
+              {/* Language Switcher */}
+              <LanguageSwitcher className="hidden md:flex" />
             </div>
           </div>
         </div>
@@ -101,13 +108,16 @@ const Header = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-2 md:gap-4">
+              {/* Language Switcher - Mobile in header */}
+              <LanguageSwitcher className="md:hidden" variant="compact" />
+              
               <Link to="/account" className="hidden md:flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <User className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span>Account</span>}
+                {!isCompact && <span>{t.nav.account}</span>}
               </Link>
               <Link to="/wishlist" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <Heart className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span className="hidden md:inline">Wishlist</span>}
+                {!isCompact && <span className="hidden md:inline">{t.nav.wishlist}</span>}
                 {user && wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {wishlistCount > 9 ? '9+' : wishlistCount}
@@ -116,7 +126,7 @@ const Header = () => {
               </Link>
               <Link to="/cart" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <ShoppingCart className={`transition-all duration-200 ${isCompact ? 'h-4 w-4' : 'h-5 w-5'}`} />
-                {!isCompact && <span className="hidden md:inline">Cart</span>}
+                {!isCompact && <span className="hidden md:inline">{t.nav.cart}</span>}
                 {cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-accent-foreground text-xs rounded-full flex items-center justify-center font-medium">
                     {cartItemCount > 9 ? '9+' : cartItemCount}
@@ -148,22 +158,22 @@ const Header = () => {
             <Link to="/products" className={`font-medium text-foreground hover:text-primary transition-colors ${
               isCompact ? 'text-xs' : 'text-sm'
             }`}>
-              All Products
+              {t.nav.products}
             </Link>
             <Link to="/request-quote" className={`font-medium text-foreground hover:text-primary transition-colors ${
               isCompact ? 'text-xs' : 'text-sm'
             }`}>
-              Request Quote
+              {t.nav.requestQuote}
             </Link>
             <Link to="/about" className={`font-medium text-foreground hover:text-primary transition-colors ${
               isCompact ? 'text-xs' : 'text-sm'
             }`}>
-              About Us
+              {t.nav.about}
             </Link>
             <Link to="/contact" className={`font-medium text-foreground hover:text-primary transition-colors ${
               isCompact ? 'text-xs' : 'text-sm'
             }`}>
-              Contact
+              {t.nav.contact}
             </Link>
           </div>
         </div>
@@ -190,7 +200,7 @@ const Header = () => {
                 onClick={closeMobileMenu}
                 className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
               >
-                <span>My Wishlist</span>
+                <span>{t.nav.myWishlist}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
               <Link 
@@ -198,7 +208,7 @@ const Header = () => {
                 onClick={closeMobileMenu}
                 className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
               >
-                <span>My Account</span>
+                <span>{t.nav.myAccount}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             </div>
