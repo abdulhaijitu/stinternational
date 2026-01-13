@@ -10,35 +10,42 @@ import {
   LogOut,
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Shield
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import AdminLanguageSwitcher from "./AdminLanguageSwitcher";
 import logo from "@/assets/logo.png";
+import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
-
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/categories", label: "Categories", icon: FolderOpen },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/quotes", label: "Quote Requests", icon: FileText },
-  { href: "/admin/logos", label: "Institution Logos", icon: Building2 },
-  { href: "/admin/testimonials", label: "Testimonials", icon: Quote },
-  { href: "/admin/ux-insights", label: "UX Insights", icon: BarChart3 },
-];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const { isAdmin, loading } = useAdmin();
+  const { t, language } = useAdminLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Navigation items with translation keys
+  const navItems = [
+    { href: "/admin", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/admin/products", label: t.nav.products, icon: Package },
+    { href: "/admin/categories", label: t.nav.categories, icon: FolderOpen },
+    { href: "/admin/orders", label: t.nav.orders, icon: ShoppingCart },
+    { href: "/admin/quotes", label: t.nav.quotes, icon: FileText },
+    { href: "/admin/logos", label: t.nav.logos, icon: Building2 },
+    { href: "/admin/testimonials", label: t.nav.testimonials, icon: Quote },
+    { href: "/admin/ux-insights", label: t.nav.uxInsights, icon: BarChart3 },
+    { href: "/admin/roles", label: t.nav.roles, icon: Shield },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,12 +64,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
         <div className="bg-card border border-border rounded-lg p-8 max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold mb-4">অ্যাক্সেস নেই</h1>
-          <p className="text-muted-foreground mb-6">
-            এই পেজে অ্যাক্সেস করতে অ্যাডমিন অনুমতি প্রয়োজন।
+          <h1 className={cn("text-2xl font-bold mb-4", language === "bn" && "font-siliguri")}>
+            {t.access.denied}
+          </h1>
+          <p className={cn("text-muted-foreground mb-6", language === "bn" && "font-siliguri")}>
+            {t.access.noPermission}
           </p>
           <Button onClick={() => navigate("/")} variant="outline">
-            হোমে ফিরে যান
+            {t.access.goHome}
           </Button>
         </div>
       </div>
@@ -70,16 +79,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className={cn("min-h-screen bg-muted/30", language === "bn" && "font-siliguri")}>
       {/* Mobile Header */}
       <div className="lg:hidden bg-card border-b border-border p-4 flex items-center justify-between">
         <Link to="/admin" className="flex items-center gap-2">
           <img src={logo} alt="ST International" className="h-8 w-auto" />
-          <span className="font-semibold">Admin</span>
+          <span className="font-semibold">{t.nav.admin}</span>
         </Link>
-        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <AdminLanguageSwitcher />
+          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="flex">
@@ -89,14 +101,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           lg:min-h-screen
         `}>
-          <div className="p-6 border-b border-border hidden lg:block">
+          <div className="p-6 border-b border-border hidden lg:flex items-center justify-between">
             <Link to="/admin" className="flex items-center gap-3">
               <img src={logo} alt="ST International" className="h-10 w-auto" />
               <div>
                 <h2 className="font-bold text-sm">ST International</h2>
-                <p className="text-xs text-muted-foreground">Admin Panel</p>
+                <p className="text-xs text-muted-foreground">{t.nav.adminPanel}</p>
               </div>
             </Link>
+          </div>
+
+          {/* Desktop Language Switcher */}
+          <div className="hidden lg:block p-4 border-b border-border">
+            <AdminLanguageSwitcher />
           </div>
 
           <nav className="p-4 space-y-1">
@@ -108,13 +125,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   key={item.href}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                    ${isActive 
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                    isActive 
                       ? "bg-primary text-primary-foreground" 
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }
-                  `}
+                  )}
                 >
                   <item.icon className="h-5 w-5" />
                   {item.label}
@@ -130,12 +146,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Admin</p>
+                <p className="text-xs text-muted-foreground">{t.nav.admin}</p>
               </div>
             </div>
             <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              {t.nav.logout}
             </Button>
           </div>
         </aside>
