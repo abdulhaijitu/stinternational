@@ -1,12 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { ChevronRight, ShoppingCart, Truck, Shield, Phone, Minus, Plus, Check, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useProduct, useFeaturedProducts } from "@/hooks/useProducts";
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
+import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { useCart } from "@/contexts/CartContext";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 
@@ -17,6 +19,23 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "specifications">("specifications");
   const { addItem } = useCart();
+  const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
+
+  // Track product view
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        compare_price: product.compare_price,
+        image_url: product.image_url || product.images?.[0] || null,
+        in_stock: product.in_stock,
+        category: product.category,
+      });
+    }
+  }, [product, addToRecentlyViewed]);
 
   const relatedProducts = featuredProducts?.filter(p => p.id !== product?.id).slice(0, 4) || [];
 
@@ -300,6 +319,8 @@ const ProductPage = () => {
           </div>
         </section>
       )}
+      {/* Recently Viewed Products */}
+      <RecentlyViewedProducts excludeProductId={product.id} maxItems={6} />
     </Layout>
   );
 };

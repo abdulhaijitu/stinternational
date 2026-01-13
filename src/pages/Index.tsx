@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCategoriesByGroup, useFeaturedProducts } from "@/hooks/useProducts";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
+import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { 
   FlaskConical, 
   Microscope, 
@@ -230,7 +231,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Recently Viewed Products */}
+      <RecentlyViewedProducts maxItems={6} />
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container-premium">
           <div className="text-center mb-12">
