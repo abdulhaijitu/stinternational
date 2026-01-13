@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
+import MultiImageUpload from "@/components/admin/MultiImageUpload";
 
 interface Category {
   id: string;
@@ -42,6 +43,7 @@ const AdminProductEditor = () => {
     sku: "",
     category_id: "",
     image_url: "",
+    images: [] as string[],
     in_stock: true,
     stock_quantity: "0",
     is_featured: false,
@@ -85,6 +87,7 @@ const AdminProductEditor = () => {
         sku: data.sku || "",
         category_id: data.category_id || "",
         image_url: data.image_url || "",
+        images: data.images || [],
         in_stock: data.in_stock,
         stock_quantity: String(data.stock_quantity),
         is_featured: data.is_featured,
@@ -142,7 +145,8 @@ const AdminProductEditor = () => {
         compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
         sku: formData.sku || null,
         category_id: formData.category_id || null,
-        image_url: formData.image_url || null,
+        image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
+        images: formData.images,
         in_stock: formData.in_stock,
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         is_featured: formData.is_featured,
@@ -296,20 +300,38 @@ const AdminProductEditor = () => {
             </Select>
           </div>
 
-          {/* Product Image */}
+          {/* Product Images Gallery */}
           <div className="space-y-2">
-            <Label>পণ্যের ছবি</Label>
+            <Label>পণ্যের ছবি গ্যালারি</Label>
+            <MultiImageUpload
+              value={formData.images}
+              onChange={(urls) => {
+                setFormData({ 
+                  ...formData, 
+                  images: urls,
+                  // Auto-set main image_url from first gallery image if not set
+                  image_url: formData.image_url || (urls.length > 0 ? urls[0] : "")
+                });
+              }}
+              maxImages={10}
+            />
+          </div>
+
+          {/* Main Product Image (fallback/override) */}
+          <div className="space-y-2">
+            <Label>প্রধান ছবি (ওভাররাইড)</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              গ্যালারির প্রথম ছবি স্বয়ংক্রিয়ভাবে প্রধান ছবি হিসেবে ব্যবহৃত হবে। আলাদাভাবে সেট করতে চাইলে নিচে দিন:
+            </p>
             <ImageUpload
               value={formData.image_url}
               onChange={(url) => setFormData({ ...formData, image_url: url })}
             />
-            <p className="text-xs text-muted-foreground">
-              অথবা সরাসরি URL দিন:
-            </p>
             <Input
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              placeholder="https://..."
+              placeholder="অথবা সরাসরি URL দিন: https://..."
+              className="mt-2"
             />
           </div>
 
