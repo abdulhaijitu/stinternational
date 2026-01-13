@@ -35,6 +35,7 @@ const MODULE_PERMISSION_MAP: Record<string, string> = {
   testimonials: "content",
   "ux-insights": "reports",
   roles: "roles",
+  users: "users",
 };
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {

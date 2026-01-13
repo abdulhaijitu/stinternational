@@ -17,6 +17,7 @@ export type Database = {
       admin_preferences: {
         Row: {
           created_at: string
+          dark_mode: boolean | null
           id: string
           language: string
           updated_at: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dark_mode?: boolean | null
           id?: string
           language?: string
           updated_at?: string
@@ -31,6 +33,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dark_mode?: boolean | null
           id?: string
           language?: string
           updated_at?: string
@@ -375,8 +378,10 @@ export type Database = {
           avatar_url: string | null
           company_name: string | null
           created_at: string
+          created_by: string | null
           full_name: string | null
           id: string
+          is_active: boolean | null
           phone: string | null
           shipping_address: string | null
           shipping_city: string | null
@@ -388,8 +393,10 @@ export type Database = {
           avatar_url?: string | null
           company_name?: string | null
           created_at?: string
+          created_by?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
           phone?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
@@ -401,8 +408,10 @@ export type Database = {
           avatar_url?: string | null
           company_name?: string | null
           created_at?: string
+          created_by?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
           phone?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
