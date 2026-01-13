@@ -80,10 +80,17 @@ export const AdminLanguageProvider = ({ children }: { children: React.ReactNode 
   );
 };
 
-export const useAdminLanguage = () => {
+export const useAdminLanguage = (): AdminLanguageContextType => {
   const context = useContext(AdminLanguageContext);
   if (context === undefined) {
-    throw new Error("useAdminLanguage must be used within an AdminLanguageProvider");
+    // Fallback for edge cases during initial render or HMR
+    console.warn("useAdminLanguage: context not found, using fallback");
+    return {
+      language: "en",
+      setLanguage: () => {},
+      t: adminEn,
+      isLoading: true,
+    };
   }
   return context;
 };
