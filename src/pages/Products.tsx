@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/collapsible";
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductQuickView from "@/components/products/ProductQuickView";
+import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
@@ -257,29 +258,31 @@ const Products = () => {
   const isLoading = productsLoading || categoriesLoading;
 
   // Filter sidebar content
-  const FilterContent = () => (
+  const FilterContent = ({ hideCategoryFilter = false }: { hideCategoryFilter?: boolean }) => (
     <div className="space-y-6">
-      {/* Categories */}
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
-          ক্যাটাগরি
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2 space-y-2">
-          {categories?.map((category) => (
-            <label
-              key={category.id}
-              className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
-            >
-              <Checkbox
-                checked={selectedCategories.includes(category.slug)}
-                onCheckedChange={() => handleCategoryToggle(category.slug)}
-              />
-              <span className="text-sm">{category.name}</span>
-            </label>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Categories - Only show when not using sticky sidebar */}
+      {!hideCategoryFilter && (
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+            ক্যাটাগরি
+            <ChevronDown className="h-4 w-4" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2 space-y-2">
+            {categories?.map((category) => (
+              <label
+                key={category.id}
+                className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+              >
+                <Checkbox
+                  checked={selectedCategories.includes(category.slug)}
+                  onCheckedChange={() => handleCategoryToggle(category.slug)}
+                />
+                <span className="text-sm">{category.name}</span>
+              </label>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
 
       {/* Price Range */}
       <Collapsible defaultOpen>
@@ -390,14 +393,25 @@ const Products = () => {
       <section className="py-8 md:py-12">
         <div className="container-premium">
           <div className="flex gap-8">
-            {/* Desktop Sidebar */}
-            <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-24 bg-card border border-border rounded-lg p-4">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  ফিল্টার
-                </h3>
-                <FilterContent />
+            {/* Desktop Sidebar - Sticky with dual panels */}
+            <aside className="hidden lg:flex gap-4 w-[520px] shrink-0">
+              {/* Categories Panel */}
+              <div className="w-64">
+                <StickyCategorySidebar 
+                  selectedCategories={selectedCategories}
+                  onCategoryToggle={handleCategoryToggle}
+                />
+              </div>
+              
+              {/* Filters Panel */}
+              <div className="w-60">
+                <div className="sticky top-24 bg-card border border-border rounded-lg p-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    ফিল্টার
+                  </h3>
+                  <FilterContent hideCategoryFilter />
+                </div>
               </div>
             </aside>
 
