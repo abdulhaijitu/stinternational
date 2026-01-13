@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, Lock } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -13,7 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface Order {
   id: string;
@@ -28,15 +29,6 @@ interface Order {
   created_at: string;
 }
 
-const statusOptions = [
-  { value: "pending_payment", label: "পেমেন্ট বাকি" },
-  { value: "paid", label: "পেমেন্ট সম্পন্ন" },
-  { value: "processing", label: "প্রসেসিং" },
-  { value: "shipped", label: "শিপিং হয়েছে" },
-  { value: "delivered", label: "ডেলিভারি সম্পন্ন" },
-  { value: "cancelled", label: "বাতিল" },
-];
-
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,9 +36,20 @@ const AdminOrders = () => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
+  const { t, language } = useAdminLanguage();
   
   // Permission checks
   const canUpdateStatus = isSuperAdmin || hasPermission("orders", "update");
+
+  // Status options with translations
+  const statusOptions = [
+    { value: "pending_payment", label: t.status.pending_payment },
+    { value: "paid", label: t.status.paid },
+    { value: "processing", label: t.status.processing },
+    { value: "shipped", label: t.status.shipped },
+    { value: "delivered", label: t.status.delivered },
+    { value: "cancelled", label: t.status.cancelled },
+  ];
 
   useEffect(() => {
     fetchOrders();
@@ -63,7 +66,7 @@ const AdminOrders = () => {
       setOrders(data || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      toast.error("অর্ডার লোড করতে সমস্যা হয়েছে");
+      toast.error(t.orders.loadError);
     } finally {
       setLoading(false);
     }
@@ -71,7 +74,7 @@ const AdminOrders = () => {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     if (!canUpdateStatus) {
-      toast.error("আপনার এই কাজের অনুমতি নেই");
+      toast.error(t.orders.noPermission);
       return;
     }
     
@@ -87,10 +90,10 @@ const AdminOrders = () => {
       setOrders(orders.map((o) =>
         o.id === orderId ? { ...o, status: newStatus } : o
       ));
-      toast.success("স্ট্যাটাস আপডেট হয়েছে");
+      toast.success(t.orders.updateSuccess);
     } catch (error) {
       console.error("Error updating status:", error);
-      toast.error("আপডেট করতে সমস্যা হয়েছে");
+      toast.error(t.orders.updateError);
     } finally {
       setUpdatingStatus(null);
     }
@@ -100,31 +103,38 @@ const AdminOrders = () => {
     ? orders
     : orders.filter((o) => o.status === statusFilter);
 
-  const paymentMethodLabels: Record<string, string> = {
-    cash_on_delivery: "ক্যাশ অন ডেলিভারি",
-    bank_transfer: "ব্যাংক ট্রান্সফার",
-    online_payment: "অনলাইন পেমেন্ট",
+  const getPaymentMethodLabel = (method: string) => {
+    const methods = t.orders.paymentMethods as Record<string, string>;
+    return methods[method] || method;
   };
 
   const getStatusLabel = (status: string) => {
     return statusOptions.find(s => s.value === status)?.label || status;
   };
 
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <AdminLayout>
       <TooltipProvider>
-        <div className="space-y-6">
+        <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">অর্ডার</h1>
-              <p className="text-muted-foreground">সব অর্ডার দেখুন ও ম্যানেজ করুন</p>
+              <h1 className="text-2xl font-bold">{t.orders.title}</h1>
+              <p className="text-muted-foreground">{t.orders.subtitle}</p>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="সব অর্ডার" />
+                <SelectValue placeholder={t.orders.allOrders} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">সব অর্ডার</SelectItem>
+                <SelectItem value="all">{t.orders.allOrders}</SelectItem>
                 {statusOptions.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -142,20 +152,20 @@ const AdminOrders = () => {
               </div>
             ) : filteredOrders.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                কোনো অর্ডার নেই
+                {t.orders.noOrders}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">অর্ডার নম্বর</th>
-                      <th className="text-left p-4 text-sm font-medium">গ্রাহক</th>
-                      <th className="text-left p-4 text-sm font-medium">শহর</th>
-                      <th className="text-left p-4 text-sm font-medium">মোট</th>
-                      <th className="text-left p-4 text-sm font-medium">পেমেন্ট</th>
-                      <th className="text-left p-4 text-sm font-medium">স্ট্যাটাস</th>
-                      <th className="text-left p-4 text-sm font-medium">তারিখ</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.orderNumber}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.customer}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.city}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.total}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.paymentMethod}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.status}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.orders.date}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -169,7 +179,7 @@ const AdminOrders = () => {
                         <td className="p-4 text-sm">{order.shipping_city}</td>
                         <td className="p-4 text-sm font-medium">{formatPrice(order.total)}</td>
                         <td className="p-4 text-sm">
-                          {paymentMethodLabels[order.payment_method] || order.payment_method}
+                          {getPaymentMethodLabel(order.payment_method)}
                         </td>
                         <td className="p-4">
                           {canUpdateStatus ? (
@@ -198,13 +208,13 @@ const AdminOrders = () => {
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>স্ট্যাটাস পরিবর্তনের অনুমতি নেই</p>
+                                <p>{t.orders.noStatusPermission}</p>
                               </TooltipContent>
                             </Tooltip>
                           )}
                         </td>
                         <td className="p-4 text-sm text-muted-foreground">
-                          {new Date(order.created_at).toLocaleDateString("bn-BD")}
+                          {formatDate(order.created_at)}
                         </td>
                       </tr>
                     ))}

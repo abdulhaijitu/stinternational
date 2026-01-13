@@ -14,18 +14,22 @@ import {
   Shield,
   Lock,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeft
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminLanguageSwitcher from "./AdminLanguageSwitcher";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -37,7 +41,10 @@ interface NavItem {
   icon: React.ElementType;
   module: string;
   group?: string;
+  badgeKey?: "pendingOrders" | "pendingQuotes";
 }
+
+const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
@@ -45,15 +52,26 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { signOut, user } = useAuth();
   const { isAdmin, loading, canAccessModule, isSuperAdmin, roles } = useAdmin();
   const { t, language } = useAdminLanguage();
+  const notifications = useAdminNotifications();
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return saved === "true";
+  });
+
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  }, [collapsed]);
 
   // Navigation items with module mapping for permissions and groups
   const allNavItems: NavItem[] = [
     { href: "/admin", label: t.nav.dashboard, icon: LayoutDashboard, module: "dashboard", group: "main" },
     { href: "/admin/products", label: t.nav.products, icon: Package, module: "products", group: "catalog" },
     { href: "/admin/categories", label: t.nav.categories, icon: FolderOpen, module: "categories", group: "catalog" },
-    { href: "/admin/orders", label: t.nav.orders, icon: ShoppingCart, module: "orders", group: "sales" },
-    { href: "/admin/quotes", label: t.nav.quotes, icon: FileText, module: "quotes", group: "sales" },
+    { href: "/admin/orders", label: t.nav.orders, icon: ShoppingCart, module: "orders", group: "sales", badgeKey: "pendingOrders" },
+    { href: "/admin/quotes", label: t.nav.quotes, icon: FileText, module: "quotes", group: "sales", badgeKey: "pendingQuotes" },
     { href: "/admin/logos", label: t.nav.logos, icon: Building2, module: "logos", group: "content" },
     { href: "/admin/testimonials", label: t.nav.testimonials, icon: Quote, module: "testimonials", group: "content" },
     { href: "/admin/ux-insights", label: t.nav.uxInsights, icon: BarChart3, module: "ux-insights", group: "analytics" },
@@ -103,6 +121,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return t.nav.admin;
   };
 
+  const getBadgeCount = (item: NavItem) => {
+    if (!item.badgeKey) return 0;
+    return notifications[item.badgeKey] || 0;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
@@ -132,6 +155,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const NavLink = ({ item, isLocked = false }: { item: NavItem; isLocked?: boolean }) => {
     const isActive = location.pathname === item.href || 
       (item.href !== "/admin" && location.pathname.startsWith(item.href));
+    const badgeCount = getBadgeCount(item);
 
     if (isLocked) {
       return (
@@ -140,24 +164,32 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <div
               className={cn(
                 "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                "text-muted-foreground/40 cursor-not-allowed"
+                "text-muted-foreground/40 cursor-not-allowed",
+                collapsed && "justify-center px-2"
               )}
             >
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/30">
+              <div className={cn(
+                "flex items-center justify-center rounded-lg bg-muted/30",
+                collapsed ? "w-10 h-10" : "w-9 h-9"
+              )}>
                 <item.icon className="h-[18px] w-[18px]" />
               </div>
-              <span className="flex-1 font-medium">{item.label}</span>
-              <Lock className="h-3.5 w-3.5 opacity-50" />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 font-medium">{item.label}</span>
+                  <Lock className="h-3.5 w-3.5 opacity-50" />
+                </>
+              )}
             </div>
           </TooltipTrigger>
           <TooltipContent side="right" className="text-xs">
-            {t.access.noPermission}
+            {collapsed ? item.label : t.access.noPermission}
           </TooltipContent>
         </Tooltip>
       );
     }
 
-    return (
+    const linkContent = (
       <Link
         to={item.href}
         onClick={() => setSidebarOpen(false)}
@@ -165,23 +197,65 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
           isActive 
             ? "bg-primary text-primary-foreground shadow-sm" 
-            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          collapsed && "justify-center px-2"
         )}
       >
         <div className={cn(
-          "flex items-center justify-center w-9 h-9 rounded-lg transition-colors duration-200",
+          "relative flex items-center justify-center rounded-lg transition-colors duration-200",
+          collapsed ? "w-10 h-10" : "w-9 h-9",
           isActive 
             ? "bg-primary-foreground/10" 
             : "bg-muted/50 group-hover:bg-muted"
         )}>
           <item.icon className="h-[18px] w-[18px]" />
+          {collapsed && badgeCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-4 min-w-4 p-0 flex items-center justify-center text-[10px]"
+            >
+              {badgeCount > 99 ? "99+" : badgeCount}
+            </Badge>
+          )}
         </div>
-        <span className="flex-1 font-medium">{item.label}</span>
-        {isActive && (
-          <ChevronRight className="h-4 w-4 opacity-60" />
+        {!collapsed && (
+          <>
+            <span className="flex-1 font-medium">{item.label}</span>
+            {badgeCount > 0 && (
+              <Badge 
+                variant={isActive ? "secondary" : "destructive"} 
+                className="h-5 min-w-5 px-1.5 text-[10px]"
+              >
+                {badgeCount > 99 ? "99+" : badgeCount}
+              </Badge>
+            )}
+            {isActive && badgeCount === 0 && (
+              <ChevronRight className="h-4 w-4 opacity-60" />
+            )}
+          </>
         )}
       </Link>
     );
+
+    if (collapsed) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {linkContent}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="flex items-center gap-2">
+            <span>{item.label}</span>
+            {badgeCount > 0 && (
+              <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[10px]">
+                {badgeCount}
+              </Badge>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return linkContent;
   };
 
   const renderNavGroups = () => {
@@ -193,12 +267,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       return (
         <div key={groupKey} className={cn(index > 0 && "mt-6")}>
-          {groupKey !== "main" && (
+          {groupKey !== "main" && !collapsed && (
             <div className="px-3 mb-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
                 {language === "bn" ? groupLabels[groupKey].bn : groupLabels[groupKey].en}
               </span>
             </div>
+          )}
+          {groupKey !== "main" && collapsed && (
+            <div className="my-3 mx-2 border-t border-border" />
           )}
           <div className="space-y-1">
             {items.map((item) => (
@@ -216,6 +293,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         {/* Desktop Topbar */}
         <header className="hidden lg:flex h-14 bg-card border-b border-border items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {collapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+            </Button>
             <Link to="/admin" className="flex items-center gap-3">
               <img src={logo} alt="ST International" className="h-8 w-auto" />
               <div>
@@ -285,10 +370,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="flex">
           {/* Sidebar */}
           <aside className={cn(
-            "fixed lg:sticky inset-y-0 lg:top-14 left-0 z-50 lg:z-10 w-72 bg-card border-r border-border",
-            "transform transition-transform duration-300 ease-out",
+            "fixed lg:sticky inset-y-0 lg:top-14 left-0 z-50 lg:z-10 bg-card border-r border-border",
+            "transform transition-all duration-300 ease-out",
             "lg:h-[calc(100vh-3.5rem)] overflow-hidden",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+            collapsed ? "w-[70px]" : "w-72"
           )}>
             {/* Mobile sidebar header */}
             <div className="lg:hidden p-4 border-b border-border flex items-center justify-between">
@@ -301,18 +387,23 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </Button>
             </div>
 
-            <ScrollArea className="h-[calc(100%-8rem)] lg:h-[calc(100%-5rem)]">
-              <nav className="p-4">
+            <ScrollArea className={cn(
+              collapsed ? "h-[calc(100%-4rem)]" : "h-[calc(100%-8rem)] lg:h-[calc(100%-5rem)]"
+            )}>
+              <nav className={cn("p-4", collapsed && "p-2")}>
                 {renderNavGroups()}
                 
                 {/* Locked items section */}
                 {lockedItems.length > 0 && (
                   <div className="mt-6">
-                    <div className="px-3 mb-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/40">
-                        {language === "bn" ? "সীমিত অ্যাক্সেস" : "Restricted"}
-                      </span>
-                    </div>
+                    {!collapsed && (
+                      <div className="px-3 mb-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/40">
+                          {language === "bn" ? "সীমিত অ্যাক্সেস" : "Restricted"}
+                        </span>
+                      </div>
+                    )}
+                    {collapsed && <div className="my-3 mx-2 border-t border-border" />}
                     <div className="space-y-1">
                       {lockedItems.map((item) => (
                         <NavLink key={item.href} item={item} isLocked />
@@ -326,30 +417,50 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             {/* Sidebar Footer */}
             <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-card">
               {/* Mobile: Show user info */}
-              <div className="lg:hidden p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-sm font-semibold shadow-sm">
-                    {user?.email?.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
+              {!collapsed && (
+                <div className="lg:hidden p-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-sm font-semibold shadow-sm">
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.email}</p>
+                      <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               {/* Logout button */}
-              <div className="p-3">
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors" 
-                  onClick={handleSignOut}
-                >
-                  <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/50">
-                    <LogOut className="h-[18px] w-[18px]" />
-                  </div>
-                  <span className="font-medium">{t.nav.logout}</span>
-                </Button>
+              <div className={cn("p-3", collapsed && "p-2")}>
+                {collapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="w-full h-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="h-[18px] w-[18px]" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {t.nav.logout}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors" 
+                    onClick={handleSignOut}
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/50">
+                      <LogOut className="h-[18px] w-[18px]" />
+                    </div>
+                    <span className="font-medium">{t.nav.logout}</span>
+                  </Button>
+                )}
               </div>
             </div>
           </aside>
