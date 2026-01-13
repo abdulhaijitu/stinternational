@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Product, formatPrice } from "@/lib/products";
-import { getCategoryBySlug, getAllCategories } from "@/lib/categories";
+import { getAllCategories } from "@/lib/categories";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +12,20 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const category = getAllCategories().find(c => c.id === product.categoryId);
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addItem({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      image_url: product.images[0] || null,
+      sku: product.sku,
+    });
+    toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+  };
 
   return (
     <div className="group bg-card border border-border rounded-lg overflow-hidden card-hover">
@@ -35,12 +51,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button variant="secondary" size="sm" className="flex-1" asChild>
             <Link to={`/product/${product.slug}`}>
               <Eye className="h-4 w-4" />
-              View
+              দেখুন
             </Link>
           </Button>
-          <Button variant="accent" size="sm" className="flex-1" disabled={!product.inStock}>
+          <Button 
+            variant="accent" 
+            size="sm" 
+            className="flex-1" 
+            disabled={!product.inStock}
+            onClick={handleAddToCart}
+          >
             <ShoppingCart className="h-4 w-4" />
-            Add
+            কিনুন
           </Button>
         </div>
       </div>

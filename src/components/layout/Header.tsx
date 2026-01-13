@@ -13,10 +13,14 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { categoryGroups } from "@/lib/categories";
+import { useCart } from "@/contexts/CartContext";
 import logo from "@/assets/logo.png";
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const { getItemCount } = useCart();
+  const cartItemCount = getItemCount();
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -78,7 +82,11 @@ const Header = () => {
               <Link to="/cart" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <ShoppingCart className="h-5 w-5" />
                 <span className="hidden md:inline">Cart</span>
-                <span className="absolute -top-1 -right-1 md:hidden w-4 h-4 bg-accent text-accent-foreground text-xs rounded-full flex items-center justify-center">0</span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 md:static md:ml-1 w-5 h-5 bg-accent text-accent-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                    {cartItemCount}
+                  </span>
+                )}
               </Link>
               <Button
                 variant="ghost"
