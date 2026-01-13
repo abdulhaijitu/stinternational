@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AdminLanguageProvider } from "@/contexts/AdminLanguageContext";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Products from "./pages/Products";
@@ -51,6 +52,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <ScrollToTop />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/categories" element={<Categories />} />

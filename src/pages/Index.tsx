@@ -246,48 +246,53 @@ const Index = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 md:py-20">
+      <section className="py-16 md:py-24 bg-muted/20">
         <div className="container-premium">
-          <div className="flex items-end justify-between mb-10">
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
-              <h2 className="mb-2">Featured Products</h2>
-              <p className="text-muted-foreground">Top-rated equipment trusted by professionals</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-3">Featured Products</h2>
+              <p className="text-muted-foreground text-base max-w-xl">
+                Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.
+              </p>
             </div>
             <Link
               to="/products"
-              className="hidden md:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent transition-colors shrink-0"
             >
               View All Products
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           
+          {/* Products Grid - 4 columns on desktop */}
           {productsLoading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
+              {[...Array(8)].map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
           ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
               {featuredProducts.slice(0, 8).map((product) => (
                 <DBProductCard key={product.id} product={product} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-muted/30 rounded-lg">
-              <p className="text-muted-foreground">No featured products available</p>
-              <Button variant="outline" size="sm" asChild className="mt-4">
+            <div className="text-center py-16 bg-card rounded-xl border border-border">
+              <p className="text-muted-foreground mb-4">No featured products available</p>
+              <Button variant="outline" size="sm" asChild>
                 <Link to="/products">Browse All Products</Link>
               </Button>
             </div>
           )}
           
-          <div className="mt-8 text-center md:hidden">
-            <Button variant="outline" asChild>
+          {/* Mobile CTA */}
+          <div className="mt-10 text-center sm:hidden">
+            <Button variant="outline" size="lg" asChild>
               <Link to="/products">
                 View All Products
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
           </div>

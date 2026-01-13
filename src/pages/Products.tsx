@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2, LayoutGrid, Filter } from "lucide-react";
 import { useGridDensity, GridDensity } from "@/hooks/useGridDensity";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
 import Layout from "@/components/layout/Layout";
@@ -28,16 +28,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 import ProductQuickView from "@/components/products/ProductQuickView";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
-import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
+import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
 import { useProductCompare } from "@/hooks/useProductCompare";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
+import { cn } from "@/lib/utils";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
@@ -48,6 +52,7 @@ const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: allProducts, isLoading: productsLoading } = useAllProducts();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { groups, isLoading: groupsLoading } = useActiveCategoriesByGroup();
   const { t } = useLanguage();
   const { getCategoryFields } = useBilingualContent();
   const { density, setDensity } = useGridDensity();
@@ -63,6 +68,7 @@ const Products = () => {
     openCompareModal,
     closeCompareModal,
   } = useProductCompare();
+
   // Filter state
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
@@ -87,6 +93,7 @@ const Products = () => {
   );
   const [visibleCount, setVisibleCount] = useState(INFINITE_SCROLL_BATCH);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
   // Quick view state
   const [quickViewProduct, setQuickViewProduct] = useState<DBProduct | null>(null);
@@ -94,6 +101,16 @@ const Products = () => {
 
   // Infinite scroll ref
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Expand groups that have selected categories
+  useEffect(() => {
+    if (groups.length > 0 && expandedGroups.length === 0) {
+      const groupsWithSelection = groups
+        .filter(g => g.categories.some(c => selectedCategories.includes(c.slug)))
+        .map(g => g.slug);
+      setExpandedGroups(groupsWithSelection.length > 0 ? groupsWithSelection : [groups[0]?.slug].filter(Boolean));
+    }
+  }, [groups, selectedCategories]);
 
   // Apply filters and sorting
   const filteredProducts = useMemo(() => {
@@ -221,7 +238,6 @@ const Products = () => {
       params.delete("page");
     }
     setSearchParams(params);
-    window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
   const handlePerPageChange = (value: string) => {
@@ -258,6 +274,12 @@ const Products = () => {
     );
   };
 
+  const toggleGroup = (slug: string) => {
+    setExpandedGroups((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
+  };
+
   const handleQuickView = useCallback((product: DBProduct) => {
     setQuickViewProduct(product);
     setQuickViewOpen(true);
@@ -279,109 +301,169 @@ const Products = () => {
 
   const isLoading = productsLoading || categoriesLoading;
 
-  // Filter sidebar content
-  const FilterContent = ({ hideCategoryFilter = false }: { hideCategoryFilter?: boolean }) => (
+  // Sidebar Filter Component
+  const FilterSidebar = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div className="space-y-6">
-      {/* Categories - Only show when not using sticky sidebar */}
-      {!hideCategoryFilter && (
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
-            {t.nav.categories}
-            <ChevronDown className="h-4 w-4" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-2 space-y-2">
-            {categories?.map((category) => {
-              const categoryFields = getCategoryFields(category);
-              return (
-                <label
-                  key={category.id}
-                  className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
-                >
-                  <Checkbox
-                    checked={selectedCategories.includes(category.slug)}
-                    onCheckedChange={() => handleCategoryToggle(category.slug)}
-                  />
-                  <span className="text-sm">{categoryFields.name}</span>
-                </label>
-              );
-            })}
-          </CollapsibleContent>
-        </Collapsible>
-      )}
-
       {/* Price Range */}
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
-          {t.products.price}
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="minPrice" className="text-xs text-muted-foreground">
-                {t.products.minPrice}
-              </Label>
-              <Input
-                id="minPrice"
-                type="number"
-                placeholder="৳০"
-                value={priceRange.min}
-                onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="maxPrice" className="text-xs text-muted-foreground">
-                {t.products.maxPrice}
-              </Label>
-              <Input
-                id="maxPrice"
-                type="number"
-                placeholder="৳..."
-                value={priceRange.max}
-                onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-              />
-            </div>
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-foreground">{t.products.price}</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="minPrice" className="text-xs text-muted-foreground mb-1.5 block">
+              {t.products.minPrice}
+            </Label>
+            <Input
+              id="minPrice"
+              type="number"
+              placeholder="৳০"
+              value={priceRange.min}
+              onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+              className="h-9"
+            />
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+          <div>
+            <Label htmlFor="maxPrice" className="text-xs text-muted-foreground mb-1.5 block">
+              {t.products.maxPrice}
+            </Label>
+            <Input
+              id="maxPrice"
+              type="number"
+              placeholder="৳..."
+              value={priceRange.max}
+              onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+              className="h-9"
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
 
       {/* Stock Filter */}
-      <div className="py-2">
-        <label className="flex items-center gap-2 cursor-pointer">
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-foreground">Availability</h4>
+        <label className="flex items-center gap-3 cursor-pointer group">
           <Checkbox
             checked={inStockOnly}
             onCheckedChange={(checked) => setInStockOnly(checked === true)}
+            className="h-5 w-5"
           />
-          <span className="text-sm font-medium">{t.products.inStockOnly}</span>
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            {t.products.inStockOnly}
+          </span>
         </label>
       </div>
 
-      {/* Infinite Scroll Toggle */}
-      <div className="py-2 border-t border-border pt-4">
+      <Separator />
+
+      {/* Scroll Mode */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-foreground">Display Mode</h4>
         <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-sm font-medium">{t.products.infiniteScroll}</span>
+          <span className="text-sm text-muted-foreground">{t.products.infiniteScroll}</span>
           <Switch
             checked={infiniteScroll}
             onCheckedChange={handleInfiniteScrollToggle}
           />
         </label>
-        <p className="text-xs text-muted-foreground mt-1">
-          {t.products.infiniteScrollHint}
-        </p>
       </div>
 
-      {/* Apply/Clear Buttons */}
-      <div className="space-y-2 pt-4 border-t border-border">
-        <Button onClick={() => updateSearchParams(true)} className="w-full">
+      <Separator />
+
+      {/* Action Buttons */}
+      <div className="space-y-2">
+        <Button onClick={() => { updateSearchParams(true); if (isMobile) setMobileFiltersOpen(false); }} className="w-full">
           {t.products.applyFilters}
         </Button>
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters} className="w-full">
+            <X className="h-4 w-4 mr-2" />
             {t.products.clearFilters}
           </Button>
         )}
       </div>
     </div>
+  );
+
+  // Category Sidebar Component
+  const CategorySidebar = () => (
+    <Card className="border-border overflow-hidden">
+      <CardHeader className="py-3 px-4 border-b bg-muted/40">
+        <div className="flex items-center gap-2">
+          <LayoutGrid className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold">{t.nav.categories}</h3>
+        </div>
+      </CardHeader>
+      <ScrollArea className="h-[400px]">
+        <CardContent className="p-0">
+          {groupsLoading ? (
+            <div className="p-4 space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {groups.map((group) => (
+                <Collapsible
+                  key={group.slug}
+                  open={expandedGroups.includes(group.slug)}
+                  onOpenChange={() => toggleGroup(group.slug)}
+                >
+                  <CollapsibleTrigger className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-muted/50 transition-colors border-b border-border/50">
+                    <span className="text-foreground">{group.name}</span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                        expandedGroups.includes(group.slug) && "rotate-180"
+                      )}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="bg-muted/20">
+                    <div className="py-2 px-2">
+                      {group.categories.map((category) => {
+                        const isSelected = selectedCategories.includes(category.slug);
+                        return (
+                          <button
+                            key={category.id}
+                            onClick={() => handleCategoryToggle(category.slug)}
+                            className={cn(
+                              "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-all text-left",
+                              isSelected
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-2 h-2 rounded-full shrink-0 transition-colors",
+                                isSelected ? "bg-primary" : "bg-border"
+                              )}
+                            />
+                            <span className="truncate">{category.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+              
+              {/* View All Categories Link */}
+              <div className="p-3 border-t">
+                <Link
+                  to="/categories"
+                  className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Browse All Categories
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </ScrollArea>
+    </Card>
   );
 
   return (
@@ -411,8 +493,8 @@ const Products = () => {
       />
 
       {/* Page Header */}
-      <section className="bg-muted/50 border-b border-border">
-        <div className="container-premium py-8 md:py-12">
+      <section className="bg-muted/40 border-b">
+        <div className="container-premium py-8 md:py-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.products.allProducts}</h1>
 
           {/* Search Bar */}
@@ -423,68 +505,98 @@ const Products = () => {
                 placeholder={t.products.searchProducts}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 bg-background"
               />
             </div>
-            <Button type="submit">{t.products.searchButton}</Button>
+            <Button type="submit" size="lg" className="h-11">
+              {t.products.searchButton}
+            </Button>
           </form>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="py-8 md:py-12">
+      <section className="py-8 md:py-10">
         <div className="container-premium">
           <div className="flex gap-8">
-            {/* Desktop Sidebar - Sticky with dual panels */}
-            <aside className="hidden lg:flex gap-4 w-[520px] shrink-0">
-              {/* Categories Panel */}
-              <div className="w-64">
-                <StickyCategorySidebar 
-                  selectedCategories={selectedCategories}
-                  onCategoryToggle={handleCategoryToggle}
-                />
-              </div>
-              
-              {/* Filters Panel */}
-              <div className="w-60">
-                <div className="sticky top-24 bg-card border border-border rounded-lg p-4 max-h-[calc(100vh-120px)] overflow-y-auto">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <SlidersHorizontal className="h-4 w-4" />
-                    {t.products.filters}
-                  </h3>
-                  <FilterContent hideCategoryFilter />
-                </div>
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block w-72 shrink-0 space-y-6">
+              {/* Filters Card */}
+              <Card className="border-border sticky top-24">
+                <CardHeader className="py-3 px-4 border-b bg-muted/40">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-primary" />
+                    <h3 className="text-sm font-semibold">{t.products.filters}</h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <FilterSidebar />
+                </CardContent>
+              </Card>
+
+              {/* Categories Card */}
+              <div className="sticky top-[440px]">
+                <CategorySidebar />
               </div>
             </aside>
 
             {/* Products Grid */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {/* Toolbar */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-card border border-border rounded-lg p-3">
+                <div className="flex items-center gap-3">
                   {/* Mobile Filter Button */}
                   <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
                     <SheetTrigger asChild>
                       <Button variant="outline" size="sm" className="lg:hidden">
-                        <SlidersHorizontal className="h-4 w-4" />
+                        <SlidersHorizontal className="h-4 w-4 mr-2" />
                         {t.products.filters}
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-80">
-                      <SheetHeader>
-                        <SheetTitle>{t.products.filters}</SheetTitle>
+                    <SheetContent side="left" className="w-80 overflow-y-auto">
+                      <SheetHeader className="mb-6">
+                        <SheetTitle className="flex items-center gap-2">
+                          <SlidersHorizontal className="h-5 w-5" />
+                          {t.products.filters}
+                        </SheetTitle>
                       </SheetHeader>
-                      <div className="mt-4">
-                        <FilterContent />
+                      
+                      {/* Mobile Category List */}
+                      <div className="mb-6">
+                        <h4 className="text-sm font-semibold mb-3">{t.nav.categories}</h4>
+                        <div className="space-y-1">
+                          {categories?.map((category) => {
+                            const categoryFields = getCategoryFields(category);
+                            const isSelected = selectedCategories.includes(category.slug);
+                            return (
+                              <label
+                                key={category.id}
+                                className="flex items-center gap-2 py-2 cursor-pointer"
+                              >
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={() => handleCategoryToggle(category.slug)}
+                                />
+                                <span className={cn("text-sm", isSelected && "font-medium text-primary")}>
+                                  {categoryFields.name}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
+                      
+                      <Separator className="mb-6" />
+                      
+                      <FilterSidebar isMobile />
                     </SheetContent>
                   </Sheet>
 
                   {/* Results Count */}
                   <span className="text-sm text-muted-foreground">
                     {t.products.productsCount.replace('{count}', String(filteredProducts.length))}
-                    {infiniteScroll && filteredProducts.length > 0 && (
-                      <span className="ml-1">
+                    {infiniteScroll && filteredProducts.length > 0 && visibleCount < filteredProducts.length && (
+                      <span className="ml-1 text-xs">
                         ({t.products.showingCount.replace('{count}', String(Math.min(visibleCount, filteredProducts.length)))})
                       </span>
                     )}
@@ -496,36 +608,26 @@ const Products = () => {
                       variant="ghost"
                       size="sm"
                       onClick={clearFilters}
-                      className="text-xs h-7"
+                      className="text-xs h-7 text-destructive hover:text-destructive"
                     >
-                      <X className="h-3 w-3" />
-                      {t.products.clearFilters}
+                      <X className="h-3 w-3 mr-1" />
+                      Clear All
                     </Button>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Grid Density Toggle - Desktop only */}
+                  {/* Grid Density Toggle */}
                   <GridDensityToggle 
                     density={density}
                     onDensityChange={setDensity}
                     className="hidden md:flex"
                   />
 
-                  {/* Infinite Scroll Toggle (desktop compact) */}
-                  <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground border border-border rounded-md px-2 py-1">
-                    <span>{t.products.infiniteScroll}</span>
-                    <Switch
-                      checked={infiniteScroll}
-                      onCheckedChange={handleInfiniteScrollToggle}
-                      className="data-[state=checked]:bg-primary scale-75"
-                    />
-                  </div>
-
-                  {/* Per Page Selector - only show when not infinite scroll */}
+                  {/* Per Page Selector */}
                   {!infiniteScroll && (
                     <Select value={perPage.toString()} onValueChange={handlePerPageChange}>
-                      <SelectTrigger className="w-28">
+                      <SelectTrigger className="w-20 h-9">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -540,7 +642,7 @@ const Products = () => {
 
                   {/* Sort Dropdown */}
                   <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                    <SelectTrigger className="w-44">
+                    <SelectTrigger className="w-40 h-9">
                       <SelectValue placeholder={t.products.sortBy} />
                     </SelectTrigger>
                     <SelectContent>
@@ -554,37 +656,67 @@ const Products = () => {
                 </div>
               </div>
 
+              {/* Selected Categories Pills */}
+              {selectedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {selectedCategories.map((slug) => {
+                    const category = categories?.find(c => c.slug === slug);
+                    if (!category) return null;
+                    const categoryFields = getCategoryFields(category);
+                    return (
+                      <button
+                        key={slug}
+                        onClick={() => handleCategoryToggle(slug)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full hover:bg-primary/20 transition-colors"
+                      >
+                        {categoryFields.name}
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Products */}
               {isLoading ? (
-                <div className={
+                <div className={cn(
+                  "grid gap-4 md:gap-5",
                   density === 'compact' 
-                    ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"
-                    : "grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"
-                }>
+                    ? "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
+                    : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                )}>
                   {Array.from({ length: perPage }).map((_, index) => (
                     <ProductCardSkeleton key={index} variant={density === 'compact' ? 'compact' : 'default'} />
                   ))}
                 </div>
               ) : filteredProducts.length === 0 ? (
-                <div className="text-center py-16 bg-card border border-border rounded-lg">
-                  <p className="text-muted-foreground mb-4">
-                    {hasActiveFilters
-                      ? t.products.noProductsMessage
-                      : t.products.noProducts}
-                  </p>
-                  {hasActiveFilters && (
-                    <Button variant="outline" onClick={clearFilters}>
-                      {t.products.clearFilters}
-                    </Button>
-                  )}
+                <div className="text-center py-20 bg-card border border-border rounded-xl">
+                  <div className="max-w-sm mx-auto">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No products found</h3>
+                    <p className="text-muted-foreground mb-6">
+                      {hasActiveFilters
+                        ? t.products.noProductsMessage
+                        : t.products.noProducts}
+                    </p>
+                    {hasActiveFilters && (
+                      <Button variant="outline" onClick={clearFilters}>
+                        <X className="h-4 w-4 mr-2" />
+                        {t.products.clearFilters}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <>
-                  <div className={
+                  <div className={cn(
+                    "grid gap-4 md:gap-5 transition-all duration-200",
                     density === 'compact' 
-                      ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 transition-all duration-200"
-                      : "grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 transition-all duration-200"
-                  }>
+                      ? "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
+                      : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                  )}>
                     {displayedProducts.map((product) => (
                       <DBProductCard
                         key={product.id}
@@ -600,9 +732,9 @@ const Products = () => {
 
                   {/* Infinite Scroll Loader */}
                   {infiniteScroll && (
-                    <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+                    <div ref={loadMoreRef} className="flex items-center justify-center py-10">
                       {hasMore ? (
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="flex items-center gap-3 text-muted-foreground">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>{t.products.loadingMore}</span>
                         </div>
@@ -614,9 +746,9 @@ const Products = () => {
                     </div>
                   )}
 
-                  {/* Pagination - only show when not infinite scroll */}
+                  {/* Pagination */}
                   {!infiniteScroll && totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 mt-8">
+                    <div className="flex items-center justify-center gap-2 mt-10">
                       <Button
                         variant="outline"
                         size="icon"
@@ -627,7 +759,6 @@ const Products = () => {
                       </Button>
 
                       <div className="flex items-center gap-1">
-                        {/* First page */}
                         {currentPage > 3 && (
                           <>
                             <Button
@@ -643,7 +774,6 @@ const Products = () => {
                           </>
                         )}
 
-                        {/* Page numbers around current */}
                         {Array.from({ length: totalPages }, (_, i) => i + 1)
                           .filter(
                             (page) =>
@@ -663,7 +793,6 @@ const Products = () => {
                             </Button>
                           ))}
 
-                        {/* Last page */}
                         {currentPage < totalPages - 2 && (
                           <>
                             {currentPage < totalPages - 3 && (
