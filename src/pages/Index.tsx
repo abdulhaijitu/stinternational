@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useCallback } from "react";
 import { 
   ArrowRight, 
   Truck, 
@@ -17,6 +18,8 @@ import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/layout/Layout";
+import PageTransition from "@/components/layout/PageTransition";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 import DBProductCard from "@/components/products/DBProductCard";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +27,7 @@ import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import Testimonials from "@/components/homepage/Testimonials";
 import HeroSlider from "@/components/homepage/HeroSlider";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Trust signals data - speaks to both B2B and B2C (bilingual)
 const trustSignals = {
@@ -198,6 +202,7 @@ const Index = () => {
   const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
   const { language, t } = useLanguage();
+  const queryClient = useQueryClient();
   
   // Get language-specific content
   const currentTrustSignals = trustSignals[language];
@@ -205,10 +210,18 @@ const Index = () => {
   const currentWhyChooseUs = whyChooseUs[language];
   const currentStats = stats[language];
 
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['featured-products'] });
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+  }, [queryClient]);
+
   return (
     <Layout>
-      {/* Hero Slider Section */}
-      <HeroSlider />
+      <PullToRefresh onRefresh={handleRefresh}>
+        <PageTransition>
+          {/* Hero Slider Section */}
+          <HeroSlider />
 
       {/* Trust Signals Section */}
       <section className="bg-muted/50 border-b border-border">
@@ -360,13 +373,13 @@ const Index = () => {
           
           {/* Products Grid - 4 columns on desktop */}
           {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[...Array(8)].map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
           ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.slice(0, 8).map((product) => (
                 <DBProductCard key={product.id} product={product} />
               ))}
@@ -418,6 +431,8 @@ const Index = () => {
 
       {/* Quick RFQ Form Section */}
       <QuickRfqForm />
+        </PageTransition>
+      </PullToRefresh>
     </Layout>
   );
 };

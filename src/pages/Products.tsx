@@ -1,9 +1,12 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2, LayoutGrid, Filter } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGridDensity, GridDensity } from "@/hooks/useGridDensity";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
 import Layout from "@/components/layout/Layout";
+import PageTransition from "@/components/layout/PageTransition";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +59,7 @@ const Products = () => {
   const { t } = useLanguage();
   const { getCategoryFields } = useBilingualContent();
   const { density, setDensity } = useGridDensity();
+  const queryClient = useQueryClient();
   const {
     compareProducts,
     isCompareOpen,
@@ -68,6 +72,12 @@ const Products = () => {
     openCompareModal,
     closeCompareModal,
   } = useProductCompare();
+
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['all-products'] });
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+  }, [queryClient]);
 
   // Filter state
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -468,29 +478,31 @@ const Products = () => {
 
   return (
     <Layout>
-      {/* Quick View Modal */}
-      <ProductQuickView
-        product={quickViewProduct}
-        open={quickViewOpen}
-        onOpenChange={setQuickViewOpen}
-      />
+      <PullToRefresh onRefresh={handleRefresh}>
+        <PageTransition>
+          {/* Quick View Modal */}
+          <ProductQuickView
+            product={quickViewProduct}
+            open={quickViewOpen}
+            onOpenChange={setQuickViewOpen}
+          />
 
-      {/* Compare Modal */}
-      <ProductCompareModal
-        products={compareProducts}
-        open={isCompareOpen}
-        onOpenChange={closeCompareModal}
-        onRemove={removeFromCompare}
-      />
+          {/* Compare Modal */}
+          <ProductCompareModal
+            products={compareProducts}
+            open={isCompareOpen}
+            onOpenChange={closeCompareModal}
+            onRemove={removeFromCompare}
+          />
 
-      {/* Compare Bar */}
-      <ProductCompareBar
-        products={compareProducts}
-        onRemove={removeFromCompare}
-        onClear={clearCompare}
-        onCompare={openCompareModal}
-        maxItems={maxItems}
-      />
+          {/* Compare Bar */}
+          <ProductCompareBar
+            products={compareProducts}
+            onRemove={removeFromCompare}
+            onClear={clearCompare}
+            onCompare={openCompareModal}
+            maxItems={maxItems}
+          />
 
       {/* Page Header */}
       <section className="bg-muted/40 border-b">
@@ -683,7 +695,7 @@ const Products = () => {
                   "grid gap-4 md:gap-5",
                   density === 'compact' 
                     ? "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-                    : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-2 xl:grid-cols-3"
                 )}>
                   {Array.from({ length: perPage }).map((_, index) => (
                     <ProductCardSkeleton key={index} variant={density === 'compact' ? 'compact' : 'default'} />
@@ -715,7 +727,7 @@ const Products = () => {
                     "grid gap-4 md:gap-5 transition-all duration-200",
                     density === 'compact' 
                       ? "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4"
-                      : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                      : "grid-cols-2 sm:grid-cols-2 xl:grid-cols-3"
                   )}>
                     {displayedProducts.map((product) => (
                       <DBProductCard
@@ -826,9 +838,11 @@ const Products = () => {
                 </>
               )}
             </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        </PageTransition>
+      </PullToRefresh>
     </Layout>
   );
 };
