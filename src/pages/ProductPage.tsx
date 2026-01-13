@@ -5,6 +5,7 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useProduct, useFeaturedProducts } from "@/hooks/useProducts";
 import DBProductCard from "@/components/products/DBProductCard";
+import ProductImageGallery from "@/components/products/ProductImageGallery";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
@@ -96,27 +97,11 @@ const ProductPage = () => {
         <div className="container-premium">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Image Gallery */}
-            <div className="space-y-4">
-              <div className="aspect-square bg-muted/50 rounded-lg border border-border overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {product.images && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-4">
-                  {product.images.slice(0, 4).map((image, index) => (
-                    <button
-                      key={index}
-                      className="aspect-square bg-muted/50 rounded-lg border border-border overflow-hidden hover:border-primary transition-colors"
-                    >
-                      <img src={image} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductImageGallery
+              images={product.images || []}
+              mainImage={product.image_url}
+              productName={product.name}
+            />
 
             {/* Product Info */}
             <div className="space-y-6">
