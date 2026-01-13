@@ -84,7 +84,9 @@ export const adminEn = {
   // Products
   products: {
     title: "Products",
+    subtitle: "Manage all products",
     addProduct: "Add Product",
+    newProduct: "New Product",
     editProduct: "Edit Product",
     productName: "Product Name",
     price: "Price",
@@ -94,13 +96,20 @@ export const adminEn = {
     featured: "Featured",
     inStock: "In Stock",
     outOfStock: "Out of Stock",
+    inactive: "Inactive",
     description: "Description",
     images: "Images",
     specifications: "Specifications",
     features: "Features",
-    deleteConfirm: "Are you sure you want to delete this product?",
+    deleteConfirm: "Are you sure you want to delete",
     noProducts: "No products found",
-    searchProducts: "Search products...",
+    searchProducts: "Search by product or SKU...",
+    loadError: "Failed to load products",
+    deleteSuccess: "Product deleted successfully",
+    deleteError: "Failed to delete product",
+    noPermission: "You don't have permission for this action",
+    noEditPermission: "No edit permission",
+    noDeletePermission: "No delete permission",
   },
 
   // Categories
@@ -122,9 +131,11 @@ export const adminEn = {
   // Orders
   orders: {
     title: "Orders",
+    subtitle: "View and manage all orders",
     orderNumber: "Order Number",
     customer: "Customer",
     company: "Company",
+    city: "City",
     total: "Total",
     status: "Status",
     paymentMethod: "Payment Method",
@@ -138,6 +149,17 @@ export const adminEn = {
     contactInfo: "Contact Information",
     subtotal: "Subtotal",
     shipping: "Shipping",
+    allOrders: "All Orders",
+    loadError: "Failed to load orders",
+    updateSuccess: "Status updated successfully",
+    updateError: "Failed to update status",
+    noPermission: "You don't have permission for this action",
+    noStatusPermission: "No permission to change status",
+    paymentMethods: {
+      cash_on_delivery: "Cash on Delivery",
+      bank_transfer: "Bank Transfer",
+      online_payment: "Online Payment",
+    },
   },
 
   // Quote Requests

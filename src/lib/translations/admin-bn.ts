@@ -84,7 +84,9 @@ export const adminBn = {
   // Products
   products: {
     title: "পণ্য",
+    subtitle: "সব পণ্য ম্যানেজ করুন",
     addProduct: "পণ্য যোগ করুন",
+    newProduct: "নতুন পণ্য",
     editProduct: "পণ্য সম্পাদনা করুন",
     productName: "পণ্যের নাম",
     price: "দাম",
@@ -94,13 +96,20 @@ export const adminBn = {
     featured: "ফিচার্ড",
     inStock: "স্টকে আছে",
     outOfStock: "স্টকে নেই",
+    inactive: "নিষ্ক্রিয়",
     description: "বিবরণ",
     images: "ছবি",
     specifications: "স্পেসিফিকেশন",
     features: "বৈশিষ্ট্য",
-    deleteConfirm: "আপনি কি এই পণ্য মুছতে চান?",
+    deleteConfirm: "আপনি কি এই পণ্য মুছতে চান",
     noProducts: "কোনো পণ্য পাওয়া যায়নি",
-    searchProducts: "পণ্য খুঁজুন...",
+    searchProducts: "পণ্য বা SKU দিয়ে খুঁজুন...",
+    loadError: "পণ্য লোড করতে সমস্যা হয়েছে",
+    deleteSuccess: "পণ্য মুছে ফেলা হয়েছে",
+    deleteError: "মুছতে সমস্যা হয়েছে",
+    noPermission: "আপনার এই কাজের অনুমতি নেই",
+    noEditPermission: "সম্পাদনার অনুমতি নেই",
+    noDeletePermission: "মোছার অনুমতি নেই",
   },
 
   // Categories
@@ -122,9 +131,11 @@ export const adminBn = {
   // Orders
   orders: {
     title: "অর্ডার",
+    subtitle: "সব অর্ডার দেখুন ও ম্যানেজ করুন",
     orderNumber: "অর্ডার নম্বর",
     customer: "গ্রাহক",
     company: "কোম্পানি",
+    city: "শহর",
     total: "মোট",
     status: "স্ট্যাটাস",
     paymentMethod: "পেমেন্ট পদ্ধতি",
@@ -138,6 +149,17 @@ export const adminBn = {
     contactInfo: "যোগাযোগের তথ্য",
     subtotal: "সাবটোটাল",
     shipping: "শিপিং",
+    allOrders: "সব অর্ডার",
+    loadError: "অর্ডার লোড করতে সমস্যা হয়েছে",
+    updateSuccess: "স্ট্যাটাস আপডেট হয়েছে",
+    updateError: "আপডেট করতে সমস্যা হয়েছে",
+    noPermission: "আপনার এই কাজের অনুমতি নেই",
+    noStatusPermission: "স্ট্যাটাস পরিবর্তনের অনুমতি নেই",
+    paymentMethods: {
+      cash_on_delivery: "ক্যাশ অন ডেলিভারি",
+      bank_transfer: "ব্যাংক ট্রান্সফার",
+      online_payment: "অনলাইন পেমেন্ট",
+    },
   },
 
   // Quote Requests

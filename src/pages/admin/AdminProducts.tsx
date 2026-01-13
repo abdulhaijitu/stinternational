@@ -10,7 +10,9 @@ import { toast } from "sonner";
 import BulkProductImport from "@/components/admin/BulkProductImport";
 import ProductExport from "@/components/admin/ProductExport";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -32,6 +34,7 @@ const AdminProducts = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
+  const { t, language } = useAdminLanguage();
   
   // Permission checks
   const canCreate = isSuperAdmin || hasPermission("products", "create");
@@ -56,7 +59,7 @@ const AdminProducts = () => {
       setProducts(data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
-      toast.error("পণ্য লোড করতে সমস্যা হয়েছে");
+      toast.error(t.products.loadError);
     } finally {
       setLoading(false);
     }
@@ -64,21 +67,21 @@ const AdminProducts = () => {
 
   const handleDelete = async (id: string, name: string) => {
     if (!canDelete) {
-      toast.error("আপনার এই কাজের অনুমতি নেই");
+      toast.error(t.products.noPermission);
       return;
     }
     
-    if (!confirm(`"${name}" মুছে ফেলতে চান?`)) return;
+    if (!confirm(`${t.products.deleteConfirm} "${name}"?`)) return;
 
     setDeleting(id);
     try {
       const { error } = await supabase.from("products").delete().eq("id", id);
       if (error) throw error;
       setProducts(products.filter((p) => p.id !== id));
-      toast.success("পণ্য মুছে ফেলা হয়েছে");
+      toast.success(t.products.deleteSuccess);
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("মুছতে সমস্যা হয়েছে");
+      toast.error(t.products.deleteError);
     } finally {
       setDeleting(null);
     }
@@ -90,14 +93,24 @@ const AdminProducts = () => {
       p.sku?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const getStatusInfo = (product: Product) => {
+    if (!product.is_active) {
+      return { label: t.products.inactive, className: "bg-muted text-muted-foreground" };
+    }
+    if (product.in_stock) {
+      return { label: t.products.inStock, className: "bg-success/10 text-success" };
+    }
+    return { label: t.products.outOfStock, className: "bg-destructive/10 text-destructive" };
+  };
+
   return (
     <AdminLayout>
       <TooltipProvider>
-        <div className="space-y-6">
+        <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">পণ্যসমূহ</h1>
-              <p className="text-muted-foreground">সব পণ্য ম্যানেজ করুন</p>
+              <h1 className="text-2xl font-bold">{t.products.title}</h1>
+              <p className="text-muted-foreground">{t.products.subtitle}</p>
             </div>
             <div className="flex items-center gap-2">
               <ProductExport />
@@ -106,8 +119,8 @@ const AdminProducts = () => {
                   <BulkProductImport onSuccess={fetchProducts} />
                   <Button asChild>
                     <Link to="/admin/products/new">
-                      <Plus className="h-4 w-4" />
-                      নতুন পণ্য
+                      <Plus className="h-4 w-4 mr-1" />
+                      {t.products.newProduct}
                     </Link>
                   </Button>
                 </>
@@ -116,11 +129,11 @@ const AdminProducts = () => {
                   <TooltipTrigger asChild>
                     <Button disabled className="opacity-50">
                       <Lock className="h-4 w-4 mr-1" />
-                      নতুন পণ্য
+                      {t.products.newProduct}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>আপনার এই কাজের অনুমতি নেই</p>
+                    <p>{t.products.noPermission}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -131,7 +144,7 @@ const AdminProducts = () => {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="পণ্য বা SKU দিয়ে খুঁজুন..."
+              placeholder={t.products.searchProducts}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -146,101 +159,100 @@ const AdminProducts = () => {
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                {search ? "কোনো পণ্য পাওয়া যায়নি" : "কোনো পণ্য নেই"}
+                {search ? t.products.noProducts : t.common.noData}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">পণ্য</th>
-                      <th className="text-left p-4 text-sm font-medium">SKU</th>
-                      <th className="text-left p-4 text-sm font-medium">ক্যাটাগরি</th>
-                      <th className="text-left p-4 text-sm font-medium">দাম</th>
-                      <th className="text-left p-4 text-sm font-medium">স্টক</th>
-                      <th className="text-left p-4 text-sm font-medium">স্ট্যাটাস</th>
-                      <th className="text-right p-4 text-sm font-medium">অ্যাকশন</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.products.productName}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.products.sku}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.products.category}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.products.price}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.products.stock}</th>
+                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
+                      <th className="text-right p-4 text-sm font-medium">{t.common.actions}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProducts.map((product) => (
-                      <tr key={product.id} className="border-t border-border">
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0">
-                              {product.image_url && (
-                                <img
-                                  src={product.image_url}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                />
+                    {filteredProducts.map((product) => {
+                      const status = getStatusInfo(product);
+                      return (
+                        <tr key={product.id} className="border-t border-border">
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0">
+                                {product.image_url && (
+                                  <img
+                                    src={product.image_url}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
+                              </div>
+                              <span className="font-medium text-sm line-clamp-1">{product.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-sm text-muted-foreground">{product.sku || "-"}</td>
+                          <td className="p-4 text-sm">{product.category?.name || "-"}</td>
+                          <td className="p-4 text-sm font-medium">{formatPrice(product.price)}</td>
+                          <td className="p-4 text-sm">{product.stock_quantity}</td>
+                          <td className="p-4">
+                            <span className={cn("text-xs px-2 py-1 rounded-full font-medium", status.className)}>
+                              {status.label}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {canEdit ? (
+                                <Button variant="ghost" size="icon" asChild>
+                                  <Link to={`/admin/products/${product.id}`}>
+                                    <Pencil className="h-4 w-4" />
+                                  </Link>
+                                </Button>
+                              ) : (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" disabled className="opacity-50">
+                                      <Lock className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{t.products.noEditPermission}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              {canDelete ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDelete(product.id, product.name)}
+                                  disabled={deleting === product.id}
+                                >
+                                  {deleting === product.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  )}
+                                </Button>
+                              ) : (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" disabled className="opacity-50">
+                                      <Lock className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{t.products.noDeletePermission}</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </div>
-                            <span className="font-medium text-sm line-clamp-1">{product.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-4 text-sm text-muted-foreground">{product.sku || "-"}</td>
-                        <td className="p-4 text-sm">{product.category?.name || "-"}</td>
-                        <td className="p-4 text-sm font-medium">{formatPrice(product.price)}</td>
-                        <td className="p-4 text-sm">{product.stock_quantity}</td>
-                        <td className="p-4">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            product.is_active && product.in_stock
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}>
-                            {product.is_active ? (product.in_stock ? "স্টকে আছে" : "স্টক নেই") : "নিষ্ক্রিয়"}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {canEdit ? (
-                              <Button variant="ghost" size="icon" asChild>
-                                <Link to={`/admin/products/${product.id}`}>
-                                  <Pencil className="h-4 w-4" />
-                                </Link>
-                              </Button>
-                            ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" disabled className="opacity-50">
-                                    <Lock className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>সম্পাদনার অনুমতি নেই</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                            {canDelete ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(product.id, product.name)}
-                                disabled={deleting === product.id}
-                              >
-                                {deleting === product.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                )}
-                              </Button>
-                            ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" disabled className="opacity-50">
-                                    <Lock className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>মোছার অনুমতি নেই</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
