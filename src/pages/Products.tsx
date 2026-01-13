@@ -27,9 +27,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import DBProductCard from "@/components/products/DBProductCard";
+import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 import ProductQuickView from "@/components/products/ProductQuickView";
 import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useBilingualContent } from "@/hooks/useBilingualContent";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
@@ -40,6 +43,8 @@ const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: allProducts, isLoading: productsLoading } = useAllProducts();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { t } = useLanguage();
+  const { getCategoryFields } = useBilingualContent();
 
   // Filter state
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -264,22 +269,25 @@ const Products = () => {
       {!hideCategoryFilter && (
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
-            ক্যাটাগরি
+            {t.nav.categories}
             <ChevronDown className="h-4 w-4" />
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2 space-y-2">
-            {categories?.map((category) => (
-              <label
-                key={category.id}
-                className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
-              >
-                <Checkbox
-                  checked={selectedCategories.includes(category.slug)}
-                  onCheckedChange={() => handleCategoryToggle(category.slug)}
-                />
-                <span className="text-sm">{category.name}</span>
-              </label>
-            ))}
+            {categories?.map((category) => {
+              const categoryFields = getCategoryFields(category);
+              return (
+                <label
+                  key={category.id}
+                  className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedCategories.includes(category.slug)}
+                    onCheckedChange={() => handleCategoryToggle(category.slug)}
+                  />
+                  <span className="text-sm">{categoryFields.name}</span>
+                </label>
+              );
+            })}
           </CollapsibleContent>
         </Collapsible>
       )}
@@ -287,14 +295,14 @@ const Products = () => {
       {/* Price Range */}
       <Collapsible defaultOpen>
         <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
-          দাম
+          {t.products.price}
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="minPrice" className="text-xs text-muted-foreground">
-                সর্বনিম্ন
+                {t.products.minPrice}
               </Label>
               <Input
                 id="minPrice"
@@ -306,7 +314,7 @@ const Products = () => {
             </div>
             <div>
               <Label htmlFor="maxPrice" className="text-xs text-muted-foreground">
-                সর্বোচ্চ
+                {t.products.maxPrice}
               </Label>
               <Input
                 id="maxPrice"
@@ -327,32 +335,32 @@ const Products = () => {
             checked={inStockOnly}
             onCheckedChange={(checked) => setInStockOnly(checked === true)}
           />
-          <span className="text-sm font-medium">শুধু স্টকে আছে</span>
+          <span className="text-sm font-medium">{t.products.inStockOnly}</span>
         </label>
       </div>
 
       {/* Infinite Scroll Toggle */}
       <div className="py-2 border-t border-border pt-4">
         <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-sm font-medium">ইনফিনিট স্ক্রোল</span>
+          <span className="text-sm font-medium">{t.products.infiniteScroll}</span>
           <Switch
             checked={infiniteScroll}
             onCheckedChange={handleInfiniteScrollToggle}
           />
         </label>
         <p className="text-xs text-muted-foreground mt-1">
-          স্ক্রোল করলে আরো পণ্য লোড হবে
+          {t.products.infiniteScrollHint}
         </p>
       </div>
 
       {/* Apply/Clear Buttons */}
       <div className="space-y-2 pt-4 border-t border-border">
         <Button onClick={() => updateSearchParams(true)} className="w-full">
-          ফিল্টার প্রয়োগ করুন
+          {t.products.applyFilters}
         </Button>
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters} className="w-full">
-            ফিল্টার মুছুন
+            {t.products.clearFilters}
           </Button>
         )}
       </div>
@@ -371,20 +379,20 @@ const Products = () => {
       {/* Page Header */}
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-8 md:py-12">
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">সকল পণ্য</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.products.allProducts}</h1>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex gap-2 max-w-xl">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="পণ্য খুঁজুন..."
+                placeholder={t.products.searchProducts}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Button type="submit">খুঁজুন</Button>
+            <Button type="submit">{t.products.searchButton}</Button>
           </form>
         </div>
       </section>
@@ -408,7 +416,7 @@ const Products = () => {
                 <div className="sticky top-24 bg-card border border-border rounded-lg p-4 max-h-[calc(100vh-120px)] overflow-y-auto">
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
                     <SlidersHorizontal className="h-4 w-4" />
-                    ফিল্টার
+                    {t.products.filters}
                   </h3>
                   <FilterContent hideCategoryFilter />
                 </div>
@@ -425,12 +433,12 @@ const Products = () => {
                     <SheetTrigger asChild>
                       <Button variant="outline" size="sm" className="lg:hidden">
                         <SlidersHorizontal className="h-4 w-4" />
-                        ফিল্টার
+                        {t.products.filters}
                       </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="w-80">
                       <SheetHeader>
-                        <SheetTitle>ফিল্টার</SheetTitle>
+                        <SheetTitle>{t.products.filters}</SheetTitle>
                       </SheetHeader>
                       <div className="mt-4">
                         <FilterContent />
@@ -440,10 +448,10 @@ const Products = () => {
 
                   {/* Results Count */}
                   <span className="text-sm text-muted-foreground">
-                    {filteredProducts.length}টি পণ্য
+                    {t.products.productsCount.replace('{count}', String(filteredProducts.length))}
                     {infiniteScroll && filteredProducts.length > 0 && (
                       <span className="ml-1">
-                        (দেখানো হচ্ছে {Math.min(visibleCount, filteredProducts.length)}টি)
+                        ({t.products.showingCount.replace('{count}', String(Math.min(visibleCount, filteredProducts.length)))})
                       </span>
                     )}
                   </span>
@@ -457,7 +465,7 @@ const Products = () => {
                       className="text-xs h-7"
                     >
                       <X className="h-3 w-3" />
-                      ফিল্টার মুছুন
+                      {t.products.clearFilters}
                     </Button>
                   )}
                 </div>
@@ -483,7 +491,7 @@ const Products = () => {
                       <SelectContent>
                         {PER_PAGE_OPTIONS.map((option) => (
                           <SelectItem key={option} value={option.toString()}>
-                            {option}টি
+                            {option}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -493,14 +501,14 @@ const Products = () => {
                   {/* Sort Dropdown */}
                   <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
                     <SelectTrigger className="w-44">
-                      <SelectValue placeholder="সর্ট করুন" />
+                      <SelectValue placeholder={t.products.sortBy} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="newest">নতুন প্রথমে</SelectItem>
-                      <SelectItem value="price-asc">দাম: কম থেকে বেশি</SelectItem>
-                      <SelectItem value="price-desc">দাম: বেশি থেকে কম</SelectItem>
-                      <SelectItem value="name-asc">নাম: A-Z</SelectItem>
-                      <SelectItem value="name-desc">নাম: Z-A</SelectItem>
+                      <SelectItem value="newest">{t.products.sortNewest}</SelectItem>
+                      <SelectItem value="price-asc">{t.products.sortPriceAsc}</SelectItem>
+                      <SelectItem value="price-desc">{t.products.sortPriceDesc}</SelectItem>
+                      <SelectItem value="name-asc">{t.products.sortNameAsc}</SelectItem>
+                      <SelectItem value="name-desc">{t.products.sortNameDesc}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -508,25 +516,27 @@ const Products = () => {
 
               {/* Products */}
               {isLoading ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                  {Array.from({ length: perPage }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))}
                 </div>
               ) : filteredProducts.length === 0 ? (
                 <div className="text-center py-16 bg-card border border-border rounded-lg">
                   <p className="text-muted-foreground mb-4">
                     {hasActiveFilters
-                      ? "কোনো পণ্য পাওয়া যায়নি। ফিল্টার পরিবর্তন করে দেখুন।"
-                      : "কোনো পণ্য নেই"}
+                      ? t.products.noProductsMessage
+                      : t.products.noProducts}
                   </p>
                   {hasActiveFilters && (
                     <Button variant="outline" onClick={clearFilters}>
-                      ফিল্টার মুছুন
+                      {t.products.clearFilters}
                     </Button>
                   )}
                 </div>
               ) : (
                 <>
-                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                     {displayedProducts.map((product) => (
                       <DBProductCard
                         key={product.id}
@@ -542,11 +552,11 @@ const Products = () => {
                       {hasMore ? (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          <span>আরো পণ্য লোড হচ্ছে...</span>
+                          <span>{t.products.loadingMore}</span>
                         </div>
                       ) : filteredProducts.length > INFINITE_SCROLL_BATCH && (
                         <span className="text-sm text-muted-foreground">
-                          সব পণ্য দেখানো হয়েছে
+                          {t.products.allProductsShown}
                         </span>
                       )}
                     </div>
@@ -628,7 +638,7 @@ const Products = () => {
                       </Button>
 
                       <span className="text-sm text-muted-foreground ml-4">
-                        পৃষ্ঠা {currentPage} / {totalPages}
+                        {t.products.pageOf.replace('{current}', String(currentPage)).replace('{total}', String(totalPages))}
                       </span>
                     </div>
                   )}
