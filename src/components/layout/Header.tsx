@@ -8,19 +8,25 @@ import {
   Search,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Heart
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { categoryGroups } from "@/lib/categories";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const { getItemCount } = useCart();
+  const { user } = useAuth();
+  const { wishlist } = useWishlist();
   const cartItemCount = getItemCount();
+  const wishlistCount = wishlist.length;
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -78,6 +84,15 @@ const Header = () => {
               <Link to="/account" className="hidden md:flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <User className="h-5 w-5" />
                 <span>Account</span>
+              </Link>
+              <Link to="/wishlist" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                <Heart className="h-5 w-5" />
+                <span className="hidden md:inline">Wishlist</span>
+                {user && wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 md:static md:ml-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
               <Link to="/cart" className="relative flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
                 <ShoppingCart className="h-5 w-5" />
@@ -199,6 +214,9 @@ const Header = () => {
               </Link>
               <Link to="/contact" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
                 Contact
+              </Link>
+              <Link to="/wishlist" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
+                My Wishlist
               </Link>
               <Link to="/account" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
                 My Account

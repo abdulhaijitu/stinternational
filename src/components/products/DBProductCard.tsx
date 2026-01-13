@@ -5,6 +5,7 @@ import { DBProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
+import WishlistButton from "./WishlistButton";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -40,6 +41,11 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
     <div className="group bg-card border border-border rounded-lg overflow-hidden card-hover">
       {/* Image */}
       <div className="relative aspect-square bg-muted/50 overflow-hidden">
+        {/* Wishlist Button */}
+        <div className="absolute top-3 right-3 z-10">
+          <WishlistButton productId={product.id} />
+        </div>
+        
         <img
           src={imageUrl}
           alt={product.name}
