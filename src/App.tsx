@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
+import Products from "./pages/Products";
 import CategoryPage from "./pages/CategoryPage";
 import ProductPage from "./pages/ProductPage";
 import About from "./pages/About";
@@ -41,6 +42,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/categories" element={<Categories />} />
+                <Route path="/products" element={<Products />} />
                 <Route path="/category/:slug" element={<CategoryPage />} />
                 <Route path="/product/:slug" element={<ProductPage />} />
                 <Route path="/about" element={<About />} />

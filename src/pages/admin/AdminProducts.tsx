@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import BulkProductImport from "@/components/admin/BulkProductImport";
+import ProductExport from "@/components/admin/ProductExport";
 
 interface Product {
   id: string;
@@ -84,6 +85,7 @@ const AdminProducts = () => {
             <p className="text-muted-foreground">সব পণ্য ম্যানেজ করুন</p>
           </div>
           <div className="flex items-center gap-2">
+            <ProductExport />
             <BulkProductImport onSuccess={fetchProducts} />
             <Button asChild>
               <Link to="/admin/products/new">
