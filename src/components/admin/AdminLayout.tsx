@@ -12,7 +12,8 @@ import {
   X,
   BarChart3,
   Shield,
-  Lock
+  Lock,
+  ExternalLink
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -112,6 +113,51 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <TooltipProvider>
       <div className={cn("min-h-screen bg-muted/30", language === "bn" && "font-siliguri")}>
+        {/* Desktop Topbar */}
+        <header className="hidden lg:flex h-14 bg-card border-b border-border items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Link to="/admin" className="flex items-center gap-3">
+              <img src={logo} alt="ST International" className="h-8 w-auto" />
+              <div>
+                <h2 className="font-bold text-sm">ST International</h2>
+                <p className="text-xs text-muted-foreground">{t.nav.adminPanel}</p>
+              </div>
+            </Link>
+          </div>
+          
+          {/* Right side: View Website, Language Toggle, User */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
+                <span>{language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website"}</span>
+              </a>
+            </Button>
+            
+            <div className="h-5 w-px bg-border" />
+            
+            <AdminLanguageSwitcher variant="compact" />
+            
+            <div className="h-5 w-px bg-border" />
+            
+            {/* User Profile Menu */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
+                {user?.email?.charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden xl:block">
+                <p className="text-sm font-medium leading-none">{user?.email?.split('@')[0]}</p>
+                <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
         {/* Mobile Header */}
         <div className="lg:hidden bg-card border-b border-border p-4 flex items-center justify-between">
           <Link to="/admin" className="flex items-center gap-2">
@@ -119,7 +165,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <span className="font-semibold">{t.nav.admin}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <AdminLanguageSwitcher />
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="text-muted-foreground"
+            >
+              <a href="/" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-5 w-5" />
+              </a>
+            </Button>
+            <AdminLanguageSwitcher variant="compact" />
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -131,21 +187,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           <aside className={`
             fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-            lg:min-h-screen
+            lg:min-h-[calc(100vh-3.5rem)] pt-4 lg:pt-0
           `}>
-            <div className="p-6 border-b border-border hidden lg:flex items-center justify-between">
-              <Link to="/admin" className="flex items-center gap-3">
-                <img src={logo} alt="ST International" className="h-10 w-auto" />
-                <div>
-                  <h2 className="font-bold text-sm">ST International</h2>
-                  <p className="text-xs text-muted-foreground">{t.nav.adminPanel}</p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Desktop Language Switcher */}
-            <div className="hidden lg:block p-4 border-b border-border">
-              <AdminLanguageSwitcher />
+            {/* Mobile sidebar header */}
+            <div className="lg:hidden p-4 border-b border-border flex items-center gap-3">
+              <img src={logo} alt="ST International" className="h-8 w-auto" />
+              <span className="font-semibold">{t.nav.admin}</span>
             </div>
 
             <nav className="p-4 space-y-1">
@@ -190,7 +237,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               ))}
             </nav>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border lg:hidden">
               <div className="flex items-center gap-3 mb-4 px-2">
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
                   {user?.email?.charAt(0).toUpperCase()}
@@ -200,6 +247,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
                 </div>
               </div>
+              <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                {t.nav.logout}
+              </Button>
+            </div>
+            
+            {/* Desktop: Only logout button */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border hidden lg:block">
               <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 {t.nav.logout}
@@ -216,7 +271,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           )}
 
           {/* Main Content */}
-          <main className="flex-1 lg:min-h-screen">
+          <main className="flex-1 lg:min-h-[calc(100vh-3.5rem)]">
             <div className="p-4 md:p-6 lg:p-8">
               {children}
             </div>

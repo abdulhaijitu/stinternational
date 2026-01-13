@@ -1,9 +1,45 @@
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 
-const AdminLanguageSwitcher = () => {
-  const { language, setLanguage, t } = useAdminLanguage();
+interface AdminLanguageSwitcherProps {
+  variant?: "default" | "compact";
+}
 
+const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherProps) => {
+  const { language, setLanguage } = useAdminLanguage();
+
+  // Compact variant: text-only EN | বাংলা
+  if (variant === "compact") {
+    return (
+      <div className="flex items-center text-sm">
+        <button
+          onClick={() => setLanguage("en")}
+          className={cn(
+            "px-2 py-1 font-medium transition-colors",
+            language === "en"
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          EN
+        </button>
+        <span className="text-muted-foreground/50">|</span>
+        <button
+          onClick={() => setLanguage("bn")}
+          className={cn(
+            "px-2 py-1 font-medium transition-colors font-siliguri",
+            language === "bn"
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          বাংলা
+        </button>
+      </div>
+    );
+  }
+
+  // Default variant with border
   return (
     <div className="flex items-center border border-border rounded-md overflow-hidden">
       <button
@@ -15,7 +51,7 @@ const AdminLanguageSwitcher = () => {
             : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
-        {t.language.en}
+        EN
       </button>
       <div className="w-px h-6 bg-border" />
       <button
@@ -27,7 +63,7 @@ const AdminLanguageSwitcher = () => {
             : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
-        {t.language.bn}
+        বাংলা
       </button>
     </div>
   );
