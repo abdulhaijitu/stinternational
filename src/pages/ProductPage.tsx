@@ -11,6 +11,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
+import { useBilingualContent } from "@/hooks/useBilingualContent";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -20,6 +22,12 @@ const ProductPage = () => {
   const [activeTab, setActiveTab] = useState<"description" | "specifications">("specifications");
   const { addItem } = useCart();
   const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
+  const { getProductFields, getCategoryFields } = useBilingualContent();
+  const { t } = useLanguage();
+
+  // Get bilingual fields
+  const productFields = product ? getProductFields(product) : null;
+  const categoryFields = product?.category ? getCategoryFields(product.category) : null;
 
   // Track product view
   useEffect(() => {
@@ -49,16 +57,16 @@ const ProductPage = () => {
     );
   }
 
-  if (error || !product) {
+  if (error || !product || !productFields) {
     return (
       <Layout>
         <div className="container-premium py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">পণ্য পাওয়া যায়নি</h1>
+          <h1 className="text-2xl font-bold mb-4">{t.products.noProductsFound}</h1>
           <p className="text-muted-foreground mb-8">
-            আপনি যে পণ্যটি খুঁজছেন সেটি পাওয়া যায়নি।
+            {t.errors.pageNotFoundMessage}
           </p>
           <Button asChild>
-            <Link to="/categories">পণ্য দেখুন</Link>
+            <Link to="/categories">{t.hero.browseProducts}</Link>
           </Button>
         </div>
       </Layout>
@@ -74,7 +82,7 @@ const ProductPage = () => {
       image_url: product.image_url || product.images?.[0] || null,
       sku: product.sku,
     }, quantity);
-    toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+    toast.success(t.products.addedToCart.replace('{name}', productFields.name));
   };
 
   const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
@@ -88,25 +96,25 @@ const ProductPage = () => {
         <div className="container-premium py-4">
           <nav className="flex items-center gap-2 text-sm flex-wrap">
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              হোম
+              {t.nav.home}
             </Link>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
             <Link to="/categories" className="text-muted-foreground hover:text-foreground transition-colors">
-              পণ্য
+              {t.nav.products}
             </Link>
-            {product.category && (
+            {categoryFields && product.category && (
               <>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 <Link 
                   to={`/category/${product.category.slug}`} 
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {product.category.name}
+                  {categoryFields.name}
                 </Link>
               </>
             )}
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            <span className="text-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+            <span className="text-foreground font-medium truncate max-w-[200px]">{productFields.name}</span>
           </nav>
         </div>
       </div>
@@ -119,24 +127,24 @@ const ProductPage = () => {
             <ProductImageGallery
               images={product.images || []}
               mainImage={product.image_url}
-              productName={product.name}
+              productName={productFields.name}
             />
 
             {/* Product Info */}
             <div className="space-y-6">
               {/* Header */}
               <div>
-                {product.category && (
+                {categoryFields && product.category && (
                   <Link
                     to={`/category/${product.category.slug}`}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {product.category.name}
+                    {categoryFields.name}
                   </Link>
                 )}
-                <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3">{product.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mt-2 mb-3">{productFields.name}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  {product.sku && <span>SKU: {product.sku}</span>}
+                  {product.sku && <span>{t.products.sku}: {product.sku}</span>}
                 </div>
               </div>
 
@@ -152,7 +160,7 @@ const ProductPage = () => {
                         {formatPrice(product.compare_price)}
                       </span>
                       <span className="bg-accent text-accent-foreground text-sm font-semibold px-2 py-1 rounded">
-                        {Math.round((1 - product.price / product.compare_price) * 100)}% OFF
+                        {Math.round((1 - product.price / product.compare_price) * 100)}% {t.products.off}
                       </span>
                     </>
                   )}
@@ -161,25 +169,25 @@ const ProductPage = () => {
                   {product.in_stock ? (
                     <span className="inline-flex items-center gap-1.5 text-green-600 font-medium">
                       <Check className="h-4 w-4" />
-                      স্টকে আছে ({product.stock_quantity}টি)
+                      {t.products.inStock} ({product.stock_quantity}{t.common.quantity.charAt(0)})
                     </span>
                   ) : (
-                    <span className="text-destructive font-medium">স্টক নেই</span>
+                    <span className="text-destructive font-medium">{t.products.outOfStock}</span>
                   )}
                 </div>
               </div>
 
               {/* Short Description */}
-              {product.short_description && (
+              {productFields.shortDescription && (
                 <p className="text-muted-foreground leading-relaxed">
-                  {product.short_description}
+                  {productFields.shortDescription}
                 </p>
               )}
 
               {/* Quantity & Add to Cart */}
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">পরিমাণ:</span>
+                  <span className="text-sm font-medium">{t.common.quantity}:</span>
                   <div className="flex items-center border border-border rounded-md">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -207,7 +215,7 @@ const ProductPage = () => {
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    কার্টে যোগ করুন
+                    {t.common.addToCart}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -216,7 +224,7 @@ const ProductPage = () => {
                     asChild
                   >
                     <Link to={`/request-quote?product=${encodeURIComponent(product.name)}&category=${product.category?.slug || ''}`}>
-                      কোটেশন নিন
+                      {t.common.getQuote}
                     </Link>
                   </Button>
                 </div>
@@ -224,10 +232,10 @@ const ProductPage = () => {
                 {/* B2B Message */}
                 <div className="bg-muted/50 rounded-lg p-4 border border-border">
                   <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">প্রাতিষ্ঠানিক ক্রয়ের জন্য?</strong>{" "}
-                    বাল্ক অর্ডার ও বিশেষ মূল্যের জন্য{" "}
+                    <strong className="text-foreground">{t.rfq.forInstitutional}</strong>{" "}
+                    {t.rfq.bulkOrderMessage}{" "}
                     <Link to="/request-quote" className="text-primary hover:underline font-medium">
-                      কোটেশন রিকোয়েস্ট করুন
+                      {t.nav.requestQuote}
                     </Link>
                   </p>
                 </div>
@@ -237,15 +245,15 @@ const ProductPage = () => {
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-border">
                 <div className="text-center">
                   <Truck className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">সারাদেশে ডেলিভারি</span>
+                  <span className="text-xs text-muted-foreground">{t.trustBadges.nationwide}</span>
                 </div>
                 <div className="text-center">
                   <Shield className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">ওয়ারেন্টি</span>
+                  <span className="text-xs text-muted-foreground">{t.trustBadges.warranty}</span>
                 </div>
                 <div className="text-center">
                   <Phone className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">বিশেষজ্ঞ সাপোর্ট</span>
+                  <span className="text-xs text-muted-foreground">{t.trustBadges.expertSupport}</span>
                 </div>
               </div>
             </div>
@@ -266,7 +274,7 @@ const ProductPage = () => {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              স্পেসিফিকেশন
+              {t.products.specifications}
             </button>
             <button
               onClick={() => setActiveTab("description")}
@@ -276,7 +284,7 @@ const ProductPage = () => {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              বিবরণ
+              {t.products.description}
             </button>
           </div>
 
@@ -285,7 +293,7 @@ const ProductPage = () => {
             <div className="grid md:grid-cols-2 gap-8">
               {Object.keys(specifications).length > 0 && (
                 <div className="bg-card border border-border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4">প্রযুক্তিগত স্পেসিফিকেশন</h3>
+                  <h3 className="font-semibold mb-4">{t.products.technicalSpecs}</h3>
                   <table className="spec-table">
                     <tbody>
                       {Object.entries(specifications).map(([key, value]) => (
@@ -300,7 +308,7 @@ const ProductPage = () => {
               )}
               {features.length > 0 && (
                 <div className="bg-card border border-border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4">মূল বৈশিষ্ট্য</h3>
+                  <h3 className="font-semibold mb-4">{t.products.keyFeatures}</h3>
                   <ul className="space-y-3">
                     {features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-3">
@@ -317,7 +325,7 @@ const ProductPage = () => {
           {activeTab === "description" && (
             <div className="bg-card border border-border rounded-lg p-6 max-w-3xl">
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {product.description || "কোনো বিবরণ নেই"}
+                {productFields.description || t.products.noDescription}
               </p>
             </div>
           )}
@@ -328,7 +336,7 @@ const ProductPage = () => {
       {relatedProducts.length > 0 && (
         <section className="py-12 md:py-16">
           <div className="container-premium">
-            <h2 className="text-2xl font-bold mb-8">সম্পর্কিত পণ্য</h2>
+            <h2 className="text-2xl font-bold mb-8">{t.products.relatedProducts}</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <DBProductCard key={relatedProduct.id} product={relatedProduct} />
