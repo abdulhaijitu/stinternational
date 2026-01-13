@@ -1,32 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { 
-  FlaskConical, 
-  Microscope, 
-  Scale, 
-  HardHat, 
-  TestTube, 
-  GraduationCap,
-  Timer,
-  Ruler,
-  ShieldCheck
-} from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { useCategoriesByGroup } from "@/hooks/useProducts";
-
-const iconMap: Record<string, any> = {
-  FlaskConical,
-  Microscope,
-  Scale,
-  HardHat,
-  TestTube,
-  GraduationCap,
-  Timer,
-  Ruler,
-  ShieldCheck,
-  Weight: Scale,
-  Shield: ShieldCheck,
-};
+import { getCategoryIcon } from "@/lib/categoryIcons";
 
 const Categories = () => {
   const { groups, isLoading, error } = useCategoriesByGroup();
@@ -69,7 +45,7 @@ const Categories = () => {
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {group.categories.map((category) => {
-                      const IconComponent = iconMap[category.icon_name || ""] || FlaskConical;
+                      const IconComponent = getCategoryIcon(category.icon_name);
                       return (
                         <Link
                           key={category.id}

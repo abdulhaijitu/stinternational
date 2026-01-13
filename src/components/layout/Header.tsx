@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSmartHeader } from "@/hooks/useSmartHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import CategoryAwareSearch from "./CategoryAwareSearch";
-import CategoryNavMenu from "./CategoryNavMenu";
+import MegaMenu from "./MegaMenu";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
 import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "@/assets/logo.png";
@@ -231,7 +231,7 @@ const Header = () => {
         >
           <div className="container-premium h-full">
             <div className="flex items-center gap-8 h-full">
-              <CategoryNavMenu isCompact={isCompact} />
+              <MegaMenu isCompact={isCompact} />
 
               <Link 
                 to="/products" 
