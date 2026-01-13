@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
@@ -24,86 +25,161 @@ import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import Testimonials from "@/components/homepage/Testimonials";
 import HeroSlider from "@/components/homepage/HeroSlider";
 
-// Trust signals data - speaks to both B2B and B2C
-const trustSignals = [
-  {
-    icon: Building2,
-    title: "Trusted Partner",
-    description: "Serving 2000+ institutions and individual professionals",
-  },
-  {
-    icon: Truck,
-    title: "Nationwide Delivery",
-    description: "Fast shipping for orders of any size across Bangladesh",
-  },
-  {
-    icon: Headphones,
-    title: "Expert Support",
-    description: "Technical assistance for all customers, big or small",
-  },
-  {
-    icon: Shield,
-    title: "Certified Products",
-    description: "Authentic equipment with warranty & documentation",
-  },
-];
+// Trust signals data - speaks to both B2B and B2C (bilingual)
+const trustSignals = {
+  en: [
+    {
+      icon: Building2,
+      title: "Trusted Partner",
+      description: "Serving 2000+ institutions and individual professionals",
+    },
+    {
+      icon: Truck,
+      title: "Nationwide Delivery",
+      description: "Fast shipping for orders of any size across Bangladesh",
+    },
+    {
+      icon: Headphones,
+      title: "Expert Support",
+      description: "Technical assistance for all customers, big or small",
+    },
+    {
+      icon: Shield,
+      title: "Certified Products",
+      description: "Authentic equipment with warranty & documentation",
+    },
+  ],
+  bn: [
+    {
+      icon: Building2,
+      title: "বিশ্বস্ত অংশীদার",
+      description: "২০০০+ প্রতিষ্ঠান এবং পেশাদারদের সেবা প্রদান",
+    },
+    {
+      icon: Truck,
+      title: "দেশব্যাপী ডেলিভারি",
+      description: "বাংলাদেশ জুড়ে যেকোনো সাইজের অর্ডারে দ্রুত শিপিং",
+    },
+    {
+      icon: Headphones,
+      title: "বিশেষজ্ঞ সহায়তা",
+      description: "ছোট-বড় সব গ্রাহকের জন্য প্রযুক্তিগত সহায়তা",
+    },
+    {
+      icon: Shield,
+      title: "প্রত্যয়িত পণ্য",
+      description: "ওয়ারেন্টি ও ডকুমেন্টেশন সহ প্রকৃত যন্ত্রপাতি",
+    },
+  ],
+};
 
-// Top-level category cards
-const categoryCards = [
-  {
-    icon: FlaskConical,
-    title: "Laboratory & Education",
-    description: "Precision instruments for research labs, universities & educational institutions",
-    slug: "laboratory-education",
-    color: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    icon: Gauge,
-    title: "Measurement & Instruments",
-    description: "Accurate measuring tools for quality control & testing applications",
-    slug: "measurement-instruments",
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    icon: HardHat,
-    title: "Engineering & Industrial",
-    description: "Heavy-duty equipment for manufacturing, construction & industrial use",
-    slug: "engineering-industrial",
-    color: "bg-amber-500/10 text-amber-600",
-  },
-];
+// Top-level category cards (bilingual)
+const categoryCards = {
+  en: [
+    {
+      icon: FlaskConical,
+      title: "Laboratory & Education",
+      description: "Precision instruments for research labs, universities & educational institutions",
+      slug: "laboratory-education",
+    },
+    {
+      icon: Gauge,
+      title: "Measurement & Instruments",
+      description: "Accurate measuring tools for quality control & testing applications",
+      slug: "measurement-instruments",
+    },
+    {
+      icon: HardHat,
+      title: "Engineering & Industrial",
+      description: "Heavy-duty equipment for manufacturing, construction & industrial use",
+      slug: "engineering-industrial",
+    },
+  ],
+  bn: [
+    {
+      icon: FlaskConical,
+      title: "ল্যাবরেটরি ও শিক্ষা",
+      description: "গবেষণা ল্যাব, বিশ্ববিদ্যালয় এবং শিক্ষা প্রতিষ্ঠানের জন্য নির্ভুল যন্ত্রপাতি",
+      slug: "laboratory-education",
+    },
+    {
+      icon: Gauge,
+      title: "পরিমাপ ও যন্ত্রপাতি",
+      description: "গুণগত নিয়ন্ত্রণ ও পরীক্ষার জন্য সঠিক পরিমাপ সরঞ্জাম",
+      slug: "measurement-instruments",
+    },
+    {
+      icon: HardHat,
+      title: "প্রকৌশল ও শিল্প",
+      description: "উৎপাদন, নির্মাণ এবং শিল্প ব্যবহারের জন্য ভারী যন্ত্রপাতি",
+      slug: "engineering-industrial",
+    },
+  ],
+};
 
-// Why choose us points
-const whyChooseUs = [
-  {
-    icon: Target,
-    title: "Specification Accuracy",
-    description: "Detailed technical specs for informed purchasing decisions",
-  },
-  {
-    icon: Award,
-    title: "Reliable Sourcing",
-    description: "Partnerships with trusted global manufacturers",
-  },
-  {
-    icon: Wrench,
-    title: "After-Sales Support",
-    description: "Installation guidance, calibration & maintenance services",
-  },
-  {
-    icon: Building2,
-    title: "Institutional Ready",
-    description: "Bulk pricing, documentation & procurement support",
-  },
-];
+// Why choose us points (bilingual)
+const whyChooseUs = {
+  en: [
+    {
+      icon: Target,
+      title: "Specification Accuracy",
+      description: "Detailed technical specs for informed purchasing decisions",
+    },
+    {
+      icon: Award,
+      title: "Reliable Sourcing",
+      description: "Partnerships with trusted global manufacturers",
+    },
+    {
+      icon: Wrench,
+      title: "After-Sales Support",
+      description: "Installation guidance, calibration & maintenance services",
+    },
+    {
+      icon: Building2,
+      title: "Institutional Ready",
+      description: "Bulk pricing, documentation & procurement support",
+    },
+  ],
+  bn: [
+    {
+      icon: Target,
+      title: "সঠিক স্পেসিফিকেশন",
+      description: "সচেতন ক্রয় সিদ্ধান্তের জন্য বিস্তারিত প্রযুক্তিগত তথ্য",
+    },
+    {
+      icon: Award,
+      title: "নির্ভরযোগ্য সোর্সিং",
+      description: "বিশ্বস্ত বৈশ্বিক প্রস্তুতকারকদের সাথে অংশীদারিত্ব",
+    },
+    {
+      icon: Wrench,
+      title: "বিক্রয়োত্তর সেবা",
+      description: "ইনস্টলেশন, ক্যালিব্রেশন ও রক্ষণাবেক্ষণ সেবা",
+    },
+    {
+      icon: Building2,
+      title: "প্রাতিষ্ঠানিক প্রস্তুত",
+      description: "বাল্ক মূল্য, ডকুমেন্টেশন এবং প্রকিউরমেন্ট সহায়তা",
+    },
+  ],
+};
 
-// Stats data
-const stats = [
-  { value: "19+", label: "Years of Experience" },
-  { value: "5000+", label: "Products Available" },
-  { value: "2000+", label: "Satisfied Clients" },
-  { value: "50+", label: "Trusted Brands" },
-];
+// Stats data (bilingual)
+const stats = {
+  en: [
+    { value: "19+", label: "Years of Experience" },
+    { value: "5000+", label: "Products Available" },
+    { value: "2000+", label: "Satisfied Clients" },
+    { value: "50+", label: "Trusted Brands" },
+  ],
+  bn: [
+    { value: "১৯+", label: "বছরের অভিজ্ঞতা" },
+    { value: "৫০০০+", label: "পণ্য উপলব্ধ" },
+    { value: "২০০০+", label: "সন্তুষ্ট গ্রাহক" },
+    { value: "৫০+", label: "বিশ্বস্ত ব্র্যান্ড" },
+  ],
+};
 
 // Product card skeleton for loading state
 const ProductSkeleton = () => (
@@ -121,6 +197,13 @@ const ProductSkeleton = () => (
 const Index = () => {
   const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
+  const { language, t } = useLanguage();
+  
+  // Get language-specific content
+  const currentTrustSignals = trustSignals[language];
+  const currentCategoryCards = categoryCards[language];
+  const currentWhyChooseUs = whyChooseUs[language];
+  const currentStats = stats[language];
 
   return (
     <Layout>
@@ -131,7 +214,7 @@ const Index = () => {
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-8 md:py-10">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {trustSignals.map((signal, index) => (
+            {currentTrustSignals.map((signal, index) => (
               <div 
                 key={index} 
                 className="flex items-start gap-4 p-4 rounded-lg hover:bg-background/50 transition-colors duration-200"
@@ -156,20 +239,22 @@ const Index = () => {
       <section className="py-16 md:py-20">
         <div className="container-premium">
           <div className="text-center mb-12">
-            <h2 className="mb-4">Product Categories</h2>
+            <h2 className="mb-4">{language === 'bn' ? 'পণ্য বিভাগ' : 'Product Categories'}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Browse our comprehensive range of scientific, measurement, and industrial equipment
+              {language === 'bn' 
+                ? 'বৈজ্ঞানিক, পরিমাপ এবং শিল্প যন্ত্রপাতির ব্যাপক পরিসর ব্রাউজ করুন'
+                : 'Browse our comprehensive range of scientific, measurement, and industrial equipment'}
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {categoryCards.map((category) => (
+            {currentCategoryCards.map((category) => (
               <Link
                 key={category.slug}
                 to={`/categories#${category.slug}`}
                 className="group bg-card border border-border rounded-lg p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className={`w-14 h-14 ${category.color} rounded-lg flex items-center justify-center mb-6`}>
+                <div className="w-14 h-14 bg-primary/10 text-primary rounded-lg flex items-center justify-center mb-6">
                   <category.icon className="h-7 w-7" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
@@ -179,7 +264,7 @@ const Index = () => {
                   {category.description}
                 </p>
                 <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:text-accent transition-colors">
-                  View Products
+                  {language === 'bn' ? 'পণ্য দেখুন' : 'View Products'}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
                 </span>
               </Link>
@@ -207,7 +292,7 @@ const Index = () => {
                         to={`/categories#${group.slug}`}
                         className="text-xs text-primary font-medium px-3 py-1.5"
                       >
-                        +{group.categories.length - 4} more
+                        +{group.categories.length - 4} {language === 'bn' ? 'আরো' : 'more'}
                       </Link>
                     )}
                   </div>
@@ -222,14 +307,18 @@ const Index = () => {
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container-premium">
           <div className="text-center mb-12">
-            <h2 className="mb-4">Why Choose ST International</h2>
+            <h2 className="mb-4">
+              {language === 'bn' ? 'কেন ST International বেছে নেবেন' : 'Why Choose ST International'}
+            </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Trusted by laboratories, factories, and institutions across Bangladesh
+              {language === 'bn' 
+                ? 'বাংলাদেশ জুড়ে ল্যাবরেটরি, কারখানা এবং প্রতিষ্ঠানের বিশ্বাসযোগ্য অংশীদার'
+                : 'Trusted by laboratories, factories, and institutions across Bangladesh'}
             </p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whyChooseUs.map((item, index) => (
+            {currentWhyChooseUs.map((item, index) => (
               <div 
                 key={index} 
                 className="bg-card border border-border rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
@@ -251,16 +340,20 @@ const Index = () => {
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">Featured Products</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                {language === 'bn' ? 'ফিচার্ড পণ্য' : 'Featured Products'}
+              </h2>
               <p className="text-muted-foreground text-base max-w-xl">
-                Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.
+                {language === 'bn' 
+                  ? 'বাংলাদেশ জুড়ে পেশাদারদের বিশ্বাসযোগ্য শীর্ষ-রেটেড বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির নির্বাচিত সংগ্রহ'
+                  : 'Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.'}
               </p>
             </div>
             <Link
               to="/products"
               className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent transition-colors shrink-0"
             >
-              View All Products
+              {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -280,9 +373,13 @@ const Index = () => {
             </div>
           ) : (
             <div className="text-center py-16 bg-card rounded-xl border border-border">
-              <p className="text-muted-foreground mb-4">No featured products available</p>
+              <p className="text-muted-foreground mb-4">
+                {language === 'bn' ? 'কোনো ফিচার্ড পণ্য নেই' : 'No featured products available'}
+              </p>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/products">Browse All Products</Link>
+                <Link to="/products">
+                  {language === 'bn' ? 'সব পণ্য ব্রাউজ করুন' : 'Browse All Products'}
+                </Link>
               </Button>
             </div>
           )}
@@ -291,7 +388,7 @@ const Index = () => {
           <div className="mt-10 text-center sm:hidden">
             <Button variant="outline" size="lg" asChild>
               <Link to="/products">
-                View All Products
+                {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
@@ -309,7 +406,7 @@ const Index = () => {
       <section className="py-16 md:py-20 bg-primary text-primary-foreground">
         <div className="container-premium">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+            {currentStats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-accent mb-2">{stat.value}</div>
                 <div className="text-sm text-primary-foreground/70">{stat.label}</div>
