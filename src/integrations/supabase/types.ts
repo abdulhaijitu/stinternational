@@ -18,12 +18,14 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          description_bn: string | null
           display_order: number | null
           icon_name: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
           name: string
+          name_bn: string | null
           parent_group: string | null
           slug: string
           updated_at: string
@@ -31,12 +33,14 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          description_bn?: string | null
           display_order?: number | null
           icon_name?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name: string
+          name_bn?: string | null
           parent_group?: string | null
           slug: string
           updated_at?: string
@@ -44,12 +48,14 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          description_bn?: string | null
           display_order?: number | null
           icon_name?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name?: string
+          name_bn?: string | null
           parent_group?: string | null
           slug?: string
           updated_at?: string
@@ -239,6 +245,7 @@ export type Database = {
           compare_price: number | null
           created_at: string
           description: string | null
+          description_bn: string | null
           features: string[] | null
           id: string
           image_url: string | null
@@ -247,8 +254,10 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           name: string
+          name_bn: string | null
           price: number
           short_description: string | null
+          short_description_bn: string | null
           sku: string | null
           slug: string
           specifications: Json | null
@@ -260,6 +269,7 @@ export type Database = {
           compare_price?: number | null
           created_at?: string
           description?: string | null
+          description_bn?: string | null
           features?: string[] | null
           id?: string
           image_url?: string | null
@@ -268,8 +278,10 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           name: string
+          name_bn?: string | null
           price: number
           short_description?: string | null
+          short_description_bn?: string | null
           sku?: string | null
           slug: string
           specifications?: Json | null
@@ -281,6 +293,7 @@ export type Database = {
           compare_price?: number | null
           created_at?: string
           description?: string | null
+          description_bn?: string | null
           features?: string[] | null
           id?: string
           image_url?: string | null
@@ -289,8 +302,10 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           name?: string
+          name_bn?: string | null
           price?: number
           short_description?: string | null
+          short_description_bn?: string | null
           sku?: string | null
           slug?: string
           specifications?: Json | null
