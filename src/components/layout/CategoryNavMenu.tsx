@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { ChevronRight, ChevronDown, Menu } from "lucide-react";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useActiveCategoriesByGroup, DBCategory } from "@/hooks/useCategories";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CategoryQuickViewPopover from "@/components/products/CategoryQuickViewPopover";
+import { useBilingualContent } from "@/hooks/useBilingualContent";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CategoryNavMenuProps {
   isCompact?: boolean;
@@ -26,9 +28,16 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
   const categoryRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   
   const { groups, isLoading } = useActiveCategoriesByGroup();
+  const { getCategoryFields } = useBilingualContent();
+  const { t } = useLanguage();
 
   // Flatten all categories for the simple list view
   const allCategories = groups.flatMap(g => g.categories);
+
+  // Memoized bilingual category names
+  const getCategoryName = useCallback((category: DBCategory) => {
+    return getCategoryFields(category).name;
+  }, [getCategoryFields]);
 
   // Keyboard navigation for groups
   useKeyboardNavigation({
@@ -147,7 +156,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
         <Menu className={cn(
           isCompact ? "h-4 w-4" : "h-5 w-5"
         )} />
-        <span className="uppercase tracking-wide">Browse Categories</span>
+        <span className="uppercase tracking-wide">{t.nav.browseCategories}</span>
         <ChevronDown className={cn(
           "transition-transform duration-200 ml-1",
           isOpen && "rotate-180",
@@ -191,7 +200,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
                         : "text-foreground/80 hover:bg-muted/40 hover:text-foreground"
                     )}
                   >
-                    <span className="font-medium">{category.name}</span>
+                    <span className="font-medium">{getCategoryName(category)}</span>
                     <ChevronRight className={cn(
                       "h-4 w-4 transition-all duration-150",
                       activeCategoryIndex === index 
@@ -211,7 +220,7 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
                 className="flex items-center justify-center gap-2 py-3 text-sm font-medium text-primary hover:text-primary/80 hover:bg-muted/50 transition-colors duration-150"
               >
                 <ChevronDown className="h-4 w-4" />
-                <span>View All Categories</span>
+                <span>{t.nav.viewAllCategories}</span>
               </Link>
             </div>
           </div>

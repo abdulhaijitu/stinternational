@@ -116,6 +116,14 @@ export const bn = {
     sortBy: "সাজান",
     priceRange: "মূল্য সীমা",
     availability: "প্রাপ্যতা",
+    // Product card actions
+    view: "দেখুন",
+    buy: "কিনুন",
+    getQuote: "কোটেশন নিন",
+    off: "ছাড়",
+    inStock: "স্টকে আছে",
+    outOfStock: "স্টকে নেই",
+    addedToCart: "{name} কার্টে যোগ হয়েছে!",
   },
 
   // Categories

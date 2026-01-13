@@ -116,6 +116,14 @@ export const en = {
     sortBy: "Sort by",
     priceRange: "Price Range",
     availability: "Availability",
+    // Product card actions
+    view: "View",
+    buy: "Buy",
+    getQuote: "Get Quote",
+    off: "OFF",
+    inStock: "In Stock",
+    outOfStock: "Out of Stock",
+    addedToCart: "{name} added to cart!",
   },
 
   // Categories

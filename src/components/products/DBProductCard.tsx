@@ -11,6 +11,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useBilingualContent } from "@/hooks/useBilingualContent";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -19,19 +21,25 @@ interface DBProductCardProps {
 
 const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
   const { addItem } = useCart();
+  const { getProductFields, getCategoryFields } = useBilingualContent();
+  const { t } = useLanguage();
+
+  // Get bilingual fields
+  const productFields = getProductFields(product);
+  const categoryFields = product.category ? getCategoryFields(product.category) : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem({
       id: product.id,
-      name: product.name,
+      name: product.name, // Keep original name for cart data
       slug: product.slug,
       price: product.price,
       image_url: product.image_url || (product.images?.[0] || null),
       sku: product.sku,
     });
-    toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
+    toast.success(t.products.addedToCart.replace('{name}', productFields.name));
   };
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -53,17 +61,17 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
         
         <img
           src={imageUrl}
-          alt={product.name}
+          alt={productFields.name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {product.compare_price && (
           <div className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs font-semibold px-2 py-1 rounded">
-            {Math.round((1 - product.price / product.compare_price) * 100)}% OFF
+            {Math.round((1 - product.price / product.compare_price) * 100)}% {t.products.off}
           </div>
         )}
         {!product.in_stock && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <span className="text-muted-foreground font-medium">স্টক নেই</span>
+            <span className="text-muted-foreground font-medium">{t.products.outOfStock}</span>
           </div>
         )}
         {/* Quick Actions */}
@@ -71,13 +79,13 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
           {onQuickView ? (
             <Button variant="secondary" size="sm" className="flex-1" onClick={handleQuickView}>
               <Eye className="h-4 w-4" />
-              দেখুন
+              {t.products.view}
             </Button>
           ) : (
             <Button variant="secondary" size="sm" className="flex-1" asChild>
               <Link to={`/product/${product.slug}`}>
                 <Eye className="h-4 w-4" />
-                দেখুন
+                {t.products.view}
               </Link>
             </Button>
           )}
@@ -89,7 +97,7 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
             onClick={handleAddToCart}
           >
             <ShoppingCart className="h-4 w-4" />
-            কিনুন
+            {t.products.buy}
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -105,7 +113,7 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>কোটেশন নিন</p>
+              <p>{t.products.getQuote}</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -113,17 +121,17 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
 
       {/* Content */}
       <div className="p-4">
-        {product.category && (
+        {categoryFields && (
           <Link
-            to={`/category/${product.category.slug}`}
+            to={`/category/${product.category!.slug}`}
             className="text-xs text-muted-foreground hover:text-primary transition-colors"
           >
-            {product.category.name}
+            {categoryFields.name}
           </Link>
         )}
         <h3 className="font-semibold text-foreground mt-1 mb-2 line-clamp-2 leading-snug">
           <Link to={`/product/${product.slug}`} className="hover:text-primary transition-colors">
-            {product.name}
+            {productFields.name}
           </Link>
         </h3>
         <div className="flex items-baseline gap-2">
@@ -138,9 +146,9 @@ const DBProductCard = ({ product, onQuickView }: DBProductCardProps) => {
         </div>
         <div className="mt-2">
           {product.in_stock ? (
-            <span className="text-xs text-green-600 font-medium">স্টকে আছে</span>
+            <span className="text-xs text-green-600 font-medium">{t.products.inStock}</span>
           ) : (
-            <span className="text-xs text-destructive font-medium">স্টক নেই</span>
+            <span className="text-xs text-destructive font-medium">{t.products.outOfStock}</span>
           )}
         </div>
       </div>
