@@ -1,62 +1,66 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Slide animation types for each industry
 type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
 
-// Slide data - professional B2B+B2C messaging with unique animations
-const heroSlides = [
+interface SlideData {
+  id: number;
+  trustBadgeKey: 'trustedSupplier' | 'certifiedQuality' | 'industrialGrade' | 'institutionsTrust';
+  headlineKey: 'slide1Headline' | 'slide2Headline' | 'slide3Headline' | 'slide4Headline';
+  accentKey: 'slide1Accent' | 'slide2Accent' | 'slide3Accent' | 'slide4Accent';
+  descriptionKey: 'slide1Description' | 'slide2Description' | 'slide3Description' | 'slide4Description';
+  visual: string;
+  icon: typeof FlaskConical;
+  animation: SlideAnimation;
+}
+
+// Slide configuration - references translation keys
+const slideConfig: SlideData[] = [
   {
     id: 1,
-    trustBadge: "Trusted Supplier Since 2005",
-    headline: "Scientific & Laboratory Equipment",
-    headlineAccent: "for Research Excellence",
-    description: "Precision instruments for universities, research laboratories, and educational institutions. Certified quality with complete documentation and after-sales support.",
-    primaryCta: { label: "Browse Products", href: "/products" },
-    secondaryCta: { label: "Request a Quote", href: "/request-quote" },
+    trustBadgeKey: 'trustedSupplier',
+    headlineKey: 'slide1Headline',
+    accentKey: 'slide1Accent',
+    descriptionKey: 'slide1Description',
     visual: "laboratory",
     icon: FlaskConical,
-    animation: "fade-up" as SlideAnimation,
+    animation: "fade-up",
   },
   {
     id: 2,
-    trustBadge: "Certified Quality Assurance",
-    headline: "Measurement & Precision Instruments",
-    headlineAccent: "for Accurate Results",
-    description: "High-accuracy measuring equipment for quality control, testing laboratories, and industrial applications. Traceable calibration and technical support included.",
-    primaryCta: { label: "Browse Products", href: "/products" },
-    secondaryCta: { label: "Request a Quote", href: "/request-quote" },
+    trustBadgeKey: 'certifiedQuality',
+    headlineKey: 'slide2Headline',
+    accentKey: 'slide2Accent',
+    descriptionKey: 'slide2Description',
     visual: "measurement",
     icon: Gauge,
-    animation: "fade-right" as SlideAnimation,
+    animation: "fade-right",
   },
   {
     id: 3,
-    trustBadge: "Industrial Grade Standards",
-    headline: "Engineering & Industrial Equipment",
-    headlineAccent: "Built for Performance",
-    description: "Heavy-duty equipment for manufacturing, construction, and industrial operations. Bulk supply available with competitive institutional pricing.",
-    primaryCta: { label: "Browse Products", href: "/products" },
-    secondaryCta: { label: "Request a Quote", href: "/request-quote" },
+    trustBadgeKey: 'industrialGrade',
+    headlineKey: 'slide3Headline',
+    accentKey: 'slide3Accent',
+    descriptionKey: 'slide3Description',
     visual: "engineering",
     icon: HardHat,
-    animation: "zoom-in" as SlideAnimation,
+    animation: "zoom-in",
   },
   {
     id: 4,
-    trustBadge: "2000+ Institutions Trust Us",
-    headline: "Your Complete Equipment Partner",
-    headlineAccent: "Nationwide Delivery",
-    description: "From individual professionals to large institutions — we provide certified equipment, technical guidance, and reliable after-sales service across Bangladesh.",
-    primaryCta: { label: "Browse Products", href: "/products" },
-    secondaryCta: { label: "Request a Quote", href: "/request-quote" },
+    trustBadgeKey: 'institutionsTrust',
+    headlineKey: 'slide4Headline',
+    accentKey: 'slide4Accent',
+    descriptionKey: 'slide4Description',
     visual: "general",
     icon: Building2,
-    animation: "fade-left" as SlideAnimation,
+    animation: "fade-left",
   },
 ];
 
@@ -106,7 +110,12 @@ const getVisualAnimationClasses = (animation: SlideAnimation, isActive: boolean)
 };
 
 // Abstract visual components for each industry
-const SlideVisual = ({ type, isActive, animation }: { type: string; isActive: boolean; animation: SlideAnimation }) => {
+const SlideVisual = ({ type, isActive, animation, t }: { 
+  type: string; 
+  isActive: boolean; 
+  animation: SlideAnimation;
+  t: ReturnType<typeof useLanguage>['t'];
+}) => {
   const visualClasses = getVisualAnimationClasses(animation, isActive);
 
   const iconMap: Record<string, typeof FlaskConical> = {
@@ -153,7 +162,7 @@ const SlideVisual = ({ type, isActive, animation }: { type: string; isActive: bo
           isActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
         )}>
           <div className="text-2xl font-bold text-foreground">5000+</div>
-          <div className="text-xs text-muted-foreground">Products</div>
+          <div className="text-xs text-muted-foreground">{t.hero.productsCount}</div>
         </div>
         
         {/* Experience card */}
@@ -162,7 +171,7 @@ const SlideVisual = ({ type, isActive, animation }: { type: string; isActive: bo
           isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}>
           <div className="text-2xl font-bold text-foreground">19+</div>
-          <div className="text-xs text-muted-foreground">Years Experience</div>
+          <div className="text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
         </div>
       </div>
     </div>
@@ -227,6 +236,7 @@ const useKeyboardNavigation = (onPrev: () => void, onNext: () => void, isEnabled
 };
 
 const HeroSlider = () => {
+  const { t } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
@@ -236,6 +246,17 @@ const HeroSlider = () => {
   const sliderRef = useRef<HTMLElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Generate translated slide data
+  const heroSlides = useMemo(() => slideConfig.map(slide => ({
+    ...slide,
+    trustBadge: t.hero[slide.trustBadgeKey],
+    headline: t.hero[slide.headlineKey],
+    headlineAccent: t.hero[slide.accentKey],
+    description: t.hero[slide.descriptionKey],
+    primaryCta: { label: t.hero.browseProducts, href: "/products" },
+    secondaryCta: { label: t.hero.requestQuote, href: "/request-quote" },
+  })), [t]);
 
   // Computed pause state (either hover or manual)
   const effectivePaused = isPaused || isManuallyPaused;
@@ -401,11 +422,11 @@ const HeroSlider = () => {
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 justify-center lg:justify-start text-sm text-primary-foreground/70">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-accent" />
-                    <span>Direct purchase available</span>
+                    <span>{t.hero.directPurchase}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-primary-foreground/50" />
-                    <span>Bulk pricing for institutions</span>
+                    <span>{t.hero.bulkPricing}</span>
                   </div>
                 </div>
               </div>
@@ -420,6 +441,7 @@ const HeroSlider = () => {
                 type={slide.visual} 
                 isActive={currentSlide === index}
                 animation={slide.animation}
+                t={t}
               />
             ))}
           </div>
@@ -474,7 +496,7 @@ const HeroSlider = () => {
                 <TooltipTrigger asChild>
                   <button
                     onClick={toggleAutoplay}
-                    aria-label={isManuallyPaused ? "Resume autoplay" : "Pause autoplay"}
+                    aria-label={isManuallyPaused ? t.hero.resumeAutoplay : t.hero.pauseAutoplay}
                     className={cn(
                       "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200",
                       isManuallyPaused 
@@ -493,7 +515,7 @@ const HeroSlider = () => {
                   side="top"
                   className="bg-background text-foreground border border-border shadow-lg"
                 >
-                  <p className="text-sm">{isManuallyPaused ? "Resume autoplay" : "Pause autoplay"}</p>
+                  <p className="text-sm">{isManuallyPaused ? t.hero.resumeAutoplay : t.hero.pauseAutoplay}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -527,7 +549,7 @@ const HeroSlider = () => {
         {/* Swipe hint for mobile */}
         <div className="lg:hidden absolute bottom-4 left-4 text-xs text-primary-foreground/40 flex items-center gap-1">
           <ChevronLeft className="h-3 w-3" />
-          <span>Swipe</span>
+          <span>{t.hero.swipe}</span>
           <ChevronRight className="h-3 w-3" />
         </div>
       </div>
