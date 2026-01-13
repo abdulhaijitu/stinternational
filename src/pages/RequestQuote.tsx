@@ -174,7 +174,8 @@ const RequestQuote = () => {
     try {
       const values = getValues();
       
-      const { error } = await supabase.from("quote_requests").insert({
+      // Insert into database
+      const { data: insertedQuote, error } = await supabase.from("quote_requests").insert({
         company_name: values.company_name,
         company_type: values.company_type,
         contact_person: values.contact_person,
@@ -190,9 +191,35 @@ const RequestQuote = () => {
         preferred_payment: values.preferred_payment || null,
         additional_notes: values.additional_notes || null,
         user_id: user?.id || null,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Send email notifications (don't block on failure)
+      try {
+        await supabase.functions.invoke("send-quote-notification", {
+          body: {
+            type: "new_quote",
+            quote: {
+              id: insertedQuote.id,
+              company_name: values.company_name,
+              contact_person: values.contact_person,
+              email: values.email,
+              phone: values.phone,
+              company_type: values.company_type,
+              product_category: values.product_category,
+              product_details: values.product_details,
+              quantity: values.quantity,
+              budget_range: values.budget_range,
+              delivery_city: values.delivery_city,
+              delivery_urgency: values.delivery_urgency,
+            },
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+        // Don't fail the submission if email fails
+      }
 
       toast.success("Quote request submitted successfully! We'll contact you within 24 hours.");
       navigate("/");

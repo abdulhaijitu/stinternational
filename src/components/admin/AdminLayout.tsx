@@ -4,7 +4,7 @@ import {
   Package, 
   FolderOpen, 
   ShoppingCart, 
-  Users,
+  FileText,
   Settings,
   LogOut,
   Menu,
@@ -21,10 +21,11 @@ interface AdminLayoutProps {
 }
 
 const navItems = [
-  { href: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
-  { href: "/admin/products", label: "পণ্যসমূহ", icon: Package },
-  { href: "/admin/categories", label: "ক্যাটাগরি", icon: FolderOpen },
-  { href: "/admin/orders", label: "অর্ডার", icon: ShoppingCart },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/categories", label: "Categories", icon: FolderOpen },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/quotes", label: "Quote Requests", icon: FileText },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
@@ -129,7 +130,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </div>
             <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
-              লগআউট
+              Logout
             </Button>
           </div>
         </aside>
