@@ -122,7 +122,7 @@ const Header = () => {
                   <MapPin className="h-3.5 w-3.5" />
                   <span>{t.header.topBarLocation}</span>
                 </div>
-                <LanguageSwitcher className="hidden md:flex" />
+                <LanguageSwitcher className="hidden md:flex" invertColors />
               </div>
             </div>
           </div>
