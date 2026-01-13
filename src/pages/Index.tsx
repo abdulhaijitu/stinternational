@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -14,7 +14,8 @@ import {
   HardHat
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCategoriesByGroup, useFeaturedProducts } from "@/hooks/useProducts";
+import { useFeaturedProducts } from "@/hooks/useProducts";
+import { useActiveCategoriesByGroup, useCategoryBySlug, getIndustryFromCategory } from "@/hooks/useCategories";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
@@ -23,6 +24,7 @@ import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import HeroCta from "@/components/homepage/HeroCta";
 import Testimonials from "@/components/homepage/Testimonials";
+import IndustryHeroVisual from "@/components/homepage/IndustryHeroVisual";
 
 // Trust signals data
 const trustSignals = [
@@ -119,8 +121,14 @@ const ProductSkeleton = () => (
 );
 
 const Index = () => {
-  const { groups, isLoading: categoriesLoading } = useCategoriesByGroup();
+  const location = useLocation();
+  const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
+  
+  // Determine industry from referrer category (if coming from a category page)
+  const referrerCategory = new URLSearchParams(location.search).get('from');
+  const { data: categoryData } = useCategoryBySlug(referrerCategory || '');
+  const industry = getIndustryFromCategory(categoryData);
 
   return (
     <Layout>
@@ -167,62 +175,9 @@ const Index = () => {
               <HeroCta />
             </div>
 
-            {/* Right Column - Visual */}
+            {/* Right Column - Industry-aware Visual */}
             <div className="hidden lg:block relative">
-              <div className="relative">
-                {/* Main Visual Container */}
-                <div className="relative w-full aspect-square max-w-md mx-auto">
-                  {/* Outer Glow Ring */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-accent/30 via-primary-foreground/10 to-transparent animate-pulse" style={{ animationDuration: '4s' }} />
-                  
-                  {/* Inner Circle */}
-                  <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary-foreground/10 to-transparent backdrop-blur-sm border border-primary-foreground/10">
-                    {/* Equipment Silhouettes */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="grid grid-cols-2 gap-6 p-8">
-                        {/* Microscope Icon */}
-                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
-                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-accent" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <circle cx="12" cy="5" r="2"/>
-                            <path d="M12 7v6M8 13h8M10 13v4a2 2 0 002 2h0a2 2 0 002-2v-4M7 21h10"/>
-                          </svg>
-                        </div>
-                        {/* Scale Icon */}
-                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
-                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-primary-foreground/70" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M12 3v18M4 8l8-5 8 5M4 8l4 8h8l4-8"/>
-                          </svg>
-                        </div>
-                        {/* Gauge Icon */}
-                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
-                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-primary-foreground/70" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path d="M12 7v5l3 3"/>
-                          </svg>
-                        </div>
-                        {/* Flask Icon */}
-                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
-                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-accent/80" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M9 3h6v5l4 9a2 2 0 01-2 3H7a2 2 0 01-2-3l4-9V3"/>
-                            <path d="M9 3h6"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Floating Stats */}
-                  <div className="absolute -top-4 -right-4 bg-background/95 backdrop-blur-sm rounded-lg shadow-xl p-4 border border-border">
-                    <div className="text-2xl font-bold text-primary">5000+</div>
-                    <div className="text-xs text-muted-foreground">Products</div>
-                  </div>
-                  
-                  <div className="absolute -bottom-4 -left-4 bg-background/95 backdrop-blur-sm rounded-lg shadow-xl p-4 border border-border">
-                    <div className="text-2xl font-bold text-primary">19+</div>
-                    <div className="text-xs text-muted-foreground">Years Experience</div>
-                  </div>
-                </div>
-              </div>
+              <IndustryHeroVisual industry={industry} />
             </div>
           </div>
         </div>
