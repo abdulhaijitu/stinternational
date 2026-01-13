@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2 } from "lucide-react";
+import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // Slide animation types for each industry
@@ -228,12 +229,20 @@ const useKeyboardNavigation = (onPrev: () => void, onNext: () => void, isEnabled
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const sliderRef = useRef<HTMLElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Computed pause state (either hover or manual)
+  const effectivePaused = isPaused || isManuallyPaused;
+
+  const toggleAutoplay = useCallback(() => {
+    setIsManuallyPaused(prev => !prev);
+  }, []);
 
   const SLIDE_INTERVAL = 6000; // 6 seconds
   const TRANSITION_DURATION = 500; // 500ms
@@ -261,9 +270,9 @@ const HeroSlider = () => {
   // Keyboard navigation support
   useKeyboardNavigation(prevSlide, nextSlide, isFocused);
 
-  // Auto-slide with pause on hover
+  // Auto-slide with pause on hover or manual toggle
   useEffect(() => {
-    if (isPaused) {
+    if (effectivePaused) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (progressRef.current) clearInterval(progressRef.current);
       return;
@@ -287,7 +296,7 @@ const HeroSlider = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (progressRef.current) clearInterval(progressRef.current);
     };
-  }, [isPaused, nextSlide, currentSlide]);
+  }, [effectivePaused, nextSlide, currentSlide]);
 
   return (
     <section 
@@ -309,7 +318,7 @@ const HeroSlider = () => {
       <div className="absolute top-0 left-0 right-0 h-1 bg-primary-foreground/10 z-20">
         <div 
           className="h-full bg-accent transition-all duration-100 ease-linear"
-          style={{ width: `${isPaused ? progress : progress}%` }}
+          style={{ width: `${effectivePaused ? progress : progress}%` }}
         />
       </div>
 
@@ -418,35 +427,79 @@ const HeroSlider = () => {
 
         {/* Navigation Controls */}
         <div className="flex items-center justify-between mt-8 md:mt-12">
-          {/* Dots Indicator with Progress */}
-          <div className="flex items-center gap-2">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
-                className="relative h-2 overflow-hidden rounded-full transition-all duration-300"
-                style={{ width: currentSlide === index ? '32px' : '8px' }}
-              >
-                <div className={cn(
-                  "absolute inset-0 transition-colors duration-200",
-                  currentSlide === index ? "bg-primary-foreground/30" : "bg-primary-foreground/30 hover:bg-primary-foreground/50"
-                )} />
-                {currentSlide === index && (
-                  <div 
-                    className="absolute inset-y-0 left-0 bg-accent transition-all duration-100 ease-linear"
-                    style={{ width: `${progress}%` }}
-                  />
-                )}
-                {currentSlide !== index && (
-                  <div className="absolute inset-0 bg-primary-foreground/30 hover:bg-primary-foreground/50 transition-colors" />
-                )}
-              </button>
-            ))}
-          </div>
+          {/* Dots Indicator with Progress and Tooltips */}
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-2">
+              {heroSlides.map((slide, index) => (
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => goToSlide(index)}
+                      aria-label={`Go to slide ${index + 1}: ${slide.headline}`}
+                      className="relative h-2 overflow-hidden rounded-full transition-all duration-300"
+                      style={{ width: currentSlide === index ? '32px' : '8px' }}
+                    >
+                      <div className={cn(
+                        "absolute inset-0 transition-colors duration-200",
+                        currentSlide === index ? "bg-primary-foreground/30" : "bg-primary-foreground/30 hover:bg-primary-foreground/50"
+                      )} />
+                      {currentSlide === index && (
+                        <div 
+                          className="absolute inset-y-0 left-0 bg-accent transition-all duration-100 ease-linear"
+                          style={{ width: `${progress}%` }}
+                        />
+                      )}
+                      {currentSlide !== index && (
+                        <div className="absolute inset-0 bg-primary-foreground/30 hover:bg-primary-foreground/50 transition-colors" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top" 
+                    className="bg-background text-foreground border border-border shadow-lg"
+                  >
+                    <p className="font-medium text-sm">{slide.headline}</p>
+                    <p className="text-xs text-muted-foreground">{slide.headlineAccent}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TooltipProvider>
 
-          {/* Arrow Controls */}
+          {/* Arrow Controls with Autoplay Toggle */}
           <div className="flex items-center gap-2">
+            {/* Autoplay Toggle Button */}
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={toggleAutoplay}
+                    aria-label={isManuallyPaused ? "Resume autoplay" : "Pause autoplay"}
+                    className={cn(
+                      "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200",
+                      isManuallyPaused 
+                        ? "border-accent bg-accent/20 text-accent hover:bg-accent/30" 
+                        : "border-primary-foreground/30 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:border-primary-foreground/50"
+                    )}
+                  >
+                    {isManuallyPaused ? (
+                      <Play className="h-4 w-4 ml-0.5" />
+                    ) : (
+                      <Pause className="h-4 w-4" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="top"
+                  className="bg-background text-foreground border border-border shadow-lg"
+                >
+                  <p className="text-sm">{isManuallyPaused ? "Resume autoplay" : "Pause autoplay"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <div className="w-px h-6 bg-primary-foreground/20 mx-1" />
+
             <button
               onClick={prevSlide}
               disabled={isTransitioning}
