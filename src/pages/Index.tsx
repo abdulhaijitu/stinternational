@@ -348,15 +348,15 @@ const Index = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 md:py-24 bg-muted/20">
-        <div className="container-premium">
+      <section className="py-12 md:py-24 bg-muted/20">
+        <div className="container-premium px-4 sm:px-6">
           {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
                 {language === 'bn' ? 'ফিচার্ড পণ্য' : 'Featured Products'}
               </h2>
-              <p className="text-muted-foreground text-base max-w-xl">
+              <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
                 {language === 'bn' 
                   ? 'বাংলাদেশ জুড়ে পেশাদারদের বিশ্বাসযোগ্য শীর্ষ-রেটেড বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির নির্বাচিত সংগ্রহ'
                   : 'Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.'}
@@ -371,22 +371,22 @@ const Index = () => {
             </Link>
           </div>
           
-          {/* Products Grid - 4 columns on desktop */}
+          {/* Products Grid - 2 cols mobile, 3 cols tablet, 4 cols desktop */}
           {productsLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {[...Array(8)].map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
           ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {featuredProducts.slice(0, 8).map((product) => (
                 <DBProductCard key={product.id} product={product} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-card rounded-xl border border-border">
-              <p className="text-muted-foreground mb-4">
+            <div className="text-center py-12 sm:py-16 bg-card rounded-xl border border-border">
+              <p className="text-muted-foreground mb-4 text-sm sm:text-base">
                 {language === 'bn' ? 'কোনো ফিচার্ড পণ্য নেই' : 'No featured products available'}
               </p>
               <Button variant="outline" size="sm" asChild>
@@ -398,8 +398,8 @@ const Index = () => {
           )}
           
           {/* Mobile CTA */}
-          <div className="mt-10 text-center sm:hidden">
-            <Button variant="outline" size="lg" asChild>
+          <div className="mt-6 sm:mt-10 text-center sm:hidden">
+            <Button variant="outline" size="default" asChild>
               <Link to="/products">
                 {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
                 <ArrowRight className="h-4 w-4 ml-2" />
