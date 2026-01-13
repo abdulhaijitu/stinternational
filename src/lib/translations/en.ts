@@ -124,6 +124,10 @@ export const en = {
     inStock: "In Stock",
     outOfStock: "Out of Stock",
     addedToCart: "{name} added to cart!",
+    // Product page specific
+    technicalSpecs: "Technical Specifications",
+    keyFeatures: "Key Features",
+    noDescription: "No description available",
   },
 
   // Categories
@@ -213,6 +217,10 @@ export const en = {
     
     submitRequest: "Submit Quote Request",
     successMessage: "Your quote request has been submitted successfully!",
+    
+    // Product page specific
+    forInstitutional: "For institutional purchases?",
+    bulkOrderMessage: "For bulk orders and special pricing,",
   },
 
   // Account
@@ -287,5 +295,12 @@ export const en = {
     pageNotFoundMessage: "The page you're looking for doesn't exist or has been moved.",
     goHome: "Go Home",
     somethingWentWrong: "Something went wrong",
+  },
+
+  // Trust Badges
+  trustBadges: {
+    nationwide: "Nationwide Delivery",
+    warranty: "Warranty",
+    expertSupport: "Expert Support",
   },
 } as const;

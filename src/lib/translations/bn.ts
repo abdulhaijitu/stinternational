@@ -124,6 +124,10 @@ export const bn = {
     inStock: "স্টকে আছে",
     outOfStock: "স্টকে নেই",
     addedToCart: "{name} কার্টে যোগ হয়েছে!",
+    // Product page specific
+    technicalSpecs: "প্রযুক্তিগত স্পেসিফিকেশন",
+    keyFeatures: "মূল বৈশিষ্ট্য",
+    noDescription: "কোনো বিবরণ নেই",
   },
 
   // Categories
@@ -213,6 +217,10 @@ export const bn = {
     
     submitRequest: "অনুরোধ জমা দিন",
     successMessage: "আপনার মূল্য অনুরোধ সফলভাবে জমা হয়েছে!",
+    
+    // Product page specific
+    forInstitutional: "প্রাতিষ্ঠানিক ক্রয়ের জন্য?",
+    bulkOrderMessage: "বাল্ক অর্ডার ও বিশেষ মূল্যের জন্য",
   },
 
   // Account
@@ -287,5 +295,12 @@ export const bn = {
     pageNotFoundMessage: "আপনি যে পেজটি খুঁজছেন সেটি বিদ্যমান নেই বা স্থানান্তরিত হয়েছে।",
     goHome: "হোমে যান",
     somethingWentWrong: "কিছু ভুল হয়েছে",
+  },
+
+  // Trust Badges
+  trustBadges: {
+    nationwide: "সারাদেশে ডেলিভারি",
+    warranty: "ওয়ারেন্টি",
+    expertSupport: "বিশেষজ্ঞ সাপোর্ট",
   },
 } as const;
