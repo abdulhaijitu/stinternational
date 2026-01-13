@@ -5,7 +5,7 @@ import {
   FolderOpen, 
   ShoppingCart, 
   FileText,
-  Settings,
+  Building2,
   LogOut,
   Menu,
   X
@@ -26,6 +26,7 @@ const navItems = [
   { href: "/admin/categories", label: "Categories", icon: FolderOpen },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/quotes", label: "Quote Requests", icon: FileText },
+  { href: "/admin/logos", label: "Institution Logos", icon: Building2 },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {

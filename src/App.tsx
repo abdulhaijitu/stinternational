@@ -30,6 +30,7 @@ import AdminProductEditor from "./pages/admin/AdminProductEditor";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminQuotes from "./pages/admin/AdminQuotes";
+import AdminLogos from "./pages/admin/AdminLogos";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/admin/categories" element={<AdminCategories />} />
                 <Route path="/admin/orders" element={<AdminOrders />} />
                 <Route path="/admin/quotes" element={<AdminQuotes />} />
+                <Route path="/admin/logos" element={<AdminLogos />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
