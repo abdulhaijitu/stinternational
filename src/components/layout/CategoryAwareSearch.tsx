@@ -6,9 +6,10 @@ import { useActiveCategories, DBCategory } from '@/hooks/useCategories';
 interface CategoryAwareSearchProps {
   currentCategorySlug?: string;
   isCompact?: boolean;
+  autoFocus?: boolean;
 }
 
-const CategoryAwareSearch = ({ currentCategorySlug, isCompact = false }: CategoryAwareSearchProps) => {
+const CategoryAwareSearch = ({ currentCategorySlug, isCompact = false, autoFocus = false }: CategoryAwareSearchProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<DBCategory | null>(null);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
@@ -131,6 +132,7 @@ const CategoryAwareSearch = ({ currentCategorySlug, isCompact = false }: Categor
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={getPlaceholder()}
+            autoFocus={autoFocus}
             className={`w-full bg-transparent focus:outline-none ${
               isCompact ? 'px-2 text-xs' : 'px-3 text-sm'
             }`}

@@ -1,6 +1,7 @@
 import Header from "./Header";
 import Footer from "./Footer";
 import BackToTop from "./BackToTop";
+import MobileBottomNav from "./MobileBottomNav";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
       <Footer />
       <BackToTop />
+      <MobileBottomNav />
     </div>
   );
 };
