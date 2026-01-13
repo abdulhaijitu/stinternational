@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronDown, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,10 @@ import {
 } from "@/components/ui/collapsible";
 import DBProductCard from "@/components/products/DBProductCard";
 import { useAllProducts, useCategories } from "@/hooks/useProducts";
-import { formatPrice } from "@/lib/formatPrice";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
+
+const PRODUCTS_PER_PAGE = 12;
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +49,9 @@ const Products = () => {
   const [inStockOnly, setInStockOnly] = useState(searchParams.get("inStock") === "true");
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("sort") as SortOption) || "newest"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page") || "1", 10)
   );
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -111,8 +115,15 @@ const Products = () => {
     return filtered;
   }, [allProducts, search, selectedCategories, priceRange, inStockOnly, sortBy]);
 
-  // Update URL params
-  const updateSearchParams = () => {
+  // Pagination
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  // Reset to page 1 when filters change
+  const updateSearchParams = (resetPage = true) => {
     const params = new URLSearchParams();
     if (search) params.set("q", search);
     if (selectedCategories.length > 0) params.set("categories", selectedCategories.join(","));
@@ -120,12 +131,27 @@ const Products = () => {
     if (priceRange.max) params.set("maxPrice", priceRange.max);
     if (inStockOnly) params.set("inStock", "true");
     if (sortBy !== "newest") params.set("sort", sortBy);
+    if (!resetPage && currentPage > 1) params.set("page", currentPage.toString());
     setSearchParams(params);
+    if (resetPage) setCurrentPage(1);
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    updateSearchParams();
+    updateSearchParams(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const params = new URLSearchParams(searchParams);
+    if (page > 1) {
+      params.set("page", page.toString());
+    } else {
+      params.delete("page");
+    }
+    setSearchParams(params);
+    // Scroll to top of products
+    window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
   const handleCategoryToggle = (slug: string) => {
@@ -140,6 +166,7 @@ const Products = () => {
     setPriceRange({ min: "", max: "" });
     setInStockOnly(false);
     setSortBy("newest");
+    setCurrentPage(1);
     setSearchParams({});
   };
 
@@ -222,7 +249,7 @@ const Products = () => {
 
       {/* Apply/Clear Buttons */}
       <div className="space-y-2 pt-4 border-t border-border">
-        <Button onClick={updateSearchParams} className="w-full">
+        <Button onClick={() => updateSearchParams(true)} className="w-full">
           ফিল্টার প্রয়োগ করুন
         </Button>
         {hasActiveFilters && (
@@ -348,11 +375,94 @@ const Products = () => {
                   )}
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredProducts.map((product) => (
-                    <DBProductCard key={product.id} product={product} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {paginatedProducts.map((product) => (
+                      <DBProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+
+                      <div className="flex items-center gap-1">
+                        {/* First page */}
+                        {currentPage > 3 && (
+                          <>
+                            <Button
+                              variant={currentPage === 1 ? "default" : "outline"}
+                              size="icon"
+                              onClick={() => handlePageChange(1)}
+                            >
+                              1
+                            </Button>
+                            {currentPage > 4 && (
+                              <span className="px-2 text-muted-foreground">...</span>
+                            )}
+                          </>
+                        )}
+
+                        {/* Page numbers around current */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(
+                            (page) =>
+                              page >= currentPage - 2 &&
+                              page <= currentPage + 2 &&
+                              page >= 1 &&
+                              page <= totalPages
+                          )
+                          .map((page) => (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="icon"
+                              onClick={() => handlePageChange(page)}
+                            >
+                              {page}
+                            </Button>
+                          ))}
+
+                        {/* Last page */}
+                        {currentPage < totalPages - 2 && (
+                          <>
+                            {currentPage < totalPages - 3 && (
+                              <span className="px-2 text-muted-foreground">...</span>
+                            )}
+                            <Button
+                              variant={currentPage === totalPages ? "default" : "outline"}
+                              size="icon"
+                              onClick={() => handlePageChange(totalPages)}
+                            >
+                              {totalPages}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+
+                      <span className="text-sm text-muted-foreground ml-4">
+                        পৃষ্ঠা {currentPage} / {totalPages}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
