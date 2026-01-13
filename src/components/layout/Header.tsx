@@ -8,10 +8,11 @@ import {
   Search,
   Menu,
   X,
-  ChevronDown,
-  Heart
+  ChevronRight,
+  Heart,
+  Grid3X3
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { categoryGroups } from "@/lib/categories";
 import { useCart } from "@/contexts/CartContext";
@@ -22,11 +23,24 @@ import logo from "@/assets/logo.png";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { getItemCount } = useCart();
   const { user } = useAuth();
   const { wishlist } = useWishlist();
   const cartItemCount = getItemCount();
   const wishlistCount = wishlist.length;
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsCategoriesOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -120,45 +134,109 @@ const Header = () => {
       <nav className="hidden lg:block bg-muted/50 border-b border-border">
         <div className="container-premium">
           <div className="flex items-center gap-8 h-12">
-            {/* Categories Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setIsCategoriesOpen(true)}
-              onMouseLeave={() => setIsCategoriesOpen(false)}
-            >
-              <button className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                <Menu className="h-4 w-4" />
+            {/* Categories Dropdown - Global B2B Style */}
+            <div className="relative" ref={menuRef}>
+              <button 
+                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  isCategoriesOpen 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground'
+                }`}
+              >
+                <Grid3X3 className="h-4 w-4" />
                 <span>All Categories</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
+                <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${isCategoriesOpen ? 'rotate-90' : ''}`} />
               </button>
 
-              {/* Mega Menu */}
+              {/* Mega Menu - Two Column Layout */}
               {isCategoriesOpen && (
-                <div className="absolute top-full left-0 w-[800px] bg-background border border-border rounded-md shadow-xl mt-2 p-6 grid grid-cols-3 gap-6 animate-fade-in">
-                  {categoryGroups.map((group) => (
-                    <div key={group.id}>
-                      <h3 className="font-semibold text-foreground mb-3">{group.name}</h3>
-                      <ul className="space-y-2">
-                        {group.categories.map((category) => (
+                <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-lg shadow-2xl overflow-hidden z-50">
+                  <div className="flex">
+                    {/* Left Column - Main Categories */}
+                    <div className="w-64 bg-muted/30 border-r border-border py-2">
+                      {categoryGroups.map((group, index) => (
+                        <button
+                          key={group.id}
+                          onMouseEnter={() => setActiveGroupIndex(index)}
+                          onClick={() => setActiveGroupIndex(index)}
+                          className={`w-full flex items-center justify-between px-4 py-3 text-left text-sm transition-colors duration-150 ${
+                            activeGroupIndex === index
+                              ? 'bg-background text-primary font-medium border-l-2 border-primary'
+                              : 'text-foreground hover:bg-background/50'
+                          }`}
+                        >
+                          <span>{group.name}</span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      ))}
+                      
+                      {/* View All Categories Link */}
+                      <div className="border-t border-border mt-2 pt-2 px-4">
+                        <Link
+                          to="/categories"
+                          onClick={() => setIsCategoriesOpen(false)}
+                          className="flex items-center gap-2 py-2 text-sm text-primary font-medium hover:underline"
+                        >
+                          View All Categories
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Subcategories */}
+                    <div className="w-80 p-4">
+                      <div className="mb-3 pb-2 border-b border-border">
+                        <h3 className="font-semibold text-foreground">
+                          {categoryGroups[activeGroupIndex]?.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {categoryGroups[activeGroupIndex]?.description}
+                        </p>
+                      </div>
+                      
+                      <ul className="space-y-1">
+                        {categoryGroups[activeGroupIndex]?.categories.map((category) => (
                           <li key={category.id}>
                             <Link
                               to={`/category/${category.slug}`}
-                              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                              onClick={() => setIsCategoriesOpen(false)}
+                              className="flex items-center justify-between px-3 py-2.5 rounded-md text-sm text-foreground hover:bg-muted transition-colors duration-150 group"
                             >
-                              <category.icon className="h-4 w-4" />
-                              {category.name}
+                              <div className="flex items-center gap-3">
+                                <category.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <span className="group-hover:text-primary transition-colors">{category.name}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                                {category.productCount}
+                              </span>
                             </Link>
                           </li>
                         ))}
                       </ul>
+                      
+                      {/* Group CTA */}
+                      <div className="mt-4 pt-3 border-t border-border">
+                        <Link
+                          to={`/categories#${categoryGroups[activeGroupIndex]?.slug}`}
+                          onClick={() => setIsCategoriesOpen(false)}
+                          className="inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline"
+                        >
+                          Browse all {categoryGroups[activeGroupIndex]?.name}
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            <Link to="/categories" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Products
+            <Link to="/products" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              All Products
+            </Link>
+            <Link to="/request-quote" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              Request Quote
             </Link>
             <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               About Us
@@ -187,40 +265,57 @@ const Header = () => {
             </div>
 
             {/* Mobile Nav Links */}
-            <nav className="space-y-4">
-              <Link to="/categories" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
-                All Products
+            <nav className="space-y-1">
+              <Link to="/categories" className="flex items-center justify-between py-3 px-4 text-base font-medium bg-primary/5 rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>All Products</span>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </Link>
+              
               {categoryGroups.map((group) => (
-                <div key={group.id} className="border-b border-border pb-4">
-                  <h3 className="font-semibold text-foreground mb-2">{group.name}</h3>
-                  <ul className="space-y-2 pl-4">
+                <div key={group.id} className="border-b border-border py-3">
+                  <h3 className="font-semibold text-foreground px-4 mb-2">{group.name}</h3>
+                  <ul className="space-y-1">
                     {group.categories.map((category) => (
                       <li key={category.id}>
                         <Link
                           to={`/category/${category.slug}`}
-                          className="text-sm text-muted-foreground"
+                          className="flex items-center justify-between py-2 px-4 text-sm text-muted-foreground hover:bg-muted rounded-md"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          {category.name}
+                          <div className="flex items-center gap-3">
+                            <category.icon className="h-4 w-4" />
+                            <span>{category.name}</span>
+                          </div>
+                          <span className="text-xs bg-muted px-2 py-0.5 rounded">{category.productCount}</span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
-              <Link to="/about" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
-                About Us
-              </Link>
-              <Link to="/contact" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
-                Contact
-              </Link>
-              <Link to="/wishlist" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
-                My Wishlist
-              </Link>
-              <Link to="/account" className="block py-3 text-lg font-medium border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
-                My Account
-              </Link>
+              
+              <div className="pt-4 space-y-1">
+                <Link to="/request-quote" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>Request Quote</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+                <Link to="/about" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>About Us</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+                <Link to="/contact" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>Contact</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+                <Link to="/wishlist" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>My Wishlist</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+                <Link to="/account" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>My Account</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+              </div>
             </nav>
           </div>
         </div>

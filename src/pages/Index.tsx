@@ -125,25 +125,105 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section - Above the Fold */}
-      <section className="hero-gradient text-primary-foreground">
-        <div className="container-premium py-16 md:py-20 lg:py-28">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm mb-8">
-              <CheckCircle className="h-4 w-4 text-accent" />
-              <span>Trusted Partner for 2000+ Institutions in Bangladesh</span>
+      <section className="hero-gradient text-primary-foreground relative overflow-hidden">
+        {/* Background Visual Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Gradient Orbs */}
+          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] transform translate-x-1/2" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
+          
+          {/* Geometric Pattern */}
+          <div className="absolute inset-y-0 right-0 w-1/2 opacity-[0.03]">
+            <svg viewBox="0 0 400 400" className="w-full h-full">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="container-premium py-16 md:py-20 lg:py-24 relative">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left Column - Content */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm mb-8">
+                <CheckCircle className="h-4 w-4 text-accent" />
+                <span>Trusted Partner for 2000+ Institutions</span>
+              </div>
+              
+              <h1 className="text-balance mb-6">
+                Reliable Scientific & Industrial{" "}
+                <span className="text-accent">Equipment Supplier</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-primary-foreground/80 max-w-xl mb-10 leading-relaxed">
+                Your trusted source for certified laboratory, measurement, and industrial equipment. 
+                Serving research institutions and businesses with nationwide delivery since 2005.
+              </p>
+              
+              <HeroCta />
             </div>
-            
-            <h1 className="text-balance mb-6">
-              Reliable Scientific & Industrial{" "}
-              <span className="text-accent">Equipment Supplier</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Your trusted source for certified laboratory, measurement, and industrial equipment. 
-              Serving research institutions, universities, and businesses with nationwide delivery since 2005.
-            </p>
-            
-            <HeroCta />
+
+            {/* Right Column - Visual */}
+            <div className="hidden lg:block relative">
+              <div className="relative">
+                {/* Main Visual Container */}
+                <div className="relative w-full aspect-square max-w-md mx-auto">
+                  {/* Outer Glow Ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-accent/30 via-primary-foreground/10 to-transparent animate-pulse" style={{ animationDuration: '4s' }} />
+                  
+                  {/* Inner Circle */}
+                  <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary-foreground/10 to-transparent backdrop-blur-sm border border-primary-foreground/10">
+                    {/* Equipment Silhouettes */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="grid grid-cols-2 gap-6 p-8">
+                        {/* Microscope Icon */}
+                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
+                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-accent" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="12" cy="5" r="2"/>
+                            <path d="M12 7v6M8 13h8M10 13v4a2 2 0 002 2h0a2 2 0 002-2v-4M7 21h10"/>
+                          </svg>
+                        </div>
+                        {/* Scale Icon */}
+                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
+                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-primary-foreground/70" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M12 3v18M4 8l8-5 8 5M4 8l4 8h8l4-8"/>
+                          </svg>
+                        </div>
+                        {/* Gauge Icon */}
+                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
+                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-primary-foreground/70" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 7v5l3 3"/>
+                          </svg>
+                        </div>
+                        {/* Flask Icon */}
+                        <div className="w-20 h-20 bg-primary-foreground/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary-foreground/10">
+                          <svg viewBox="0 0 24 24" className="w-10 h-10 text-accent/80" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M9 3h6v5l4 9a2 2 0 01-2 3H7a2 2 0 01-2-3l4-9V3"/>
+                            <path d="M9 3h6"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Floating Stats */}
+                  <div className="absolute -top-4 -right-4 bg-background/95 backdrop-blur-sm rounded-lg shadow-xl p-4 border border-border">
+                    <div className="text-2xl font-bold text-primary">5000+</div>
+                    <div className="text-xs text-muted-foreground">Products</div>
+                  </div>
+                  
+                  <div className="absolute -bottom-4 -left-4 bg-background/95 backdrop-blur-sm rounded-lg shadow-xl p-4 border border-border">
+                    <div className="text-2xl font-bold text-primary">19+</div>
+                    <div className="text-xs text-muted-foreground">Years Experience</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
