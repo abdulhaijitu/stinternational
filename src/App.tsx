@@ -33,7 +33,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminQuotes from "./pages/admin/AdminQuotes";
 import AdminLogos from "./pages/admin/AdminLogos";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
-
+import AdminUXInsights from "./pages/admin/AdminUXInsights";
 const queryClient = new QueryClient();
 
 // Main App Component
@@ -74,6 +74,7 @@ const App = () => (
                   <Route path="/admin/quotes" element={<AdminQuotes />} />
                   <Route path="/admin/logos" element={<AdminLogos />} />
                   <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+                  <Route path="/admin/ux-insights" element={<AdminUXInsights />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -9,7 +9,8 @@ import {
   Quote,
   LogOut,
   Menu,
-  X
+  X,
+  BarChart3
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/admin/quotes", label: "Quote Requests", icon: FileText },
   { href: "/admin/logos", label: "Institution Logos", icon: Building2 },
   { href: "/admin/testimonials", label: "Testimonials", icon: Quote },
+  { href: "/admin/ux-insights", label: "UX Insights", icon: BarChart3 },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {

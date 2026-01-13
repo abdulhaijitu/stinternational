@@ -493,6 +493,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ux_telemetry_events: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          event_action: string | null
+          event_category: string
+          event_label: string | null
+          event_type: string
+          event_value: string | null
+          id: string
+          page_url: string | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          event_action?: string | null
+          event_category: string
+          event_label?: string | null
+          event_type: string
+          event_value?: string | null
+          id?: string
+          page_url?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          event_action?: string | null
+          event_category?: string
+          event_label?: string | null
+          event_type?: string
+          event_value?: string | null
+          id?: string
+          page_url?: string | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
       wishlists: {
         Row: {
           created_at: string

@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GridDensity } from "@/hooks/useGridDensity";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
 interface GridDensityToggleProps {
   density: GridDensity;
@@ -22,6 +23,12 @@ const GridDensityToggle = ({
   className,
 }: GridDensityToggleProps) => {
   const { t } = useLanguage();
+  const { trackGridDensity } = useUXTelemetry();
+
+  const handleDensityChange = (newDensity: GridDensity) => {
+    trackGridDensity(newDensity);
+    onDensityChange(newDensity);
+  };
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -31,7 +38,7 @@ const GridDensityToggle = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDensityChange('comfortable')}
+              onClick={() => handleDensityChange('comfortable')}
               className={cn(
                 "h-8 px-2.5 rounded-r-none border-r border-border",
                 "transition-colors duration-150",
@@ -54,7 +61,7 @@ const GridDensityToggle = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDensityChange('compact')}
+              onClick={() => handleDensityChange('compact')}
               className={cn(
                 "h-8 px-2.5 rounded-l-none",
                 "transition-colors duration-150",

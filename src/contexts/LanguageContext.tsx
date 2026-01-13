@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { translations, Language, TranslationKeys, languageNames } from '@/lib/translations';
+import { getUXTelemetry } from '@/hooks/useUXTelemetry';
 
 // Language Context for bilingual support - English and Bangla
 
@@ -37,6 +38,19 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
+    
+    // Track language switch
+    try {
+      const telemetry = getUXTelemetry();
+      telemetry.trackEvent({
+        event_type: 'language_switch',
+        event_category: 'utility',
+        event_action: 'switch',
+        event_value: lang,
+      });
+    } catch (e) {
+      // Telemetry should not break the app
+    }
     
     // Update document lang attribute for accessibility
     document.documentElement.lang = lang;
