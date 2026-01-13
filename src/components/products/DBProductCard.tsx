@@ -7,6 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import WishlistButton from "./WishlistButton";
+import CompareCheckbox from "./CompareCheckbox";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -15,9 +16,20 @@ interface DBProductCardProps {
   product: DBProduct;
   onQuickView?: (product: DBProduct) => void;
   variant?: "default" | "compact";
+  // Compare feature props
+  isInCompare?: boolean;
+  onToggleCompare?: (product: DBProduct) => void;
+  canAddToCompare?: boolean;
 }
 
-const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductCardProps) => {
+const DBProductCard = ({ 
+  product, 
+  onQuickView, 
+  variant = "default",
+  isInCompare = false,
+  onToggleCompare,
+  canAddToCompare = true,
+}: DBProductCardProps) => {
   const { addItem } = useCart();
   const { getProductFields, getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
@@ -40,52 +52,76 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
     toast.success(t.products.addedToCart.replace('{name}', productFields.name));
   };
 
+  const handleToggleCompare = () => {
+    if (onToggleCompare) {
+      onToggleCompare(product);
+    }
+  };
+
   const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
   const discountPercent = product.compare_price 
     ? Math.round((1 - product.price / product.compare_price) * 100)
     : 0;
 
   const isCompact = variant === "compact";
+  const showCompareCheckbox = !!onToggleCompare;
 
   return (
     <article 
       className={cn(
         "group relative bg-card rounded-lg border border-border overflow-hidden",
         "transition-all duration-200 ease-out",
-        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5"
+        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5",
+        isInCompare && "ring-2 ring-primary"
       )}
     >
-      {/* Image Container */}
+      {/* Image Container - Fixed aspect ratio for CLS optimization */}
       <div 
         className={cn(
           "relative bg-muted/30 overflow-hidden",
           isCompact ? "aspect-[4/3]" : "aspect-square"
         )}
       >
-        {/* Wishlist Button - Top Right */}
+        {/* Top Actions Row */}
         <div className={cn(
-          "absolute z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-          isCompact ? "top-1.5 right-1.5" : "top-2.5 right-2.5"
+          "absolute top-0 left-0 right-0 z-10 flex items-start justify-between p-2",
+          isCompact && "p-1.5"
         )}>
-          <WishlistButton productId={product.id} size={isCompact ? "sm" : "default"} />
-        </div>
-        
-        {/* Discount Badge - Top Left */}
-        {discountPercent > 0 && (
-          <Badge 
-            variant="default" 
-            className={cn(
-              "absolute z-10 bg-accent text-accent-foreground font-semibold",
-              isCompact 
-                ? "top-1.5 left-1.5 text-[10px] px-1.5 py-0" 
-                : "top-2.5 left-2.5 text-xs px-2 py-0.5"
+          {/* Left: Discount Badge */}
+          <div>
+            {discountPercent > 0 && (
+              <Badge 
+                variant="default" 
+                className={cn(
+                  "bg-accent text-accent-foreground font-semibold",
+                  isCompact 
+                    ? "text-[10px] px-1.5 py-0" 
+                    : "text-xs px-2 py-0.5"
+                )}
+              >
+                -{discountPercent}%
+              </Badge>
             )}
-          >
-            -{discountPercent}%
-          </Badge>
-        )}
+          </div>
+          
+          {/* Right: Wishlist & Compare */}
+          <div className={cn(
+            "flex items-center gap-1.5",
+            "opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          )}>
+            {showCompareCheckbox && (
+              <CompareCheckbox
+                isSelected={isInCompare}
+                onToggle={handleToggleCompare}
+                disabled={!canAddToCompare && !isInCompare}
+                size={isCompact ? "sm" : "default"}
+              />
+            )}
+            <WishlistButton productId={product.id} size={isCompact ? "sm" : "default"} />
+          </div>
+        </div>
 
-        {/* Product Image */}
+        {/* Product Image with lazy loading */}
         <Link to={`/product/${product.slug}`} className="block w-full h-full">
           <img
             src={imageUrl}
@@ -96,6 +132,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
               "group-hover:scale-[1.03]"
             )}
             loading="lazy"
+            decoding="async"
           />
         </Link>
 
@@ -124,7 +161,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           </Link>
         )}
 
-        {/* Product Name */}
+        {/* Product Name - Fixed min-height for CLS optimization */}
         <h3 className={cn(
           "font-medium text-foreground leading-snug",
           isCompact 
@@ -139,7 +176,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           </Link>
         </h3>
 
-        {/* SKU or Short Spec - Only for default variant */}
+        {/* SKU - Only for default variant */}
         {product.sku && !isCompact && (
           <p className="text-xs text-muted-foreground mt-1">
             SKU: {product.sku}
@@ -184,7 +221,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           )}
         </div>
 
-        {/* CTA Buttons - Show on hover for default, simpler for compact */}
+        {/* CTA Buttons */}
         {isCompact ? (
           <Button
             variant="default"
@@ -227,7 +264,7 @@ const DBProductCard = ({ product, onQuickView, variant = "default" }: DBProductC
           </div>
         )}
 
-        {/* RFQ Link - Subtle, always visible (default only) */}
+        {/* RFQ Link */}
         {!isCompact && (
           <Link
             to={`/request-quote?product=${encodeURIComponent(product.name)}`}
