@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import CtaAnalyticsWidget from "@/components/admin/CtaAnalyticsWidget";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 
@@ -145,6 +146,9 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* CTA Analytics Widget */}
+        <CtaAnalyticsWidget />
       </div>
     </AdminLayout>
   );

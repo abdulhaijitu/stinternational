@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import HeroCta from "@/components/homepage/HeroCta";
+import Testimonials from "@/components/homepage/Testimonials";
 
 // Trust signals data
 const trustSignals = [
@@ -316,6 +317,9 @@ const Index = () => {
 
       {/* Recently Viewed Products */}
       <RecentlyViewedProducts maxItems={6} />
+
+      {/* Testimonials Section */}
+      <Testimonials />
 
       {/* Stats Section */}
       <section className="py-16 md:py-20 bg-primary text-primary-foreground">

@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   FileText,
   Building2,
+  Quote,
   LogOut,
   Menu,
   X
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/quotes", label: "Quote Requests", icon: FileText },
   { href: "/admin/logos", label: "Institution Logos", icon: Building2 },
+  { href: "/admin/testimonials", label: "Testimonials", icon: Quote },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
