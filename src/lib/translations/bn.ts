@@ -31,6 +31,7 @@ export const bn = {
     back: "পিছনে",
     submit: "জমা দিন",
     close: "বন্ধ করুন",
+    available: "উপলব্ধ",
   },
 
   // Navigation
@@ -128,6 +129,8 @@ export const bn = {
     technicalSpecs: "প্রযুক্তিগত স্পেসিফিকেশন",
     keyFeatures: "মূল বৈশিষ্ট্য",
     noDescription: "কোনো বিবরণ নেই",
+    noSpecifications: "এই পণ্যের জন্য কোনো স্পেসিফিকেশন নেই।",
+    youMayAlsoLike: "আপনার পছন্দ হতে পারে এমন পণ্য",
   },
 
   // Categories
