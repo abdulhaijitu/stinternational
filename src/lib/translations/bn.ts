@@ -31,6 +31,7 @@ export const bn = {
     back: "পিছনে",
     submit: "জমা দিন",
     close: "বন্ধ করুন",
+    clear: "মুছুন",
     available: "উপলব্ধ",
   },
 
@@ -158,6 +159,14 @@ export const bn = {
     sortPriceDesc: "দাম: বেশি থেকে কম",
     sortNameAsc: "নাম: A-Z",
     sortNameDesc: "নাম: Z-A",
+    // Compare feature
+    compare: "তুলনা করুন",
+    compareNow: "তুলনা দেখুন",
+    compareProducts: "পণ্য তুলনা",
+    addToCompare: "তুলনায় যোগ করুন",
+    removeFromCompare: "তুলনা থেকে সরান",
+    compareLimit: "সর্বোচ্চ ৩টি পণ্য",
+    items: "পণ্য",
   },
 
   // Categories

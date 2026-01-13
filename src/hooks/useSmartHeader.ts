@@ -4,46 +4,74 @@ interface SmartHeaderState {
   isScrolled: boolean;
   isCompact: boolean;
   isVisible: boolean;
+  scrollDirection: 'up' | 'down' | 'none';
 }
 
-export const useSmartHeader = (threshold: number = 100) => {
+const SCROLL_THRESHOLD = 10; // Minimum scroll distance to trigger direction change
+const HIDE_THRESHOLD = 200; // Minimum scroll position before header can hide
+
+export const useSmartHeader = (compactThreshold: number = 100) => {
   const [state, setState] = useState<SmartHeaderState>({
     isScrolled: false,
     isCompact: false,
     isVisible: true,
+    scrollDirection: 'none',
   });
   
   const lastScrollY = useRef(0);
+  const lastDirectionChangeY = useRef(0);
   const ticking = useRef(false);
 
   const updateState = useCallback(() => {
     const currentScrollY = window.scrollY;
-    const scrollingDown = currentScrollY > lastScrollY.current;
-    const scrollingUp = currentScrollY < lastScrollY.current;
+    const scrollDelta = currentScrollY - lastScrollY.current;
+    const isAtTop = currentScrollY < 20;
     
     setState(prev => {
       const isScrolled = currentScrollY > 20;
+      const isCompact = currentScrollY > compactThreshold;
       
-      // Compact mode: scrolled past threshold
-      const isCompact = currentScrollY > threshold;
+      // Determine scroll direction with hysteresis
+      let scrollDirection = prev.scrollDirection;
+      let isVisible = prev.isVisible;
       
-      // Visibility: always visible, but can be used for hide-on-scroll-down patterns
-      // For now, we keep it always visible but track scroll direction
-      const isVisible = true;
+      if (Math.abs(scrollDelta) > SCROLL_THRESHOLD) {
+        scrollDirection = scrollDelta > 0 ? 'down' : 'up';
+        lastDirectionChangeY.current = currentScrollY;
+      }
+      
+      // Visibility logic:
+      // - Always visible at top
+      // - Hide when scrolling down past threshold
+      // - Show when scrolling up
+      if (isAtTop) {
+        isVisible = true;
+        scrollDirection = 'none';
+      } else if (currentScrollY > HIDE_THRESHOLD) {
+        if (scrollDirection === 'down' && scrollDelta > SCROLL_THRESHOLD) {
+          isVisible = false;
+        } else if (scrollDirection === 'up' && scrollDelta < -SCROLL_THRESHOLD) {
+          isVisible = true;
+        }
+      } else {
+        // Below top but above hide threshold - always visible
+        isVisible = true;
+      }
       
       // Only update if something changed
       if (prev.isScrolled === isScrolled && 
           prev.isCompact === isCompact && 
-          prev.isVisible === isVisible) {
+          prev.isVisible === isVisible &&
+          prev.scrollDirection === scrollDirection) {
         return prev;
       }
       
-      return { isScrolled, isCompact, isVisible };
+      return { isScrolled, isCompact, isVisible, scrollDirection };
     });
     
     lastScrollY.current = currentScrollY;
     ticking.current = false;
-  }, [threshold]);
+  }, [compactThreshold]);
 
   useEffect(() => {
     const handleScroll = () => {

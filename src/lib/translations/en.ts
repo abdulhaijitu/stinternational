@@ -31,6 +31,7 @@ export const en = {
     back: "Back",
     submit: "Submit",
     close: "Close",
+    clear: "Clear",
     available: "available",
   },
 
@@ -158,6 +159,14 @@ export const en = {
     sortPriceDesc: "Price: High to Low",
     sortNameAsc: "Name: A-Z",
     sortNameDesc: "Name: Z-A",
+    // Compare feature
+    compare: "Compare",
+    compareNow: "Compare Now",
+    compareProducts: "Compare Products",
+    addToCompare: "Add to compare",
+    removeFromCompare: "Remove from compare",
+    compareLimit: "Maximum 3 products",
+    items: "items",
   },
 
   // Categories

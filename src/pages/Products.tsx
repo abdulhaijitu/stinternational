@@ -31,8 +31,11 @@ import {
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 import ProductQuickView from "@/components/products/ProductQuickView";
+import ProductCompareBar from "@/components/products/ProductCompareBar";
+import ProductCompareModal from "@/components/products/ProductCompareModal";
 import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
+import { useProductCompare } from "@/hooks/useProductCompare";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 
@@ -48,7 +51,18 @@ const Products = () => {
   const { t } = useLanguage();
   const { getCategoryFields } = useBilingualContent();
   const { density, setDensity } = useGridDensity();
-
+  const {
+    compareProducts,
+    isCompareOpen,
+    maxItems,
+    toggleCompare,
+    removeFromCompare,
+    clearCompare,
+    isInCompare,
+    canAddMore,
+    openCompareModal,
+    closeCompareModal,
+  } = useProductCompare();
   // Filter state
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
@@ -379,6 +393,23 @@ const Products = () => {
         onOpenChange={setQuickViewOpen}
       />
 
+      {/* Compare Modal */}
+      <ProductCompareModal
+        products={compareProducts}
+        open={isCompareOpen}
+        onOpenChange={closeCompareModal}
+        onRemove={removeFromCompare}
+      />
+
+      {/* Compare Bar */}
+      <ProductCompareBar
+        products={compareProducts}
+        onRemove={removeFromCompare}
+        onClear={clearCompare}
+        onCompare={openCompareModal}
+        maxItems={maxItems}
+      />
+
       {/* Page Header */}
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-8 md:py-12">
@@ -560,6 +591,9 @@ const Products = () => {
                         product={product}
                         onQuickView={handleQuickView}
                         variant={density === 'compact' ? 'compact' : 'default'}
+                        isInCompare={isInCompare(product.id)}
+                        onToggleCompare={toggleCompare}
+                        canAddToCompare={canAddMore}
                       />
                     ))}
                   </div>
