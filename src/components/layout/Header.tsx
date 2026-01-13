@@ -8,31 +8,26 @@ import {
   Menu,
   X,
   ChevronRight,
-  Heart,
-  Grid3X3
+  Heart
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/contexts/AuthContext";
-import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
 import { useSmartHeader } from "@/hooks/useSmartHeader";
 import CategoryAwareSearch from "./CategoryAwareSearch";
+import CategoryNavMenu from "./CategoryNavMenu";
+import MobileCategoryDrawer from "./MobileCategoryDrawer";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
-  const menuRef = useRef<HTMLDivElement>(null);
   const { getItemCount } = useCart();
   const { user } = useAuth();
   const { wishlist } = useWishlist();
   const location = useLocation();
   const { isScrolled, isCompact } = useSmartHeader(100);
-  
-  const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   
   const cartItemCount = getItemCount();
   const wishlistCount = wishlist.length;
@@ -42,21 +37,12 @@ const Header = () => {
     ? location.pathname.split('/category/')[1] 
     : undefined;
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsCategoriesOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-200 ${
@@ -151,107 +137,13 @@ const Header = () => {
       </div>
 
       {/* Navigation */}
-      <nav className={`hidden lg:block bg-muted/50 border-b border-border transition-all duration-200 ${
+      <nav className={`hidden lg:block bg-muted/30 border-b border-border transition-all duration-200 ${
         isCompact ? 'h-10' : 'h-12'
       }`}>
         <div className="container-premium h-full">
-          <div className={`flex items-center gap-8 h-full`}>
-            {/* Categories Dropdown - Global B2B Style */}
-            <div className="relative" ref={menuRef}>
-              <button 
-                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                className={`flex items-center gap-2 font-medium rounded-md transition-all duration-200 ${
-                  isCompact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
-                } ${
-                  isCategoriesOpen 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground'
-                }`}
-              >
-                <Grid3X3 className={isCompact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
-                <span>All Categories</span>
-                <ChevronRight className={`transition-transform duration-200 ${
-                  isCategoriesOpen ? 'rotate-90' : ''
-                } ${isCompact ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-              </button>
-
-              {/* Mega Menu - Two Column Layout */}
-              {isCategoriesOpen && !categoriesLoading && groups.length > 0 && (
-                <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-lg shadow-2xl overflow-hidden z-50">
-                  <div className="flex">
-                    {/* Left Column - Main Categories */}
-                    <div className="w-64 bg-muted/30 border-r border-border py-2">
-                      {groups.map((group, index) => (
-                        <button
-                          key={group.slug}
-                          onMouseEnter={() => setActiveGroupIndex(index)}
-                          onClick={() => setActiveGroupIndex(index)}
-                          className={`w-full flex items-center justify-between px-4 py-3 text-left text-sm transition-colors duration-150 ${
-                            activeGroupIndex === index
-                              ? 'bg-background text-primary font-medium border-l-2 border-primary'
-                              : 'text-foreground hover:bg-background/50'
-                          }`}
-                        >
-                          <span>{group.name}</span>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                      ))}
-                      
-                      {/* View All Categories Link */}
-                      <div className="border-t border-border mt-2 pt-2 px-4">
-                        <Link
-                          to="/categories"
-                          onClick={() => setIsCategoriesOpen(false)}
-                          className="flex items-center gap-2 py-2 text-sm text-primary font-medium hover:underline"
-                        >
-                          View All Categories
-                          <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Right Column - Subcategories */}
-                    <div className="w-80 p-4">
-                      {groups[activeGroupIndex] && (
-                        <>
-                          <div className="mb-3 pb-2 border-b border-border">
-                            <h3 className="font-semibold text-foreground">
-                              {groups[activeGroupIndex].name}
-                            </h3>
-                          </div>
-                          
-                          <ul className="space-y-1">
-                            {groups[activeGroupIndex].categories.map((category) => (
-                              <li key={category.id}>
-                                <Link
-                                  to={`/category/${category.slug}`}
-                                  onClick={() => setIsCategoriesOpen(false)}
-                                  className="flex items-center justify-between px-3 py-2.5 rounded-md text-sm text-foreground hover:bg-muted transition-colors duration-150 group"
-                                >
-                                  <span className="group-hover:text-primary transition-colors">{category.name}</span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                          
-                          {/* Group CTA */}
-                          <div className="mt-4 pt-3 border-t border-border">
-                            <Link
-                              to={`/categories#${groups[activeGroupIndex].slug}`}
-                              onClick={() => setIsCategoriesOpen(false)}
-                              className="inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline"
-                            >
-                              Browse all {groups[activeGroupIndex].name}
-                              <ChevronRight className="h-4 w-4" />
-                            </Link>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-8 h-full">
+            {/* Categories Dropdown - New Shadcn Style */}
+            <CategoryNavMenu isCompact={isCompact} />
 
             <Link to="/products" className={`font-medium text-foreground hover:text-primary transition-colors ${
               isCompact ? 'text-xs' : 'text-sm'
@@ -277,64 +169,39 @@ const Header = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Clean Drawer Style */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-[108px] bg-background z-40 overflow-y-auto animate-fade-in">
-          <div className="container-premium py-4">
+        <div className="lg:hidden fixed inset-0 top-[108px] bg-background z-40 overflow-hidden animate-fade-in">
+          <div className="h-full flex flex-col">
             {/* Mobile Search */}
-            <div className="mb-6">
+            <div className="p-4 border-b border-border">
               <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
             </div>
 
-            {/* Mobile Nav Links */}
-            <nav className="space-y-1">
-              <Link to="/categories" className="flex items-center justify-between py-3 px-4 text-base font-medium bg-primary/5 rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                <span>All Products</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            {/* Mobile Category Navigation */}
+            <div className="flex-1 overflow-y-auto">
+              <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
+            </div>
+
+            {/* Mobile Footer Actions */}
+            <div className="border-t border-border p-4 space-y-2">
+              <Link 
+                to="/wishlist" 
+                onClick={closeMobileMenu}
+                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
+              >
+                <span>My Wishlist</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
-              
-              {groups.map((group) => (
-                <div key={group.slug} className="border-b border-border py-3">
-                  <h3 className="font-semibold text-foreground px-4 mb-2">{group.name}</h3>
-                  <ul className="space-y-1">
-                    {group.categories.map((category) => (
-                      <li key={category.id}>
-                        <Link
-                          to={`/category/${category.slug}`}
-                          className="flex items-center justify-between py-2 px-4 text-sm text-muted-foreground hover:bg-muted rounded-md"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span>{category.name}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-              
-              <div className="pt-4 space-y-1">
-                <Link to="/request-quote" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>Request Quote</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-                <Link to="/about" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>About Us</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-                <Link to="/contact" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>Contact</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-                <Link to="/wishlist" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>My Wishlist</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-                <Link to="/account" className="flex items-center justify-between py-3 px-4 text-base font-medium hover:bg-muted rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>My Account</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-              </div>
-            </nav>
+              <Link 
+                to="/account" 
+                onClick={closeMobileMenu}
+                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
+              >
+                <span>My Account</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </div>
           </div>
         </div>
       )}
