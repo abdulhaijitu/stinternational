@@ -16,6 +16,7 @@ import {
   Layers
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -37,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import UXRecommendations from "@/components/admin/UXRecommendations";
+import { cn } from "@/lib/utils";
 import {
   useTelemetrySummary,
   useTopCategories,
@@ -49,6 +51,7 @@ import {
 } from "@/hooks/useUXTelemetryData";
 
 const AdminUXInsights = () => {
+  const { t, language } = useAdminLanguage();
   const [timeRange, setTimeRange] = useState<TimeRange>('7days');
   const filters = { timeRange };
 
@@ -60,24 +63,24 @@ const AdminUXInsights = () => {
   const { data: utility, isLoading: utilityLoading } = useUtilityUsage(filters);
   const { data: hero, isLoading: heroLoading } = useHeroAnalytics(filters);
 
-  const timeRangeLabels: Record<TimeRange, string> = {
-    today: 'Today',
-    '7days': 'Last 7 Days',
-    '30days': 'Last 30 Days',
-  };
+  const timeRangeOptions = [
+    { value: "today", label: t.uxInsights.today },
+    { value: "7days", label: t.uxInsights.last7Days },
+    { value: "30days", label: t.uxInsights.last30Days },
+  ];
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <BarChart3 className="h-6 w-6 text-primary" />
-              UX Insights
+              {t.uxInsights.title}
             </h1>
             <p className="text-muted-foreground">
-              Monitor user behavior and navigation effectiveness
+              {t.uxInsights.subtitle}
             </p>
           </div>
           
@@ -86,9 +89,9 @@ const AdminUXInsights = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="7days">Last 7 Days</SelectItem>
-              <SelectItem value="30days">Last 30 Days</SelectItem>
+              {timeRangeOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -99,7 +102,7 @@ const AdminUXInsights = () => {
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-1.5">
                 <MousePointerClick className="h-4 w-4" />
-                Total Events
+                {t.uxInsights.totalEvents}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -115,7 +118,7 @@ const AdminUXInsights = () => {
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-1.5">
                 <Users className="h-4 w-4" />
-                Unique Sessions
+                {t.uxInsights.uniqueSessions}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -131,7 +134,7 @@ const AdminUXInsights = () => {
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-1.5">
                 <ShoppingCart className="h-4 w-4" />
-                Conversion Events
+                {t.uxInsights.conversionEvents}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -145,7 +148,7 @@ const AdminUXInsights = () => {
           
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Device Split</CardDescription>
+              <CardDescription>{t.uxInsights.deviceSplit}</CardDescription>
             </CardHeader>
             <CardContent>
               {summaryLoading ? (
@@ -186,10 +189,10 @@ const AdminUXInsights = () => {
         {/* Main Content Tabs */}
         <Tabs defaultValue="navigation" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-            <TabsTrigger value="navigation">Navigation</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="conversion">Conversion</TabsTrigger>
-            <TabsTrigger value="utility">Utility</TabsTrigger>
+            <TabsTrigger value="navigation">{t.uxInsights.navigation}</TabsTrigger>
+            <TabsTrigger value="products">{t.uxInsights.products}</TabsTrigger>
+            <TabsTrigger value="conversion">{t.uxInsights.conversion}</TabsTrigger>
+            <TabsTrigger value="utility">{t.uxInsights.utility}</TabsTrigger>
           </TabsList>
 
           {/* Navigation Tab */}
@@ -200,9 +203,9 @@ const AdminUXInsights = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Layers className="h-4 w-4" />
-                    Hero Slider Performance
+                    {t.uxInsights.heroSlider}
                   </CardTitle>
-                  <CardDescription>Views and clicks per slide</CardDescription>
+                  <CardDescription>{t.uxInsights.viewsAndClicks}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {heroLoading ? (
@@ -213,20 +216,20 @@ const AdminUXInsights = () => {
                     <div className="space-y-3">
                       {hero.map((slide) => (
                         <div key={slide.slide} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Slide {slide.slide + 1}</span>
+                          <span className="text-sm font-medium">{t.uxInsights.slide} {slide.slide + 1}</span>
                           <div className="flex items-center gap-4 text-sm">
                             <span className="text-muted-foreground">
-                              {slide.views} views
+                              {slide.views} {t.uxInsights.views}
                             </span>
                             <Badge variant="secondary">
-                              {slide.clicks} clicks
+                              {slide.clicks} {t.uxInsights.clicks}
                             </Badge>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No data available</p>
+                    <p className="text-sm text-muted-foreground">{t.uxInsights.noDataAvailable}</p>
                   )}
                 </CardContent>
               </Card>
@@ -236,9 +239,9 @@ const AdminUXInsights = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <LayoutGrid className="h-4 w-4" />
-                    Top Categories
+                    {t.uxInsights.topCategories}
                   </CardTitle>
-                  <CardDescription>Most interacted categories</CardDescription>
+                  <CardDescription>{t.uxInsights.mostInteracted}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {categoriesLoading ? (
@@ -249,9 +252,9 @@ const AdminUXInsights = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Category</TableHead>
-                          <TableHead className="text-right">Clicks</TableHead>
-                          <TableHead className="text-right">Hovers</TableHead>
+                          <TableHead>{t.uxInsights.category}</TableHead>
+                          <TableHead className="text-right">{t.uxInsights.clicks}</TableHead>
+                          <TableHead className="text-right">{t.uxInsights.hovers}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -267,7 +270,7 @@ const AdminUXInsights = () => {
                       </TableBody>
                     </Table>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No data available</p>
+                    <p className="text-sm text-muted-foreground">{t.uxInsights.noDataAvailable}</p>
                   )}
                 </CardContent>
               </Card>
@@ -278,13 +281,13 @@ const AdminUXInsights = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Search className="h-4 w-4" />
-                  Search Analytics
+                  {t.uxInsights.searchAnalytics}
                 </CardTitle>
                 <CardDescription>
                   {searchLoading ? (
                     <Skeleton className="h-4 w-48" />
                   ) : (
-                    `${search?.totalSearches || 0} total searches • ${search?.categorySearchCount || 0} category-aware`
+                    `${search?.totalSearches || 0} ${t.uxInsights.totalSearches} • ${search?.categorySearchCount || 0} ${t.uxInsights.categoryAware}`
                   )}
                 </CardDescription>
               </CardHeader>
@@ -303,7 +306,7 @@ const AdminUXInsights = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No search data available</p>
+                  <p className="text-sm text-muted-foreground">{t.uxInsights.noSearchData}</p>
                 )}
               </CardContent>
             </Card>
@@ -315,9 +318,9 @@ const AdminUXInsights = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Top Clicked Products
+                  {t.uxInsights.topClickedProducts}
                 </CardTitle>
-                <CardDescription>Most viewed products from cards and mega menu</CardDescription>
+                <CardDescription>{t.uxInsights.productViews}</CardDescription>
               </CardHeader>
               <CardContent>
                 {productsLoading ? (
@@ -328,9 +331,9 @@ const AdminUXInsights = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Product</TableHead>
-                        <TableHead className="text-right">Views</TableHead>
-                        <TableHead className="text-right">Add to Cart</TableHead>
+                        <TableHead>{t.uxInsights.product}</TableHead>
+                        <TableHead className="text-right">{t.uxInsights.views}</TableHead>
+                        <TableHead className="text-right">{t.uxInsights.addToCart}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -350,7 +353,7 @@ const AdminUXInsights = () => {
                     </TableBody>
                   </Table>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No product data available</p>
+                  <p className="text-sm text-muted-foreground">{t.uxInsights.noProductData}</p>
                 )}
               </CardContent>
             </Card>
@@ -364,9 +367,9 @@ const AdminUXInsights = () => {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Conversion Funnel
+                    {t.uxInsights.conversionFunnel}
                   </CardTitle>
-                  <CardDescription>From cart to completion</CardDescription>
+                  <CardDescription>{t.uxInsights.cartToCompletion}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {funnelLoading ? (
@@ -376,29 +379,29 @@ const AdminUXInsights = () => {
                   ) : funnel ? (
                     <div className="space-y-4">
                       <FunnelStep 
-                        label="Add to Cart" 
+                        label={t.uxInsights.addToCart} 
                         count={funnel.addToCart} 
                         maxCount={Math.max(funnel.addToCart, funnel.checkoutStart, funnel.orderComplete, 1)} 
                       />
                       <FunnelStep 
-                        label="Buy Now Clicks" 
+                        label={t.uxInsights.buyNowClicks} 
                         count={funnel.buyNow} 
                         maxCount={Math.max(funnel.addToCart, funnel.checkoutStart, funnel.orderComplete, 1)} 
                       />
                       <FunnelStep 
-                        label="Checkout Started" 
+                        label={t.uxInsights.checkoutStarted} 
                         count={funnel.checkoutStart} 
                         maxCount={Math.max(funnel.addToCart, funnel.checkoutStart, funnel.orderComplete, 1)} 
                       />
                       <FunnelStep 
-                        label="Orders Completed" 
+                        label={t.uxInsights.ordersCompleted} 
                         count={funnel.orderComplete} 
                         maxCount={Math.max(funnel.addToCart, funnel.checkoutStart, funnel.orderComplete, 1)} 
                         highlight 
                       />
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No conversion data</p>
+                    <p className="text-sm text-muted-foreground">{t.uxInsights.noConversionData}</p>
                   )}
                 </CardContent>
               </Card>
@@ -406,8 +409,8 @@ const AdminUXInsights = () => {
               {/* RFQ vs Direct */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">RFQ vs Direct Purchase</CardTitle>
-                  <CardDescription>Quote requests compared to direct orders</CardDescription>
+                  <CardTitle className="text-base">{t.uxInsights.rfqVsDirect}</CardTitle>
+                  <CardDescription>{t.uxInsights.quoteVsOrders}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {funnelLoading ? (
@@ -415,13 +418,13 @@ const AdminUXInsights = () => {
                   ) : funnel ? (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">RFQ Submissions</span>
+                        <span className="text-sm">{t.uxInsights.rfqSubmissions}</span>
                         <Badge variant="outline" className="text-lg px-3 py-1">
                           {funnel.rfqSubmit}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Direct Orders</span>
+                        <span className="text-sm">{t.uxInsights.directOrders}</span>
                         <Badge className="text-lg px-3 py-1">
                           {funnel.orderComplete}
                         </Badge>
@@ -429,15 +432,15 @@ const AdminUXInsights = () => {
                       <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground">
                           {funnel.rfqSubmit > funnel.orderComplete 
-                            ? "B2B focused: More quote requests than direct purchases"
+                            ? t.uxInsights.b2bFocused
                             : funnel.orderComplete > funnel.rfqSubmit
-                            ? "B2C focused: More direct purchases than quote requests"
-                            : "Balanced between B2B and B2C channels"}
+                            ? t.uxInsights.b2cFocused
+                            : t.uxInsights.balanced}
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No data available</p>
+                    <p className="text-sm text-muted-foreground">{t.uxInsights.noDataAvailable}</p>
                   )}
                 </CardContent>
               </Card>
@@ -452,7 +455,7 @@ const AdminUXInsights = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <ArrowUpCircle className="h-4 w-4" />
-                    Back to Top
+                    {t.uxInsights.backToTop}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -461,7 +464,7 @@ const AdminUXInsights = () => {
                   ) : (
                     <div className="text-center">
                       <p className="text-3xl font-bold">{utility?.backToTop || 0}</p>
-                      <p className="text-sm text-muted-foreground">button clicks</p>
+                      <p className="text-sm text-muted-foreground">{t.uxInsights.buttonClicks}</p>
                     </div>
                   )}
                 </CardContent>
@@ -472,7 +475,7 @@ const AdminUXInsights = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Language Usage
+                    {t.uxInsights.languageUsage}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -482,11 +485,11 @@ const AdminUXInsights = () => {
                     <div className="flex items-center justify-center gap-6">
                       <div className="text-center">
                         <p className="text-2xl font-bold">{utility?.languageSwitch.en || 0}</p>
-                        <p className="text-xs text-muted-foreground">→ English</p>
+                        <p className="text-xs text-muted-foreground">{t.uxInsights.toEnglish}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-2xl font-bold">{utility?.languageSwitch.bn || 0}</p>
-                        <p className="text-xs text-muted-foreground">→ বাংলা</p>
+                        <p className="text-xs text-muted-foreground">{t.uxInsights.toBangla}</p>
                       </div>
                     </div>
                   )}
@@ -498,7 +501,7 @@ const AdminUXInsights = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <LayoutGrid className="h-4 w-4" />
-                    Grid Density
+                    {t.uxInsights.gridDensity}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -508,11 +511,11 @@ const AdminUXInsights = () => {
                     <div className="flex items-center justify-center gap-6">
                       <div className="text-center">
                         <p className="text-2xl font-bold">{utility?.gridDensity.comfortable || 0}</p>
-                        <p className="text-xs text-muted-foreground">Comfortable</p>
+                        <p className="text-xs text-muted-foreground">{t.uxInsights.comfortable}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-2xl font-bold">{utility?.gridDensity.compact || 0}</p>
-                        <p className="text-xs text-muted-foreground">Compact</p>
+                        <p className="text-xs text-muted-foreground">{t.uxInsights.compact}</p>
                       </div>
                     </div>
                   )}
