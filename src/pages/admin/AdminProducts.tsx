@@ -14,6 +14,7 @@ import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useAdminProducts, useDeleteProduct, useInvalidateProducts } from "@/hooks/useAdminProducts";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 interface Product {
   id: string;
@@ -31,6 +32,8 @@ interface Product {
 const AdminProducts = () => {
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
@@ -45,23 +48,29 @@ const AdminProducts = () => {
   const canEdit = isSuperAdmin || hasPermission("products", "update");
   const canDelete = isSuperAdmin || hasPermission("products", "delete");
 
-  const handleDelete = async (id: string, name: string) => {
+  const openDeleteDialog = (product: Product) => {
     if (!canDelete) {
       toast.error(t.products.noPermission);
       return;
     }
-    
-    if (!confirm(`${t.products.deleteConfirm} "${name}"?`)) return;
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
 
-    setDeletingId(id);
+  const handleDelete = async () => {
+    if (!productToDelete) return;
+
+    setDeletingId(productToDelete.id);
     try {
-      await deleteProduct.mutateAsync(id);
+      await deleteProduct.mutateAsync(productToDelete.id);
       toast.success(t.products.deleteSuccess);
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error(t.products.deleteError);
+      throw error; // Re-throw to let dialog know it failed
     } finally {
       setDeletingId(null);
+      setProductToDelete(null);
     }
   };
 
@@ -220,7 +229,7 @@ const AdminProducts = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleDelete(product.id, product.name)}
+                                  onClick={() => openDeleteDialog(product)}
                                   disabled={deletingId === product.id}
                                   className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
@@ -253,6 +262,21 @@ const AdminProducts = () => {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          itemName={productToDelete?.name || ""}
+          itemType={language === "bn" ? "পণ্য" : "Product"}
+          onConfirm={handleDelete}
+          translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
       </TooltipProvider>
     </AdminLayout>
   );
