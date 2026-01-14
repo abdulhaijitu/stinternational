@@ -1,5 +1,5 @@
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { ChevronDown, ChevronRight, SlidersHorizontal, Clock, Package, X } from "lucide-react";
+import { ChevronDown, ChevronRight, SlidersHorizontal, Clock, Package, X, Trash2 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCategoryHierarchy, ParentCategory, DBCategory } from "@/hooks/useCategories";
 import { useAllProducts } from "@/hooks/useProducts";
@@ -19,6 +19,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { getCategoryIcon } from "@/lib/categoryIcons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface StickyCategorySidebarProps {
   className?: string;
@@ -31,7 +38,10 @@ export interface SidebarFilters {
   minPrice: string;
   maxPrice: string;
   inStockOnly: boolean;
+  sortBy: string;
 }
+
+type SortOption = "newest" | "price_asc" | "price_desc" | "name_asc" | "name_desc";
 
 const StickyCategorySidebar = ({ 
   className,
@@ -43,7 +53,7 @@ const StickyCategorySidebar = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const { parentCategories, isLoading } = useCategoryHierarchy();
   const { data: products } = useAllProducts();
-  const { products: recentlyViewedProducts } = useRecentlyViewed();
+  const { products: recentlyViewedProducts, clearHistory } = useRecentlyViewed();
   const { getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
   
@@ -56,6 +66,7 @@ const StickyCategorySidebar = ({
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [inStockOnly, setInStockOnly] = useState(searchParams.get("inStock") === "true");
+  const [sortBy, setSortBy] = useState<SortOption>((searchParams.get("sort") as SortOption) || "newest");
   
   // Parse current URL to determine active category
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -69,7 +80,7 @@ const StickyCategorySidebar = ({
   }, [recentlyViewedProducts]);
 
   // Check if filters are active
-  const hasActiveFilters = minPrice || maxPrice || inStockOnly;
+  const hasActiveFilters = minPrice || maxPrice || inStockOnly || sortBy !== "newest";
 
   // Calculate product counts per category
   const productCounts = useMemo(() => {
@@ -138,25 +149,30 @@ const StickyCategorySidebar = ({
     if (inStockOnly) params.set("inStock", "true");
     else params.delete("inStock");
     
+    if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
+    else params.delete("sort");
+    
     params.set("page", "1");
     setSearchParams(params);
     
-    onFilterChange?.({ minPrice, maxPrice, inStockOnly });
-  }, [minPrice, maxPrice, inStockOnly, searchParams, setSearchParams, onFilterChange]);
+    onFilterChange?.({ minPrice, maxPrice, inStockOnly, sortBy });
+  }, [minPrice, maxPrice, inStockOnly, sortBy, searchParams, setSearchParams, onFilterChange]);
 
   const clearFilters = useCallback(() => {
     setMinPrice("");
     setMaxPrice("");
     setInStockOnly(false);
+    setSortBy("newest");
     
     const params = new URLSearchParams(searchParams);
     params.delete("minPrice");
     params.delete("maxPrice");
     params.delete("inStock");
+    params.delete("sort");
     params.set("page", "1");
     setSearchParams(params);
     
-    onFilterChange?.({ minPrice: "", maxPrice: "", inStockOnly: false });
+    onFilterChange?.({ minPrice: "", maxPrice: "", inStockOnly: false, sortBy: "newest" });
   }, [searchParams, setSearchParams, onFilterChange]);
 
   if (isLoading) {
@@ -413,6 +429,23 @@ const StickyCategorySidebar = ({
 
                   <Separator />
 
+                  {/* Sort By */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">{t.products.sortBy}</Label>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder={t.products.sortBy} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">{t.products.sortNewest}</SelectItem>
+                        <SelectItem value="price_asc">{t.products.sortPriceAsc}</SelectItem>
+                        <SelectItem value="price_desc">{t.products.sortPriceDesc}</SelectItem>
+                        <SelectItem value="name_asc">{t.products.sortNameAsc}</SelectItem>
+                        <SelectItem value="name_desc">{t.products.sortNameDesc}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* Filter Actions */}
                   <div className="flex gap-2">
                     <Button 
@@ -502,6 +535,19 @@ const StickyCategorySidebar = ({
                       )}
                     </Link>
                   ))}
+                  
+                  {/* Clear History Button */}
+                  <div className="pt-2 px-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearHistory}
+                      className="w-full h-8 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                      {t.products.clearHistory}
+                    </Button>
+                  </div>
                 </div>
               </CollapsibleContent>
             </Collapsible>

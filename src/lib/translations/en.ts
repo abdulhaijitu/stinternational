@@ -159,6 +159,7 @@ export const en = {
     sortPriceDesc: "Price: High to Low",
     sortNameAsc: "Name: A-Z",
     sortNameDesc: "Name: Z-A",
+    clearHistory: "Clear History",
     // Compare feature
     compare: "Compare",
     compareNow: "Compare Now",
