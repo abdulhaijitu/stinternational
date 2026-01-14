@@ -201,42 +201,54 @@ const AdminProductEditor = () => {
       .replace(/-+/g, "-");
   };
 
-  const handleSave = async () => {
-    // Validate based on language - English name is always required
-    if (!formData.name || !formData.slug || !formData.price) {
-      toast.error(t.products.required);
+  const handleSave = async (e?: React.FormEvent) => {
+    // Prevent form default behavior
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Validate required fields - English name and slug are always required
+    if (!formData.name.trim()) {
+      toast.error(language === "bn" ? "পণ্যের নাম (ইংরেজি) আবশ্যক" : "Product name (English) is required");
+      return;
+    }
+    
+    if (!formData.slug.trim()) {
+      toast.error(language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required");
+      return;
+    }
+    
+    if (!formData.price || isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
+      toast.error(language === "bn" ? "সঠিক মূল্য দিন" : "Please enter a valid price");
       return;
     }
 
     setSaving(true);
 
     try {
+      // Parse specifications JSON if provided
       let specifications = {};
-      if (formData.specifications) {
+      if (formData.specifications.trim()) {
         try {
           specifications = JSON.parse(formData.specifications);
         } catch {
-          toast.error(t.products.specJsonError);
+          toast.error(language === "bn" ? "স্পেসিফিকেশন JSON ফরম্যাটে ভুল" : "Invalid JSON format in specifications");
           setSaving(false);
           return;
         }
       }
 
+      // Parse features (one per line)
       const features = formData.features
-        ? formData.features.split("\n").filter((f) => f.trim())
+        ? formData.features.split("\n").map(f => f.trim()).filter(f => f.length > 0)
         : [];
 
-      const productData = {
-        name: formData.name,
-        name_bn: formData.name_bn || null,
-        slug: formData.slug,
-        description: formData.description || null,
-        description_bn: formData.description_bn || null,
-        short_description: formData.short_description || null,
-        short_description_bn: formData.short_description_bn || null,
+      // Build product data payload with proper typing
+      const baseProductData = {
+        name: formData.name.trim(),
+        slug: formData.slug.trim(),
         price: parseFloat(formData.price),
-        compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
-        sku: formData.sku || null,
         category_id: formData.category_id || null,
         image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
         images: formData.images,
@@ -246,27 +258,70 @@ const AdminProductEditor = () => {
         is_active: formData.is_active,
         specifications,
         features,
+        sku: formData.sku.trim() || null,
+        compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
+        // Include all language fields
+        name_bn: formData.name_bn.trim() || null,
+        description: formData.description.trim() || null,
+        description_bn: formData.description_bn.trim() || null,
+        short_description: formData.short_description.trim() || null,
+        short_description_bn: formData.short_description_bn.trim() || null,
       };
 
+      console.log("Saving product data:", { isNew, id, productData: baseProductData });
+
       if (isNew) {
-        const { error } = await supabase.from("products").insert([productData]);
-        if (error) throw error;
-        toast.success(t.products.createSuccess);
-      } else {
-        const { error } = await supabase
+        // CREATE - Insert new product
+        const { data, error } = await supabase
           .from("products")
-          .update(productData)
-          .eq("id", id);
-        if (error) throw error;
-        toast.success(t.products.updateSuccess);
+          .insert([baseProductData])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Create error:", error);
+          throw error;
+        }
+        
+        console.log("Product created:", data);
+        toast.success(language === "bn" ? "পণ্য সফলভাবে তৈরি হয়েছে" : "Product created successfully");
+      } else {
+        // UPDATE - Update existing product by ID
+        if (!id) {
+          throw new Error("Product ID is missing for update");
+        }
+        
+        const { data, error } = await supabase
+          .from("products")
+          .update(baseProductData)
+          .eq("id", id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Update error:", error);
+          throw error;
+        }
+        
+        console.log("Product updated:", data);
+        toast.success(language === "bn" ? "পণ্য সফলভাবে আপডেট হয়েছে" : "Product updated successfully");
       }
 
       // Clear draft after successful save
       clearDraft();
+      
+      // Navigate back to products list
       navigate("/admin/products");
     } catch (error: any) {
       console.error("Error saving product:", error);
-      toast.error(error.message || t.products.saveError);
+      
+      // Show detailed error message
+      const errorMessage = error.message || error.details || "Unknown error occurred";
+      toast.error(
+        language === "bn" 
+          ? `সংরক্ষণ ব্যর্থ: ${errorMessage}` 
+          : `Save failed: ${errorMessage}`
+      );
     } finally {
       setSaving(false);
     }
@@ -639,13 +694,19 @@ const AdminProductEditor = () => {
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-border">
             <Button 
+              type="button"
               variant="outline" 
               onClick={() => navigate("/admin/products")}
               className={getInputClass()}
             >
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSave} disabled={saving} className={getInputClass()}>
+            <Button 
+              type="button"
+              onClick={handleSave} 
+              disabled={saving} 
+              className={getInputClass()}
+            >
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Save className="h-4 w-4 mr-2" />
               {t.common.save}
