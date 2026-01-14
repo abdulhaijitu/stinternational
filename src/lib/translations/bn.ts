@@ -488,6 +488,26 @@ export const bn = {
     createAccount: "একটি অ্যাকাউন্ট তৈরি করুন",
   },
 
+  // Track Order
+  trackOrder: {
+    title: "আপনার অর্ডার ট্র্যাক করুন",
+    subtitle: "আপনার অর্ডার স্ট্যাটাস দেখতে অর্ডার নম্বর এবং ইমেইল/ফোন দিন",
+    searchTitle: "আপনার অর্ডার খুঁজুন",
+    searchDescription: "আপনার অর্ডার নম্বর STI- দিয়ে শুরু হয় এবং অর্ডার নিশ্চিতকরণে দেওয়া হয়েছে।",
+    orderNumberLabel: "অর্ডার নম্বর",
+    emailOrPhoneLabel: "ইমেইল বা ফোন",
+    fillAllFields: "সব তথ্য পূরণ করুন",
+    orderNotFound: "অর্ডার পাওয়া যায়নি। অর্ডার নম্বর যাচাই করুন।",
+    verificationFailed: "ইমেইল বা ফোন অর্ডারের সাথে মিলছে না।",
+    errorTracking: "অর্ডার ট্র্যাক করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    searching: "খোঁজা হচ্ছে...",
+    trackButton: "অর্ডার ট্র্যাক করুন",
+    orderedOn: "অর্ডার তারিখ",
+    orderItems: "অর্ডারের পণ্য",
+    quantity: "পরিমাণ",
+    shippingInfo: "শিপিং তথ্য",
+  },
+
   // Footer
   footer: {
     aboutCompany: "এসটি ইন্টারন্যাশনাল সম্পর্কে",

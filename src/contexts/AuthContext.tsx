@@ -123,10 +123,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    // Link any guest orders to this user after successful login
+    if (!error && data?.user?.id) {
+      try {
+        await supabase.rpc('link_guest_orders_to_user', {
+          user_email: email,
+          user_uuid: data.user.id
+        });
+      } catch (linkError) {
+        console.error('Error linking guest orders on login:', linkError);
+      }
+    }
+    
     return { error };
   };
 
