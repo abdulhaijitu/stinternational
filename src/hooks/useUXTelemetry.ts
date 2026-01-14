@@ -21,7 +21,9 @@ export type TelemetryEventType =
   | 'language_switch'
   | 'wishlist_add'
   | 'wishlist_remove'
-  | 'quick_view_open';
+  | 'quick_view_open'
+  | 'mobile_menu_open'
+  | 'mobile_menu_close';
 
 export type TelemetryCategory = 
   | 'navigation'
@@ -29,6 +31,8 @@ export type TelemetryCategory =
   | 'conversion'
   | 'utility'
   | 'engagement';
+
+export type MobileMenuCloseMethod = 'overlay' | 'button' | 'swipe' | 'navigation' | 'escape';
 
 interface TelemetryEvent {
   event_type: TelemetryEventType;
@@ -242,6 +246,15 @@ export const useUXTelemetry = () => {
       event_value: productSlug,
     });
   }, [trackEvent]);
+
+  const trackMobileMenu = useCallback((action: 'open' | 'close', closeMethod?: MobileMenuCloseMethod) => {
+    trackEvent({
+      event_type: action === 'open' ? 'mobile_menu_open' : 'mobile_menu_close',
+      event_category: 'navigation',
+      event_action: action,
+      event_label: closeMethod,
+    });
+  }, [trackEvent]);
   
   return {
     trackEvent,
@@ -255,6 +268,7 @@ export const useUXTelemetry = () => {
     trackUtility,
     trackWishlist,
     trackQuickView,
+    trackMobileMenu,
   };
 };
 
@@ -290,6 +304,7 @@ export const getUXTelemetry = () => {
       trackUtility: () => {},
       trackWishlist: () => {},
       trackQuickView: () => {},
+      trackMobileMenu: () => {},
     };
   }
   return singletonTracker;
