@@ -224,52 +224,65 @@ const AdminProductEditor = () => {
       return;
     }
 
+    // Parse specifications JSON if provided (validate before optimistic update)
+    let specifications = {};
+    if (formData.specifications.trim()) {
+      try {
+        specifications = JSON.parse(formData.specifications);
+      } catch {
+        toast.error(language === "bn" ? "স্পেসিফিকেশন JSON ফরম্যাটে ভুল" : "Invalid JSON format in specifications");
+        return;
+      }
+    }
+
+    // Parse features (one per line)
+    const features = formData.features
+      ? formData.features.split("\n").map(f => f.trim()).filter(f => f.length > 0)
+      : [];
+
+    // Build product data payload with proper typing
+    const baseProductData = {
+      name: formData.name.trim(),
+      slug: formData.slug.trim(),
+      price: parseFloat(formData.price),
+      category_id: formData.category_id || null,
+      image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
+      images: formData.images,
+      in_stock: formData.in_stock,
+      stock_quantity: parseInt(formData.stock_quantity) || 0,
+      is_featured: formData.is_featured,
+      is_active: formData.is_active,
+      specifications,
+      features,
+      sku: formData.sku.trim() || null,
+      compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
+      // Include all language fields
+      name_bn: formData.name_bn.trim() || null,
+      description: formData.description.trim() || null,
+      description_bn: formData.description_bn.trim() || null,
+      short_description: formData.short_description.trim() || null,
+      short_description_bn: formData.short_description_bn.trim() || null,
+    };
+
+    // OPTIMISTIC UPDATE: Show success immediately and navigate
     setSaving(true);
+    
+    // Show optimistic success toast
+    const toastId = toast.loading(
+      language === "bn" 
+        ? (isNew ? "পণ্য তৈরি হচ্ছে..." : "পণ্য আপডেট হচ্ছে...") 
+        : (isNew ? "Creating product..." : "Updating product...")
+    );
+    
+    // Clear draft optimistically
+    clearDraft();
+    
+    // Navigate immediately for faster UX
+    navigate("/admin/products");
+
+    console.log("Saving product data:", { isNew, id, productData: baseProductData });
 
     try {
-      // Parse specifications JSON if provided
-      let specifications = {};
-      if (formData.specifications.trim()) {
-        try {
-          specifications = JSON.parse(formData.specifications);
-        } catch {
-          toast.error(language === "bn" ? "স্পেসিফিকেশন JSON ফরম্যাটে ভুল" : "Invalid JSON format in specifications");
-          setSaving(false);
-          return;
-        }
-      }
-
-      // Parse features (one per line)
-      const features = formData.features
-        ? formData.features.split("\n").map(f => f.trim()).filter(f => f.length > 0)
-        : [];
-
-      // Build product data payload with proper typing
-      const baseProductData = {
-        name: formData.name.trim(),
-        slug: formData.slug.trim(),
-        price: parseFloat(formData.price),
-        category_id: formData.category_id || null,
-        image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
-        images: formData.images,
-        in_stock: formData.in_stock,
-        stock_quantity: parseInt(formData.stock_quantity) || 0,
-        is_featured: formData.is_featured,
-        is_active: formData.is_active,
-        specifications,
-        features,
-        sku: formData.sku.trim() || null,
-        compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
-        // Include all language fields
-        name_bn: formData.name_bn.trim() || null,
-        description: formData.description.trim() || null,
-        description_bn: formData.description_bn.trim() || null,
-        short_description: formData.short_description.trim() || null,
-        short_description_bn: formData.short_description_bn.trim() || null,
-      };
-
-      console.log("Saving product data:", { isNew, id, productData: baseProductData });
-
       if (isNew) {
         // CREATE - Insert new product
         const { data, error } = await supabase
@@ -284,7 +297,10 @@ const AdminProductEditor = () => {
         }
         
         console.log("Product created:", data);
-        toast.success(language === "bn" ? "পণ্য সফলভাবে তৈরি হয়েছে" : "Product created successfully");
+        toast.success(
+          language === "bn" ? "পণ্য সফলভাবে তৈরি হয়েছে" : "Product created successfully",
+          { id: toastId }
+        );
       } else {
         // UPDATE - Update existing product by ID
         if (!id) {
@@ -304,24 +320,25 @@ const AdminProductEditor = () => {
         }
         
         console.log("Product updated:", data);
-        toast.success(language === "bn" ? "পণ্য সফলভাবে আপডেট হয়েছে" : "Product updated successfully");
+        toast.success(
+          language === "bn" ? "পণ্য সফলভাবে আপডেট হয়েছে" : "Product updated successfully",
+          { id: toastId }
+        );
       }
-
-      // Clear draft after successful save
-      clearDraft();
-      
-      // Navigate back to products list
-      navigate("/admin/products");
     } catch (error: any) {
       console.error("Error saving product:", error);
       
-      // Show detailed error message
+      // Show detailed error message - rollback happened, user needs to retry
       const errorMessage = error.message || error.details || "Unknown error occurred";
       toast.error(
         language === "bn" 
-          ? `সংরক্ষণ ব্যর্থ: ${errorMessage}` 
-          : `Save failed: ${errorMessage}`
+          ? `সংরক্ষণ ব্যর্থ: ${errorMessage}। অনুগ্রহ করে আবার চেষ্টা করুন।` 
+          : `Save failed: ${errorMessage}. Please try again.`,
+        { id: toastId }
       );
+      
+      // Navigate back to editor so user can retry
+      navigate(isNew ? "/admin/products/new" : `/admin/products/${id}`);
     } finally {
       setSaving(false);
     }
