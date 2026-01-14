@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, RefreshCw } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import BulkProductImport from "@/components/admin/BulkProductImport";
@@ -14,6 +13,7 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useAdminProducts, useDeleteProduct, useInvalidateProducts } from "@/hooks/useAdminProducts";
 
 interface Product {
   id: string;
@@ -29,42 +29,21 @@ interface Product {
 }
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
+  
+  // React Query hooks for data management
+  const { data: products = [], isLoading: loading, refetch, isFetching } = useAdminProducts();
+  const deleteProduct = useDeleteProduct();
+  const invalidateProducts = useInvalidateProducts();
   
   // Permission checks
   const canCreate = isSuperAdmin || hasPermission("products", "create");
   const canEdit = isSuperAdmin || hasPermission("products", "update");
   const canDelete = isSuperAdmin || hasPermission("products", "delete");
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select(`
-          id, name, slug, price, sku, in_stock, stock_quantity, is_active, image_url,
-          category:categories(name)
-        `)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error(t.products.loadError);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!canDelete) {
@@ -74,17 +53,15 @@ const AdminProducts = () => {
     
     if (!confirm(`${t.products.deleteConfirm} "${name}"?`)) return;
 
-    setDeleting(id);
+    setDeletingId(id);
     try {
-      const { error } = await supabase.from("products").delete().eq("id", id);
-      if (error) throw error;
-      setProducts(products.filter((p) => p.id !== id));
+      await deleteProduct.mutateAsync(id);
       toast.success(t.products.deleteSuccess);
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error(t.products.deleteError);
     } finally {
-      setDeleting(null);
+      setDeletingId(null);
     }
   };
 
@@ -126,7 +103,7 @@ const AdminProducts = () => {
               <ProductExport />
               {canCreate ? (
                 <>
-                  <BulkProductImport onSuccess={fetchProducts} />
+                  <BulkProductImport onSuccess={invalidateProducts} />
                   <Button asChild className="gap-1.5">
                     <Link to="/admin/products/new">
                       <Plus className="h-4 w-4" />
@@ -244,10 +221,10 @@ const AdminProducts = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDelete(product.id, product.name)}
-                                  disabled={deleting === product.id}
+                                  disabled={deletingId === product.id}
                                   className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
-                                  {deleting === product.id ? (
+                                  {deletingId === product.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <Trash2 className="h-4 w-4" />
