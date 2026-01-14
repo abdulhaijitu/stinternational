@@ -21,6 +21,7 @@ import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 import Account from "./pages/Account";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
@@ -70,6 +71,7 @@ const App = () => (
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/checkout" element={<Checkout />} />
                       <Route path="/orders" element={<Orders />} />
+                      <Route path="/orders/:id" element={<OrderDetail />} />
                       <Route path="/account" element={<Account />} />
                       <Route path="/account/orders" element={<Orders />} />
                       <Route path="/wishlist" element={<Wishlist />} />
