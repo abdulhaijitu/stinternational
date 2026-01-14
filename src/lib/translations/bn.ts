@@ -159,6 +159,7 @@ export const bn = {
     sortPriceDesc: "দাম: বেশি থেকে কম",
     sortNameAsc: "নাম: A-Z",
     sortNameDesc: "নাম: Z-A",
+    clearHistory: "ইতিহাস মুছুন",
     // Compare feature
     compare: "তুলনা করুন",
     compareNow: "তুলনা দেখুন",
