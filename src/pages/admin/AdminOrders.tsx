@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Lock, Eye, Plus, Trash2, FileText } from "lucide-react";
+import { Lock, Eye, Plus, Trash2, FileText } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -272,6 +273,14 @@ const AdminOrders = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <AdminLayout>
+        <AdminTableSkeleton columns={9} rows={10} showSearch={false} />
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <TooltipProvider>
@@ -337,11 +346,7 @@ const AdminOrders = () => {
 
           {/* Orders Table */}
           <div className="bg-card border border-border rounded-lg overflow-hidden">
-            {loading ? (
-              <div className="p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              </div>
-            ) : filteredOrders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 {t.orders.noOrders}
               </div>
