@@ -18,9 +18,11 @@ import { cn } from "@/lib/utils";
 
 const CategoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { getCategoryFields } = useBilingualContent();
   const { density, setDensity } = useGridDensity();
+
+  const fontClass = language === "bn" ? "font-siliguri" : "";
   
   // Product comparison
   const {
@@ -58,7 +60,7 @@ const CategoryPage = () => {
   if (!categoryLoading && !category) {
     return (
       <Layout>
-        <div className="container-premium py-16 text-center">
+        <div className={`container-premium py-16 text-center ${fontClass}`}>
           <h1 className="text-2xl font-bold mb-4">{t.categories.notFound}</h1>
           <p className="text-muted-foreground mb-8">
             {t.categories.notFoundDesc}
@@ -100,7 +102,7 @@ const CategoryPage = () => {
 
       {/* Breadcrumb */}
       <div className="bg-muted/50 border-b border-border">
-        <div className="container-premium py-4">
+        <div className={`container-premium py-4 ${fontClass}`}>
           <nav className="flex items-center gap-2 text-sm">
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
               {t.nav.home}
@@ -119,7 +121,7 @@ const CategoryPage = () => {
 
       {/* Page Header */}
       <section className="bg-muted/30 border-b border-border">
-        <div className="container-premium py-8 md:py-12">
+        <div className={`container-premium py-8 md:py-12 ${fontClass}`}>
           <div className="flex items-start gap-4">
             {CategoryIcon && (
               <div className="w-16 h-16 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0">
@@ -143,7 +145,7 @@ const CategoryPage = () => {
 
       {/* Products Grid */}
       <section className="py-8 md:py-12">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
             <p className="text-sm text-muted-foreground">
