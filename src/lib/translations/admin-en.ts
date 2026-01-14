@@ -227,7 +227,11 @@ export const adminEn = {
     backToOrders: "Back to Orders",
     print: "Print",
     export: "Export",
+    invoice: "Invoice",
     orderNotFound: "Order not found",
+    order: "Order",
+    exportedSuccess: "Order exported",
+    invoiceDownloaded: "Invoice downloaded",
     paymentMethods: {
       cash_on_delivery: "Cash on Delivery",
       bank_transfer: "Bank Transfer",
@@ -433,6 +437,11 @@ export const adminEn = {
     noPermissionChanges: "Permission changes saved",
     saveChanges: "Save Changes",
     discardChanges: "Discard Changes",
+    superAdminInfo: "Super Admin has full access and cannot be modified",
+    permissionManagement: "Permission Management",
+    permissionManagementInfo: "Use the Permission Matrix tab to modify role permissions. Super Admin has full access to all features and cannot be modified. Changes are saved automatically.",
+    modules: "Modules",
+    partial: "partial",
     roleDescriptions: {
       super_admin: "Full system access. Can manage roles and all settings.",
       admin: "Manage products, categories, orders, and reports.",

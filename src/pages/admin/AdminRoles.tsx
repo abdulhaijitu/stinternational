@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Shield, Users, CheckCircle, XCircle, Info } from "lucide-react";
+import { Shield, Users, CheckCircle, Info } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,7 +60,7 @@ const AdminRoles = () => {
 
   const togglePermission = async (role: AppRole, permissionId: string) => {
     if (role === "super_admin") {
-      toast.info("Super Admin has full access and cannot be modified");
+      toast.info(t.roles.superAdminInfo);
       return;
     }
 
@@ -255,7 +255,7 @@ const AdminRoles = () => {
                   <CardContent>
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground mb-3">
-                        {t.roles.module}:
+                        {t.roles.modules}:
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {role === "super_admin" ? (
@@ -280,7 +280,7 @@ const AdminRoles = () => {
                                 )}
                               >
                                 {module.replace(/_/g, " ")}
-                                {!hasAll && " (partial)"}
+                                {!hasAll && ` (${t.roles.partial})`}
                               </Badge>
                             );
                           })
@@ -297,9 +297,9 @@ const AdminRoles = () => {
               <CardContent className="p-4 flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Permission Management</p>
+                  <p className="font-medium mb-1">{t.roles.permissionManagement}</p>
                   <p className="text-blue-700">
-                    Use the Permission Matrix tab to modify role permissions. Super Admin has full access to all features and cannot be modified. Changes are saved automatically.
+                    {t.roles.permissionManagementInfo}
                   </p>
                 </div>
               </CardContent>

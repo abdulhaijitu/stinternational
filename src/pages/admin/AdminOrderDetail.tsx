@@ -117,7 +117,7 @@ const AdminOrderDetail = () => {
       setItems(itemsData || []);
     } catch (error) {
       console.error("Error fetching order:", error);
-      toast.error(t.orders?.loadError || "Failed to load order");
+      toast.error(t.orders.loadError);
       navigate("/admin/orders");
     } finally {
       setLoading(false);
@@ -137,10 +137,10 @@ const AdminOrderDetail = () => {
       if (error) throw error;
 
       setOrder({ ...order, status: newStatus });
-      toast.success(t.orders?.updateSuccess || "Status updated");
+      toast.success(t.orders.updateSuccess);
     } catch (error) {
       console.error("Error updating status:", error);
-      toast.error(t.orders?.updateError || "Failed to update status");
+      toast.error(t.orders.updateError);
     } finally {
       setUpdatingStatus(false);
     }
@@ -168,7 +168,7 @@ const AdminOrderDetail = () => {
     a.download = `order-${order.order_number}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success(language === "bn" ? "অর্ডার এক্সপোর্ট হয়েছে" : "Order exported");
+    toast.success(t.orders.exportedSuccess);
   };
 
   const handleDownloadInvoice = () => {
@@ -198,7 +198,7 @@ const AdminOrderDetail = () => {
       language,
     });
     
-    toast.success(language === "bn" ? "ইনভয়েস ডাউনলোড হয়েছে" : "Invoice downloaded");
+    toast.success(t.orders.invoiceDownloaded);
   };
 
   const formatDate = (dateStr: string) => {
@@ -212,7 +212,7 @@ const AdminOrderDetail = () => {
   };
 
   const getPaymentMethodLabel = (method: string) => {
-    const methods = t.orders?.paymentMethods as Record<string, string>;
+    const methods = t.orders.paymentMethods as Record<string, string>;
     return methods?.[method] || method;
   };
 
@@ -233,9 +233,9 @@ const AdminOrderDetail = () => {
   if (!order) {
     return (
       <AdminLayout>
-        <div className="text-center py-12">
+        <div className={cn("text-center py-12", language === "bn" && "font-siliguri")}>
           <p className="text-muted-foreground">
-            {language === "bn" ? "অর্ডার পাওয়া যায়নি" : "Order not found"}
+            {t.orders.orderNotFound}
           </p>
         </div>
       </AdminLayout>
@@ -261,7 +261,7 @@ const AdminOrderDetail = () => {
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">
-                  {language === "bn" ? "অর্ডার" : "Order"} #{order.order_number}
+                  {t.orders.order} #{order.order_number}
                 </h1>
                 <Badge className={cn("text-white", statusInfo.color)}>
                   {statusInfo.label}
@@ -276,15 +276,15 @@ const AdminOrderDetail = () => {
           <div className="flex items-center gap-2 print:hidden">
             <Button variant="default" size="sm" onClick={handleDownloadInvoice}>
               <FileDown className="h-4 w-4 mr-2" />
-              {language === "bn" ? "ইনভয়েস" : "Invoice"}
+              {t.orders.invoice}
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" />
-              {language === "bn" ? "প্রিন্ট" : "Print"}
+              {t.orders.print}
             </Button>
             <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="h-4 w-4 mr-2" />
-              {language === "bn" ? "এক্সপোর্ট" : "Export"}
+              {t.orders.export}
             </Button>
           </div>
         </div>
@@ -295,7 +295,7 @@ const AdminOrderDetail = () => {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Package className="h-5 w-5" />
-                {t.orders?.items || "Order Items"}
+                {t.orders.items}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -329,16 +329,16 @@ const AdminOrderDetail = () => {
                 {/* Totals */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t.orders?.subtotal || "Subtotal"}</span>
+                    <span className="text-muted-foreground">{t.orders.subtotal}</span>
                     <span>{formatPrice(order.subtotal, language)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t.orders?.shipping || "Shipping"}</span>
+                    <span className="text-muted-foreground">{t.orders.shipping}</span>
                     <span>{formatPrice(order.shipping_cost || 0, language)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
-                    <span>{t.orders?.total || "Total"}</span>
+                    <span>{t.orders.total}</span>
                     <span className="text-primary">{formatPrice(order.total, language)}</span>
                   </div>
                 </div>
@@ -352,7 +352,7 @@ const AdminOrderDetail = () => {
             <Card className="print:hidden">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">
-                  {t.orders?.updateStatus || "Update Status"}
+                  {t.orders.updateStatus}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -379,7 +379,7 @@ const AdminOrderDetail = () => {
                 ) : (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Lock className="h-4 w-4" />
-                    {t.orders?.noStatusPermission || "No permission"}
+                    {t.orders.noStatusPermission}
                   </div>
                 )}
               </CardContent>
@@ -390,7 +390,7 @@ const AdminOrderDetail = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <User className="h-5 w-5" />
-                  {t.orders?.contactInfo || "Customer Info"}
+                  {t.orders.contactInfo}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -429,7 +429,7 @@ const AdminOrderDetail = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <MapPin className="h-5 w-5" />
-                  {t.orders?.shippingAddress || "Shipping Address"}
+                  {t.orders.shippingAddress}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -448,7 +448,7 @@ const AdminOrderDetail = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <CreditCard className="h-5 w-5" />
-                  {t.orders?.paymentMethod || "Payment"}
+                  {t.orders.paymentMethod}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -464,7 +464,7 @@ const AdminOrderDetail = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <FileText className="h-5 w-5" />
-                    {t.orders?.notes || "Notes"}
+                    {t.orders.notes}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

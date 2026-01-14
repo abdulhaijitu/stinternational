@@ -227,7 +227,11 @@ export const adminBn = {
     backToOrders: "অর্ডারে ফিরে যান",
     print: "প্রিন্ট",
     export: "এক্সপোর্ট",
+    invoice: "ইনভয়েস",
     orderNotFound: "অর্ডার পাওয়া যায়নি",
+    order: "অর্ডার",
+    exportedSuccess: "অর্ডার এক্সপোর্ট হয়েছে",
+    invoiceDownloaded: "ইনভয়েস ডাউনলোড হয়েছে",
     paymentMethods: {
       cash_on_delivery: "ক্যাশ অন ডেলিভারি",
       bank_transfer: "ব্যাংক ট্রান্সফার",
@@ -433,6 +437,11 @@ export const adminBn = {
     noPermissionChanges: "পারমিশন পরিবর্তন সংরক্ষিত হয়েছে",
     saveChanges: "পরিবর্তন সংরক্ষণ করুন",
     discardChanges: "পরিবর্তন বাতিল করুন",
+    superAdminInfo: "সুপার অ্যাডমিনের সম্পূর্ণ অ্যাক্সেস আছে এবং পরিবর্তন করা যাবে না",
+    permissionManagement: "পারমিশন ম্যানেজমেন্ট",
+    permissionManagementInfo: "রোল পারমিশন পরিবর্তন করতে পারমিশন ম্যাট্রিক্স ট্যাব ব্যবহার করুন। সুপার অ্যাডমিনের সব ফিচারে সম্পূর্ণ অ্যাক্সেস আছে এবং পরিবর্তন করা যাবে না। পরিবর্তনগুলো স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়।",
+    modules: "মডিউলসমূহ",
+    partial: "আংশিক",
     roleDescriptions: {
       super_admin: "সম্পূর্ণ সিস্টেম অ্যাক্সেস। রোল এবং সব সেটিংস পরিচালনা করতে পারেন।",
       admin: "পণ্য, ক্যাটাগরি, অর্ডার এবং রিপোর্ট পরিচালনা করুন।",
