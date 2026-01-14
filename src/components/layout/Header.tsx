@@ -11,6 +11,7 @@ import {
   Heart
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -63,9 +64,16 @@ const Header = () => {
 
   // Toggle mobile menu handler with haptic feedback
   const toggleMobileMenu = useCallback(() => {
-    mediumTap();
-    setIsMobileMenuOpen(prev => !prev);
-  }, [mediumTap]);
+    setIsMobileMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        mediumTap();
+      } else {
+        lightTap();
+      }
+      return next;
+    });
+  }, [mediumTap, lightTap]);
 
   // Swipe gesture handlers for closing menu
   const swipeHandlers = useSwipeGesture({
@@ -368,85 +376,95 @@ const Header = () => {
           </div>
         </nav>
 
-        {/* Mobile Menu Overlay */}
-        <div
-          className={cn(
-            "lg:hidden fixed inset-0 bg-black/60 z-[60] transition-opacity duration-200",
-            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          )}
-          style={{ top: mobileMenuOffset }}
-          onClick={closeMobileMenu}
-          aria-hidden="true"
-        />
-
-        {/* Mobile Menu Drawer */}
-        <div 
-          ref={menuContentRef}
-          id="mobile-menu"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-          className={cn(
-            "lg:hidden fixed inset-x-0 bottom-0 bg-background z-[70] overflow-hidden",
-            "transition-transform duration-200 ease-out will-change-transform",
-            isMobileMenuOpen ? "translate-y-0" : "translate-y-full"
-          )}
-          style={{ top: mobileMenuOffset }}
-          {...swipeHandlers}
-        >
-          {/* Swipe indicator handle */}
-          <div className="flex justify-center pt-2 pb-1">
-            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
-          </div>
-
-          {/* Close button for accessibility */}
-          <div className="absolute top-2 right-2 z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="min-w-[44px] min-h-[44px] touch-manipulation"
-              onClick={closeMobileMenu}
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <div className="h-full flex flex-col">
-            <div className="p-4 pr-14 border-b border-border">
-              <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
-            </div>
-
-            <div 
-              className="flex-1 overflow-y-auto overscroll-contain"
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
-            >
-              <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
-            </div>
-
-            <div className="border-t border-border p-4 space-y-2 pb-safe">
-              <Link 
-                to="/wishlist" 
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
-              >
-                <span>{t.nav.myWishlist}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-              <Link 
-                to="/account" 
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
-              >
-                <span>{t.nav.myAccount}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* Mobile menu rendered outside <header> to avoid transform + fixed-positioning issues */}
       </header>
+
+      {/* Mobile Menu (mobile only) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              key="mobile-menu-overlay"
+              className="lg:hidden fixed inset-0 bg-foreground/60 z-[60]"
+              style={{ top: mobileMenuOffset }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              onClick={closeMobileMenu}
+              aria-hidden="true"
+            />
+
+            <motion.div
+              key="mobile-menu-drawer"
+              ref={menuContentRef}
+              id="mobile-menu"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              className="lg:hidden fixed inset-x-0 bottom-0 bg-background z-[70] overflow-hidden will-change-transform"
+              style={{ top: mobileMenuOffset }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              {...swipeHandlers}
+            >
+              {/* Swipe indicator handle */}
+              <div className="flex justify-center pt-2 pb-1">
+                <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+              </div>
+
+              {/* Close button for accessibility */}
+              <div className="absolute top-2 right-2 z-10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="min-w-[44px] min-h-[44px] touch-manipulation"
+                  onClick={closeMobileMenu}
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <div className="h-full flex flex-col">
+                <div className="p-4 pr-14 border-b border-border">
+                  <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
+                </div>
+
+                <div
+                  className="flex-1 overflow-y-auto overscroll-contain"
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                >
+                  <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
+                </div>
+
+                <div className="border-t border-border p-4 space-y-2 pb-safe">
+                  <Link
+                    to="/wishlist"
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
+                  >
+                    <span>{t.nav.myWishlist}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                  <Link
+                    to="/account"
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
+                  >
+                    <span>{t.nav.myAccount}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
