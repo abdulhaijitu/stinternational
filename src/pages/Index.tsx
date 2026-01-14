@@ -373,13 +373,13 @@ const Index = () => {
           
           {/* Products Grid - 2 cols mobile, 3 cols tablet, 4 cols desktop */}
           {productsLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[...Array(8)].map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>
           ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.slice(0, 8).map((product) => (
                 <DBProductCard key={product.id} product={product} />
               ))}

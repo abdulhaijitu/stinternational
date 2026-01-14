@@ -75,8 +75,8 @@ const DBProductCard = ({
         "transition-all duration-200 ease-out",
         "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5",
         isInCompare && "ring-2 ring-primary",
-        // Ensure minimum card width on mobile
-        "min-w-0"
+        // Ensure consistent card height and minimum width
+        "min-w-0 h-full flex flex-col"
       )}
     >
       {/* Image Container - Fixed aspect ratio for CLS optimization */}
@@ -159,9 +159,9 @@ const DBProductCard = ({
         )}
       </div>
 
-      {/* Content Container */}
+      {/* Content Container - flex-1 ensures equal height */}
       <div className={cn(
-        "flex flex-col",
+        "flex flex-col flex-1",
         isCompact ? "p-2.5" : "p-3 sm:p-4"
       )}>
         {/* Category Tag */}
@@ -280,12 +280,8 @@ const DBProductCard = ({
               )}
             </div>
 
-            {/* Desktop: Side-by-side buttons */}
-            <div className={cn(
-              "mt-4 hidden sm:flex gap-2",
-              "opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
-              "transition-opacity duration-200"
-            )}>
+            {/* Desktop: Side-by-side buttons - Always visible */}
+            <div className="mt-4 hidden sm:flex gap-2">
               <Button
                 variant="default"
                 size="sm"
