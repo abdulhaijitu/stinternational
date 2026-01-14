@@ -10,7 +10,7 @@ import {
   ChevronRight,
   Heart
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -33,6 +33,8 @@ const COMPACT_HEADER_HEIGHT = MAIN_HEADER_HEIGHT_MOBILE + NAV_HEIGHT;
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuContentRef = useRef<HTMLDivElement>(null);
   const { getItemCount } = useCart();
   const { user } = useAuth();
   const { wishlist } = useWishlist();
@@ -48,12 +50,93 @@ const Header = () => {
     ? location.pathname.split('/category/')[1] 
     : undefined;
 
+  // Close mobile menu handler
+  const closeMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    // Return focus to menu button after closing
+    menuButtonRef.current?.focus();
+  }, []);
+
+  // Toggle mobile menu handler
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
+
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
   }, [location.pathname]);
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        closeMobileMenu();
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMobileMenuOpen, closeMobileMenu]);
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isMobileMenuOpen]);
+
+  // Focus trap inside menu
+  useEffect(() => {
+    if (!isMobileMenuOpen || !menuContentRef.current) return;
+
+    const menuContent = menuContentRef.current;
+    const focusableElements = menuContent.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0] as HTMLElement;
+    const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable?.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable?.focus();
+        }
+      }
+    };
+
+    menuContent.addEventListener('keydown', handleTabKey);
+    // Focus first element when menu opens
+    firstFocusable?.focus();
+
+    return () => {
+      menuContent.removeEventListener('keydown', handleTabKey);
+    };
+  }, [isMobileMenuOpen]);
 
   // Calculate header translation based on visibility and scroll state
   const getHeaderTransform = () => {
@@ -220,12 +303,16 @@ const Header = () => {
                 </Link>
                 
                 <Button
+                  ref={menuButtonRef}
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden"
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="lg:hidden min-w-[44px] min-h-[44px] touch-manipulation"
+                  onClick={toggleMobileMenu}
+                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-menu"
                 >
-                  {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </Button>
               </div>
             </div>
@@ -269,42 +356,73 @@ const Header = () => {
           </div>
         </nav>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div 
-            className="lg:hidden fixed inset-x-0 bottom-0 bg-background z-40 overflow-hidden animate-fade-in"
-            style={{ top: mobileMenuOffset }}
-          >
-            <div className="h-full flex flex-col">
-              <div className="p-4 border-b border-border">
-                <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
-              </div>
+        {/* Mobile Menu Overlay */}
+        <div
+          className={cn(
+            "lg:hidden fixed inset-0 bg-black/60 z-[60] transition-opacity duration-200",
+            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+          style={{ top: mobileMenuOffset }}
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
 
-              <div className="flex-1 overflow-y-auto">
-                <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
-              </div>
+        {/* Mobile Menu Drawer */}
+        <div 
+          ref={menuContentRef}
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
+          className={cn(
+            "lg:hidden fixed inset-x-0 bottom-0 bg-background z-[70] overflow-hidden",
+            "transition-transform duration-200 ease-out will-change-transform",
+            isMobileMenuOpen ? "translate-y-0" : "translate-y-full"
+          )}
+          style={{ top: mobileMenuOffset }}
+        >
+          {/* Close button for accessibility */}
+          <div className="absolute top-2 right-2 z-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="min-w-[44px] min-h-[44px] touch-manipulation"
+              onClick={closeMobileMenu}
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
 
-              <div className="border-t border-border p-4 space-y-2">
-                <Link 
-                  to="/wishlist" 
-                  onClick={closeMobileMenu}
-                  className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
-                >
-                  <span>{t.nav.myWishlist}</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </Link>
-                <Link 
-                  to="/account" 
-                  onClick={closeMobileMenu}
-                  className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg"
-                >
-                  <span>{t.nav.myAccount}</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </Link>
-              </div>
+          <div className="h-full flex flex-col">
+            <div className="p-4 pr-14 border-b border-border">
+              <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
+            </div>
+
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
+            </div>
+
+            <div className="border-t border-border p-4 space-y-2 pb-safe">
+              <Link 
+                to="/wishlist" 
+                onClick={closeMobileMenu}
+                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
+              >
+                <span>{t.nav.myWishlist}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+              <Link 
+                to="/account" 
+                onClick={closeMobileMenu}
+                className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
+              >
+                <span>{t.nav.myAccount}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
             </div>
           </div>
-        )}
+        </div>
       </header>
     </>
   );
