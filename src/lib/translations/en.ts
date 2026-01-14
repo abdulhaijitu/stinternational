@@ -488,6 +488,26 @@ export const en = {
     createAccount: "Create an account",
   },
 
+  // Track Order
+  trackOrder: {
+    title: "Track Your Order",
+    subtitle: "Enter your order number and email/phone to track your order status",
+    searchTitle: "Find Your Order",
+    searchDescription: "Your order number starts with STI- and was provided in your order confirmation.",
+    orderNumberLabel: "Order Number",
+    emailOrPhoneLabel: "Email or Phone",
+    fillAllFields: "Please fill in all fields",
+    orderNotFound: "Order not found. Please check your order number.",
+    verificationFailed: "Email or phone does not match the order.",
+    errorTracking: "Error tracking order. Please try again.",
+    searching: "Searching...",
+    trackButton: "Track Order",
+    orderedOn: "Ordered on",
+    orderItems: "Order Items",
+    quantity: "Qty",
+    shippingInfo: "Shipping Information",
+  },
+
   // Footer
   footer: {
     aboutCompany: "About ST International",
