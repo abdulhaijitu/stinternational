@@ -1035,8 +1035,8 @@ const AdminProductEditor = () => {
 
       {/* Quick-Add Sub-Category Modal */}
       <Dialog open={showAddSubCategoryModal} onOpenChange={setShowAddSubCategoryModal}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[425px] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className={getInputClass()}>
               {language === "bn" ? "নতুন সাব-ক্যাটাগরি" : "New Sub-Category"}
             </DialogTitle>
@@ -1047,7 +1047,7 @@ const AdminProductEditor = () => {
               }
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
             <div className="space-y-2">
               <Label htmlFor="new_cat_name" className={getInputClass()}>
                 {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
@@ -1106,7 +1106,7 @@ const AdminProductEditor = () => {
               onChange={(iconName) => setNewSubCategory({ ...newSubCategory, icon_name: iconName })}
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
             <Button
               type="button"
               variant="outline"
@@ -1134,8 +1134,8 @@ const AdminProductEditor = () => {
 
       {/* Quick-Add Parent Category Modal */}
       <Dialog open={showAddParentCategoryModal} onOpenChange={setShowAddParentCategoryModal}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[425px] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className={getInputClass()}>
               {language === "bn" ? "নতুন প্যারেন্ট ক্যাটাগরি" : "New Parent Category"}
             </DialogTitle>
@@ -1146,7 +1146,7 @@ const AdminProductEditor = () => {
               }
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
             <div className="space-y-2">
               <Label htmlFor="new_parent_name" className={getInputClass()}>
                 {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
@@ -1205,7 +1205,7 @@ const AdminProductEditor = () => {
               onChange={(iconName) => setNewParentCategory({ ...newParentCategory, icon_name: iconName })}
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
             <Button
               type="button"
               variant="outline"

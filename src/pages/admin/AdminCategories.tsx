@@ -613,13 +613,13 @@ const AdminCategories = () => {
                   </Tooltip>
                 )}
               </DialogTrigger>
-                <DialogContent className={cn("max-w-2xl", getTextClass())}>
-                  <DialogHeader>
+                <DialogContent className={cn("max-w-2xl flex flex-col", getTextClass())}>
+                  <DialogHeader className="flex-shrink-0">
                     <DialogTitle>
                       {editingCategory ? t.categories.editCategory : t.categories.newCategory}
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
                     {/* Category Type Selection */}
                     <div className="space-y-2">
                       <Label>{t.categories.categoryType}</Label>
@@ -763,15 +763,15 @@ const AdminCategories = () => {
                         onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                       />
                     </div>
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                        {t.common.cancel}
-                      </Button>
-                      <Button onClick={handleSave} disabled={saving}>
-                        {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                        {t.common.save}
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="flex-shrink-0 flex justify-end gap-2 pt-4 border-t border-border">
+                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                      {t.common.cancel}
+                    </Button>
+                    <Button onClick={handleSave} disabled={saving}>
+                      {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      {t.common.save}
+                    </Button>
                   </div>
                 </DialogContent>
               </Dialog>
