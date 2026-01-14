@@ -191,6 +191,8 @@ export const en = {
     removeItem: "Remove Item",
     cartSummary: "Cart Summary",
     orderTotal: "Order Total",
+    decreaseQuantity: "Decrease quantity",
+    increaseQuantity: "Increase quantity",
   },
 
   // Checkout

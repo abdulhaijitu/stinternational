@@ -28,10 +28,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, getSubtotal, clearCart } = useCart();
   const { user, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+
+  const fontClass = language === "bn" ? "font-siliguri" : "";
 
   const [formData, setFormData] = useState({
     customer_name: profile?.full_name || "",
@@ -126,7 +128,7 @@ const Checkout = () => {
   if (!user) {
     return (
       <Layout>
-        <div className="container-premium py-16 text-center">
+        <div className={`container-premium py-16 text-center ${fontClass}`}>
           <h1 className="text-2xl font-bold mb-4">{t.nav.login}</h1>
           <p className="text-muted-foreground mb-6">{t.checkout.loginToOrder}</p>
           <Button onClick={() => navigate("/account")}>{t.nav.login}</Button>
@@ -138,7 +140,7 @@ const Checkout = () => {
   if (orderPlaced) {
     return (
       <Layout>
-        <div className="container-premium py-16 md:py-24">
+        <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
           <div className="max-w-lg mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-10 w-10 text-green-600" />
@@ -171,7 +173,7 @@ const Checkout = () => {
   if (items.length === 0) {
     return (
       <Layout>
-        <div className="container-premium py-16 text-center">
+        <div className={`container-premium py-16 text-center ${fontClass}`}>
           <h1 className="text-2xl font-bold mb-4">{t.cart.cartEmpty}</h1>
           <p className="text-muted-foreground mb-6">{t.checkout.addProductsToCheckout}</p>
           <Button onClick={() => navigate("/categories")}>{t.checkout.browseProducts}</Button>
@@ -183,7 +185,7 @@ const Checkout = () => {
   return (
     <Layout>
       <section className="bg-muted/50 border-b border-border">
-        <div className="container-premium py-6 md:py-8">
+        <div className={`container-premium py-6 md:py-8 ${fontClass}`}>
           <Link to="/cart" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
             <ArrowLeft className="h-4 w-4" />
             {t.checkout.backToCart}
@@ -193,7 +195,7 @@ const Checkout = () => {
       </section>
 
       <section className="py-8 md:py-12">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           <form onSubmit={handleSubmit}>
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Form */}
