@@ -27,6 +27,8 @@ import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { useAdminNotifications } from "@/hooks/useAdminNotifications";
 import AdminLanguageSwitcher from "./AdminLanguageSwitcher";
 import { AdminThemeToggle } from "./AdminThemeToggle";
+import { AdminGlobalSearch } from "./AdminGlobalSearch";
+import { AdminNotificationCenter } from "./AdminNotificationCenter";
 import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -311,8 +313,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </Link>
           </div>
           
-          {/* Right side: View Website | Language | Dark Mode | Profile */}
+          {/* Right side: Search | Notifications | View Website | Language | Dark Mode | Profile */}
           <div className="flex items-center gap-1">
+            {/* Global Search */}
+            <AdminGlobalSearch />
+            
+            {/* Notification Center */}
+            <AdminNotificationCenter />
+            
+            <div className="h-6 w-px bg-border mx-1" />
+            
             {/* View Website */}
             <Button
               variant="ghost"
@@ -359,19 +369,22 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <img src={logo} alt="ST International" className="h-8 w-auto" />
             <span className="font-semibold">{t.nav.admin}</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {/* Mobile Notification Center */}
+            <AdminNotificationCenter />
+            
             <Button
               variant="ghost"
               size="icon"
               asChild
-              className="text-muted-foreground"
+              className="text-muted-foreground h-9 w-9"
             >
               <a href="/" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-5 w-5" />
               </a>
             </Button>
             <AdminLanguageSwitcher variant="compact" />
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
