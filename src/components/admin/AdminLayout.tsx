@@ -320,7 +320,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             >
               <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                 <ExternalLink className="h-4 w-4" />
-                <span>{language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website"}</span>
+                <span>{t.layout?.viewWebsite || (language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website")}</span>
               </a>
             </Button>
             
@@ -400,8 +400,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   <div className="mt-4">
                     {!collapsed && (
                       <div className="px-2.5 mb-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
-                          {language === "bn" ? "সীমিত" : "Restricted"}
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
+                          {t.layout?.restricted || (language === "bn" ? "সীমিত" : "Restricted")}
                         </span>
                       </div>
                     )}
