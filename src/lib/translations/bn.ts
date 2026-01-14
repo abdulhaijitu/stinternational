@@ -276,6 +276,9 @@ export const bn = {
     viewOrderHistory: "অর্ডার ইতিহাস দেখুন",
     saveWishlist: "পছন্দের তালিকা সংরক্ষণ করুন",
     secureCheckoutLabel: "নিরাপদ চেকআউট",
+    guestCheckout: "গেস্ট হিসেবে চালিয়ে যান",
+    guestCheckoutNote: "ইমেইলের মাধ্যমে আপনার অর্ডার ট্র্যাক করতে পারবেন",
+    or: "অথবা",
   },
 
   // Request Quote (RFQ)

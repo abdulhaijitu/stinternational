@@ -276,6 +276,9 @@ export const en = {
     viewOrderHistory: "View order history",
     saveWishlist: "Save wishlist items",
     secureCheckoutLabel: "Secure Checkout",
+    guestCheckout: "Continue as Guest",
+    guestCheckoutNote: "You can still track your order via email",
+    or: "or",
   },
 
   // Request Quote (RFQ)
