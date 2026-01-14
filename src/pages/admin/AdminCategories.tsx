@@ -55,6 +55,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { BulkDeleteDialog } from "@/components/admin/BulkDeleteDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Category {
   id: string;
@@ -334,6 +336,9 @@ const AdminCategories = () => {
   const [activeDragType, setActiveDragType] = useState<'parent' | 'sub' | null>(null);
   const [activeParentId, setActiveParentId] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     name_bn: "",
@@ -695,6 +700,74 @@ const AdminCategories = () => {
       toast.error(t.categories.saveError);
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  // Bulk selection handlers
+  const toggleSelectCategory = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    // Only select sub-categories (ones that can be deleted without children)
+    const deletableCategories = categories.filter(c => {
+      if (!c.parent_id) {
+        // Parent category - only deletable if no sub-categories
+        return !subCategoriesByParent[c.id]?.length;
+      }
+      return true; // Sub-categories are always deletable
+    });
+    
+    if (selectedIds.size === deletableCategories.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(deletableCategories.map(c => c.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const idsToDelete = Array.from(selectedIds);
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Filter out parent categories with sub-categories
+    const safeToDelete = idsToDelete.filter(id => {
+      const category = categories.find(c => c.id === id);
+      if (!category) return false;
+      if (!category.parent_id && subCategoriesByParent[id]?.length > 0) {
+        return false; // Don't delete parents with subs
+      }
+      return true;
+    });
+    
+    for (const id of safeToDelete) {
+      try {
+        const { error } = await supabase.from("categories").delete().eq("id", id);
+        if (error) throw error;
+        successCount++;
+      } catch (error) {
+        console.error(`Error deleting category ${id}:`, error);
+        errorCount++;
+      }
+    }
+    
+    await fetchCategories();
+    setSelectedIds(new Set());
+    
+    if (successCount > 0) {
+      toast.success(t.categories.bulkDeleteSuccess.replace("{count}", String(successCount)));
+    }
+    if (errorCount > 0) {
+      toast.error(t.categories.bulkDeleteError);
+      throw new Error("Some categories failed to delete");
     }
   };
 
@@ -1120,6 +1193,25 @@ const AdminCategories = () => {
           itemType={language === "bn" ? "বিভাগ" : "Category"}
           onConfirm={handleDelete}
           translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
+
+        {/* Bulk Delete Dialog */}
+        <BulkDeleteDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+          selectedCount={selectedIds.size}
+          itemType={language === "bn" ? "ক্যাটাগরি" : "categories"}
+          onConfirm={handleBulkDelete}
+          translations={{
+            title: t.categories.bulkDeleteTitle,
+            description: t.categories.bulkDeleteDescription,
+            typeToConfirm: language === "bn" ? "নিশ্চিত করতে টাইপ করুন" : "Type to confirm:",
+            confirmWord: "DELETE",
             cancel: t.common.cancel,
             delete: t.common.delete || "Delete",
             deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",

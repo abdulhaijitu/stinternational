@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { BulkDeleteDialog } from "@/components/admin/BulkDeleteDialog";
 import { SortableRow } from "@/components/admin/SortableRow";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 
@@ -55,6 +57,9 @@ const AdminTestimonials = () => {
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testimonialToDelete, setTestimonialToDelete] = useState<Testimonial | null>(null);
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     client_name: "",
     company_name: "",
@@ -245,8 +250,65 @@ const AdminTestimonials = () => {
     });
   };
 
+  // Bulk selection handlers
+  const toggleSelectTestimonial = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === (testimonials?.length || 0)) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(testimonials?.map(t => t.id) || []));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const idsToDelete = Array.from(selectedIds);
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (const id of idsToDelete) {
+      try {
+        const { error } = await supabase.from("testimonials").delete().eq("id", id);
+        if (error) throw error;
+        successCount++;
+      } catch (error) {
+        console.error(`Error deleting testimonial ${id}:`, error);
+        errorCount++;
+      }
+    }
+    
+    queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
+    queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+    setSelectedIds(new Set());
+    
+    if (successCount > 0) {
+      toast.success(t.testimonials.bulkDeleteSuccess.replace("{count}", String(successCount)));
+    }
+    if (errorCount > 0) {
+      toast.error(t.testimonials.bulkDeleteError);
+      throw new Error("Some testimonials failed to delete");
+    }
+  };
+
   const renderTestimonialRow = (testimonial: Testimonial) => (
     <>
+      <td className="p-4 text-sm">
+        <Checkbox
+          checked={selectedIds.has(testimonial.id)}
+          onCheckedChange={() => toggleSelectTestimonial(testimonial.id)}
+          disabled={isReordering}
+        />
+      </td>
       <td className="p-4 text-sm">
         <div>
           <p className="font-medium">{testimonial.client_name}</p>
@@ -443,6 +505,29 @@ const AdminTestimonials = () => {
           <p>{isBangla ? "💡 পুনর্বিন্যাস করতে টেনে আনুন এবং ফেলুন" : "💡 Drag and drop to reorder testimonials"}</p>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedIds.size > 0 && (
+          <div className="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Checkbox
+                checked={selectedIds.size === (testimonials?.length || 0)}
+                onCheckedChange={toggleSelectAll}
+              />
+              <span className="text-sm font-medium">
+                {t.testimonials.selectedCount.replace("{count}", String(selectedIds.size))}
+              </span>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t.testimonials.bulkDelete}
+            </Button>
+          </div>
+        )}
+
         {/* Table with Drag and Drop */}
         <div className="admin-table-wrapper">
           {isLoading ? (
@@ -460,6 +545,13 @@ const AdminTestimonials = () => {
                 <table className="admin-table">
                   <thead className="sticky top-0 z-10 bg-muted/50">
                     <tr>
+                      <th className="w-10">
+                        <Checkbox
+                          checked={selectedIds.size === (testimonials?.length || 0) && testimonials && testimonials.length > 0}
+                          onCheckedChange={toggleSelectAll}
+                          disabled={isReordering}
+                        />
+                      </th>
                       <th className="w-10"></th>
                       <th>{t.testimonials.client}</th>
                       <th>{t.testimonials.company}</th>
@@ -527,6 +619,25 @@ const AdminTestimonials = () => {
           itemType={isBangla ? "প্রশংসাপত্র" : "Testimonial"}
           onConfirm={handleDeleteConfirm}
           translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
+
+        {/* Bulk Delete Dialog */}
+        <BulkDeleteDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+          selectedCount={selectedIds.size}
+          itemType={isBangla ? "প্রশংসাপত্র" : "testimonials"}
+          onConfirm={handleBulkDelete}
+          translations={{
+            title: t.testimonials.bulkDeleteTitle,
+            description: t.testimonials.bulkDeleteDescription,
+            typeToConfirm: isBangla ? "নিশ্চিত করতে টাইপ করুন" : "Type to confirm:",
+            confirmWord: "DELETE",
             cancel: t.common.cancel,
             delete: t.common.delete || "Delete",
             deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
