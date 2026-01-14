@@ -39,11 +39,22 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
           setLoading(false);
           return;
         }
-        const { error } = await signUp(email, password, fullName);
+        const { error, linkedOrdersCount } = await signUp(email, password, fullName);
         if (error) {
           toast.error(error.message);
         } else {
           toast.success("অ্যাকাউন্ট তৈরি হয়েছে! আপনি এখন লগইন করতে পারবেন।");
+          
+          // Show additional toast if guest orders were linked
+          if (linkedOrdersCount && linkedOrdersCount > 0) {
+            setTimeout(() => {
+              toast.success(
+                `${linkedOrdersCount}টি অতীত অর্ডার আপনার অ্যাকাউন্টে যুক্ত হয়েছে!`,
+                { duration: 5000 }
+              );
+            }, 1000);
+          }
+          
           onSuccess?.();
         }
       }

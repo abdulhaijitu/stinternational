@@ -19,7 +19,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null; linkedOrdersCount?: number }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
@@ -103,20 +103,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
     
+    let linkedOrdersCount = 0;
+    
     // If signup successful and user confirmed, link any guest orders to this user
     if (!error && data?.user?.id) {
       try {
-        await supabase.rpc('link_guest_orders_to_user', {
+        const { data: countData } = await supabase.rpc('link_guest_orders_to_user', {
           user_email: email,
           user_uuid: data.user.id
         });
+        linkedOrdersCount = countData || 0;
       } catch (linkError) {
         // Non-critical error - log but don't fail signup
         console.error('Error linking guest orders:', linkError);
       }
     }
     
-    return { error };
+    return { error, linkedOrdersCount };
   };
 
   const signIn = async (email: string, password: string) => {
