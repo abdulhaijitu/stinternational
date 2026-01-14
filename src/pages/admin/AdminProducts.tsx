@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Search, Loader2, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -116,29 +116,30 @@ const AdminProducts = () => {
     <AdminLayout>
       <TooltipProvider>
         <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Page Header - Enterprise Standard */}
+          <div className="admin-page-header">
             <div>
-              <h1 className="text-2xl font-bold">{t.products.title}</h1>
-              <p className="text-muted-foreground">{t.products.subtitle}</p>
+              <h1 className="admin-page-title">{t.products.title}</h1>
+              <p className="admin-page-subtitle">{t.products.subtitle}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="admin-action-bar">
               <ProductExport />
               {canCreate ? (
                 <>
                   <BulkProductImport onSuccess={fetchProducts} />
-                  <Button asChild>
+                  <Button asChild className="gap-1.5">
                     <Link to="/admin/products/new">
-                      <Plus className="h-4 w-4 mr-1" />
-                      {t.products.newProduct}
+                      <Plus className="h-4 w-4" />
+                      <span className="hidden sm:inline">{t.products.newProduct}</span>
                     </Link>
                   </Button>
                 </>
               ) : (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button disabled className="opacity-50">
-                      <Lock className="h-4 w-4 mr-1" />
-                      {t.products.newProduct}
+                    <Button disabled className="opacity-50 gap-1.5">
+                      <Lock className="h-4 w-4" />
+                      <span className="hidden sm:inline">{t.products.newProduct}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -150,42 +151,45 @@ const AdminProducts = () => {
           </div>
 
           {/* Search */}
-          <div className="relative max-w-md">
+          <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t.products.searchProducts}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-9"
             />
           </div>
 
-          {/* Products Table */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          {/* Products Table - Enterprise Standard */}
+          <div className="admin-table-wrapper">
             {filteredProducts.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                {search ? t.products.noProducts : t.common.noData}
+              <div className="admin-empty-state">
+                <Package className="admin-empty-state-icon" />
+                <p className="admin-empty-state-text">
+                  {search ? t.products.noProducts : t.common.noData}
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
+                <table className="admin-table">
+                  <thead>
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">{t.products.productName}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.products.sku}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.products.category}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.products.price}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.products.stock}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
-                      <th className="text-right p-4 text-sm font-medium">{t.common.actions}</th>
+                      <th>{t.products.productName}</th>
+                      <th className="hidden md:table-cell">{t.products.sku}</th>
+                      <th className="hidden lg:table-cell">{t.products.category}</th>
+                      <th>{t.products.price}</th>
+                      <th className="hidden sm:table-cell">{t.products.stock}</th>
+                      <th>{t.common.status}</th>
+                      <th className="text-right">{t.common.actions}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredProducts.map((product) => {
                       const status = getStatusInfo(product);
                       return (
-                        <tr key={product.id} className="border-t border-border">
-                          <td className="p-4">
+                        <tr key={product.id}>
+                          <td>
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0">
                                 {product.image_url && (
@@ -199,27 +203,34 @@ const AdminProducts = () => {
                               <span className="font-medium text-sm line-clamp-1">{product.name}</span>
                             </div>
                           </td>
-                          <td className="p-4 text-sm text-muted-foreground">{product.sku || "-"}</td>
-                          <td className="p-4 text-sm">{product.category?.name || "-"}</td>
-                          <td className="p-4 text-sm font-medium">{formatPrice(product.price, language)}</td>
-                          <td className="p-4 text-sm">{product.stock_quantity}</td>
-                          <td className="p-4">
-                            <span className={cn("text-xs px-2 py-1 rounded-full font-medium", status.className)}>
+                          <td className="hidden md:table-cell text-muted-foreground">
+                            {product.sku || "-"}
+                          </td>
+                          <td className="hidden lg:table-cell">
+                            {product.category?.name || "-"}
+                          </td>
+                          <td>
+                            <span className="font-medium">{formatPrice(product.price, language)}</span>
+                          </td>
+                          <td className="hidden sm:table-cell">{product.stock_quantity}</td>
+                          <td>
+                            <span className={cn("text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap", status.className)}>
                               {status.label}
                             </span>
                           </td>
-                          <td className="p-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                          <td>
+                            <div className="admin-table-actions">
                               {canEdit ? (
-                                <Button variant="ghost" size="icon" asChild>
+                                <Button variant="ghost" size="sm" asChild className="h-8 gap-1.5">
                                   <Link to={`/admin/products/${product.id}`}>
                                     <Pencil className="h-4 w-4" />
+                                    <span className="hidden lg:inline">{t.common.edit}</span>
                                   </Link>
                                 </Button>
                               ) : (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" disabled className="opacity-50">
+                                    <Button variant="ghost" size="sm" disabled className="opacity-50 h-8">
                                       <Lock className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
@@ -231,20 +242,21 @@ const AdminProducts = () => {
                               {canDelete ? (
                                 <Button
                                   variant="ghost"
-                                  size="icon"
+                                  size="sm"
                                   onClick={() => handleDelete(product.id, product.name)}
                                   disabled={deleting === product.id}
+                                  className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                   {deleting === product.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                    <Trash2 className="h-4 w-4" />
                                   )}
                                 </Button>
                               ) : (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" disabled className="opacity-50">
+                                    <Button variant="ghost" size="sm" disabled className="opacity-50 h-8">
                                       <Lock className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
