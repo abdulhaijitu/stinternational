@@ -15,6 +15,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface InstitutionLogo {
   id: string;
@@ -26,6 +28,8 @@ interface InstitutionLogo {
 }
 
 const AdminLogos = () => {
+  const { language, t } = useAdminLanguage();
+  const isBangla = language === "bn";
   const [logos, setLogos] = useState<InstitutionLogo[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -52,7 +56,7 @@ const AdminLogos = () => {
       setLogos(data || []);
     } catch (error) {
       console.error("Error fetching logos:", error);
-      toast.error("Failed to load logos");
+      toast.error(t.logos.saveError);
     } finally {
       setLoading(false);
     }
@@ -75,7 +79,7 @@ const AdminLogos = () => {
 
   const handleSave = async () => {
     if (!formData.name || !formData.logo_url) {
-      toast.error("Name and logo image are required");
+      toast.error(t.logos.required);
       return;
     }
 
@@ -92,7 +96,7 @@ const AdminLogos = () => {
           .eq("id", editingLogo.id);
 
         if (error) throw error;
-        toast.success("Logo updated successfully");
+        toast.success(t.logos.updateSuccess);
       } else {
         const { error } = await supabase.from("institution_logos").insert([{
           name: formData.name,
@@ -102,30 +106,30 @@ const AdminLogos = () => {
         }]);
 
         if (error) throw error;
-        toast.success("Logo added successfully");
+        toast.success(t.logos.saveSuccess);
       }
 
       setDialogOpen(false);
       fetchLogos();
     } catch (error: any) {
       console.error("Error saving logo:", error);
-      toast.error(error.message || "Failed to save logo");
+      toast.error(t.logos.saveError);
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete "${name}" logo?`)) return;
+    if (!confirm(t.logos.deleteConfirm.replace("{name}", name))) return;
 
     try {
       const { error } = await supabase.from("institution_logos").delete().eq("id", id);
       if (error) throw error;
       setLogos(logos.filter((l) => l.id !== id));
-      toast.success("Logo deleted successfully");
+      toast.success(t.logos.deleteSuccess);
     } catch (error) {
       console.error("Error deleting logo:", error);
-      toast.error("Failed to delete logo");
+      toast.error(t.logos.deleteError);
     }
   };
 
@@ -141,10 +145,10 @@ const AdminLogos = () => {
       setLogos(logos.map(l => 
         l.id === logo.id ? { ...l, is_active: !l.is_active } : l
       ));
-      toast.success(`Logo ${!logo.is_active ? "enabled" : "disabled"}`);
+      toast.success(!logo.is_active ? t.logos.statusEnabled : t.logos.statusDisabled);
     } catch (error) {
       console.error("Error toggling logo:", error);
-      toast.error("Failed to update logo status");
+      toast.error(t.logos.statusError);
     }
   };
 
@@ -155,7 +159,6 @@ const AdminLogos = () => {
     const currentLogo = newLogos[index];
     const prevLogo = newLogos[index - 1];
     
-    // Swap display orders
     const currentOrder = currentLogo.display_order;
     const prevOrder = prevLogo.display_order;
     
@@ -165,7 +168,6 @@ const AdminLogos = () => {
         supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", prevLogo.id),
       ]);
       
-      // Swap in array
       [newLogos[index], newLogos[index - 1]] = [newLogos[index - 1], newLogos[index]];
       newLogos[index].display_order = currentOrder;
       newLogos[index - 1].display_order = prevOrder;
@@ -173,7 +175,7 @@ const AdminLogos = () => {
       setLogos(newLogos);
     } catch (error) {
       console.error("Error reordering:", error);
-      toast.error("Failed to reorder logos");
+      toast.error(t.logos.reorderError);
     }
   };
 
@@ -184,7 +186,6 @@ const AdminLogos = () => {
     const currentLogo = newLogos[index];
     const nextLogo = newLogos[index + 1];
     
-    // Swap display orders
     const currentOrder = currentLogo.display_order;
     const nextOrder = nextLogo.display_order;
     
@@ -194,7 +195,6 @@ const AdminLogos = () => {
         supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", nextLogo.id),
       ]);
       
-      // Swap in array
       [newLogos[index], newLogos[index + 1]] = [newLogos[index + 1], newLogos[index]];
       newLogos[index].display_order = currentOrder;
       newLogos[index + 1].display_order = nextOrder;
@@ -202,45 +202,45 @@ const AdminLogos = () => {
       setLogos(newLogos);
     } catch (error) {
       console.error("Error reordering:", error);
-      toast.error("Failed to reorder logos");
+      toast.error(t.logos.reorderError);
     }
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className={cn("space-y-6", isBangla && "font-siliguri")}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Institution Logos</h1>
-            <p className="text-muted-foreground">Manage client/partner logos displayed on the homepage</p>
+            <h1 className="text-2xl font-bold">{t.logos.title}</h1>
+            <p className="text-muted-foreground">{t.logos.subtitle}</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()}>
                 <Plus className="h-4 w-4" />
-                Add Logo
+                {t.logos.addLogo}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={cn(isBangla && "font-siliguri")}>
               <DialogHeader>
                 <DialogTitle>
-                  {editingLogo ? "Edit Logo" : "Add New Logo"}
+                  {editingLogo ? t.logos.editLogo : t.logos.newLogo}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Institution Name *</Label>
+                  <Label htmlFor="name">{t.logos.institutionName} *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Dhaka University"
+                    placeholder={t.logos.institutionNamePlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Logo Image *</Label>
+                  <Label>{t.logos.logoImage} *</Label>
                   <p className="text-xs text-muted-foreground mb-2">
-                    Upload a transparent PNG for best results. Recommended size: 200x100px
+                    {t.logos.logoImageHint}
                   </p>
                   <ImageUpload
                     value={formData.logo_url}
@@ -249,7 +249,7 @@ const AdminLogos = () => {
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">Show on homepage</Label>
+                  <Label htmlFor="is_active">{t.logos.showOnHomepage}</Label>
                   <Switch
                     id="is_active"
                     checked={formData.is_active}
@@ -258,11 +258,11 @@ const AdminLogos = () => {
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                    Cancel
+                    {t.common.cancel}
                   </Button>
                   <Button onClick={handleSave} disabled={saving}>
                     {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    Save
+                    {t.common.save}
                   </Button>
                 </div>
               </div>
@@ -272,10 +272,7 @@ const AdminLogos = () => {
 
         {/* Info Box */}
         <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
-          <p>
-            These logos appear in the "Trusted by Institutions & Professional Buyers" section on the homepage.
-            Use the arrows to reorder logos. Only active logos will be displayed.
-          </p>
+          <p>{t.logos.infoBox}</p>
         </div>
 
         {/* Logos List */}
@@ -285,7 +282,7 @@ const AdminLogos = () => {
           </div>
         ) : logos.length === 0 ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center text-muted-foreground">
-            No institution logos yet. Add your first logo to display on the homepage.
+            {t.logos.noLogos}
           </div>
         ) : (
           <div className="bg-card border border-border rounded-lg overflow-hidden divide-y divide-border">
@@ -331,7 +328,7 @@ const AdminLogos = () => {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{logo.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Order: {logo.display_order} • {logo.is_active ? "Active" : "Hidden"}
+                    {t.logos.order}: {logo.display_order} • {logo.is_active ? t.logos.active : t.logos.hidden}
                   </p>
                 </div>
 
@@ -341,7 +338,7 @@ const AdminLogos = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleToggleActive(logo)}
-                    title={logo.is_active ? "Hide logo" : "Show logo"}
+                    title={logo.is_active ? t.logos.hidden : t.logos.active}
                   >
                     {logo.is_active ? (
                       <Eye className="h-4 w-4 text-green-600" />

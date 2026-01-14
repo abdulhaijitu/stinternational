@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface Testimonial {
   id: string;
@@ -39,6 +41,8 @@ interface Testimonial {
 }
 
 const AdminTestimonials = () => {
+  const { language, t } = useAdminLanguage();
+  const isBangla = language === "bn";
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
@@ -101,10 +105,10 @@ const AdminTestimonials = () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       setIsDialogOpen(false);
       resetForm();
-      toast.success(editingTestimonial ? "Testimonial updated" : "Testimonial added");
+      toast.success(editingTestimonial ? t.testimonials.updateSuccess : t.testimonials.createSuccess);
     },
     onError: (error) => {
-      toast.error("Failed to save testimonial: " + error.message);
+      toast.error(t.common.error + ": " + error.message);
     },
   });
 
@@ -116,10 +120,10 @@ const AdminTestimonials = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
-      toast.success("Testimonial deleted");
+      toast.success(t.testimonials.deleteSuccess);
     },
     onError: (error) => {
-      toast.error("Failed to delete: " + error.message);
+      toast.error(t.common.error + ": " + error.message);
     },
   });
 
@@ -148,7 +152,7 @@ const AdminTestimonials = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
-      toast.success("Status updated");
+      toast.success(t.testimonials.statusUpdated);
     },
   });
 
@@ -203,12 +207,12 @@ const AdminTestimonials = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className={cn("space-y-6", isBangla && "font-siliguri")}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Testimonials</h1>
+            <h1 className="text-2xl font-bold">{t.testimonials.title}</h1>
             <p className="text-muted-foreground">
-              Manage customer testimonials displayed on the homepage
+              {t.testimonials.subtitle}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -218,67 +222,70 @@ const AdminTestimonials = () => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Testimonial
+                {t.testimonials.addTestimonial}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className={cn("max-w-lg", isBangla && "font-siliguri")}>
               <DialogHeader>
                 <DialogTitle>
-                  {editingTestimonial ? "Edit Testimonial" : "Add New Testimonial"}
+                  {editingTestimonial ? t.testimonials.editTestimonial : t.testimonials.newTestimonial}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="client_name">Client Name *</Label>
+                    <Label htmlFor="client_name">{t.testimonials.clientName} *</Label>
                     <Input
                       id="client_name"
                       value={formData.client_name}
                       onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                      placeholder={t.testimonials.clientNamePlaceholder}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="company_name">Company Name *</Label>
+                    <Label htmlFor="company_name">{t.testimonials.companyName} *</Label>
                     <Input
                       id="company_name"
                       value={formData.company_name}
                       onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                      placeholder={t.testimonials.companyNamePlaceholder}
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="designation">Designation</Label>
+                  <Label htmlFor="designation">{t.testimonials.designation}</Label>
                   <Input
                     id="designation"
                     value={formData.designation}
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    placeholder="e.g., Procurement Manager"
+                    placeholder={t.testimonials.designationPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="quote">Testimonial Quote *</Label>
+                  <Label htmlFor="quote">{t.testimonials.testimonialQuote} *</Label>
                   <Textarea
                     id="quote"
                     value={formData.quote}
                     onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                    placeholder={t.testimonials.testimonialQuotePlaceholder}
                     rows={4}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="avatar_url">Avatar URL (optional)</Label>
+                  <Label htmlFor="avatar_url">{t.testimonials.avatarUrl}</Label>
                   <Input
                     id="avatar_url"
                     value={formData.avatar_url}
                     onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                    placeholder="https://..."
+                    placeholder={t.testimonials.avatarUrlPlaceholder}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="rating">Rating (1-5)</Label>
+                    <Label htmlFor="rating">{t.testimonials.rating}</Label>
                     <Input
                       id="rating"
                       type="number"
@@ -289,7 +296,7 @@ const AdminTestimonials = () => {
                     />
                   </div>
                   <div className="flex items-center justify-between pt-6">
-                    <Label htmlFor="is_active">Active</Label>
+                    <Label htmlFor="is_active">{t.testimonials.active}</Label>
                     <Switch
                       id="is_active"
                       checked={formData.is_active}
@@ -299,10 +306,10 @@ const AdminTestimonials = () => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t.common.cancel}
                   </Button>
                   <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending ? "Saving..." : "Save"}
+                    {saveMutation.isPending ? t.common.loading : t.common.save}
                   </Button>
                 </div>
               </form>
@@ -314,22 +321,22 @@ const AdminTestimonials = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Quote className="h-5 w-5" />
-              All Testimonials ({testimonials?.length || 0})
+              {t.testimonials.allTestimonials} ({testimonials?.length || 0})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-muted-foreground py-8 text-center">Loading...</p>
+              <p className="text-muted-foreground py-8 text-center">{t.common.loading}</p>
             ) : testimonials && testimonials.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">Order</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-12">{t.testimonials.order}</TableHead>
+                    <TableHead>{t.testimonials.client}</TableHead>
+                    <TableHead>{t.testimonials.company}</TableHead>
+                    <TableHead>{t.testimonials.rating}</TableHead>
+                    <TableHead>{t.testimonials.status}</TableHead>
+                    <TableHead className="text-right">{t.testimonials.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -399,7 +406,7 @@ const AdminTestimonials = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              if (confirm("Delete this testimonial?")) {
+                              if (confirm(t.testimonials.deleteConfirm)) {
                                 deleteMutation.mutate(testimonial.id);
                               }
                             }}
@@ -414,7 +421,7 @@ const AdminTestimonials = () => {
               </Table>
             ) : (
               <p className="text-muted-foreground py-8 text-center">
-                No testimonials yet. Add your first one!
+                {t.testimonials.noTestimonials}
               </p>
             )}
           </CardContent>
