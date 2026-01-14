@@ -11,6 +11,7 @@ import { AdminLanguageProvider } from "@/contexts/AdminLanguageContext";
 import { AdminThemeProvider } from "@/contexts/AdminThemeContext";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import BilingualSEO from "@/components/seo/BilingualSEO";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Products from "./pages/Products";
@@ -62,44 +63,47 @@ const App = () => (
                   <BrowserRouter>
                     <ScrollToTop />
                     <BilingualSEO />
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/categories" element={<Categories />} />
-                      <Route path="/products" element={<Products />} />
-                      <Route path="/category/:slug" element={<CategoryPage />} />
-                      <Route path="/category/:parentSlug/:subSlug" element={<CategoryPage />} />
-                      <Route path="/product/:slug" element={<ProductPage />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/orders" element={<Orders />} />
-                      <Route path="/orders/:id" element={<OrderDetail />} />
-                      <Route path="/account" element={<Account />} />
-                      <Route path="/account/orders" element={<Orders />} />
-                      <Route path="/wishlist" element={<Wishlist />} />
-                      <Route path="/request-quote" element={<RequestQuote />} />
-                      <Route path="/track-order" element={<TrackOrder />} />
-                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                      <Route path="/terms-conditions" element={<TermsConditions />} />
-                      <Route path="/refund-policy" element={<RefundPolicy />} />
-                      {/* Admin Routes */}
-                      <Route path="/admin" element={<AdminDashboard />} />
-                      <Route path="/admin/products" element={<AdminProducts />} />
-                      <Route path="/admin/products/:id" element={<AdminProductEditor />} />
-                      <Route path="/admin/categories" element={<AdminCategories />} />
-                      <Route path="/admin/orders" element={<AdminOrders />} />
-                      <Route path="/admin/orders/new" element={<AdminOrderCreate />} />
-                      <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
-                      <Route path="/admin/quotes" element={<AdminQuotes />} />
-                      <Route path="/admin/logos" element={<AdminLogos />} />
-                      <Route path="/admin/testimonials" element={<AdminTestimonials />} />
-                      <Route path="/admin/ux-insights" element={<AdminUXInsights />} />
-                      <Route path="/admin/roles" element={<AdminRoles />} />
-                      <Route path="/admin/users" element={<AdminUsers />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                    <ErrorBoundary>
+                      <Routes>
+                        {/* Public Routes */}
+                        <Route path="/" element={<Index />} />
+                        <Route path="/categories" element={<Categories />} />
+                        <Route path="/products" element={<Products />} />
+                        <Route path="/category/:slug" element={<CategoryPage />} />
+                        <Route path="/category/:parentSlug/:subSlug" element={<CategoryPage />} />
+                        <Route path="/product/:slug" element={<ProductPage />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/checkout" element={<Checkout />} />
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/orders/:id" element={<OrderDetail />} />
+                        <Route path="/account" element={<Account />} />
+                        <Route path="/account/orders" element={<Orders />} />
+                        <Route path="/wishlist" element={<Wishlist />} />
+                        <Route path="/request-quote" element={<RequestQuote />} />
+                        <Route path="/track-order" element={<TrackOrder />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="/terms-conditions" element={<TermsConditions />} />
+                        <Route path="/refund-policy" element={<RefundPolicy />} />
+                        {/* Admin Routes */}
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/admin/products" element={<AdminProducts />} />
+                        <Route path="/admin/products/:id" element={<AdminProductEditor />} />
+                        <Route path="/admin/categories" element={<AdminCategories />} />
+                        <Route path="/admin/orders" element={<AdminOrders />} />
+                        <Route path="/admin/orders/new" element={<AdminOrderCreate />} />
+                        <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+                        <Route path="/admin/quotes" element={<AdminQuotes />} />
+                        <Route path="/admin/logos" element={<AdminLogos />} />
+                        <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+                        <Route path="/admin/ux-insights" element={<AdminUXInsights />} />
+                        <Route path="/admin/roles" element={<AdminRoles />} />
+                        <Route path="/admin/users" element={<AdminUsers />} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </ErrorBoundary>
                   </BrowserRouter>
                 </TooltipProvider>
               </CartProvider>

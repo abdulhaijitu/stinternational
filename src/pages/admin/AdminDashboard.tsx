@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Package, ShoppingCart, DollarSign, FileText, Building2, User } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CtaAnalyticsWidget from "@/components/admin/CtaAnalyticsWidget";
+import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { Badge } from "@/components/ui/badge";
@@ -99,6 +100,14 @@ const AdminDashboard = () => {
   const getStatusLabel = (status: string) => {
     return t.status[status as keyof typeof t.status] || status;
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <DashboardSkeleton />
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
