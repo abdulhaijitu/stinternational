@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
-import { Upload, X, Loader2, Image as ImageIcon, GripVertical } from "lucide-react";
+import { Upload, X, Loader2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 
 interface MultiImageUploadProps {
   value: string[];
@@ -19,9 +20,12 @@ const MultiImageUpload = ({
   folder = "products",
   maxImages = 10
 }: MultiImageUploadProps) => {
+  const { language, t } = useAdminLanguage();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const img = t.imageUpload;
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -29,7 +33,7 @@ const MultiImageUpload = ({
 
     const remainingSlots = maxImages - value.length;
     if (remainingSlots <= 0) {
-      toast.error(`সর্বোচ্চ ${maxImages}টি ছবি আপলোড করা যাবে`);
+      toast.error(img?.maxReached || `Maximum ${maxImages} images allowed`);
       return;
     }
 
@@ -38,11 +42,11 @@ const MultiImageUpload = ({
     // Validate files
     for (const file of filesToUpload) {
       if (!file.type.startsWith("image/")) {
-        toast.error("শুধুমাত্র ছবি আপলোড করা যাবে");
+        toast.error(img?.imageOnly || "Only images can be uploaded");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("প্রতিটি ছবির সাইজ ৫MB এর বেশি হতে পারবে না");
+        toast.error(img?.maxSize || "Image size cannot exceed 5MB");
         return;
       }
     }
@@ -73,10 +77,14 @@ const MultiImageUpload = ({
       }
 
       onChange([...value, ...uploadedUrls]);
-      toast.success(`${uploadedUrls.length}টি ছবি আপলোড হয়েছে`);
+      toast.success(
+        language === "bn" 
+          ? `${uploadedUrls.length}টি ছবি আপলোড হয়েছে` 
+          : `${uploadedUrls.length} image(s) uploaded`
+      );
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error(error.message || "আপলোড করতে সমস্যা হয়েছে");
+      toast.error(error.message || img?.uploadError || "Failed to upload");
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -109,8 +117,11 @@ const MultiImageUpload = ({
     setDraggedIndex(null);
   };
 
+  const fontClass = language === "bn" ? "font-siliguri" : "";
+  const primaryLabel = language === "bn" ? "প্রধান" : "Primary";
+
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${fontClass}`}>
       <input
         ref={fileInputRef}
         type="file"
@@ -152,7 +163,7 @@ const MultiImageUpload = ({
                 </Button>
               </div>
               <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                {index === 0 ? "প্রধান" : index + 1}
+                {index === 0 ? primaryLabel : index + 1}
               </div>
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <GripVertical className="h-5 w-5 text-white drop-shadow" />
@@ -173,22 +184,22 @@ const MultiImageUpload = ({
           {uploading ? (
             <>
               <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
-              <span className="text-sm text-muted-foreground">আপলোড হচ্ছে...</span>
+              <span className="text-sm text-muted-foreground">{img?.uploading || "Uploading..."}</span>
             </>
           ) : (
             <>
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                ছবি যোগ করুন ({value.length}/{maxImages})
+                {img?.addMore || "Add More"} ({value.length}/{maxImages})
               </span>
-              <span className="text-xs text-muted-foreground">PNG, JPG (সর্বোচ্চ 5MB প্রতিটি)</span>
+              <span className="text-xs text-muted-foreground">{img?.dropzoneHint || "PNG, JPG (max 5MB)"}</span>
             </>
           )}
         </button>
       )}
 
       <p className="text-xs text-muted-foreground">
-        ড্র্যাগ করে ছবির ক্রম পরিবর্তন করুন। প্রথম ছবিটি প্রধান ছবি হিসেবে দেখানো হবে।
+        {img?.dragToReorder || "Drag to reorder images. First image is primary."}
       </p>
     </div>
   );

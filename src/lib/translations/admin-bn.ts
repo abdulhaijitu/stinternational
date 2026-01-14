@@ -631,4 +631,21 @@ export const adminBn = {
     compactVsComfortable: "{compact} কম্প্যাক্ট বনাম {comfortable} কমফোর্টেবল",
     hoversClicks: "{hovers} হোভার, {clicks} ক্লিক",
   },
+
+  // Image Upload
+  imageUpload: {
+    uploadImage: "ছবি আপলোড করুন",
+    changeImage: "পরিবর্তন",
+    removeImage: "মুছুন",
+    uploading: "আপলোড হচ্ছে...",
+    imageOnly: "শুধুমাত্র ছবি আপলোড করা যাবে",
+    maxSize: "ছবির সাইজ ৫MB এর বেশি হতে পারবে না",
+    uploadSuccess: "ছবি আপলোড হয়েছে",
+    uploadError: "আপলোড করতে সমস্যা হয়েছে",
+    dropzone: "ছবি আপলোড করুন",
+    dropzoneHint: "PNG, JPG (সর্বোচ্চ 5MB)",
+    dragToReorder: "ক্রম পরিবর্তন করতে টেনে আনুন। প্রথম ছবিটি প্রাথমিক।",
+    addMore: "আরো যোগ করুন",
+    maxReached: "সর্বোচ্চ সংখ্যক ছবি হয়ে গেছে",
+  },
 } as const;
