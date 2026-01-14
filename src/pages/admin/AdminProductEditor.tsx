@@ -92,8 +92,13 @@ const AdminProductEditor = () => {
   
   // Quick-add sub-category modal state
   const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
-  const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "" });
+  const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "" });
   const [addingSubCategory, setAddingSubCategory] = useState(false);
+
+  // Quick-add parent category modal state
+  const [showAddParentCategoryModal, setShowAddParentCategoryModal] = useState(false);
+  const [newParentCategory, setNewParentCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "" });
+  const [addingParentCategory, setAddingParentCategory] = useState(false);
 
   const [formData, setFormData] = useState(initialFormData);
 
@@ -472,6 +477,7 @@ const AdminProductEditor = () => {
           name: newSubCategory.name.trim(),
           name_bn: newSubCategory.name_bn.trim() || null,
           slug: newSubCategory.slug.trim(),
+          image_url: newSubCategory.image_url || null,
           parent_id: formData.parent_category_id,
           is_parent: false,
           is_active: true,
@@ -499,7 +505,7 @@ const AdminProductEditor = () => {
       toast.success(language === "bn" ? "সাব-ক্যাটাগরি তৈরি হয়েছে" : "Sub-category created");
       
       // Reset modal
-      setNewSubCategory({ name: "", name_bn: "", slug: "" });
+      setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "" });
       setShowAddSubCategoryModal(false);
     } catch (error: any) {
       console.error("Error creating sub-category:", error);
@@ -510,6 +516,68 @@ const AdminProductEditor = () => {
       );
     } finally {
       setAddingSubCategory(false);
+    }
+  };
+
+  // Handle quick-add parent category
+  const handleAddParentCategory = async () => {
+    if (!newParentCategory.name.trim()) {
+      toast.error(language === "bn" ? "ক্যাটাগরির নাম আবশ্যক" : "Category name is required");
+      return;
+    }
+
+    if (!newParentCategory.slug.trim()) {
+      toast.error(language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required");
+      return;
+    }
+
+    setAddingParentCategory(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .insert([{
+          name: newParentCategory.name.trim(),
+          name_bn: newParentCategory.name_bn.trim() || null,
+          slug: newParentCategory.slug.trim(),
+          image_url: newParentCategory.image_url || null,
+          parent_id: null,
+          is_parent: true,
+          is_active: true,
+          display_order: parentCategories.length,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add to local parent categories list
+      setParentCategories(prev => [...prev, {
+        id: data.id,
+        name: data.name,
+        name_bn: data.name_bn,
+      }]);
+
+      // Auto-select the new parent category
+      setFormData(prev => ({ ...prev, parent_category_id: data.id, category_id: "" }));
+
+      // Invalidate category queries
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+
+      toast.success(language === "bn" ? "প্যারেন্ট ক্যাটাগরি তৈরি হয়েছে" : "Parent category created");
+      
+      // Reset modal
+      setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+      setShowAddParentCategoryModal(false);
+    } catch (error: any) {
+      console.error("Error creating parent category:", error);
+      toast.error(
+        language === "bn" 
+          ? `প্যারেন্ট ক্যাটাগরি তৈরি ব্যর্থ: ${error.message}` 
+          : `Failed to create parent category: ${error.message}`
+      );
+    } finally {
+      setAddingParentCategory(false);
     }
   };
 
@@ -740,24 +808,35 @@ const AdminProductEditor = () => {
               <Label htmlFor="parent_category" className={getInputClass()}>
                 {t.categories.parentCategory} *
               </Label>
-              <Select
-                value={formData.parent_category_id}
-                onValueChange={handleParentCategoryChange}
-              >
-                <SelectTrigger className={getInputClass()}>
-                  <SelectValue placeholder={t.categories.selectParentCategory} />
-                </SelectTrigger>
-                <SelectContent>
-                  {parentCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
-                      {getCategoryName(cat)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {!formData.parent_category_id && (
-                <p className="text-xs text-destructive">
-                  {language === "bn" ? "প্যারেন্ট ক্যাটাগরি আবশ্যক" : "Parent category is required"}
+              <div className="flex gap-2">
+                <Select
+                  value={formData.parent_category_id}
+                  onValueChange={handleParentCategoryChange}
+                >
+                  <SelectTrigger className={cn("flex-1", getInputClass())}>
+                    <SelectValue placeholder={t.categories.selectParentCategory} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parentCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
+                        {getCategoryName(cat)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowAddParentCategoryModal(true)}
+                  title={language === "bn" ? "নতুন প্যারেন্ট ক্যাটাগরি যোগ করুন" : "Add new parent category"}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {!formData.parent_category_id && parentCategories.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {language === "bn" ? "কোনো প্যারেন্ট ক্যাটাগরি নেই। নতুন তৈরি করতে + বাটনে ক্লিক করুন।" : "No parent categories. Click + to create one."}
                 </p>
               )}
             </div>
@@ -1010,6 +1089,15 @@ const AdminProductEditor = () => {
                 placeholder="digital-scales"
               />
             </div>
+            <div className="space-y-2">
+              <Label className={getInputClass()}>
+                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"}
+              </Label>
+              <ImageUpload
+                value={newSubCategory.image_url}
+                onChange={(url) => setNewSubCategory({ ...newSubCategory, image_url: url })}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -1017,7 +1105,7 @@ const AdminProductEditor = () => {
               variant="outline"
               onClick={() => {
                 setShowAddSubCategoryModal(false);
-                setNewSubCategory({ name: "", name_bn: "", slug: "" });
+                setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "" });
               }}
               className={getInputClass()}
             >
@@ -1030,6 +1118,101 @@ const AdminProductEditor = () => {
               className={getInputClass()}
             >
               {addingSubCategory && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              <Plus className="h-4 w-4 mr-2" />
+              {language === "bn" ? "তৈরি করুন" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick-Add Parent Category Modal */}
+      <Dialog open={showAddParentCategoryModal} onOpenChange={setShowAddParentCategoryModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className={getInputClass()}>
+              {language === "bn" ? "নতুন প্যারেন্ট ক্যাটাগরি" : "New Parent Category"}
+            </DialogTitle>
+            <DialogDescription className={getInputClass()}>
+              {language === "bn" 
+                ? "নতুন প্যারেন্ট ক্যাটাগরি তৈরি করুন যার অধীনে সাব-ক্যাটাগরি থাকবে"
+                : "Create a new parent category to organize sub-categories under"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new_parent_name" className={getInputClass()}>
+                {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
+              </Label>
+              <Input
+                id="new_parent_name"
+                value={newParentCategory.name}
+                onChange={(e) => setNewParentCategory({
+                  ...newParentCategory,
+                  name: e.target.value,
+                  slug: generateCategorySlug(e.target.value),
+                })}
+                placeholder={language === "bn" ? "যেমন: Laboratory Equipment" : "e.g., Laboratory Equipment"}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new_parent_name_bn" className="font-siliguri">
+                {language === "bn" ? "নাম (বাংলা)" : "Name (Bangla)"}
+              </Label>
+              <Input
+                id="new_parent_name_bn"
+                value={newParentCategory.name_bn}
+                onChange={(e) => setNewParentCategory({
+                  ...newParentCategory,
+                  name_bn: e.target.value,
+                })}
+                placeholder={language === "bn" ? "যেমন: ল্যাবরেটরি সরঞ্জাম" : "e.g., ল্যাবরেটরি সরঞ্জাম"}
+                className="font-siliguri"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new_parent_slug" className={getInputClass()}>
+                {language === "bn" ? "স্লাগ *" : "Slug *"}
+              </Label>
+              <Input
+                id="new_parent_slug"
+                value={newParentCategory.slug}
+                onChange={(e) => setNewParentCategory({
+                  ...newParentCategory,
+                  slug: e.target.value,
+                })}
+                placeholder="laboratory-equipment"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className={getInputClass()}>
+                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"}
+              </Label>
+              <ImageUpload
+                value={newParentCategory.image_url}
+                onChange={(url) => setNewParentCategory({ ...newParentCategory, image_url: url })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowAddParentCategoryModal(false);
+                setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+              }}
+              className={getInputClass()}
+            >
+              {t.common.cancel}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAddParentCategory}
+              disabled={addingParentCategory}
+              className={getInputClass()}
+            >
+              {addingParentCategory && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Plus className="h-4 w-4 mr-2" />
               {language === "bn" ? "তৈরি করুন" : "Create"}
             </Button>
