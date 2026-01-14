@@ -20,6 +20,7 @@ import { useSmartHeader } from "@/hooks/useSmartHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
+import { useUXTelemetry, type MobileMenuCloseMethod } from "@/hooks/useUXTelemetry";
 import CategoryAwareSearch from "./CategoryAwareSearch";
 import MegaMenu from "./MegaMenu";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
@@ -36,8 +37,10 @@ const COMPACT_HEADER_HEIGHT = MAIN_HEADER_HEIGHT_MOBILE + NAV_HEIGHT;
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuContentRef = useRef<HTMLDivElement>(null);
+  const closeMethodRef = useRef<MobileMenuCloseMethod>('button');
   const { getItemCount } = useCart();
   const { user } = useAuth();
   const { wishlist } = useWishlist();
@@ -45,6 +48,7 @@ const Header = () => {
   const { isScrolled, isCompact, isVisible, scrollDirection } = useSmartHeader(100);
   const { t } = useLanguage();
   const { lightTap, mediumTap } = useHapticFeedback();
+  const { trackMobileMenu } = useUXTelemetry();
   
   const cartItemCount = getItemCount();
   const wishlistCount = wishlist.length;
@@ -54,37 +58,49 @@ const Header = () => {
     ? location.pathname.split('/category/')[1] 
     : undefined;
 
-  // Close mobile menu handler with haptic feedback
-  const closeMobileMenu = useCallback(() => {
+  // Close mobile menu handler with haptic feedback and telemetry
+  const closeMobileMenu = useCallback((method: MobileMenuCloseMethod = 'button') => {
     lightTap();
+    trackMobileMenu('close', method);
     setIsMobileMenuOpen(false);
+    setDragOffset(0);
     // Return focus to menu button after closing
     menuButtonRef.current?.focus();
-  }, [lightTap]);
+  }, [lightTap, trackMobileMenu]);
 
-  // Toggle mobile menu handler with haptic feedback
+  // Toggle mobile menu handler with haptic feedback and telemetry
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => {
       const next = !prev;
       if (next) {
         mediumTap();
+        trackMobileMenu('open');
       } else {
         lightTap();
+        trackMobileMenu('close', 'button');
       }
       return next;
     });
-  }, [mediumTap, lightTap]);
+  }, [mediumTap, lightTap, trackMobileMenu]);
 
-  // Swipe gesture handlers for closing menu
+  // Handle drag for finger-following preview
+  const handleDrag = useCallback((offset: number) => {
+    setDragOffset(offset);
+  }, []);
+
+  // Swipe gesture handlers for closing menu with drag preview
   const swipeHandlers = useSwipeGesture({
-    onSwipeDown: closeMobileMenu,
-    threshold: 60,
-    velocityThreshold: 0.4,
+    onSwipeDown: () => closeMobileMenu('swipe'),
+    onDrag: handleDrag,
+    threshold: 80,
+    velocityThreshold: 0.5,
+    direction: 'vertical',
   });
 
   // Close mobile menu on route change
   useEffect(() => {
     if (isMobileMenuOpen) {
+      trackMobileMenu('close', 'navigation');
       setIsMobileMenuOpen(false);
     }
   }, [location.pathname]);
@@ -93,7 +109,7 @@ const Header = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isMobileMenuOpen) {
-        closeMobileMenu();
+        closeMobileMenu('escape');
       }
     };
 
@@ -388,10 +404,10 @@ const Header = () => {
               className="lg:hidden fixed inset-0 bg-foreground/60 z-[60]"
               style={{ top: mobileMenuOffset }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              animate={{ opacity: 1 - dragOffset / 300 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              onClick={closeMobileMenu}
+              onClick={() => closeMobileMenu('overlay')}
               aria-hidden="true"
             />
 
@@ -403,16 +419,24 @@ const Header = () => {
               aria-modal="true"
               aria-label="Navigation menu"
               className="lg:hidden fixed inset-x-0 bottom-0 bg-background z-[70] overflow-hidden will-change-transform"
-              style={{ top: mobileMenuOffset }}
+              style={{ 
+                top: mobileMenuOffset,
+                transform: `translateY(${dragOffset}px)`,
+              }}
               initial={{ y: "100%" }}
-              animate={{ y: 0 }}
+              animate={{ y: dragOffset }}
               exit={{ y: "100%" }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={dragOffset > 0 ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
               {...swipeHandlers}
             >
               {/* Swipe indicator handle */}
               <div className="flex justify-center pt-2 pb-1">
-                <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+                <div 
+                  className={cn(
+                    "w-12 h-1.5 rounded-full transition-colors",
+                    dragOffset > 40 ? "bg-primary" : "bg-muted-foreground/30"
+                  )} 
+                />
               </div>
 
               {/* Close button for accessibility */}
@@ -421,7 +445,7 @@ const Header = () => {
                   variant="ghost"
                   size="icon"
                   className="min-w-[44px] min-h-[44px] touch-manipulation"
-                  onClick={closeMobileMenu}
+                  onClick={() => closeMobileMenu('button')}
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5" />
@@ -439,13 +463,13 @@ const Header = () => {
                   onTouchMove={(e) => e.stopPropagation()}
                   onTouchEnd={(e) => e.stopPropagation()}
                 >
-                  <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
+                  <MobileCategoryDrawer onCategoryClick={() => closeMobileMenu('navigation')} />
                 </div>
 
                 <div className="border-t border-border p-4 space-y-2 pb-safe">
                   <Link
                     to="/wishlist"
-                    onClick={closeMobileMenu}
+                    onClick={() => closeMobileMenu('navigation')}
                     className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
                   >
                     <span>{t.nav.myWishlist}</span>
@@ -453,7 +477,7 @@ const Header = () => {
                   </Link>
                   <Link
                     to="/account"
-                    onClick={closeMobileMenu}
+                    onClick={() => closeMobileMenu('navigation')}
                     className="flex items-center justify-between py-3 px-4 text-sm font-medium bg-muted/30 rounded-lg min-h-[44px] touch-manipulation"
                   >
                     <span>{t.nav.myAccount}</span>
