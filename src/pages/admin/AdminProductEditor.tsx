@@ -106,6 +106,113 @@ const AdminProductEditor = () => {
   const [checkingParentCategorySlug, setCheckingParentCategorySlug] = useState(false);
 
   const [formData, setFormData] = useState(initialFormData);
+  
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    slug?: string;
+    price?: string;
+    parent_category_id?: string;
+    specifications?: string;
+  }>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Field validation function
+  const validateField = useCallback((name: string, value: string): string | undefined => {
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          return language === "bn" ? "পণ্যের নাম আবশ্যক" : "Product name is required";
+        }
+        if (value.trim().length < 2) {
+          return language === "bn" ? "নাম কমপক্ষে ২ অক্ষরের হতে হবে" : "Name must be at least 2 characters";
+        }
+        break;
+      case "slug":
+        if (!value.trim()) {
+          return language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required";
+        }
+        if (!/^[a-z0-9-]+$/.test(value.trim())) {
+          return language === "bn" ? "স্লাগে শুধু ছোট হাতের অক্ষর, সংখ্যা এবং হাইফেন থাকতে পারবে" : "Slug can only contain lowercase letters, numbers, and hyphens";
+        }
+        break;
+      case "price":
+        if (!value || isNaN(parseFloat(value))) {
+          return language === "bn" ? "মূল্য আবশ্যক" : "Price is required";
+        }
+        if (parseFloat(value) < 0) {
+          return language === "bn" ? "মূল্য ঋণাত্মক হতে পারে না" : "Price cannot be negative";
+        }
+        break;
+      case "parent_category_id":
+        if (!value) {
+          return language === "bn" ? "প্যারেন্ট ক্যাটাগরি আবশ্যক" : "Parent category is required";
+        }
+        break;
+      case "specifications":
+        if (value.trim()) {
+          try {
+            JSON.parse(value);
+          } catch {
+            return language === "bn" ? "স্পেসিফিকেশন JSON ফরম্যাটে ভুল" : "Invalid JSON format";
+          }
+        }
+        break;
+    }
+    return undefined;
+  }, [language]);
+
+  // Handle field blur for validation
+  const handleBlur = useCallback((name: string) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const value = formData[name as keyof typeof formData];
+    const error = validateField(name, typeof value === 'string' ? value : String(value));
+    setFormErrors(prev => ({ ...prev, [name]: error }));
+  }, [formData, validateField]);
+
+  // Handle field change with real-time validation
+  const handleFieldChange = useCallback((name: string, value: string | boolean | string[]) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Only validate if field has been touched
+    if (touched[name] && typeof value === 'string') {
+      const error = validateField(name, value);
+      setFormErrors(prev => ({ ...prev, [name]: error }));
+    }
+  }, [touched, validateField]);
+
+  // Validate all required fields
+  const validateForm = useCallback((): boolean => {
+    const errors: typeof formErrors = {};
+    const fieldsToValidate = ['name', 'slug', 'price', 'parent_category_id'];
+    
+    fieldsToValidate.forEach(field => {
+      const value = formData[field as keyof typeof formData];
+      const error = validateField(field, typeof value === 'string' ? value : String(value));
+      if (error) {
+        errors[field as keyof typeof errors] = error;
+      }
+    });
+
+    // Also validate specifications if present
+    if (formData.specifications.trim()) {
+      const specError = validateField('specifications', formData.specifications);
+      if (specError) {
+        errors.specifications = specError;
+      }
+    }
+
+    setFormErrors(errors);
+    setTouched({
+      name: true,
+      slug: true,
+      price: true,
+      parent_category_id: true,
+      specifications: !!formData.specifications.trim(),
+    });
+
+    return Object.keys(errors).length === 0;
+  }, [formData, validateField]);
 
   // Draft management
   const {
@@ -264,37 +371,16 @@ const AdminProductEditor = () => {
       e.stopPropagation();
     }
 
-    // Validate required fields - English name and slug are always required
-    if (!formData.name.trim()) {
-      toast.error(language === "bn" ? "পণ্যের নাম (ইংরেজি) আবশ্যক" : "Product name (English) is required");
-      return;
-    }
-    
-    if (!formData.slug.trim()) {
-      toast.error(language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required");
-      return;
-    }
-    
-    if (!formData.price || isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
-      toast.error(language === "bn" ? "সঠিক মূল্য দিন" : "Please enter a valid price");
+    // Validate all fields using the form validation function
+    if (!validateForm()) {
+      toast.error(language === "bn" ? "অনুগ্রহ করে সব প্রয়োজনীয় তথ্য সঠিকভাবে পূরণ করুন" : "Please fill in all required fields correctly");
       return;
     }
 
-    // Validate category selection - Parent Category is REQUIRED, Sub-Category is OPTIONAL
-    if (!formData.parent_category_id) {
-      toast.error(language === "bn" ? "প্যারেন্ট ক্যাটাগরি নির্বাচন করুন" : "Please select a parent category");
-      return;
-    }
-
-    // Parse specifications JSON if provided (validate before optimistic update)
+    // Parse specifications JSON if provided (already validated in validateForm)
     let specifications = {};
     if (formData.specifications.trim()) {
-      try {
-        specifications = JSON.parse(formData.specifications);
-      } catch {
-        toast.error(language === "bn" ? "স্পেসিফিকেশন JSON ফরম্যাটে ভুল" : "Invalid JSON format in specifications");
-        return;
-      }
+      specifications = JSON.parse(formData.specifications);
     }
 
     // Parse features (one per line)
@@ -729,23 +815,33 @@ const AdminProductEditor = () => {
                       id="name"
                       value={formData.name}
                       onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          name: e.target.value,
-                          slug: isNew ? generateSlug(e.target.value) : formData.slug,
-                        });
+                        const newName = e.target.value;
+                        handleFieldChange("name", newName);
+                        if (isNew) {
+                          handleFieldChange("slug", generateSlug(newName));
+                        }
                       }}
+                      onBlur={() => handleBlur("name")}
                       placeholder={t.products.productNamePlaceholder}
+                      className={cn(formErrors.name && touched.name && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.name && touched.name && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.name}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="slug">{t.products.slug} <span className="text-destructive">*</span></Label>
                     <Input
                       id="slug"
                       value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      onChange={(e) => handleFieldChange("slug", e.target.value)}
+                      onBlur={() => handleBlur("slug")}
                       placeholder={t.products.slugPlaceholder}
+                      className={cn(formErrors.slug && touched.slug && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.slug && touched.slug && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.slug}</p>
+                    )}
                   </div>
                 </div>
 
@@ -832,8 +928,13 @@ const AdminProductEditor = () => {
                 id="price"
                 type="number"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) => handleFieldChange("price", e.target.value)}
+                onBlur={() => handleBlur("price")}
+                className={cn(formErrors.price && touched.price && "border-destructive focus-visible:ring-destructive")}
               />
+              {formErrors.price && touched.price && (
+                <p className="text-xs font-medium text-destructive">{formErrors.price}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="compare_price" className={getInputClass()}>
@@ -843,7 +944,7 @@ const AdminProductEditor = () => {
                 id="compare_price"
                 type="number"
                 value={formData.compare_price}
-                onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
+                onChange={(e) => handleFieldChange("compare_price", e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
@@ -853,7 +954,7 @@ const AdminProductEditor = () => {
               <Input
                 id="sku"
                 value={formData.sku}
-                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                onChange={(e) => handleFieldChange("sku", e.target.value)}
               />
             </div>
           </div>
@@ -868,12 +969,16 @@ const AdminProductEditor = () => {
               <div className="flex gap-2">
                 <Select
                   value={formData.parent_category_id}
-                  onValueChange={handleParentCategoryChange}
+                  onValueChange={(value) => {
+                    handleFieldChange("parent_category_id", value);
+                    handleFieldChange("category_id", ""); // Reset sub-category when parent changes
+                    setTouched(prev => ({ ...prev, parent_category_id: true }));
+                  }}
                 >
                   <SelectTrigger className={cn(
                     "flex-1", 
                     getInputClass(),
-                    !formData.parent_category_id && "border-destructive focus:ring-destructive"
+                    formErrors.parent_category_id && touched.parent_category_id && "border-destructive focus:ring-destructive"
                   )}>
                     <SelectValue placeholder={t.categories.selectParentCategory} />
                   </SelectTrigger>
@@ -895,10 +1000,8 @@ const AdminProductEditor = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              {!formData.parent_category_id && (
-                <p className="text-xs text-destructive">
-                  {language === "bn" ? "প্যারেন্ট ক্যাটাগরি আবশ্যক" : "Parent category is required"}
-                </p>
+              {formErrors.parent_category_id && touched.parent_category_id && (
+                <p className="text-xs font-medium text-destructive">{formErrors.parent_category_id}</p>
               )}
               {!formData.parent_category_id && parentCategories.length === 0 && (
                 <p className="text-xs text-muted-foreground">
@@ -1045,11 +1148,15 @@ const AdminProductEditor = () => {
             <Textarea
               id="specifications"
               value={formData.specifications}
-              onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
+              onChange={(e) => handleFieldChange("specifications", e.target.value)}
+              onBlur={() => handleBlur("specifications")}
               rows={5}
               placeholder={t.products.specificationsPlaceholder}
-              className="font-mono text-sm"
+              className={cn("font-mono text-sm", formErrors.specifications && touched.specifications && "border-destructive focus-visible:ring-destructive")}
             />
+            {formErrors.specifications && touched.specifications && (
+              <p className="text-xs font-medium text-destructive">{formErrors.specifications}</p>
+            )}
           </div>
 
           {/* Features */}
@@ -1060,7 +1167,7 @@ const AdminProductEditor = () => {
             <Textarea
               id="features"
               value={formData.features}
-              onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+              onChange={(e) => handleFieldChange("features", e.target.value)}
               rows={4}
               placeholder={t.products.featuresPlaceholder}
               className={getInputClass()}
