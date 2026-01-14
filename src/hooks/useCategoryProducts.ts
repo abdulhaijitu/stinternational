@@ -24,7 +24,7 @@ export const useTopProductsByCategory = (categorySlug: string, limit: number = 4
           price,
           image_url,
           in_stock,
-          category:categories(name, slug)
+          category:categories(id, name, slug, parent_id)
         `)
         .eq("category_id", category.id)
         .eq("is_active", true)
@@ -51,7 +51,7 @@ export const useProductsByCategory = (categoryId: string | undefined) => {
         .from("products")
         .select(`
           *,
-          category:categories(id, name, name_bn, slug, description, description_bn)
+          category:categories(id, name, name_bn, slug, description, description_bn, parent_id)
         `)
         .eq("category_id", categoryId)
         .eq("is_active", true)
