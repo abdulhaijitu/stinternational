@@ -21,6 +21,7 @@ import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown, MessageSquare, Loa
 import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 interface Testimonial {
   id: string;
@@ -40,6 +41,8 @@ const AdminTestimonials = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [testimonialToDelete, setTestimonialToDelete] = useState<Testimonial | null>(null);
   const [formData, setFormData] = useState({
     client_name: "",
     company_name: "",
@@ -114,7 +117,7 @@ const AdminTestimonials = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error, count } = await supabase.from("testimonials").delete().eq("id", id);
+      const { error } = await supabase.from("testimonials").delete().eq("id", id);
       if (error) throw error;
       return id;
     },
@@ -122,11 +125,23 @@ const AdminTestimonials = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       toast.success(t.testimonials.deleteSuccess);
+      setDeleteDialogOpen(false);
+      setTestimonialToDelete(null);
     },
     onError: (error) => {
       toast.error(t.common.error + ": " + error.message);
     },
   });
+
+  const openDeleteDialog = (testimonial: Testimonial) => {
+    setTestimonialToDelete(testimonial);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!testimonialToDelete) return;
+    await deleteMutation.mutateAsync(testimonialToDelete.id);
+  };
 
   const reorderMutation = useMutation({
     mutationFn: async ({ id, newOrder }: { id: string; newOrder: number }) => {
@@ -447,11 +462,7 @@ const AdminTestimonials = () => {
                           variant="ghost"
                           size="icon"
                           disabled={deleteMutation.isPending}
-                          onClick={() => {
-                            if (confirm(t.testimonials.deleteConfirm)) {
-                              deleteMutation.mutate(testimonial.id);
-                            }
-                          }}
+                          onClick={() => openDeleteDialog(testimonial)}
                         >
                           {deleteMutation.isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -479,6 +490,21 @@ const AdminTestimonials = () => {
             />
           )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          itemName={testimonialToDelete?.client_name || ""}
+          itemType={isBangla ? "প্রশংসাপত্র" : "Testimonial"}
+          onConfirm={handleDeleteConfirm}
+          translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
       </div>
     </AdminLayout>
   );

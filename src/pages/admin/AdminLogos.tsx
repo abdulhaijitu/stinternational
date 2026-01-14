@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 interface InstitutionLogo {
   id: string;
@@ -41,6 +42,8 @@ const AdminLogos = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [logoToDelete, setLogoToDelete] = useState<InstitutionLogo | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     logo_url: "",
@@ -132,12 +135,17 @@ const AdminLogos = () => {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(t.logos.deleteConfirm.replace("{name}", name))) return;
+  const openDeleteDialog = (logo: InstitutionLogo) => {
+    setLogoToDelete(logo);
+    setDeleteDialogOpen(true);
+  };
 
-    setDeletingId(id);
+  const handleDelete = async () => {
+    if (!logoToDelete) return;
+    
+    setDeletingId(logoToDelete.id);
     try {
-      const { error } = await supabase.from("institution_logos").delete().eq("id", id);
+      const { error } = await supabase.from("institution_logos").delete().eq("id", logoToDelete.id);
       if (error) throw error;
       
       // Refetch to ensure UI is in sync with database
@@ -146,8 +154,10 @@ const AdminLogos = () => {
     } catch (error) {
       console.error("Error deleting logo:", error);
       toast.error(t.logos.deleteError);
+      throw error; // Re-throw to let dialog know it failed
     } finally {
       setDeletingId(null);
+      setLogoToDelete(null);
     }
   };
 
@@ -404,7 +414,7 @@ const AdminLogos = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(logo.id, logo.name)}
+                    onClick={() => openDeleteDialog(logo)}
                     disabled={deletingId === logo.id}
                   >
                     {deletingId === logo.id ? (
@@ -418,6 +428,21 @@ const AdminLogos = () => {
             ))}
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          itemName={logoToDelete?.name || ""}
+          itemType={isBangla ? "লোগো" : "Logo"}
+          onConfirm={handleDelete}
+          translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
       </div>
     </AdminLayout>
   );

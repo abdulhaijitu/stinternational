@@ -38,6 +38,7 @@ import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 interface Category {
   id: string;
@@ -65,6 +66,8 @@ const AdminCategories = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     name_bn: "",
@@ -262,24 +265,29 @@ const AdminCategories = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const openDeleteDialog = (category: Category) => {
     if (!canDelete) {
       toast.error(t.products.noPermission);
       return;
     }
     
     // Check if this parent has sub-categories
-    const hasChildren = subCategoriesByParent[id]?.length > 0;
+    const hasChildren = subCategoriesByParent[category.id]?.length > 0;
     if (hasChildren) {
       toast.error(t.categories.deleteErrorHasChildren);
       return;
     }
     
-    if (!confirm(t.categories.deleteConfirm)) return;
+    setCategoryToDelete(category);
+    setDeleteDialogOpen(true);
+  };
 
-    setDeletingId(id);
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
+
+    setDeletingId(categoryToDelete.id);
     try {
-      const { error } = await supabase.from("categories").delete().eq("id", id);
+      const { error } = await supabase.from("categories").delete().eq("id", categoryToDelete.id);
       if (error) {
         if (error.message?.includes("sub-categories")) {
           toast.error(t.categories.deleteErrorHasChildren);
@@ -295,8 +303,10 @@ const AdminCategories = () => {
     } catch (error) {
       console.error("Error deleting category:", error);
       toast.error(t.categories.deleteError);
+      throw error; // Re-throw to let dialog know it failed
     } finally {
       setDeletingId(null);
+      setCategoryToDelete(null);
     }
   };
 
@@ -583,7 +593,7 @@ const AdminCategories = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleDelete(category.id)}
+              onClick={() => openDeleteDialog(category)}
               disabled={(!isSubCategory && subCount > 0) || deletingId === category.id}
             >
               {deletingId === category.id ? (
@@ -905,6 +915,21 @@ const AdminCategories = () => {
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDeleteDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          itemName={categoryToDelete ? (language === "bn" && categoryToDelete.name_bn ? categoryToDelete.name_bn : categoryToDelete.name) : ""}
+          itemType={language === "bn" ? "বিভাগ" : "Category"}
+          onConfirm={handleDelete}
+          translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
       </TooltipProvider>
     </AdminLayout>
   );
