@@ -1,1 +1,5 @@
 project_id = "tmdktmnoeqezkbdaaayh"
+
+# Allow public (guest) checkout to call this function without requiring a JWT
+[functions.create-order]
+verify_jwt = false
