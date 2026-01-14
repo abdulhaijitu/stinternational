@@ -279,6 +279,13 @@ export const en = {
     guestCheckout: "Continue as Guest",
     guestCheckoutNote: "You can still track your order via email",
     or: "or",
+    // Create Account Prompt (Guest Checkout)
+    createAccountPromptTitle: "Save Your Order History",
+    createAccountPromptMessage: "Create a free account to track this order and access your order history anytime.",
+    benefitTrackOrders: "Track your order status in real-time",
+    benefitFasterCheckout: "Faster checkout next time",
+    benefitOrderHistory: "Access complete order history",
+    createAccountButton: "Create Free Account",
   },
 
   // Request Quote (RFQ)

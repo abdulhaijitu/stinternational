@@ -7,7 +7,8 @@ import {
   ArrowLeft,
   Loader2,
   ShieldCheck,
-  CheckCircle
+  CheckCircle,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,10 +218,46 @@ const Checkout = () => {
           <p className="text-xs text-muted-foreground mb-8">
             Operated by ST International, Dhaka, Bangladesh
           </p>
+
+          {/* Create Account Prompt for Guest Users */}
+          {isGuestCheckout && !user && (
+            <div className="bg-muted/50 border border-border rounded-lg p-6 mb-8 text-left">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                  <UserPlus className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-2">{t.checkout.createAccountPromptTitle}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t.checkout.createAccountPromptMessage}
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1 mb-4">
+                    <li>✓ {t.checkout.benefitTrackOrders}</li>
+                    <li>✓ {t.checkout.benefitFasterCheckout}</li>
+                    <li>✓ {t.checkout.benefitOrderHistory}</li>
+                  </ul>
+                  <Button 
+                    onClick={() => navigate("/account?signup=true&email=" + encodeURIComponent(formData.customer_email))}
+                    className="w-full sm:w-auto"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    {t.checkout.createAccountButton}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={() => navigate("/account")}>
-              {t.checkout.viewOrders}
-            </Button>
+            {user ? (
+              <Button onClick={() => navigate("/account")}>
+                {t.checkout.viewOrders}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => navigate("/")}>
+                {t.nav.home}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => navigate("/categories")}>
               {t.checkout.continueShopping}
             </Button>
