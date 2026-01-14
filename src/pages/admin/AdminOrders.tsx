@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Eye, Plus, Trash2, FileText, ShoppingCart } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -24,29 +24,13 @@ import { cn } from "@/lib/utils";
 import { OrderDeleteDialog } from "@/components/admin/OrderDeleteDialog";
 import { BulkOrderDeleteDialog } from "@/components/admin/BulkOrderDeleteDialog";
 import { OrderDeletionLogDialog } from "@/components/admin/OrderDeletionLogDialog";
+import { useAdminOrders, AdminOrder } from "@/hooks/useAdminOrders";
 
-interface Order {
-  id: string;
-  order_number: string;
-  status: string;
-  payment_method: string;
-  total: number;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  shipping_city: string;
-  shipping_address: string;
-  company_name: string | null;
-  subtotal: number;
-  shipping_cost: number | null;
-  notes: string | null;
-  created_at: string;
-}
+// Re-export interface for compatibility
+interface Order extends AdminOrder {}
 
 const AdminOrders = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -58,6 +42,9 @@ const AdminOrders = () => {
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { user } = useAuth();
   const { t, language } = useAdminLanguage();
+  
+  // Use React Query hook with realtime
+  const { data: orders = [], isLoading: loading } = useAdminOrders();
   
   // Permission checks - Super Admin has full control
   const canCreate = isSuperAdmin;
@@ -74,27 +61,10 @@ const AdminOrders = () => {
     { value: "cancelled", label: t.status.cancelled },
   ];
 
+  // Clear selection when orders change
   useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setOrders(data || []);
-      setSelectedOrders(new Set()); // Clear selection on refresh
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error(t.orders.loadError);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setSelectedOrders(new Set());
+  }, [orders]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     if (!canUpdateStatus) {
@@ -110,11 +80,8 @@ const AdminOrders = () => {
         .eq("id", orderId);
 
       if (error) throw error;
-
-      setOrders(orders.map((o) =>
-        o.id === orderId ? { ...o, status: newStatus } : o
-      ));
       toast.success(t.orders.updateSuccess);
+      // Realtime will handle the refresh
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error(t.orders.updateError);
@@ -189,7 +156,7 @@ const AdminOrders = () => {
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
       toast.success(t.orders.deleteSuccess);
-      await fetchOrders();
+      // Realtime will handle the refresh
     } else {
       toast.error(t.orders.deleteError);
     }
@@ -231,7 +198,7 @@ const AdminOrders = () => {
       toast.error(t.orders.bulkDeleteError);
     }
 
-    await fetchOrders();
+    // Realtime will handle the refresh
   };
 
   const toggleOrderSelection = (orderId: string) => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   FileText, 
   Mail, 
@@ -50,6 +50,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
+import { useAdminQuotes, AdminQuote, ADMIN_QUOTES_QUERY_KEY } from "@/hooks/useAdminQuotes";
 
 interface QuoteRequest {
   id: string;
@@ -118,24 +119,8 @@ const AdminQuotes = () => {
     return t.quotes.languages?.[key] || lang.toUpperCase();
   };
 
-  // Fetch quote requests
-  const { data: quotes, isLoading } = useQuery({
-    queryKey: ["admin-quotes", filterStatus],
-    queryFn: async () => {
-      let query = supabase
-        .from("quote_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (filterStatus !== "all") {
-        query = query.eq("status", filterStatus);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data as QuoteRequest[];
-    },
-  });
+  // Fetch quote requests with realtime updates
+  const { data: quotes, isLoading } = useAdminQuotes(filterStatus);
 
   // Update status mutation
   const updateStatusMutation = useMutation({
@@ -147,7 +132,7 @@ const AdminQuotes = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-quotes"] });
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUOTES_QUERY_KEY });
       toast.success(t.quotes.statusUpdateSuccess);
     },
     onError: () => {
