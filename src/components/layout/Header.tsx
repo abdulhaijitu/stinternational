@@ -17,6 +17,8 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSmartHeader } from "@/hooks/useSmartHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 import CategoryAwareSearch from "./CategoryAwareSearch";
 import MegaMenu from "./MegaMenu";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
@@ -41,6 +43,7 @@ const Header = () => {
   const location = useLocation();
   const { isScrolled, isCompact, isVisible, scrollDirection } = useSmartHeader(100);
   const { t } = useLanguage();
+  const { lightTap, mediumTap } = useHapticFeedback();
   
   const cartItemCount = getItemCount();
   const wishlistCount = wishlist.length;
@@ -50,17 +53,26 @@ const Header = () => {
     ? location.pathname.split('/category/')[1] 
     : undefined;
 
-  // Close mobile menu handler
+  // Close mobile menu handler with haptic feedback
   const closeMobileMenu = useCallback(() => {
+    lightTap();
     setIsMobileMenuOpen(false);
     // Return focus to menu button after closing
     menuButtonRef.current?.focus();
-  }, []);
+  }, [lightTap]);
 
-  // Toggle mobile menu handler
+  // Toggle mobile menu handler with haptic feedback
   const toggleMobileMenu = useCallback(() => {
+    mediumTap();
     setIsMobileMenuOpen(prev => !prev);
-  }, []);
+  }, [mediumTap]);
+
+  // Swipe gesture handlers for closing menu
+  const swipeHandlers = useSwipeGesture({
+    onSwipeDown: closeMobileMenu,
+    threshold: 60,
+    velocityThreshold: 0.4,
+  });
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -380,7 +392,13 @@ const Header = () => {
             isMobileMenuOpen ? "translate-y-0" : "translate-y-full"
           )}
           style={{ top: mobileMenuOffset }}
+          {...swipeHandlers}
         >
+          {/* Swipe indicator handle */}
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+          </div>
+
           {/* Close button for accessibility */}
           <div className="absolute top-2 right-2 z-10">
             <Button
@@ -399,7 +417,12 @@ const Header = () => {
               <CategoryAwareSearch currentCategorySlug={currentCategorySlug} />
             </div>
 
-            <div className="flex-1 overflow-y-auto overscroll-contain">
+            <div 
+              className="flex-1 overflow-y-auto overscroll-contain"
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
               <MobileCategoryDrawer onCategoryClick={closeMobileMenu} />
             </div>
 
