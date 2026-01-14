@@ -51,63 +51,81 @@ const QuickRfqForm = () => {
   });
 
   const onSubmit = async (data: RfqFormData) => {
+    // Prevent double submission
+    if (isSubmitting) return;
     setIsSubmitting(true);
     
     try {
-      // Insert into quote_requests table (using simplified fields for quick RFQ)
-      const { error } = await supabase.from("quote_requests").insert({
-        contact_person: data.name,
-        company_name: data.organization,
+      // Prepare the quote data with all required fields
+      const quotePayload = {
+        contact_person: data.name.trim(),
+        company_name: data.organization.trim(),
         company_type: "other",
-        phone: data.phone,
-        email: data.email,
+        phone: data.phone.trim(),
+        email: data.email.trim(),
         product_category: "general",
-        product_details: data.requirements,
-        quantity: data.quantity || "Not specified",
+        product_details: data.requirements.trim(),
+        quantity: data.quantity?.trim() || "Not specified",
         delivery_urgency: "flexible",
         delivery_address: "To be confirmed",
         delivery_city: "To be confirmed",
         status: "pending",
         source_page: "homepage-quick-rfq",
         language: language,
-      });
+      };
 
-      if (error) throw error;
+      // Insert into quote_requests table
+      const { error: insertError } = await supabase
+        .from("quote_requests")
+        .insert(quotePayload);
+
+      if (insertError) {
+        console.error("Database insert error:", insertError);
+        throw new Error(insertError.message || "Failed to save your request");
+      }
 
       // Track the RFQ submission
       trackRfqSubmit();
 
-      // Try to send notification email (non-blocking)
-      try {
-        await supabase.functions.invoke("send-quote-notification", {
-          body: {
-            type: "new_quote",
-            quoteData: {
-              contact_person: data.name,
-              company_name: data.organization,
-              email: data.email,
-              phone: data.phone,
-              product_details: data.requirements,
-              quantity: data.quantity || "Not specified",
-            },
+      // Try to send notification email (non-blocking, don't throw on failure)
+      supabase.functions.invoke("send-quote-notification", {
+        body: {
+          type: "new_quote",
+          quote: {
+            id: crypto.randomUUID(),
+            contact_person: data.name.trim(),
+            company_name: data.organization.trim(),
+            company_type: "other",
+            email: data.email.trim(),
+            phone: data.phone.trim(),
+            product_category: "general",
+            product_details: data.requirements.trim(),
+            quantity: data.quantity?.trim() || "Not specified",
+            delivery_city: "To be confirmed",
+            delivery_urgency: "flexible",
           },
-        });
-      } catch {
-        // Email notification failed silently
-      }
+          language,
+        },
+      }).catch((emailErr) => {
+        // Log but don't block on email failure
+        console.warn("Email notification failed (non-critical):", emailErr);
+      });
 
       setIsSuccess(true);
       form.reset();
       
       toast({
-        title: "Quote Request Submitted",
-        description: "Our team will contact you within 24 hours.",
+        title: language === "bn" ? "অনুরোধ সফলভাবে জমা হয়েছে" : "Quote Request Submitted",
+        description: language === "bn" ? "আমাদের টিম ২৪ ঘন্টার মধ্যে যোগাযোগ করবে।" : "Our team will contact you within 24 hours.",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("RFQ submission error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
-        title: "Submission Failed",
-        description: "Please try again or contact us directly.",
+        title: language === "bn" ? "জমা দিতে ব্যর্থ" : "Submission Failed",
+        description: language === "bn" 
+          ? `দুঃখিত, আবার চেষ্টা করুন। (${errorMessage})`
+          : `Please try again or contact us directly. (${errorMessage})`,
         variant: "destructive",
       });
     } finally {
