@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCategoryHierarchy, ParentCategory, DBCategory } from "@/hooks/useCategories";
+import { useAllProducts } from "@/hooks/useProducts";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 
 interface MobileCategoryDrawerProps {
@@ -20,6 +22,7 @@ interface MobileCategoryDrawerProps {
 const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) => {
   const location = useLocation();
   const { parentCategories, isLoading } = useCategoryHierarchy();
+  const { data: products } = useAllProducts();
   const { getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
   
@@ -31,6 +34,31 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
   const isOnCategoryPage = pathParts[0] === 'category';
   const currentParentSlug = isOnCategoryPage ? pathParts[1] : null;
   const currentSubSlug = isOnCategoryPage && pathParts.length > 2 ? pathParts[2] : null;
+
+  // Calculate product counts per category
+  const productCounts = useMemo(() => {
+    if (!products || !parentCategories.length) return {};
+    
+    const counts: Record<string, number> = {};
+    
+    parentCategories.forEach(parent => {
+      let parentTotal = 0;
+      
+      // Count products in sub-categories
+      parent.subCategories.forEach(sub => {
+        const subCount = products.filter(p => p.category_id === sub.id).length;
+        counts[sub.id] = subCount;
+        parentTotal += subCount;
+      });
+      
+      // Products directly in parent category
+      const directCount = products.filter(p => p.category_id === parent.id).length;
+      parentTotal += directCount;
+      counts[parent.id] = parentTotal;
+    });
+    
+    return counts;
+  }, [products, parentCategories]);
 
   // Auto-expand parent that contains active category
   useEffect(() => {
@@ -77,7 +105,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
         to="/categories" 
         onClick={onCategoryClick}
         className={cn(
-          "flex items-center justify-between py-3.5 px-4 mx-2 mb-2 text-sm font-medium rounded-lg transition-colors duration-150",
+          "flex items-center justify-between py-3.5 px-4 mx-2 mb-2 text-sm font-medium rounded-lg transition-all duration-200",
           location.pathname === '/categories'
             ? "bg-primary/10 text-primary"
             : "bg-muted/50 hover:bg-muted"
@@ -96,6 +124,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
             const parentName = getCategoryFields(parent).name;
             const isActive = isParentActive(parent);
             const hasActive = hasActiveChild(parent);
+            const parentCount = productCounts[parent.id] || 0;
             
             // If parent has no sub-categories, show as simple link
             if (!hasChildren) {
@@ -105,17 +134,28 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                   to={`/category/${parent.slug}`}
                   onClick={onCategoryClick}
                   className={cn(
-                    "w-full flex items-center gap-3 py-3.5 px-4 rounded-lg transition-colors duration-150",
+                    "w-full flex items-center gap-3 py-3.5 px-4 rounded-lg transition-all duration-200",
                     isActive
                       ? "bg-primary/10 text-primary font-semibold"
                       : "hover:bg-muted/40 text-foreground"
                   )}
                 >
                   <ParentIcon className={cn(
-                    "h-4 w-4 shrink-0",
+                    "h-4 w-4 shrink-0 transition-colors duration-200",
                     isActive ? "text-primary" : "text-muted-foreground"
                   )} />
                   <span className="text-sm font-medium flex-1">{parentName}</span>
+                  {parentCount > 0 && (
+                    <Badge 
+                      variant="secondary" 
+                      className={cn(
+                        "text-xs px-1.5 py-0 h-5 min-w-[1.25rem] justify-center",
+                        isActive ? "bg-primary/20 text-primary" : ""
+                      )}
+                    >
+                      {parentCount}
+                    </Badge>
+                  )}
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
               );
@@ -133,7 +173,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                     to={`/category/${parent.slug}`}
                     onClick={onCategoryClick}
                     className={cn(
-                      "flex-1 flex items-center gap-3 py-3.5 pl-4 pr-2 rounded-l-lg transition-colors duration-150",
+                      "flex-1 flex items-center gap-3 py-3.5 pl-4 pr-2 rounded-l-lg transition-all duration-200",
                       isActive
                         ? "bg-primary/10 text-primary font-semibold"
                         : hasActive
@@ -142,35 +182,47 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                     )}
                   >
                     <ParentIcon className={cn(
-                      "h-4 w-4 shrink-0",
+                      "h-4 w-4 shrink-0 transition-colors duration-200",
                       isActive || hasActive ? "text-primary" : "text-muted-foreground"
                     )} />
-                    <span className="text-sm font-medium">{parentName}</span>
+                    <span className="text-sm font-medium flex-1">{parentName}</span>
+                    {parentCount > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className={cn(
+                          "text-xs px-1.5 py-0 h-5 min-w-[1.25rem] justify-center transition-colors duration-200",
+                          isActive || hasActive ? "bg-primary/20 text-primary" : ""
+                        )}
+                      >
+                        {parentCount}
+                      </Badge>
+                    )}
                   </Link>
 
                   {/* Expand/Collapse Toggle */}
                   <CollapsibleTrigger
                     className={cn(
-                      "p-3.5 rounded-r-lg hover:bg-muted/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20",
+                      "p-3.5 rounded-r-lg hover:bg-muted/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20",
                       isExpanded && "bg-muted/30",
                       hasActive && "bg-muted/30"
                     )}
                     aria-label={isExpanded ? `Collapse ${parentName}` : `Expand ${parentName}`}
                   >
                     <ChevronDown className={cn(
-                      "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                      "h-4 w-4 text-muted-foreground transition-transform duration-300 ease-out",
                       isExpanded && "rotate-180"
                     )} />
                   </CollapsibleTrigger>
                 </div>
                 
-                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+                <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
                   <div className="py-1 pl-4 pr-2 space-y-0.5">
                     {/* Sub-categories */}
-                    {parent.subCategories?.map((sub) => {
+                    {parent.subCategories?.map((sub, index) => {
                       const SubIcon = getCategoryIcon(sub.icon_name);
                       const subName = getCategoryFields(sub).name;
                       const isSubItemActive = isSubActive(parent, sub);
+                      const subCount = productCounts[sub.id] || 0;
 
                       return (
                         <Link
@@ -178,17 +230,30 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                           to={`/category/${parent.slug}/${sub.slug}`}
                           onClick={onCategoryClick}
                           className={cn(
-                            "flex items-center gap-3 py-3 pl-7 pr-3 rounded-md text-sm transition-colors duration-150",
+                            "flex items-center gap-3 py-3 pl-7 pr-3 rounded-md text-sm transition-all duration-200",
+                            "animate-fade-in",
                             isSubItemActive
                               ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
                               : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           )}
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
                           <SubIcon className={cn(
-                            "h-4 w-4 shrink-0",
+                            "h-4 w-4 shrink-0 transition-colors duration-200",
                             isSubItemActive && "text-primary"
                           )} />
                           <span className="flex-1">{subName}</span>
+                          {subCount > 0 && (
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "text-xs px-1.5 py-0 h-5 min-w-[1.25rem] justify-center transition-colors duration-200",
+                                isSubItemActive ? "border-primary/50 text-primary" : "border-border/50"
+                              )}
+                            >
+                              {subCount}
+                            </Badge>
+                          )}
                           {isSubItemActive && (
                             <ChevronRight className="h-4 w-4 text-primary" />
                           )}
@@ -208,7 +273,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
         <Link 
           to="/request-quote" 
           onClick={onCategoryClick}
-          className="flex items-center justify-between py-3 px-4 text-sm font-medium rounded-lg hover:bg-muted/40 transition-colors duration-150"
+          className="flex items-center justify-between py-3 px-4 text-sm font-medium rounded-lg hover:bg-muted/40 transition-all duration-200"
         >
           <span>{t.nav.requestQuote}</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -216,7 +281,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
         <Link 
           to="/about" 
           onClick={onCategoryClick}
-          className="flex items-center justify-between py-3 px-4 text-sm text-muted-foreground rounded-lg hover:bg-muted/40 hover:text-foreground transition-colors duration-150"
+          className="flex items-center justify-between py-3 px-4 text-sm text-muted-foreground rounded-lg hover:bg-muted/40 hover:text-foreground transition-all duration-200"
         >
           <span>{t.nav.about}</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -224,7 +289,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
         <Link 
           to="/contact" 
           onClick={onCategoryClick}
-          className="flex items-center justify-between py-3 px-4 text-sm text-muted-foreground rounded-lg hover:bg-muted/40 hover:text-foreground transition-colors duration-150"
+          className="flex items-center justify-between py-3 px-4 text-sm text-muted-foreground rounded-lg hover:bg-muted/40 hover:text-foreground transition-all duration-200"
         >
           <span>{t.nav.contact}</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
