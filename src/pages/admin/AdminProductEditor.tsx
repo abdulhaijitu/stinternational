@@ -1,6 +1,6 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save, RotateCcw, Clock, X } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -21,6 +26,7 @@ import MultiImageUpload from "@/components/admin/MultiImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProductDraft } from "@/hooks/useProductDraft";
 
 // Lazy load rich text editor for performance
 const RichTextEditor = lazy(() => import("@/components/admin/RichTextEditor"));
@@ -43,6 +49,28 @@ interface Category {
   name_bn: string | null;
 }
 
+const initialFormData = {
+  name: "",
+  name_bn: "",
+  slug: "",
+  description: "",
+  description_bn: "",
+  short_description: "",
+  short_description_bn: "",
+  price: "",
+  compare_price: "",
+  sku: "",
+  category_id: "",
+  image_url: "",
+  images: [] as string[],
+  in_stock: true,
+  stock_quantity: "0",
+  is_featured: false,
+  is_active: true,
+  specifications: "",
+  features: "",
+};
+
 const AdminProductEditor = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -52,35 +80,45 @@ const AdminProductEditor = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    name_bn: "",
-    slug: "",
-    description: "",
-    description_bn: "",
-    short_description: "",
-    short_description_bn: "",
-    price: "",
-    compare_price: "",
-    sku: "",
-    category_id: "",
-    image_url: "",
-    images: [] as string[],
-    in_stock: true,
-    stock_quantity: "0",
-    is_featured: false,
-    is_active: true,
-    specifications: "",
-    features: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Draft management
+  const {
+    hasDraft,
+    draftSavedAt,
+    isAutoSaving,
+    autoSave,
+    loadDraft,
+    clearDraft,
+    checkForDraft,
+  } = useProductDraft(isNew ? null : id || null);
+
+  // Check for draft on mount
+  useEffect(() => {
+    const draft = checkForDraft();
+    if (draft && isNew) {
+      setShowDraftPrompt(true);
+    }
+  }, [checkForDraft, isNew]);
 
   useEffect(() => {
     fetchCategories();
     if (!isNew && id) {
       fetchProduct(id);
+    } else {
+      setInitialDataLoaded(true);
     }
   }, [id, isNew]);
+
+  // Auto-save when form data changes
+  useEffect(() => {
+    if (initialDataLoaded && !loading) {
+      autoSave(formData);
+    }
+  }, [formData, autoSave, initialDataLoaded, loading]);
 
   const fetchCategories = async () => {
     const { data } = await supabase
@@ -100,7 +138,7 @@ const AdminProductEditor = () => {
 
       if (error) throw error;
 
-      setFormData({
+      const loadedData = {
         name: data.name,
         name_bn: data.name_bn || "",
         slug: data.slug,
@@ -120,15 +158,40 @@ const AdminProductEditor = () => {
         is_active: data.is_active,
         specifications: data.specifications ? JSON.stringify(data.specifications, null, 2) : "",
         features: data.features ? data.features.join("\n") : "",
-      });
+      };
+
+      setFormData(loadedData);
+      
+      // Check for draft after loading product
+      const draft = checkForDraft();
+      if (draft) {
+        setShowDraftPrompt(true);
+      }
     } catch (error) {
       console.error("Error fetching product:", error);
       toast.error(t.products.loadError);
       navigate("/admin/products");
     } finally {
       setLoading(false);
+      setInitialDataLoaded(true);
     }
   };
+
+  // Handle draft restoration
+  const handleRestoreDraft = useCallback(() => {
+    const draftData = loadDraft();
+    if (draftData) {
+      setFormData(draftData);
+      setShowDraftPrompt(false);
+      toast.success(language === "bn" ? "ড্রাফট পুনরুদ্ধার করা হয়েছে" : "Draft restored");
+    }
+  }, [loadDraft, language]);
+
+  // Handle draft dismissal
+  const handleDismissDraft = useCallback(() => {
+    clearDraft();
+    setShowDraftPrompt(false);
+  }, [clearDraft]);
 
   const generateSlug = (name: string) => {
     return name
@@ -198,6 +261,8 @@ const AdminProductEditor = () => {
         toast.success(t.products.updateSuccess);
       }
 
+      // Clear draft after successful save
+      clearDraft();
       navigate("/admin/products");
     } catch (error: any) {
       console.error("Error saving product:", error);
@@ -232,13 +297,41 @@ const AdminProductEditor = () => {
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-4xl">
+        {/* Draft Restoration Prompt */}
+        {showDraftPrompt && (
+          <Alert className="border-primary/50 bg-primary/5">
+            <Clock className="h-4 w-4" />
+            <AlertTitle className={cn("flex items-center justify-between", getInputClass())}>
+              {language === "bn" ? "সংরক্ষিত ড্রাফট পাওয়া গেছে" : "Unsaved Draft Found"}
+            </AlertTitle>
+            <AlertDescription className={cn("mt-2", getInputClass())}>
+              <p className="text-sm mb-3">
+                {language === "bn" 
+                  ? `আপনার আগের কাজ ${draftSavedAt ? new Date(draftSavedAt).toLocaleString('bn-BD') : ''} এ সংরক্ষিত আছে। পুনরুদ্ধার করতে চান?`
+                  : `Your previous work was saved ${draftSavedAt ? new Date(draftSavedAt).toLocaleString() : ''}. Would you like to restore it?`
+                }
+              </p>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleRestoreDraft}>
+                  <RotateCcw className="h-4 w-4 mr-1" />
+                  {language === "bn" ? "পুনরুদ্ধার করুন" : "Restore Draft"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleDismissDraft}>
+                  <X className="h-4 w-4 mr-1" />
+                  {language === "bn" ? "বাতিল করুন" : "Discard"}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link to="/admin/products">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <div>
+          <div className="flex-1">
             <h1 className={cn("text-2xl font-bold", getInputClass())}>
               {isNew ? t.products.newProduct : t.products.editProduct}
             </h1>
@@ -246,6 +339,24 @@ const AdminProductEditor = () => {
               {t.products.fillProductInfo}
             </p>
           </div>
+          {/* Auto-save indicator */}
+          {(isAutoSaving || draftSavedAt) && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {isAutoSaving ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>{language === "bn" ? "সংরক্ষণ করা হচ্ছে..." : "Saving..."}</span>
+                </>
+              ) : draftSavedAt && (
+                <>
+                  <Clock className="h-3 w-3" />
+                  <span>
+                    {language === "bn" ? "ড্রাফট সংরক্ষিত" : "Draft saved"}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="bg-card border border-border rounded-lg p-6 space-y-6">
