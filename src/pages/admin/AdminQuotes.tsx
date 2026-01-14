@@ -16,6 +16,9 @@ import {
   Activity
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -217,12 +220,10 @@ const AdminQuotes = () => {
     <AdminLayout>
       <div className={cn("space-y-6", isBangla && "font-siliguri")}>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{t.quotes.title}</h1>
-            <p className="text-muted-foreground">{t.quotes.subtitle}</p>
-          </div>
-          
+        <AdminPageHeader 
+          title={t.quotes.title} 
+          subtitle={t.quotes.subtitle}
+        >
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -238,14 +239,14 @@ const AdminQuotes = () => {
               </SelectContent>
             </Select>
           </div>
-        </div>
+        </AdminPageHeader>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {(["pending", "reviewed", "quoted", "closed"] as const).map((status) => {
             const count = quotes?.filter((q) => q.status === status).length || 0;
             return (
-              <div key={status} className="bg-card border border-border rounded-lg p-4">
+              <div key={status} className="admin-stats-card">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{getStatusLabel(status)}</span>
                   <Badge className={statusColors[status]}>{count}</Badge>
@@ -256,56 +257,50 @@ const AdminQuotes = () => {
         </div>
 
         {/* Quotes Table */}
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="admin-table-wrapper">
           {isLoading ? (
-            <div className="p-6 space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+            <AdminTableSkeleton columns={7} rows={5} />
           ) : quotes && quotes.length > 0 ? (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.quotes.company}</TableHead>
-                    <TableHead>{t.quotes.contact}</TableHead>
-                    <TableHead>{t.quotes.category}</TableHead>
-                    <TableHead>{t.quotes.urgency}</TableHead>
-                    <TableHead>{t.quotes.status}</TableHead>
-                    <TableHead>{t.quotes.date}</TableHead>
-                    <TableHead className="text-right">{t.common.actions}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <table className="admin-table">
+                <thead className="sticky top-0 z-10 bg-muted/50">
+                  <tr>
+                    <th>{t.quotes.company}</th>
+                    <th>{t.quotes.contact}</th>
+                    <th>{t.quotes.category}</th>
+                    <th>{t.quotes.urgency}</th>
+                    <th>{t.quotes.status}</th>
+                    <th>{t.quotes.date}</th>
+                    <th className="text-right">{t.common.actions}</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {quotes.map((quote) => (
-                    <TableRow key={quote.id}>
-                      <TableCell>
+                    <tr key={quote.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                      <td className="p-4 text-sm">
                         <div>
                           <p className="font-medium">{quote.company_name}</p>
                           <p className="text-xs text-muted-foreground">
                             {getCompanyTypeLabel(quote.company_type)}
                           </p>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm">
                         <div className="space-y-1">
-                          <p className="text-sm">{quote.contact_person}</p>
+                          <p>{quote.contact_person}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Mail className="h-3 w-3" />
                             {quote.email}
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm capitalize">{quote.product_category}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">
-                          {getUrgencyLabel(quote.delivery_urgency)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm">
+                        <span className="capitalize">{quote.product_category}</span>
+                      </td>
+                      <td className="p-4 text-sm">
+                        <span>{getUrgencyLabel(quote.delivery_urgency)}</span>
+                      </td>
+                      <td className="p-4 text-sm">
                         <Select
                           value={quote.status}
                           onValueChange={(value) => 
@@ -324,14 +319,14 @@ const AdminQuotes = () => {
                             <SelectItem value="closed">{t.quotes.statuses.closed}</SelectItem>
                           </SelectContent>
                         </Select>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
+                      </td>
+                      <td className="p-4 text-sm">
+                        <span className="text-muted-foreground">
                           {format(new Date(quote.created_at), "MMM d, yyyy")}
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-2">
+                      </td>
+                      <td className="p-4 text-sm">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -347,17 +342,18 @@ const AdminQuotes = () => {
                             <MessageSquare className="h-4 w-4" />
                           </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="p-12 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">{t.quotes.noQuotes}</p>
-            </div>
+            <AdminEmptyState
+              icon={FileText}
+              title={t.quotes.noQuotes}
+              description={t.quotes.subtitle}
+            />
           )}
         </div>
 

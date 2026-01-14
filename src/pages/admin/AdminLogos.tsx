@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown, Image } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -209,66 +212,65 @@ const AdminLogos = () => {
   return (
     <AdminLayout>
       <div className={cn("space-y-6", isBangla && "font-siliguri")}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">{t.logos.title}</h1>
-            <p className="text-muted-foreground">{t.logos.subtitle}</p>
-          </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="h-4 w-4" />
-                {t.logos.addLogo}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className={cn(isBangla && "font-siliguri")}>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingLogo ? t.logos.editLogo : t.logos.newLogo}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{t.logos.institutionName} *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder={t.logos.institutionNamePlaceholder}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.logos.logoImage} *</Label>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    {t.logos.logoImageHint}
-                  </p>
-                  <ImageUpload
-                    value={formData.logo_url}
-                    onChange={(url) => setFormData({ ...formData, logo_url: url })}
-                    folder="institution-logos"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">{t.logos.showOnHomepage}</Label>
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                    {t.common.cancel}
-                  </Button>
-                  <Button onClick={handleSave} disabled={saving}>
-                    {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    {t.common.save}
-                  </Button>
-                </div>
+        <AdminPageHeader 
+          title={t.logos.title} 
+          subtitle={t.logos.subtitle}
+        >
+          <Button onClick={() => handleOpenDialog()}>
+            <Plus className="h-4 w-4" />
+            {t.logos.addLogo}
+          </Button>
+        </AdminPageHeader>
+
+        {/* Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className={cn("admin-dialog-header", isBangla && "font-siliguri")}>
+            <DialogHeader>
+              <DialogTitle>
+                {editingLogo ? t.logos.editLogo : t.logos.newLogo}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="admin-form-group space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">{t.logos.institutionName} *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder={t.logos.institutionNamePlaceholder}
+                />
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div className="space-y-2">
+                <Label>{t.logos.logoImage} *</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {t.logos.logoImageHint}
+                </p>
+                <ImageUpload
+                  value={formData.logo_url}
+                  onChange={(url) => setFormData({ ...formData, logo_url: url })}
+                  folder="institution-logos"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="is_active">{t.logos.showOnHomepage}</Label>
+                <Switch
+                  id="is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                {t.common.cancel}
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {t.common.save}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Info Box */}
         <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
@@ -277,19 +279,28 @@ const AdminLogos = () => {
 
         {/* Logos List */}
         {loading ? (
-          <div className="p-8 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          </div>
+          <AdminTableSkeleton columns={4} rows={4} />
         ) : logos.length === 0 ? (
-          <div className="bg-card border border-border rounded-lg p-8 text-center text-muted-foreground">
-            {t.logos.noLogos}
-          </div>
+          <AdminEmptyState
+            icon={Image}
+            title={t.logos.noLogos}
+            description={t.logos.subtitle}
+            action={
+              <Button onClick={() => handleOpenDialog()}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t.logos.addLogo}
+              </Button>
+            }
+          />
         ) : (
-          <div className="bg-card border border-border rounded-lg overflow-hidden divide-y divide-border">
+          <div className="admin-table-wrapper divide-y divide-border">
             {logos.map((logo, index) => (
               <div 
                 key={logo.id} 
-                className={`flex items-center gap-4 p-4 ${!logo.is_active ? "opacity-50 bg-muted/30" : ""}`}
+                className={cn(
+                  "flex items-center gap-4 p-4",
+                  !logo.is_active && "opacity-50 bg-muted/30"
+                )}
               >
                 {/* Reorder controls */}
                 <div className="flex flex-col gap-1">
@@ -300,7 +311,7 @@ const AdminLogos = () => {
                     onClick={() => handleMoveUp(index)}
                     disabled={index === 0}
                   >
-                    <GripVertical className="h-3 w-3 rotate-90" />
+                    <ArrowUp className="h-3 w-3" />
                     <span className="sr-only">Move up</span>
                   </Button>
                   <Button
@@ -310,7 +321,7 @@ const AdminLogos = () => {
                     onClick={() => handleMoveDown(index)}
                     disabled={index === logos.length - 1}
                   >
-                    <GripVertical className="h-3 w-3 rotate-90" />
+                    <ArrowDown className="h-3 w-3" />
                     <span className="sr-only">Move down</span>
                   </Button>
                 </div>
@@ -333,7 +344,7 @@ const AdminLogos = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"

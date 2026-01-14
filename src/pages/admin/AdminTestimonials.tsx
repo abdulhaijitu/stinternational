@@ -2,28 +2,22 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
@@ -208,224 +202,223 @@ const AdminTestimonials = () => {
   return (
     <AdminLayout>
       <div className={cn("space-y-6", isBangla && "font-siliguri")}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">{t.testimonials.title}</h1>
-            <p className="text-muted-foreground">
-              {t.testimonials.subtitle}
-            </p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                {t.testimonials.addTestimonial}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className={cn("max-w-lg", isBangla && "font-siliguri")}>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingTestimonial ? t.testimonials.editTestimonial : t.testimonials.newTestimonial}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="client_name">{t.testimonials.clientName} *</Label>
-                    <Input
-                      id="client_name"
-                      value={formData.client_name}
-                      onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                      placeholder={t.testimonials.clientNamePlaceholder}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_name">{t.testimonials.companyName} *</Label>
-                    <Input
-                      id="company_name"
-                      value={formData.company_name}
-                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                      placeholder={t.testimonials.companyNamePlaceholder}
-                      required
-                    />
-                  </div>
-                </div>
+        <AdminPageHeader 
+          title={t.testimonials.title} 
+          subtitle={t.testimonials.subtitle}
+        >
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t.testimonials.addTestimonial}
+          </Button>
+        </AdminPageHeader>
+
+        {/* Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}>
+          <DialogContent className={cn("max-w-lg admin-dialog-header", isBangla && "font-siliguri")}>
+            <DialogHeader>
+              <DialogTitle>
+                {editingTestimonial ? t.testimonials.editTestimonial : t.testimonials.newTestimonial}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="admin-form-group space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="designation">{t.testimonials.designation}</Label>
+                  <Label htmlFor="client_name">{t.testimonials.clientName} *</Label>
                   <Input
-                    id="designation"
-                    value={formData.designation}
-                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    placeholder={t.testimonials.designationPlaceholder}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="quote">{t.testimonials.testimonialQuote} *</Label>
-                  <Textarea
-                    id="quote"
-                    value={formData.quote}
-                    onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
-                    placeholder={t.testimonials.testimonialQuotePlaceholder}
-                    rows={4}
+                    id="client_name"
+                    value={formData.client_name}
+                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                    placeholder={t.testimonials.clientNamePlaceholder}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="avatar_url">{t.testimonials.avatarUrl}</Label>
+                  <Label htmlFor="company_name">{t.testimonials.companyName} *</Label>
                   <Input
-                    id="avatar_url"
-                    value={formData.avatar_url}
-                    onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                    placeholder={t.testimonials.avatarUrlPlaceholder}
+                    id="company_name"
+                    value={formData.company_name}
+                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                    placeholder={t.testimonials.companyNamePlaceholder}
+                    required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="rating">{t.testimonials.rating}</Label>
-                    <Input
-                      id="rating"
-                      type="number"
-                      min={1}
-                      max={5}
-                      value={formData.rating}
-                      onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pt-6">
-                    <Label htmlFor="is_active">{t.testimonials.active}</Label>
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                  </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="designation">{t.testimonials.designation}</Label>
+                <Input
+                  id="designation"
+                  value={formData.designation}
+                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                  placeholder={t.testimonials.designationPlaceholder}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quote">{t.testimonials.testimonialQuote} *</Label>
+                <Textarea
+                  id="quote"
+                  value={formData.quote}
+                  onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                  placeholder={t.testimonials.testimonialQuotePlaceholder}
+                  rows={4}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="avatar_url">{t.testimonials.avatarUrl}</Label>
+                <Input
+                  id="avatar_url"
+                  value={formData.avatar_url}
+                  onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
+                  placeholder={t.testimonials.avatarUrlPlaceholder}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="rating">{t.testimonials.rating}</Label>
+                  <Input
+                    id="rating"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={formData.rating}
+                    onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
+                  />
                 </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    {t.common.cancel}
-                  </Button>
-                  <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending ? t.common.loading : t.common.save}
-                  </Button>
+                <div className="flex items-center justify-between pt-6">
+                  <Label htmlFor="is_active">{t.testimonials.active}</Label>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
                 </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t.common.cancel}
+                </Button>
+                <Button type="submit" disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? t.common.loading : t.common.save}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Quote className="h-5 w-5" />
-              {t.testimonials.allTestimonials} ({testimonials?.length || 0})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-muted-foreground py-8 text-center">{t.common.loading}</p>
-            ) : testimonials && testimonials.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">{t.testimonials.order}</TableHead>
-                    <TableHead>{t.testimonials.client}</TableHead>
-                    <TableHead>{t.testimonials.company}</TableHead>
-                    <TableHead>{t.testimonials.rating}</TableHead>
-                    <TableHead>{t.testimonials.status}</TableHead>
-                    <TableHead className="text-right">{t.testimonials.actions}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {testimonials.map((testimonial, index) => (
-                    <TableRow key={testimonial.id}>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleMoveUp(testimonial, index)}
-                            disabled={index === 0}
-                          >
-                            <ArrowUp className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleMoveDown(testimonial, index)}
-                            disabled={index === testimonials.length - 1}
-                          >
-                            <ArrowDown className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{testimonial.client_name}</p>
-                          {testimonial.designation && (
-                            <p className="text-sm text-muted-foreground">{testimonial.designation}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{testimonial.company_name}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${
-                                i < testimonial.rating ? "text-accent fill-accent" : "text-muted"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={testimonial.is_active}
-                          onCheckedChange={(checked) =>
-                            toggleActiveMutation.mutate({ id: testimonial.id, isActive: checked })
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(testimonial)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm(t.testimonials.deleteConfirm)) {
-                                deleteMutation.mutate(testimonial.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="text-muted-foreground py-8 text-center">
-                {t.testimonials.noTestimonials}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        {/* Table */}
+        <div className="admin-table-wrapper">
+          {isLoading ? (
+            <AdminTableSkeleton columns={6} rows={4} />
+          ) : testimonials && testimonials.length > 0 ? (
+            <table className="admin-table">
+              <thead className="sticky top-0 z-10 bg-muted/50">
+                <tr>
+                  <th className="w-12">{t.testimonials.order}</th>
+                  <th>{t.testimonials.client}</th>
+                  <th>{t.testimonials.company}</th>
+                  <th>{t.testimonials.rating}</th>
+                  <th>{t.testimonials.status}</th>
+                  <th className="text-right">{t.testimonials.actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {testimonials.map((testimonial, index) => (
+                  <tr key={testimonial.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                    <td className="p-4 text-sm">
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleMoveUp(testimonial, index)}
+                          disabled={index === 0}
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleMoveDown(testimonial, index)}
+                          disabled={index === testimonials.length - 1}
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm">
+                      <div>
+                        <p className="font-medium">{testimonial.client_name}</p>
+                        {testimonial.designation && (
+                          <p className="text-xs text-muted-foreground">{testimonial.designation}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm">{testimonial.company_name}</td>
+                    <td className="p-4 text-sm">
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={cn(
+                              "h-3 w-3",
+                              i < testimonial.rating ? "text-amber-500 fill-amber-500" : "text-muted"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm">
+                      <Switch
+                        checked={testimonial.is_active}
+                        onCheckedChange={(checked) =>
+                          toggleActiveMutation.mutate({ id: testimonial.id, isActive: checked })
+                        }
+                      />
+                    </td>
+                    <td className="p-4 text-sm text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(testimonial)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm(t.testimonials.deleteConfirm)) {
+                              deleteMutation.mutate(testimonial.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <AdminEmptyState
+              icon={MessageSquare}
+              title={t.testimonials.noTestimonials}
+              description={t.testimonials.subtitle}
+              action={
+                <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.testimonials.addTestimonial}
+                </Button>
+              }
+            />
+          )}
+        </div>
       </div>
     </AdminLayout>
   );

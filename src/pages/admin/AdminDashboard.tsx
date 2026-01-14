@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Package, ShoppingCart, DollarSign, FileText, Building2, User } from "lucide-react";
+import { Package, ShoppingCart, DollarSign, FileText, Building2, User, TrendingUp } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import CtaAnalyticsWidget from "@/components/admin/CtaAnalyticsWidget";
 import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,10 +92,10 @@ const AdminDashboard = () => {
   };
 
   const statCards = [
-    { label: t.dashboard.totalProducts, value: stats.totalProducts, icon: Package, color: "text-blue-600", bgColor: "bg-blue-50" },
-    { label: t.dashboard.totalOrders, value: stats.totalOrders, icon: ShoppingCart, color: "text-green-600", bgColor: "bg-green-50" },
-    { label: t.dashboard.quoteRequests, value: stats.totalQuotes, icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50" },
-    { label: t.dashboard.totalRevenue, value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-amber-600", bgColor: "bg-amber-50" },
+    { label: t.dashboard.totalProducts, value: stats.totalProducts, icon: Package, color: "text-blue-600", bgColor: "bg-blue-50 dark:bg-blue-950/30" },
+    { label: t.dashboard.totalOrders, value: stats.totalOrders, icon: ShoppingCart, color: "text-green-600", bgColor: "bg-green-50 dark:bg-green-950/30" },
+    { label: t.dashboard.quoteRequests, value: stats.totalQuotes, icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50 dark:bg-purple-950/30" },
+    { label: t.dashboard.totalRevenue, value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-amber-600", bgColor: "bg-amber-50 dark:bg-amber-950/30" },
   ];
 
   const getStatusLabel = (status: string) => {
@@ -112,21 +113,21 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
-        <div>
-          <h1 className="text-2xl font-bold">{t.dashboard.title}</h1>
-          <p className="text-muted-foreground">{t.dashboard.subtitle}</p>
-        </div>
+        <AdminPageHeader 
+          title={t.dashboard.title} 
+          subtitle={t.dashboard.subtitle}
+        />
 
         {/* Stats Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((stat, index) => (
-            <div key={index} className="bg-card border border-border rounded-lg p-6">
+            <div key={index} className="admin-stats-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                 </div>
-                <div className={`p-3 ${stat.bgColor} rounded-lg ${stat.color}`}>
+                <div className={cn("p-3 rounded-lg", stat.bgColor, stat.color)}>
                   <stat.icon className="h-6 w-6" />
                 </div>
               </div>
@@ -136,9 +137,9 @@ const AdminDashboard = () => {
 
         {/* B2B vs B2C Summary */}
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="admin-stats-card">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
                 <User className="h-5 w-5 text-blue-600" />
               </div>
               <div>
@@ -158,9 +159,9 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="admin-stats-card">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-purple-50 rounded-lg">
+              <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
                 <Building2 className="h-5 w-5 text-purple-600" />
               </div>
               <div>
@@ -184,8 +185,8 @@ const AdminDashboard = () => {
         {/* Two Column Layout for Recent Activity */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Recent Orders (B2C) */}
-          <div className="bg-card border border-border rounded-lg">
-            <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className="admin-table-wrapper">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5 text-green-600" />
                 <h2 className="font-semibold">{t.dashboard.recentOrders}</h2>
@@ -195,18 +196,16 @@ const AdminDashboard = () => {
               </Link>
             </div>
             <div className="overflow-x-auto">
-              {loading ? (
-                <div className="p-8 text-center text-muted-foreground">{t.common.loading}</div>
-              ) : recentOrders.length === 0 ? (
+              {recentOrders.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">{t.dashboard.noOrders}</div>
               ) : (
-                <table className="w-full">
-                  <thead className="bg-muted/50">
+                <table className="admin-table">
+                  <thead>
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.order}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.customer}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.total}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
+                      <th>{t.dashboard.order}</th>
+                      <th>{t.dashboard.customer}</th>
+                      <th>{t.dashboard.total}</th>
+                      <th>{t.common.status}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -223,12 +222,13 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 text-sm font-medium">{formatPrice(order.total)}</td>
                         <td className="p-4">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            order.status === "pending_payment" ? "bg-amber-100 text-amber-700" :
-                            order.status === "paid" ? "bg-green-100 text-green-700" :
-                            order.status === "cancelled" ? "bg-red-100 text-red-700" :
-                            "bg-blue-100 text-blue-700"
-                          }`}>
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded-full",
+                            order.status === "pending_payment" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+                            order.status === "paid" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                            order.status === "cancelled" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                            !["pending_payment", "paid", "cancelled"].includes(order.status) && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                          )}>
                             {getStatusLabel(order.status)}
                           </span>
                         </td>
@@ -241,8 +241,8 @@ const AdminDashboard = () => {
           </div>
 
           {/* Recent Quotes (B2B) */}
-          <div className="bg-card border border-border rounded-lg">
-            <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className="admin-table-wrapper">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-purple-600" />
                 <h2 className="font-semibold">{t.dashboard.recentQuotes}</h2>
@@ -252,17 +252,15 @@ const AdminDashboard = () => {
               </Link>
             </div>
             <div className="overflow-x-auto">
-              {loading ? (
-                <div className="p-8 text-center text-muted-foreground">{t.common.loading}</div>
-              ) : recentQuotes.length === 0 ? (
+              {recentQuotes.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">{t.dashboard.noQuotes}</div>
               ) : (
-                <table className="w-full">
-                  <thead className="bg-muted/50">
+                <table className="admin-table">
+                  <thead>
                     <tr>
-                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.institution}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.dashboard.category}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.common.status}</th>
+                      <th>{t.dashboard.institution}</th>
+                      <th>{t.dashboard.category}</th>
+                      <th>{t.common.status}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -274,12 +272,13 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 text-sm capitalize">{quote.product_category}</td>
                         <td className="p-4">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            quote.status === "pending" ? "bg-amber-100 text-amber-700" :
-                            quote.status === "quoted" ? "bg-green-100 text-green-700" :
-                            quote.status === "reviewed" ? "bg-blue-100 text-blue-700" :
-                            "bg-gray-100 text-gray-700"
-                          }`}>
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded-full",
+                            quote.status === "pending" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+                            quote.status === "quoted" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                            quote.status === "reviewed" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                            !["pending", "quoted", "reviewed"].includes(quote.status) && "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                          )}>
                             {getStatusLabel(quote.status)}
                           </span>
                         </td>

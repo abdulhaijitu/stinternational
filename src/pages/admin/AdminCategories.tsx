@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown, Lock, ChevronDown, ChevronRight, FolderOpen, Folder } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -579,39 +582,37 @@ const AdminCategories = () => {
     <AdminLayout>
       <TooltipProvider>
         <div className={cn("space-y-6", getTextClass())}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{t.categories.title}</h1>
-              <p className="text-muted-foreground">{t.categories.subtitle}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={expandAll}>
-                {t.categories.expandAll}
-              </Button>
-              <Button variant="outline" size="sm" onClick={collapseAll}>
-                {t.categories.collapseAll}
-              </Button>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  {canCreate ? (
-                    <Button onClick={() => handleOpenDialog()}>
-                      <Plus className="h-4 w-4" />
-                      {t.categories.newCategory}
-                    </Button>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button disabled className="opacity-50">
-                          <Lock className="h-4 w-4 mr-1" />
-                          {t.categories.newCategory}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t.products.noPermission}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </DialogTrigger>
+          <AdminPageHeader 
+            title={t.categories.title} 
+            subtitle={t.categories.subtitle}
+          >
+            <Button variant="outline" size="sm" onClick={expandAll}>
+              {t.categories.expandAll}
+            </Button>
+            <Button variant="outline" size="sm" onClick={collapseAll}>
+              {t.categories.collapseAll}
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                {canCreate ? (
+                  <Button onClick={() => handleOpenDialog()}>
+                    <Plus className="h-4 w-4" />
+                    {t.categories.newCategory}
+                  </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button disabled className="opacity-50">
+                        <Lock className="h-4 w-4 mr-1" />
+                        {t.categories.newCategory}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t.products.noPermission}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </DialogTrigger>
                 <DialogContent className={cn("max-w-2xl", getTextClass())}>
                   <DialogHeader>
                     <DialogTitle>
@@ -774,8 +775,7 @@ const AdminCategories = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-            </div>
-          </div>
+          </AdminPageHeader>
 
           {/* Info Banner */}
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
@@ -786,13 +786,19 @@ const AdminCategories = () => {
 
           {/* Categories List */}
           {loading ? (
-            <div className="p-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-            </div>
+            <AdminTableSkeleton columns={5} rows={6} />
           ) : categories.length === 0 ? (
-            <div className="bg-card border border-border rounded-lg p-8 text-center text-muted-foreground">
-              {t.categories.noCategories}
-            </div>
+            <AdminEmptyState
+              icon={Folder}
+              title={t.categories.noCategories}
+              description={t.categories.subtitle}
+              action={canCreate && (
+                <Button onClick={() => handleOpenDialog()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.categories.newCategory}
+                </Button>
+              )}
+            />
           ) : (
             <div className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="bg-muted/50 p-4 border-b border-border flex items-center justify-between">
