@@ -24,8 +24,17 @@ import { toast } from "sonner";
 import CheckoutLayout from "@/components/checkout/CheckoutLayout";
 import CheckoutLoginStep from "@/components/checkout/CheckoutLoginStep";
 import { CheckoutStep } from "@/components/checkout/CheckoutStepIndicator";
+import { cn } from "@/lib/utils";
 
 type PaymentMethod = "cash_on_delivery" | "bank_transfer";
+
+interface FormErrors {
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  shipping_address?: string;
+  shipping_city?: string;
+}
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -36,6 +45,8 @@ const Checkout = () => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [isGuestCheckout, setIsGuestCheckout] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   
   // Determine current step
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("login");
@@ -53,6 +64,92 @@ const Checkout = () => {
     notes: "",
     payment_method: "cash_on_delivery" as PaymentMethod,
   });
+
+  // Validation functions
+  const validateField = (name: string, value: string): string | undefined => {
+    switch (name) {
+      case "customer_name":
+        if (!value.trim()) {
+          return language === "bn" ? "নাম আবশ্যক" : "Name is required";
+        }
+        if (value.trim().length < 2) {
+          return language === "bn" ? "নাম কমপক্ষে ২ অক্ষরের হতে হবে" : "Name must be at least 2 characters";
+        }
+        break;
+      case "customer_email":
+        if (!value.trim()) {
+          return language === "bn" ? "ইমেইল আবশ্যক" : "Email is required";
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return language === "bn" ? "সঠিক ইমেইল দিন" : "Please enter a valid email";
+        }
+        break;
+      case "customer_phone":
+        if (!value.trim()) {
+          return language === "bn" ? "ফোন নম্বর আবশ্যক" : "Phone number is required";
+        }
+        if (!/^[+]?[\d\s-]{10,}$/.test(value.replace(/\s/g, ''))) {
+          return language === "bn" ? "সঠিক ফোন নম্বর দিন" : "Please enter a valid phone number";
+        }
+        break;
+      case "shipping_address":
+        if (!value.trim()) {
+          return language === "bn" ? "ঠিকানা আবশ্যক" : "Address is required";
+        }
+        if (value.trim().length < 10) {
+          return language === "bn" ? "সম্পূর্ণ ঠিকানা দিন" : "Please enter a complete address";
+        }
+        break;
+      case "shipping_city":
+        if (!value.trim()) {
+          return language === "bn" ? "শহর আবশ্যক" : "City is required";
+        }
+        break;
+    }
+    return undefined;
+  };
+
+  // Handle field blur for validation
+  const handleBlur = (name: string) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, formData[name as keyof typeof formData] as string);
+    setFormErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  // Handle field change with real-time validation
+  const handleFieldChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Only validate if field has been touched
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setFormErrors(prev => ({ ...prev, [name]: error }));
+    }
+  };
+
+  // Validate all fields
+  const validateForm = (): boolean => {
+    const errors: FormErrors = {};
+    const fieldsToValidate = ['customer_name', 'customer_email', 'customer_phone', 'shipping_address', 'shipping_city'];
+    
+    fieldsToValidate.forEach(field => {
+      const error = validateField(field, formData[field as keyof typeof formData] as string);
+      if (error) {
+        errors[field as keyof FormErrors] = error;
+      }
+    });
+
+    setFormErrors(errors);
+    setTouched({
+      customer_name: true,
+      customer_email: true,
+      customer_phone: true,
+      shipping_address: true,
+      shipping_city: true,
+    });
+
+    return Object.keys(errors).length === 0;
+  };
 
   // Update form data when profile loads
   useEffect(() => {
@@ -108,6 +205,12 @@ const Checkout = () => {
       return;
     }
 
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error(language === "bn" ? "অনুগ্রহ করে সব প্রয়োজনীয় তথ্য সঠিকভাবে পূরণ করুন" : "Please fill in all required fields correctly");
+      return;
+    }
+
     if (items.length === 0) {
       toast.error(t.checkout.cartEmpty);
       return;
@@ -124,14 +227,14 @@ const Checkout = () => {
           subtotal,
           shipping_cost: shippingCost,
           total,
-          customer_name: formData.customer_name,
-          customer_email: formData.customer_email,
-          customer_phone: formData.customer_phone,
-          company_name: formData.company_name || null,
-          shipping_address: formData.shipping_address,
-          shipping_city: formData.shipping_city,
-          shipping_postal_code: formData.shipping_postal_code || null,
-          notes: formData.notes || null,
+          customer_name: formData.customer_name.trim(),
+          customer_email: formData.customer_email.trim(),
+          customer_phone: formData.customer_phone.trim(),
+          company_name: formData.company_name.trim() || null,
+          shipping_address: formData.shipping_address.trim(),
+          shipping_city: formData.shipping_city.trim(),
+          shipping_postal_code: formData.shipping_postal_code.trim() || null,
+          notes: formData.notes.trim() || null,
         },
         items: items.map((item) => ({
           product_id: item.id,
@@ -286,16 +389,21 @@ const Checkout = () => {
                     <Input
                       id="customer_name"
                       value={formData.customer_name}
-                      onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                      onChange={(e) => handleFieldChange("customer_name", e.target.value)}
+                      onBlur={() => handleBlur("customer_name")}
+                      className={cn(formErrors.customer_name && touched.customer_name && "border-destructive focus-visible:ring-destructive")}
                       required
                     />
+                    {formErrors.customer_name && touched.customer_name && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customer_name}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="company_name">{t.checkout.companyOptional} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span></Label>
                     <Input
                       id="company_name"
                       value={formData.company_name}
-                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                      onChange={(e) => handleFieldChange("company_name", e.target.value)}
                       placeholder={t.checkout.leaveBlankForPersonal}
                     />
                   </div>
@@ -305,19 +413,29 @@ const Checkout = () => {
                       id="customer_email"
                       type="email"
                       value={formData.customer_email}
-                      onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
+                      onChange={(e) => handleFieldChange("customer_email", e.target.value)}
+                      onBlur={() => handleBlur("customer_email")}
+                      className={cn(formErrors.customer_email && touched.customer_email && "border-destructive focus-visible:ring-destructive")}
                       required
                     />
+                    {formErrors.customer_email && touched.customer_email && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customer_email}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="customer_phone">{t.checkout.phone} <span className="text-destructive">*</span></Label>
                     <Input
                       id="customer_phone"
                       value={formData.customer_phone}
-                      onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                      onChange={(e) => handleFieldChange("customer_phone", e.target.value)}
+                      onBlur={() => handleBlur("customer_phone")}
                       placeholder="+880"
+                      className={cn(formErrors.customer_phone && touched.customer_phone && "border-destructive focus-visible:ring-destructive")}
                       required
                     />
+                    {formErrors.customer_phone && touched.customer_phone && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customer_phone}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -334,27 +452,37 @@ const Checkout = () => {
                     <Input
                       id="shipping_address"
                       value={formData.shipping_address}
-                      onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                      onChange={(e) => handleFieldChange("shipping_address", e.target.value)}
+                      onBlur={() => handleBlur("shipping_address")}
                       placeholder={t.checkout.addressPlaceholder}
+                      className={cn(formErrors.shipping_address && touched.shipping_address && "border-destructive focus-visible:ring-destructive")}
                       required
                     />
+                    {formErrors.shipping_address && touched.shipping_address && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.shipping_address}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="shipping_city">{t.checkout.city} <span className="text-destructive">*</span></Label>
                     <Input
                       id="shipping_city"
                       value={formData.shipping_city}
-                      onChange={(e) => setFormData({ ...formData, shipping_city: e.target.value })}
+                      onChange={(e) => handleFieldChange("shipping_city", e.target.value)}
+                      onBlur={() => handleBlur("shipping_city")}
                       placeholder={t.checkout.cityPlaceholder}
+                      className={cn(formErrors.shipping_city && touched.shipping_city && "border-destructive focus-visible:ring-destructive")}
                       required
                     />
+                    {formErrors.shipping_city && touched.shipping_city && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.shipping_city}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="shipping_postal_code">{t.checkout.postalCode} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span></Label>
                     <Input
                       id="shipping_postal_code"
                       value={formData.shipping_postal_code}
-                      onChange={(e) => setFormData({ ...formData, shipping_postal_code: e.target.value })}
+                      onChange={(e) => handleFieldChange("shipping_postal_code", e.target.value)}
                       placeholder="1000"
                     />
                   </div>
@@ -411,41 +539,39 @@ const Checkout = () => {
 
               {/* Notes */}
               <div className="bg-card border border-border rounded-lg p-6">
-                <h2 className="font-semibold text-lg mb-4">{t.checkout.additionalNotes}</h2>
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder={t.checkout.notesPlaceholder}
-                  rows={3}
-                />
+                <h2 className="font-semibold text-lg mb-4">{t.checkout.additionalNotes} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span></h2>
+                <div className="space-y-1.5">
+                  <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder={t.checkout.notesPlaceholder}
+                    rows={3}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
+              <div className="bg-card border border-border rounded-lg p-6 sticky top-4">
                 <h2 className="font-semibold text-lg mb-4">{t.checkout.orderSummary}</h2>
-                
+
                 <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3 text-sm">
-                      <div className="w-12 h-12 bg-muted rounded overflow-hidden shrink-0">
-                        {item.image_url && (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{item.name}</p>
                         <p className="text-muted-foreground">
-                          {item.quantity} × {formatPrice(item.price)}
+                          {item.quantity} × {formatPrice(item.price, language)}
                         </p>
                       </div>
-                      <p className="font-medium shrink-0">
-                        {formatPrice(item.price * item.quantity)}
+                      <p className="font-medium whitespace-nowrap">
+                        {formatPrice(item.price * item.quantity, language)}
                       </p>
                     </div>
                   ))}
@@ -453,42 +579,45 @@ const Checkout = () => {
 
                 <div className="border-t border-border pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t.common.subtotal}</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <span className="text-muted-foreground">{language === "bn" ? "সাবটোটাল" : "Subtotal"}</span>
+                    <span>{formatPrice(subtotal, language)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t.checkout.delivery}</span>
-                    <span>{shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}</span>
+                    <span className="text-muted-foreground">{language === "bn" ? "ডেলিভারি" : "Shipping"}</span>
+                    <span>
+                      {shippingCost === 0 ? (
+                        <span className="text-green-600 font-medium">{language === "bn" ? "বিনামূল্যে" : "Free"}</span>
+                      ) : (
+                        formatPrice(shippingCost, language)
+                      )}
+                    </span>
                   </div>
                   {subtotal < 10000 && (
                     <p className="text-xs text-muted-foreground">
-                      {t.checkout.freeShippingThreshold}
+                      {language === "bn" 
+                        ? `আরো ${formatPrice(10000 - subtotal, language)} কিনলে ফ্রি ডেলিভারি`
+                        : `Add ${formatPrice(10000 - subtotal, language)} more for free delivery`
+                      }
                     </p>
                   )}
-                  <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-                    <span>{t.common.total}</span>
-                    <span className="text-primary">{formatPrice(total)}</span>
+                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
+                    <span>{language === "bn" ? "মোট" : "Total"}</span>
+                    <span className="text-primary">{formatPrice(total, language)}</span>
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  variant="accent"
+                <Button 
+                  type="submit" 
+                  className="w-full mt-6" 
                   size="lg"
-                  className="w-full mt-6"
                   disabled={loading}
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t.checkout.processing}
-                    </>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
-                    <>
-                      <ShieldCheck className="mr-2 h-4 w-4" />
-                      {t.checkout.placeOrder}
-                    </>
+                    <ShieldCheck className="h-4 w-4 mr-2" />
                   )}
+                  {loading ? t.checkout.processing : t.checkout.placeOrder}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground mt-4">
