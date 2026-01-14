@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, MousePointerClick, FileText, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface AnalyticsData {
   totalClicks: number;
@@ -19,6 +21,8 @@ interface AnalyticsData {
 }
 
 const CtaAnalyticsWidget = () => {
+  const { t, language } = useAdminLanguage();
+  
   const { data: analytics, isLoading } = useQuery({
     queryKey: ["cta-analytics"],
     queryFn: async () => {
@@ -80,9 +84,9 @@ const CtaAnalyticsWidget = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={cn("flex items-center gap-2", language === "bn" && "font-siliguri")}>
             <BarChart3 className="h-5 w-5" />
-            CTA Analytics
+            {t.ctaAnalytics?.title || "CTA Analytics"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -99,17 +103,24 @@ const CtaAnalyticsWidget = () => {
   const getPerformanceIndicator = (variant: { conversionRate: number }, allVariants: { conversionRate: number }[]) => {
     const avgRate = allVariants.reduce((sum, v) => sum + v.conversionRate, 0) / allVariants.length;
     if (variant.conversionRate > avgRate) {
-      return { icon: ArrowUpRight, color: "text-success", label: "Above avg" };
+      return { icon: ArrowUpRight, color: "text-success", label: t.ctaAnalytics?.aboveAvg || "Above avg" };
     }
-    return { icon: ArrowDownRight, color: "text-muted-foreground", label: "Below avg" };
+    return { icon: ArrowDownRight, color: "text-muted-foreground", label: t.ctaAnalytics?.belowAvg || "Below avg" };
+  };
+
+  const getVariantLabel = (variant: string) => {
+    if (variant === "primary") {
+      return t.ctaAnalytics?.primaryCta || "🅰️ Primary CTA";
+    }
+    return t.ctaAnalytics?.secondaryCta || "🅱️ Secondary CTA";
   };
 
   return (
-    <Card>
+    <Card className={cn(language === "bn" && "font-siliguri")}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" />
-          CTA Analytics & A/B Performance
+          {t.ctaAnalytics?.title || "CTA Analytics & A/B Performance"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -118,53 +129,53 @@ const CtaAnalyticsWidget = () => {
           <div className="bg-muted/50 rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <MousePointerClick className="h-4 w-4" />
-              <span className="text-xs font-medium">Total Clicks</span>
+              <span className="text-xs font-medium">{t.ctaAnalytics?.totalClicks || "Total Clicks"}</span>
             </div>
             <p className="text-2xl font-bold">{analytics?.totalClicks || 0}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {analytics?.last7DaysClicks || 0} last 7 days
+              {analytics?.last7DaysClicks || 0} {t.ctaAnalytics?.last7Days || "last 7 days"}
             </p>
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <FileText className="h-4 w-4" />
-              <span className="text-xs font-medium">RFQ Submissions</span>
+              <span className="text-xs font-medium">{t.ctaAnalytics?.rfqSubmissions || "RFQ Submissions"}</span>
             </div>
             <p className="text-2xl font-bold">{analytics?.totalRfqSubmissions || 0}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {analytics?.last7DaysRfq || 0} last 7 days
+              {analytics?.last7DaysRfq || 0} {t.ctaAnalytics?.last7Days || "last 7 days"}
             </p>
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-xs font-medium">Conversion Rate</span>
+              <span className="text-xs font-medium">{t.ctaAnalytics?.conversionRate || "Conversion Rate"}</span>
             </div>
             <p className="text-2xl font-bold">
               {analytics?.conversionRate.toFixed(1) || 0}%
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Click to RFQ
+              {t.ctaAnalytics?.clickToRfq || "Click to RFQ"}
             </p>
           </div>
 
           <div className="bg-primary/10 rounded-lg p-4">
             <div className="flex items-center gap-2 text-primary mb-1">
               <BarChart3 className="h-4 w-4" />
-              <span className="text-xs font-medium">Active Variants</span>
+              <span className="text-xs font-medium">{t.ctaAnalytics?.activeVariants || "Active Variants"}</span>
             </div>
             <p className="text-2xl font-bold">2</p>
             <p className="text-xs text-muted-foreground mt-1">
-              A/B Testing
+              {t.ctaAnalytics?.abTesting || "A/B Testing"}
             </p>
           </div>
         </div>
 
         {/* A/B Test Performance Comparison */}
         <div>
-          <h4 className="text-sm font-semibold mb-4">A/B Test Variant Performance</h4>
+          <h4 className="text-sm font-semibold mb-4">{t.ctaAnalytics?.variantPerformance || "A/B Test Variant Performance"}</h4>
           <div className="grid md:grid-cols-2 gap-4">
             {analytics?.variantPerformance.map((variant) => {
               const indicator = getPerformanceIndicator(variant, analytics.variantPerformance);
@@ -176,8 +187,8 @@ const CtaAnalyticsWidget = () => {
                   className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium capitalize">
-                      {variant.variant === "primary" ? "🅰️ Primary CTA" : "🅱️ Secondary CTA"}
+                    <span className="font-medium">
+                      {getVariantLabel(variant.variant)}
                     </span>
                     <span className={`text-xs flex items-center gap-1 ${indicator.color}`}>
                       <IndicatorIcon className="h-3 w-3" />
@@ -188,17 +199,17 @@ const CtaAnalyticsWidget = () => {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <p className="text-lg font-semibold">{variant.clicks}</p>
-                      <p className="text-xs text-muted-foreground">Clicks</p>
+                      <p className="text-xs text-muted-foreground">{t.ctaAnalytics?.clicks || "Clicks"}</p>
                     </div>
                     <div>
                       <p className="text-lg font-semibold">{variant.rfqSubmissions}</p>
-                      <p className="text-xs text-muted-foreground">RFQs</p>
+                      <p className="text-xs text-muted-foreground">{t.ctaAnalytics?.rfqs || "RFQs"}</p>
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-primary">
                         {variant.conversionRate.toFixed(1)}%
                       </p>
-                      <p className="text-xs text-muted-foreground">Rate</p>
+                      <p className="text-xs text-muted-foreground">{t.ctaAnalytics?.rate || "Rate"}</p>
                     </div>
                   </div>
 
@@ -218,16 +229,16 @@ const CtaAnalyticsWidget = () => {
         {/* Insights */}
         {analytics && analytics.variantPerformance.length > 0 && (
           <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-            <h4 className="text-sm font-semibold mb-2 text-accent-foreground">💡 Insights</h4>
+            <h4 className="text-sm font-semibold mb-2 text-accent-foreground">{t.ctaAnalytics?.insights || "💡 Insights"}</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               {analytics.variantPerformance[0].conversionRate > analytics.variantPerformance[1]?.conversionRate ? (
-                <li>• Primary CTA is outperforming Secondary by {(analytics.variantPerformance[0].conversionRate - (analytics.variantPerformance[1]?.conversionRate || 0)).toFixed(1)}%</li>
+                <li>• {t.ctaAnalytics?.primaryOutperforming || "Primary CTA is outperforming Secondary by"} {(analytics.variantPerformance[0].conversionRate - (analytics.variantPerformance[1]?.conversionRate || 0)).toFixed(1)}%</li>
               ) : (
-                <li>• Secondary CTA is outperforming Primary by {((analytics.variantPerformance[1]?.conversionRate || 0) - analytics.variantPerformance[0].conversionRate).toFixed(1)}%</li>
+                <li>• {t.ctaAnalytics?.secondaryOutperforming || "Secondary CTA is outperforming Primary by"} {((analytics.variantPerformance[1]?.conversionRate || 0) - analytics.variantPerformance[0].conversionRate).toFixed(1)}%</li>
               )}
-              <li>• Total engagement: {analytics.totalClicks} clicks tracked</li>
+              <li>• {t.ctaAnalytics?.totalEngagement || "Total engagement:"} {analytics.totalClicks} {t.ctaAnalytics?.clicksTracked || "clicks tracked"}</li>
               {analytics.conversionRate > 5 && (
-                <li>• Great conversion rate! Industry average is 2-5%</li>
+                <li>• {t.ctaAnalytics?.greatConversion || "Great conversion rate! Industry average is 2-5%"}</li>
               )}
             </ul>
           </div>

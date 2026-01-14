@@ -518,4 +518,36 @@ export const adminEn = {
     en: "EN",
     bn: "বাংলা",
   },
+
+  // CTA Analytics Widget
+  ctaAnalytics: {
+    title: "CTA Analytics & A/B Performance",
+    totalClicks: "Total Clicks",
+    rfqSubmissions: "RFQ Submissions",
+    conversionRate: "Conversion Rate",
+    activeVariants: "Active Variants",
+    last7Days: "last 7 days",
+    clickToRfq: "Click to RFQ",
+    abTesting: "A/B Testing",
+    variantPerformance: "A/B Test Variant Performance",
+    primaryCta: "🅰️ Primary CTA",
+    secondaryCta: "🅱️ Secondary CTA",
+    aboveAvg: "Above avg",
+    belowAvg: "Below avg",
+    clicks: "Clicks",
+    rfqs: "RFQs",
+    rate: "Rate",
+    insights: "💡 Insights",
+    primaryOutperforming: "Primary CTA is outperforming Secondary by",
+    secondaryOutperforming: "Secondary CTA is outperforming Primary by",
+    totalEngagement: "Total engagement:",
+    clicksTracked: "clicks tracked",
+    greatConversion: "Great conversion rate! Industry average is 2-5%",
+  },
+
+  // Layout
+  layout: {
+    viewWebsite: "View Website",
+    restricted: "Restricted",
+  },
 } as const;
