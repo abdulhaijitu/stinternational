@@ -6,19 +6,13 @@ import { Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCtaAnalytics } from "@/hooks/useCtaAnalytics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 const rfqSchema = z.object({
   name: z.string().trim().min(2, "Name is required").max(100, "Name too long"),
@@ -175,150 +169,150 @@ const QuickRfqForm = () => {
           </div>
 
           <div className="bg-card border border-border rounded-lg p-6 md:p-8">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Name *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Full name"
-                          {...field}
-                          disabled={isSubmitting}
-                          className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">
+                  {language === "bn" ? "আপনার নাম" : "Your Name"}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  placeholder={language === "bn" ? "পূর্ণ নাম" : "Full name"}
+                  {...form.register("name")}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "transition-all duration-200 focus:ring-2 focus:ring-primary/20",
+                    form.formState.errors.name && "border-destructive focus-visible:ring-destructive"
                   )}
                 />
+                {form.formState.errors.name && (
+                  <p className="text-xs font-medium text-destructive">{form.formState.errors.name.message}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="organization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organization / Company *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Company or institution name"
-                          {...field}
-                          disabled={isSubmitting}
-                          className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              <div className="space-y-1.5">
+                <Label htmlFor="organization">
+                  {language === "bn" ? "প্রতিষ্ঠান / কোম্পানি" : "Organization / Company"}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <Input
+                  id="organization"
+                  placeholder={language === "bn" ? "কোম্পানি বা প্রতিষ্ঠানের নাম" : "Company or institution name"}
+                  {...form.register("organization")}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "transition-all duration-200 focus:ring-2 focus:ring-primary/20",
+                    form.formState.errors.organization && "border-destructive focus-visible:ring-destructive"
                   )}
                 />
+                {form.formState.errors.organization && (
+                  <p className="text-xs font-medium text-destructive">{form.formState.errors.organization.message}</p>
+                )}
+              </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="+880 1XXX-XXXXXX"
-                            {...field}
-                            disabled={isSubmitting}
-                            className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone">
+                    {language === "bn" ? "ফোন নম্বর" : "Phone Number"}
+                    <span className="text-destructive ml-0.5">*</span>
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+880 1XXX-XXXXXX"
+                    {...form.register("phone")}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "transition-all duration-200 focus:ring-2 focus:ring-primary/20",
+                      form.formState.errors.phone && "border-destructive focus-visible:ring-destructive"
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="you@company.com"
-                            {...field}
-                            disabled={isSubmitting}
-                            className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {form.formState.errors.phone && (
+                    <p className="text-xs font-medium text-destructive">{form.formState.errors.phone.message}</p>
+                  )}
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="requirements"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Product / Requirements *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Describe the products or equipment you need..."
-                          className="min-h-[100px] resize-none transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                          {...field}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">
+                    {language === "bn" ? "ইমেইল ঠিকানা" : "Email Address"}
+                    <span className="text-destructive ml-0.5">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@company.com"
+                    {...form.register("email")}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "transition-all duration-200 focus:ring-2 focus:ring-primary/20",
+                      form.formState.errors.email && "border-destructive focus-visible:ring-destructive"
+                    )}
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-xs font-medium text-destructive">{form.formState.errors.email.message}</p>
                   )}
-                />
+                </div>
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantity (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g., 10 units, 50 pieces"
-                          {...field}
-                          disabled={isSubmitting}
-                          className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full active:scale-[0.98] transition-transform duration-200"
-                  size="lg"
+              <div className="space-y-1.5">
+                <Label htmlFor="requirements">
+                  {language === "bn" ? "পণ্য / প্রয়োজনীয়তা" : "Product / Requirements"}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <Textarea
+                  id="requirements"
+                  placeholder={language === "bn" ? "আপনার প্রয়োজনীয় পণ্য বা সরঞ্জাম বর্ণনা করুন..." : "Describe the products or equipment you need..."}
+                  {...form.register("requirements")}
                   disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4 rounded-full animate-pulse" />
-                      <span>Submitting...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Request a Quote
-                    </>
+                  className={cn(
+                    "min-h-[100px] resize-none transition-all duration-200 focus:ring-2 focus:ring-primary/20",
+                    form.formState.errors.requirements && "border-destructive focus-visible:ring-destructive"
                   )}
-                </Button>
+                />
+                {form.formState.errors.requirements && (
+                  <p className="text-xs font-medium text-destructive">{form.formState.errors.requirements.message}</p>
+                )}
+              </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  We typically respond within 24 business hours
-                </p>
-              </form>
-            </Form>
+              <div className="space-y-1.5">
+                <Label htmlFor="quantity">
+                  {language === "bn" ? "পরিমাণ" : "Quantity"}
+                  <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                    ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                  </span>
+                </Label>
+                <Input
+                  id="quantity"
+                  placeholder={language === "bn" ? "যেমন, ১০ ইউনিট, ৫০ পিস" : "e.g., 10 units, 50 pieces"}
+                  {...form.register("quantity")}
+                  disabled={isSubmitting}
+                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full active:scale-[0.98] transition-transform duration-200"
+                size="lg"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded-full animate-pulse" />
+                    <span>{language === "bn" ? "জমা হচ্ছে..." : "Submitting..."}</span>
+                  </div>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    {language === "bn" ? "কোটেশন অনুরোধ করুন" : "Request a Quote"}
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                {language === "bn" ? "আমরা সাধারণত ২৪ ঘন্টার মধ্যে সাড়া দিই" : "We typically respond within 24 business hours"}
+              </p>
+            </form>
           </div>
         </div>
       </div>

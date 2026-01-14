@@ -621,7 +621,7 @@ const AdminCategories = () => {
                   </DialogHeader>
                   <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
                     {/* Category Type Selection */}
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <Label>{t.categories.categoryType}</Label>
                       <div className="flex items-center gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -655,8 +655,11 @@ const AdminCategories = () => {
 
                     {/* Parent Category Selection (only for sub-categories) */}
                     {!formData.is_parent && (
-                      <div className="space-y-2">
-                        <Label htmlFor="parent_id">{t.categories.selectParentCategory} *</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="parent_id">
+                          {t.categories.selectParentCategory}
+                          <span className="text-destructive ml-0.5">*</span>
+                        </Label>
                         <Select
                           value={formData.parent_id}
                           onValueChange={(value) => setFormData({ ...formData, parent_id: value })}
@@ -678,8 +681,11 @@ const AdminCategories = () => {
                     {/* Language-specific name field */}
                     {isEnglish ? (
                       <>
-                        <div className="space-y-2">
-                          <Label htmlFor="name">{t.categories.categoryName} *</Label>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="name">
+                            {t.categories.categoryName}
+                            <span className="text-destructive ml-0.5">*</span>
+                          </Label>
                           <Input
                             id="name"
                             value={formData.name}
@@ -693,16 +699,24 @@ const AdminCategories = () => {
                             placeholder={t.categories.categoryNamePlaceholder}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="slug">{t.categories.slug} *</Label>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="slug">
+                            {t.categories.slug}
+                            <span className="text-destructive ml-0.5">*</span>
+                          </Label>
                           <Input
                             id="slug"
                             value={formData.slug}
                             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="description">{t.categories.description}</Label>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="description">
+                            {t.categories.description}
+                            <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                              (Optional)
+                            </span>
+                          </Label>
                           <Textarea
                             id="description"
                             value={formData.description}
@@ -713,9 +727,12 @@ const AdminCategories = () => {
                       </>
                     ) : (
                       <>
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           <Label htmlFor="name_bn" className="font-siliguri">
                             {t.categories.categoryName}
+                            <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                              (ঐচ্ছিক)
+                            </span>
                           </Label>
                           <Input
                             id="name_bn"
@@ -725,9 +742,12 @@ const AdminCategories = () => {
                             className="font-siliguri"
                           />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           <Label htmlFor="description_bn" className="font-siliguri">
                             {t.categories.description}
+                            <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                              (ঐচ্ছিক)
+                            </span>
                           </Label>
                           <Textarea
                             id="description_bn"
@@ -740,8 +760,13 @@ const AdminCategories = () => {
                       </>
                     )}
                     
-                    <div className="space-y-2">
-                      <Label>{t.categories.image}</Label>
+                    <div className="space-y-1.5">
+                      <Label>
+                        {t.categories.image}
+                        <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                          ({isEnglish ? "Optional" : "ঐচ্ছিক"})
+                        </span>
+                      </Label>
                       <ImageUpload
                         value={formData.image_url}
                         onChange={(url) => setFormData({ ...formData, image_url: url })}
