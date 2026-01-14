@@ -8,8 +8,6 @@ import {
   Package, 
   Truck,
   Clock,
-  CheckCircle,
-  XCircle,
   MessageSquare,
   Send,
   Eye,
@@ -45,6 +43,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface QuoteRequest {
   id: string;
@@ -74,38 +74,30 @@ const statusColors: Record<string, string> = {
   closed: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  reviewed: "Reviewed",
-  quoted: "Quoted",
-  closed: "Closed",
-};
-
-const companyTypeLabels: Record<string, string> = {
-  university: "University / College",
-  research_lab: "Research Laboratory",
-  hospital: "Hospital / Medical Center",
-  factory: "Factory / Manufacturing",
-  government: "Government Institution",
-  school: "School / Educational Institute",
-  ngo: "NGO / Non-Profit",
-  private_business: "Private Business",
-  other: "Other",
-};
-
-const urgencyLabels: Record<string, string> = {
-  urgent: "Urgent (Within 1 week)",
-  within_week: "Within 2 weeks",
-  within_month: "Within 1 month",
-  flexible: "Flexible / No Rush",
-};
-
 const AdminQuotes = () => {
+  const { language, t } = useAdminLanguage();
+  const isBangla = language === "bn";
   const queryClient = useQueryClient();
   const [selectedQuote, setSelectedQuote] = useState<QuoteRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+
+  // Get translated labels
+  const getCompanyTypeLabel = (type: string) => {
+    const key = type as keyof typeof t.quotes.companyTypes;
+    return t.quotes.companyTypes[key] || type;
+  };
+
+  const getUrgencyLabel = (urgency: string) => {
+    const key = urgency as keyof typeof t.quotes.urgencyLabels;
+    return t.quotes.urgencyLabels[key] || urgency;
+  };
+
+  const getStatusLabel = (status: string) => {
+    const key = status as keyof typeof t.quotes.statuses;
+    return t.quotes.statuses[key] || status;
+  };
 
   // Fetch quote requests
   const { data: quotes, isLoading } = useQuery({
@@ -137,10 +129,10 @@ const AdminQuotes = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-quotes"] });
-      toast.success("Status updated successfully");
+      toast.success(t.quotes.statusUpdateSuccess);
     },
     onError: () => {
-      toast.error("Failed to update status");
+      toast.error(t.quotes.statusUpdateError);
     },
   });
 
@@ -180,20 +172,20 @@ const AdminQuotes = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-quotes"] });
-      toast.success("Response sent successfully");
+      toast.success(t.quotes.responseSentSuccess);
       setIsResponseDialogOpen(false);
       setResponseMessage("");
       setSelectedQuote(null);
     },
     onError: (error: any) => {
       console.error("Failed to send response:", error);
-      toast.error("Failed to send response email");
+      toast.error(t.quotes.responseSendError);
     },
   });
 
   const handleSendResponse = () => {
     if (!selectedQuote || !responseMessage.trim()) {
-      toast.error("Please enter a response message");
+      toast.error(t.quotes.enterMessage);
       return;
     }
     sendResponseMutation.mutate({ quote: selectedQuote, message: responseMessage });
@@ -207,26 +199,26 @@ const AdminQuotes = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className={cn("space-y-6", isBangla && "font-siliguri")}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Quote Requests</h1>
-            <p className="text-muted-foreground">Manage quote requests from institutional buyers</p>
+            <h1 className="text-2xl font-bold">{t.quotes.title}</h1>
+            <p className="text-muted-foreground">{t.quotes.subtitle}</p>
           </div>
           
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t.quotes.filterByStatus} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Requests</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="reviewed">Reviewed</SelectItem>
-                <SelectItem value="quoted">Quoted</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="all">{t.quotes.allRequests}</SelectItem>
+                <SelectItem value="pending">{t.quotes.statuses.pending}</SelectItem>
+                <SelectItem value="reviewed">{t.quotes.statuses.reviewed}</SelectItem>
+                <SelectItem value="quoted">{t.quotes.statuses.quoted}</SelectItem>
+                <SelectItem value="closed">{t.quotes.statuses.closed}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -234,12 +226,12 @@ const AdminQuotes = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {["pending", "reviewed", "quoted", "closed"].map((status) => {
+          {(["pending", "reviewed", "quoted", "closed"] as const).map((status) => {
             const count = quotes?.filter((q) => q.status === status).length || 0;
             return (
               <div key={status} className="bg-card border border-border rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground capitalize">{status}</span>
+                  <span className="text-sm text-muted-foreground">{getStatusLabel(status)}</span>
                   <Badge className={statusColors[status]}>{count}</Badge>
                 </div>
               </div>
@@ -260,13 +252,13 @@ const AdminQuotes = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Urgency</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t.quotes.company}</TableHead>
+                    <TableHead>{t.quotes.contact}</TableHead>
+                    <TableHead>{t.quotes.category}</TableHead>
+                    <TableHead>{t.quotes.urgency}</TableHead>
+                    <TableHead>{t.quotes.status}</TableHead>
+                    <TableHead>{t.quotes.date}</TableHead>
+                    <TableHead className="text-right">{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -276,7 +268,7 @@ const AdminQuotes = () => {
                         <div>
                           <p className="font-medium">{quote.company_name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {companyTypeLabels[quote.company_type] || quote.company_type}
+                            {getCompanyTypeLabel(quote.company_type)}
                           </p>
                         </div>
                       </TableCell>
@@ -294,7 +286,7 @@ const AdminQuotes = () => {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm">
-                          {urgencyLabels[quote.delivery_urgency] || quote.delivery_urgency}
+                          {getUrgencyLabel(quote.delivery_urgency)}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -306,14 +298,14 @@ const AdminQuotes = () => {
                         >
                           <SelectTrigger className="w-[120px] h-8">
                             <Badge className={statusColors[quote.status]}>
-                              {statusLabels[quote.status]}
+                              {getStatusLabel(quote.status)}
                             </Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="reviewed">Reviewed</SelectItem>
-                            <SelectItem value="quoted">Quoted</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
+                            <SelectItem value="pending">{t.quotes.statuses.pending}</SelectItem>
+                            <SelectItem value="reviewed">{t.quotes.statuses.reviewed}</SelectItem>
+                            <SelectItem value="quoted">{t.quotes.statuses.quoted}</SelectItem>
+                            <SelectItem value="closed">{t.quotes.statuses.closed}</SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
@@ -348,14 +340,14 @@ const AdminQuotes = () => {
           ) : (
             <div className="p-12 text-center">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No quote requests found</p>
+              <p className="text-muted-foreground">{t.quotes.noQuotes}</p>
             </div>
           )}
         </div>
 
         {/* Quote Detail Dialog */}
         <Dialog open={!!selectedQuote && !isResponseDialogOpen} onOpenChange={() => setSelectedQuote(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className={cn("max-w-2xl max-h-[90vh] overflow-y-auto", isBangla && "font-siliguri")}>
             {selectedQuote && (
               <>
                 <DialogHeader>
@@ -370,20 +362,20 @@ const AdminQuotes = () => {
                   <div className="bg-muted/50 rounded-lg p-4">
                     <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      Company Information
+                      {t.quotes.companyInfo}
                     </h4>
                     <dl className="grid grid-cols-2 gap-2 text-sm">
-                      <dt className="text-muted-foreground">Type:</dt>
-                      <dd>{companyTypeLabels[selectedQuote.company_type]}</dd>
-                      <dt className="text-muted-foreground">Contact:</dt>
+                      <dt className="text-muted-foreground">{t.quotes.type}:</dt>
+                      <dd>{getCompanyTypeLabel(selectedQuote.company_type)}</dd>
+                      <dt className="text-muted-foreground">{t.quotes.contact}:</dt>
                       <dd>{selectedQuote.contact_person}</dd>
-                      <dt className="text-muted-foreground">Email:</dt>
+                      <dt className="text-muted-foreground">{t.quotes.email}:</dt>
                       <dd>
                         <a href={`mailto:${selectedQuote.email}`} className="text-primary hover:underline">
                           {selectedQuote.email}
                         </a>
                       </dd>
-                      <dt className="text-muted-foreground">Phone:</dt>
+                      <dt className="text-muted-foreground">{t.quotes.phone}:</dt>
                       <dd>
                         <a href={`tel:${selectedQuote.phone}`} className="text-primary hover:underline">
                           {selectedQuote.phone}
@@ -396,23 +388,23 @@ const AdminQuotes = () => {
                   <div className="bg-muted/50 rounded-lg p-4">
                     <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                       <Package className="h-4 w-4" />
-                      Product Requirements
+                      {t.quotes.productRequirements}
                     </h4>
                     <dl className="space-y-2 text-sm">
                       <div className="grid grid-cols-2 gap-2">
-                        <dt className="text-muted-foreground">Category:</dt>
+                        <dt className="text-muted-foreground">{t.quotes.category}:</dt>
                         <dd className="capitalize">{selectedQuote.product_category}</dd>
-                        <dt className="text-muted-foreground">Quantity:</dt>
+                        <dt className="text-muted-foreground">{t.quotes.quantity}:</dt>
                         <dd>{selectedQuote.quantity}</dd>
                         {selectedQuote.budget_range && (
                           <>
-                            <dt className="text-muted-foreground">Budget:</dt>
+                            <dt className="text-muted-foreground">{t.quotes.budget}:</dt>
                             <dd>{selectedQuote.budget_range}</dd>
                           </>
                         )}
                       </div>
                       <div className="pt-2">
-                        <dt className="text-muted-foreground mb-1">Details:</dt>
+                        <dt className="text-muted-foreground mb-1">{t.quotes.details}:</dt>
                         <dd className="bg-background p-3 rounded text-sm whitespace-pre-wrap">
                           {selectedQuote.product_details}
                         </dd>
@@ -424,27 +416,27 @@ const AdminQuotes = () => {
                   <div className="bg-muted/50 rounded-lg p-4">
                     <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                       <Truck className="h-4 w-4" />
-                      Delivery Preferences
+                      {t.quotes.deliveryPreferences}
                     </h4>
                     <dl className="grid grid-cols-2 gap-2 text-sm">
-                      <dt className="text-muted-foreground">City:</dt>
+                      <dt className="text-muted-foreground">{t.quotes.city}:</dt>
                       <dd>{selectedQuote.delivery_city}</dd>
-                      <dt className="text-muted-foreground">Urgency:</dt>
-                      <dd>{urgencyLabels[selectedQuote.delivery_urgency]}</dd>
+                      <dt className="text-muted-foreground">{t.quotes.urgency}:</dt>
+                      <dd>{getUrgencyLabel(selectedQuote.delivery_urgency)}</dd>
                       {selectedQuote.preferred_payment && (
                         <>
-                          <dt className="text-muted-foreground">Payment:</dt>
+                          <dt className="text-muted-foreground">{t.quotes.payment}:</dt>
                           <dd className="capitalize">{selectedQuote.preferred_payment.replace(/_/g, " ")}</dd>
                         </>
                       )}
                     </dl>
                     <div className="mt-2 text-sm">
-                      <dt className="text-muted-foreground mb-1">Address:</dt>
+                      <dt className="text-muted-foreground mb-1">{t.quotes.address}:</dt>
                       <dd>{selectedQuote.delivery_address}</dd>
                     </div>
                     {selectedQuote.additional_notes && (
                       <div className="mt-2 text-sm">
-                        <dt className="text-muted-foreground mb-1">Notes:</dt>
+                        <dt className="text-muted-foreground mb-1">{t.quotes.notes}:</dt>
                         <dd className="bg-background p-2 rounded">{selectedQuote.additional_notes}</dd>
                       </div>
                     )}
@@ -454,21 +446,21 @@ const AdminQuotes = () => {
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      Submitted: {format(new Date(selectedQuote.created_at), "PPp")}
+                      {t.quotes.submitted}: {format(new Date(selectedQuote.created_at), "PPp")}
                     </span>
                     <Badge className={statusColors[selectedQuote.status]}>
-                      {statusLabels[selectedQuote.status]}
+                      {getStatusLabel(selectedQuote.status)}
                     </Badge>
                   </div>
                 </div>
 
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setSelectedQuote(null)}>
-                    Close
+                    {t.quotes.close}
                   </Button>
                   <Button onClick={() => openResponseDialog(selectedQuote)}>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Send Response
+                    {t.quotes.sendResponse}
                   </Button>
                 </DialogFooter>
               </>
@@ -478,20 +470,20 @@ const AdminQuotes = () => {
 
         {/* Send Response Dialog */}
         <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className={cn("max-w-lg", isBangla && "font-siliguri")}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Send className="h-5 w-5" />
-                Send Response to {selectedQuote?.contact_person}
+                {t.quotes.sendResponseTo} {selectedQuote?.contact_person}
               </DialogTitle>
             </DialogHeader>
 
             <div className="py-4">
               <p className="text-sm text-muted-foreground mb-4">
-                This email will be sent to: <strong>{selectedQuote?.email}</strong>
+                {t.quotes.emailWillBeSent} <strong>{selectedQuote?.email}</strong>
               </p>
               <Textarea
-                placeholder="Enter your response message..."
+                placeholder={t.quotes.enterResponseMessage}
                 value={responseMessage}
                 onChange={(e) => setResponseMessage(e.target.value)}
                 className="min-h-[200px]"
@@ -500,18 +492,18 @@ const AdminQuotes = () => {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsResponseDialogOpen(false)}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button 
                 onClick={handleSendResponse}
                 disabled={sendResponseMutation.isPending || !responseMessage.trim()}
               >
                 {sendResponseMutation.isPending ? (
-                  "Sending..."
+                  t.quotes.sending
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Send Email
+                    {t.quotes.sendEmail}
                   </>
                 )}
               </Button>
