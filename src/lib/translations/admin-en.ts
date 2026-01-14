@@ -214,6 +214,15 @@ export const adminEn = {
     addSubCategory: "Add Sub Category",
     expandAll: "Expand All",
     collapseAll: "Collapse All",
+    // Bulk delete
+    bulkDelete: "Delete Selected",
+    bulkDeleteTitle: "Delete Multiple Categories",
+    bulkDeleteDescription: "Are you sure you want to delete {count} selected categories? This action cannot be undone.",
+    bulkDeleteSuccess: "{count} categories deleted successfully",
+    bulkDeleteError: "Failed to delete some categories",
+    selectAll: "Select All",
+    selectedCount: "{count} selected",
+    cannotDeleteParentWithSubs: "Cannot delete parent categories with sub-categories. Delete sub-categories first.",
   },
 
   // Orders
@@ -420,6 +429,14 @@ export const adminEn = {
     statusError: "Failed to update logo status",
     order: "Order",
     required: "Name and logo image are required",
+    // Bulk delete
+    bulkDelete: "Delete Selected",
+    bulkDeleteTitle: "Delete Multiple Logos",
+    bulkDeleteDescription: "Are you sure you want to delete {count} selected logos? This action cannot be undone.",
+    bulkDeleteSuccess: "{count} logos deleted successfully",
+    bulkDeleteError: "Failed to delete some logos",
+    selectAll: "Select All",
+    selectedCount: "{count} selected",
   },
 
   // Testimonials
@@ -455,6 +472,14 @@ export const adminEn = {
     deleteConfirm: "Delete this testimonial?",
     statusUpdated: "Status updated",
     order: "Order",
+    // Bulk delete
+    bulkDelete: "Delete Selected",
+    bulkDeleteTitle: "Delete Multiple Testimonials",
+    bulkDeleteDescription: "Are you sure you want to delete {count} selected testimonials? This action cannot be undone.",
+    bulkDeleteSuccess: "{count} testimonials deleted successfully",
+    bulkDeleteError: "Failed to delete some testimonials",
+    selectAll: "Select All",
+    selectedCount: "{count} selected",
   },
 
   // UX Insights

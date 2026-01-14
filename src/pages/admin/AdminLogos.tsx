@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { BulkDeleteDialog } from "@/components/admin/BulkDeleteDialog";
 import { SortableRow } from "@/components/admin/SortableRow";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 
@@ -55,6 +57,9 @@ const AdminLogos = () => {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [logoToDelete, setLogoToDelete] = useState<InstitutionLogo | null>(null);
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     logo_url: "",
@@ -233,8 +238,65 @@ const AdminLogos = () => {
     }
   };
 
+  // Bulk selection handlers
+  const toggleSelectLogo = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === logos.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(logos.map(l => l.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const idsToDelete = Array.from(selectedIds);
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (const id of idsToDelete) {
+      try {
+        const { error } = await supabase.from("institution_logos").delete().eq("id", id);
+        if (error) throw error;
+        successCount++;
+      } catch (error) {
+        console.error(`Error deleting logo ${id}:`, error);
+        errorCount++;
+      }
+    }
+    
+    await fetchLogos();
+    setSelectedIds(new Set());
+    
+    if (successCount > 0) {
+      toast.success(t.logos.bulkDeleteSuccess.replace("{count}", String(successCount)));
+    }
+    if (errorCount > 0) {
+      toast.error(t.logos.bulkDeleteError);
+      throw new Error("Some logos failed to delete");
+    }
+  };
+
   const renderLogoRow = (logo: InstitutionLogo) => (
     <>
+      {/* Checkbox for selection */}
+      <Checkbox
+        checked={selectedIds.has(logo.id)}
+        onCheckedChange={() => toggleSelectLogo(logo.id)}
+        disabled={isReordering}
+        className="mr-2"
+      />
+      
       {/* Logo preview */}
       <div className="w-24 h-16 bg-muted rounded-lg border border-border flex items-center justify-center p-2">
         <img
@@ -370,6 +432,29 @@ const AdminLogos = () => {
           </p>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedIds.size > 0 && (
+          <div className="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Checkbox
+                checked={selectedIds.size === logos.length}
+                onCheckedChange={toggleSelectAll}
+              />
+              <span className="text-sm font-medium">
+                {t.logos.selectedCount.replace("{count}", String(selectedIds.size))}
+              </span>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t.logos.bulkDelete}
+            </Button>
+          </div>
+        )}
+
         {/* Logos List with Drag and Drop */}
         {loading ? (
           <AdminTableSkeleton columns={4} rows={4} />
@@ -430,6 +515,25 @@ const AdminLogos = () => {
           itemType={isBangla ? "লোগো" : "Logo"}
           onConfirm={handleDelete}
           translations={{
+            cancel: t.common.cancel,
+            delete: t.common.delete || "Delete",
+            deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
+
+        {/* Bulk Delete Dialog */}
+        <BulkDeleteDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+          selectedCount={selectedIds.size}
+          itemType={isBangla ? "লোগো" : "logos"}
+          onConfirm={handleBulkDelete}
+          translations={{
+            title: t.logos.bulkDeleteTitle,
+            description: t.logos.bulkDeleteDescription,
+            typeToConfirm: isBangla ? "নিশ্চিত করতে টাইপ করুন" : "Type to confirm:",
+            confirmWord: "DELETE",
             cancel: t.common.cancel,
             delete: t.common.delete || "Delete",
             deleting: isBangla ? "মুছে ফেলা হচ্ছে..." : "Deleting...",

@@ -214,6 +214,15 @@ export const adminBn = {
     addSubCategory: "সাব ক্যাটাগরি যোগ করুন",
     expandAll: "সব প্রসারিত করুন",
     collapseAll: "সব সংকুচিত করুন",
+    // Bulk delete
+    bulkDelete: "নির্বাচিত মুছুন",
+    bulkDeleteTitle: "একাধিক ক্যাটাগরি মুছুন",
+    bulkDeleteDescription: "আপনি কি নিশ্চিত যে আপনি {count}টি নির্বাচিত ক্যাটাগরি মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    bulkDeleteSuccess: "{count}টি ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে",
+    bulkDeleteError: "কিছু ক্যাটাগরি মুছতে সমস্যা হয়েছে",
+    selectAll: "সব নির্বাচন করুন",
+    selectedCount: "{count}টি নির্বাচিত",
+    cannotDeleteParentWithSubs: "সাব-ক্যাটাগরি সহ প্যারেন্ট ক্যাটাগরি মোছা যাবে না। প্রথমে সাব-ক্যাটাগরি মুছুন।",
   },
 
   // Orders
@@ -420,6 +429,14 @@ export const adminBn = {
     statusError: "লোগো স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে",
     order: "ক্রম",
     required: "নাম এবং লোগো ছবি আবশ্যক",
+    // Bulk delete
+    bulkDelete: "নির্বাচিত মুছুন",
+    bulkDeleteTitle: "একাধিক লোগো মুছুন",
+    bulkDeleteDescription: "আপনি কি নিশ্চিত যে আপনি {count}টি নির্বাচিত লোগো মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    bulkDeleteSuccess: "{count}টি লোগো সফলভাবে মুছে ফেলা হয়েছে",
+    bulkDeleteError: "কিছু লোগো মুছতে সমস্যা হয়েছে",
+    selectAll: "সব নির্বাচন করুন",
+    selectedCount: "{count}টি নির্বাচিত",
   },
 
   // Testimonials
@@ -455,6 +472,14 @@ export const adminBn = {
     deleteConfirm: "এই প্রশংসাপত্র মুছবেন?",
     statusUpdated: "স্ট্যাটাস আপডেট হয়েছে",
     order: "ক্রম",
+    // Bulk delete
+    bulkDelete: "নির্বাচিত মুছুন",
+    bulkDeleteTitle: "একাধিক প্রশংসাপত্র মুছুন",
+    bulkDeleteDescription: "আপনি কি নিশ্চিত যে আপনি {count}টি নির্বাচিত প্রশংসাপত্র মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    bulkDeleteSuccess: "{count}টি প্রশংসাপত্র সফলভাবে মুছে ফেলা হয়েছে",
+    bulkDeleteError: "কিছু প্রশংসাপত্র মুছতে সমস্যা হয়েছে",
+    selectAll: "সব নির্বাচন করুন",
+    selectedCount: "{count}টি নির্বাচিত",
   },
 
   // UX Insights
