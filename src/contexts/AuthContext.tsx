@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -102,6 +102,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
       },
     });
+    
+    // If signup successful and user confirmed, link any guest orders to this user
+    if (!error && data?.user?.id) {
+      try {
+        await supabase.rpc('link_guest_orders_to_user', {
+          user_email: email,
+          user_uuid: data.user.id
+        });
+      } catch (linkError) {
+        // Non-critical error - log but don't fail signup
+        console.error('Error linking guest orders:', linkError);
+      }
+    }
+    
     return { error };
   };
 

@@ -664,6 +664,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_user: { Args: { _user_id: string }; Returns: boolean }
+      link_guest_orders_to_user: {
+        Args: { user_email: string; user_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role:
