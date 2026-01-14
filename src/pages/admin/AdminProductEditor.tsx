@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -19,16 +18,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface Category {
   id: string;
   name: string;
+  name_bn: string | null;
 }
 
 const AdminProductEditor = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isNew = id === "new";
+  const { t, language } = useAdminLanguage();
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -66,7 +69,7 @@ const AdminProductEditor = () => {
   const fetchCategories = async () => {
     const { data } = await supabase
       .from("categories")
-      .select("id, name")
+      .select("id, name, name_bn")
       .order("name");
     setCategories(data || []);
   };
@@ -104,7 +107,7 @@ const AdminProductEditor = () => {
       });
     } catch (error) {
       console.error("Error fetching product:", error);
-      toast.error("পণ্য লোড করতে সমস্যা হয়েছে");
+      toast.error(t.products.loadError);
       navigate("/admin/products");
     } finally {
       setLoading(false);
@@ -120,8 +123,9 @@ const AdminProductEditor = () => {
   };
 
   const handleSave = async () => {
+    // Validate based on language - English name is always required
     if (!formData.name || !formData.slug || !formData.price) {
-      toast.error("নাম, স্লাগ এবং দাম আবশ্যক");
+      toast.error(t.products.required);
       return;
     }
 
@@ -133,7 +137,7 @@ const AdminProductEditor = () => {
         try {
           specifications = JSON.parse(formData.specifications);
         } catch {
-          toast.error("স্পেসিফিকেশন JSON ফরম্যাটে হতে হবে");
+          toast.error(t.products.specJsonError);
           setSaving(false);
           return;
         }
@@ -168,23 +172,32 @@ const AdminProductEditor = () => {
       if (isNew) {
         const { error } = await supabase.from("products").insert([productData]);
         if (error) throw error;
-        toast.success("পণ্য তৈরি হয়েছে");
+        toast.success(t.products.createSuccess);
       } else {
         const { error } = await supabase
           .from("products")
           .update(productData)
           .eq("id", id);
         if (error) throw error;
-        toast.success("পণ্য আপডেট হয়েছে");
+        toast.success(t.products.updateSuccess);
       }
 
       navigate("/admin/products");
     } catch (error: any) {
       console.error("Error saving product:", error);
-      toast.error(error.message || "সংরক্ষণে সমস্যা হয়েছে");
+      toast.error(error.message || t.products.saveError);
     } finally {
       setSaving(false);
     }
+  };
+
+  // Helper to get text input class based on language
+  const getInputClass = () => cn(language === "bn" && "font-siliguri");
+
+  // Get category display name based on language
+  const getCategoryName = (cat: Category) => {
+    if (language === "bn" && cat.name_bn) return cat.name_bn;
+    return cat.name;
   };
 
   if (loading) {
@@ -197,6 +210,9 @@ const AdminProductEditor = () => {
     );
   }
 
+  // Determine which fields to show based on language
+  const isEnglish = language === "en";
+
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-4xl">
@@ -207,112 +223,121 @@ const AdminProductEditor = () => {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">
-              {isNew ? "নতুন পণ্য" : "পণ্য সম্পাদনা"}
+            <h1 className={cn("text-2xl font-bold", getInputClass())}>
+              {isNew ? t.products.newProduct : t.products.editProduct}
             </h1>
-            <p className="text-muted-foreground">পণ্যের তথ্য পূরণ করুন</p>
+            <p className={cn("text-muted-foreground", getInputClass())}>
+              {t.products.fillProductInfo}
+            </p>
           </div>
         </div>
 
         <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-          {/* Bilingual Name & Description Tabs */}
-          <Tabs defaultValue="english" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="english">English</TabsTrigger>
-              <TabsTrigger value="bangla">বাংলা</TabsTrigger>
-            </TabsList>
+          {/* Language-specific Name & Description Fields */}
+          <div className="space-y-4">
+            {isEnglish ? (
+              <>
+                {/* English Fields */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">{t.products.productName} *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          name: e.target.value,
+                          slug: isNew ? generateSlug(e.target.value) : formData.slug,
+                        });
+                      }}
+                      placeholder={t.products.productNamePlaceholder}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">{t.products.slug} *</Label>
+                    <Input
+                      id="slug"
+                      value={formData.slug}
+                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      placeholder={t.products.slugPlaceholder}
+                    />
+                  </div>
+                </div>
 
-            <TabsContent value="english" className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Product Name (English) *</Label>
+                  <Label htmlFor="short_description">{t.products.shortDescription}</Label>
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        name: e.target.value,
-                        slug: isNew ? generateSlug(e.target.value) : formData.slug,
-                      });
-                    }}
-                    placeholder="e.g., Digital Weighing Scale"
+                    id="short_description"
+                    value={formData.short_description}
+                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                    placeholder={t.products.shortDescriptionPlaceholder}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug *</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    placeholder="e.g., digital-weighing-scale"
+                  <Label htmlFor="description">{t.products.fullDescription}</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
+                    placeholder={t.products.fullDescriptionPlaceholder}
                   />
                 </div>
-              </div>
+              </>
+            ) : (
+              <>
+                {/* Bangla Fields */}
+                <div className="space-y-2">
+                  <Label htmlFor="name_bn" className="font-siliguri">
+                    {t.products.productName}
+                  </Label>
+                  <Input
+                    id="name_bn"
+                    value={formData.name_bn}
+                    onChange={(e) => setFormData({ ...formData, name_bn: e.target.value })}
+                    placeholder={t.products.productNamePlaceholder}
+                    className="font-siliguri"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="short_description">Short Description (English)</Label>
-                <Input
-                  id="short_description"
-                  value={formData.short_description}
-                  onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                  placeholder="Brief product description"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="short_description_bn" className="font-siliguri">
+                    {t.products.shortDescription}
+                  </Label>
+                  <Input
+                    id="short_description_bn"
+                    value={formData.short_description_bn}
+                    onChange={(e) => setFormData({ ...formData, short_description_bn: e.target.value })}
+                    placeholder={t.products.shortDescriptionPlaceholder}
+                    className="font-siliguri"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Full Description (English)</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                  placeholder="Detailed product description"
-                />
-              </div>
-            </TabsContent>
+                <div className="space-y-2">
+                  <Label htmlFor="description_bn" className="font-siliguri">
+                    {t.products.fullDescription}
+                  </Label>
+                  <Textarea
+                    id="description_bn"
+                    value={formData.description_bn}
+                    onChange={(e) => setFormData({ ...formData, description_bn: e.target.value })}
+                    rows={4}
+                    placeholder={t.products.fullDescriptionPlaceholder}
+                    className="font-siliguri"
+                  />
+                </div>
+              </>
+            )}
+          </div>
 
-            <TabsContent value="bangla" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name_bn">পণ্যের নাম (বাংলা)</Label>
-                <Input
-                  id="name_bn"
-                  value={formData.name_bn}
-                  onChange={(e) => setFormData({ ...formData, name_bn: e.target.value })}
-                  placeholder="যেমন: ডিজিটাল ওজন মাপার যন্ত্র"
-                  className="font-bengali"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="short_description_bn">সংক্ষিপ্ত বিবরণ (বাংলা)</Label>
-                <Input
-                  id="short_description_bn"
-                  value={formData.short_description_bn}
-                  onChange={(e) => setFormData({ ...formData, short_description_bn: e.target.value })}
-                  placeholder="পণ্যের সংক্ষিপ্ত বিবরণ"
-                  className="font-bengali"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_bn">বিস্তারিত বিবরণ (বাংলা)</Label>
-                <Textarea
-                  id="description_bn"
-                  value={formData.description_bn}
-                  onChange={(e) => setFormData({ ...formData, description_bn: e.target.value })}
-                  rows={4}
-                  placeholder="পণ্যের বিস্তারিত বিবরণ লিখুন"
-                  className="font-bengali"
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Pricing */}
+          {/* Pricing - Always visible */}
           <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">দাম (৳) *</Label>
+              <Label htmlFor="price" className={getInputClass()}>
+                {t.products.price} (৳) *
+              </Label>
               <Input
                 id="price"
                 type="number"
@@ -321,7 +346,9 @@ const AdminProductEditor = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="compare_price">তুলনামূলক দাম (৳)</Label>
+              <Label htmlFor="compare_price" className={getInputClass()}>
+                {t.products.comparePrice} (৳)
+              </Label>
               <Input
                 id="compare_price"
                 type="number"
@@ -330,7 +357,9 @@ const AdminProductEditor = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sku">SKU</Label>
+              <Label htmlFor="sku" className={getInputClass()}>
+                {t.products.sku}
+              </Label>
               <Input
                 id="sku"
                 value={formData.sku}
@@ -341,18 +370,20 @@ const AdminProductEditor = () => {
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category">ক্যাটাগরি</Label>
+            <Label htmlFor="category" className={getInputClass()}>
+              {t.products.category}
+            </Label>
             <Select
               value={formData.category_id}
               onValueChange={(value) => setFormData({ ...formData, category_id: value })}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+              <SelectTrigger className={getInputClass()}>
+                <SelectValue placeholder={t.products.selectCategory} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                  <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
+                    {getCategoryName(cat)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -361,7 +392,7 @@ const AdminProductEditor = () => {
 
           {/* Product Images Gallery */}
           <div className="space-y-2">
-            <Label>পণ্যের ছবি গ্যালারি</Label>
+            <Label className={getInputClass()}>{t.products.productGallery}</Label>
             <MultiImageUpload
               value={formData.images}
               onChange={(urls) => {
@@ -377,9 +408,9 @@ const AdminProductEditor = () => {
 
           {/* Main Product Image (fallback/override) */}
           <div className="space-y-2">
-            <Label>প্রধান ছবি (ওভাররাইড)</Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              গ্যালারির প্রথম ছবি স্বয়ংক্রিয়ভাবে প্রধান ছবি হিসেবে ব্যবহৃত হবে। আলাদাভাবে সেট করতে চাইলে নিচে দিন:
+            <Label className={getInputClass()}>{t.products.mainImage}</Label>
+            <p className={cn("text-xs text-muted-foreground mb-2", getInputClass())}>
+              {t.products.mainImageHint}
             </p>
             <ImageUpload
               value={formData.image_url}
@@ -388,7 +419,7 @@ const AdminProductEditor = () => {
             <Input
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              placeholder="অথবা সরাসরি URL দিন: https://..."
+              placeholder={t.products.orEnterUrl}
               className="mt-2"
             />
           </div>
@@ -396,7 +427,9 @@ const AdminProductEditor = () => {
           {/* Stock */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="stock_quantity">স্টক পরিমাণ</Label>
+              <Label htmlFor="stock_quantity" className={getInputClass()}>
+                {t.products.stockQuantity}
+              </Label>
               <Input
                 id="stock_quantity"
                 type="number"
@@ -414,7 +447,9 @@ const AdminProductEditor = () => {
                 checked={formData.in_stock}
                 onCheckedChange={(checked) => setFormData({ ...formData, in_stock: checked })}
               />
-              <Label htmlFor="in_stock">স্টকে আছে</Label>
+              <Label htmlFor="in_stock" className={getInputClass()}>
+                {t.products.inStock}
+              </Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch
@@ -422,7 +457,9 @@ const AdminProductEditor = () => {
                 checked={formData.is_featured}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
               />
-              <Label htmlFor="is_featured">ফিচার্ড</Label>
+              <Label htmlFor="is_featured" className={getInputClass()}>
+                {t.products.featured}
+              </Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch
@@ -430,44 +467,55 @@ const AdminProductEditor = () => {
                 checked={formData.is_active}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
               />
-              <Label htmlFor="is_active">সক্রিয়</Label>
+              <Label htmlFor="is_active" className={getInputClass()}>
+                {t.products.active}
+              </Label>
             </div>
           </div>
 
           {/* Specifications */}
           <div className="space-y-2">
-            <Label htmlFor="specifications">স্পেসিফিকেশন (JSON ফরম্যাট)</Label>
+            <Label htmlFor="specifications" className={getInputClass()}>
+              {t.products.specifications} ({t.products.specificationsHint})
+            </Label>
             <Textarea
               id="specifications"
               value={formData.specifications}
               onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
               rows={5}
-              placeholder='{"Capacity": "500g", "Accuracy": "0.01g"}'
+              placeholder={t.products.specificationsPlaceholder}
               className="font-mono text-sm"
             />
           </div>
 
           {/* Features */}
           <div className="space-y-2">
-            <Label htmlFor="features">ফিচার (প্রতি লাইনে একটি)</Label>
+            <Label htmlFor="features" className={getInputClass()}>
+              {t.products.features} ({t.products.featuresHint})
+            </Label>
             <Textarea
               id="features"
               value={formData.features}
               onChange={(e) => setFormData({ ...formData, features: e.target.value })}
               rows={4}
-              placeholder="High precision measurement&#10;Easy to use&#10;Durable construction"
+              placeholder={t.products.featuresPlaceholder}
+              className={getInputClass()}
             />
           </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-border">
-            <Button variant="outline" onClick={() => navigate("/admin/products")}>
-              বাতিল
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/admin/products")}
+              className={getInputClass()}
+            >
+              {t.common.cancel}
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving} className={getInputClass()}>
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Save className="h-4 w-4 mr-2" />
-              সংরক্ষণ করুন
+              {t.common.save}
             </Button>
           </div>
         </div>
