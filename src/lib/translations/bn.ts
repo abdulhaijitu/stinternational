@@ -279,6 +279,13 @@ export const bn = {
     guestCheckout: "গেস্ট হিসেবে চালিয়ে যান",
     guestCheckoutNote: "ইমেইলের মাধ্যমে আপনার অর্ডার ট্র্যাক করতে পারবেন",
     or: "অথবা",
+    // Create Account Prompt (Guest Checkout)
+    createAccountPromptTitle: "আপনার অর্ডার ইতিহাস সংরক্ষণ করুন",
+    createAccountPromptMessage: "এই অর্ডার ট্র্যাক করতে এবং যেকোনো সময় আপনার অর্ডার ইতিহাস দেখতে একটি বিনামূল্যের অ্যাকাউন্ট তৈরি করুন।",
+    benefitTrackOrders: "রিয়েল-টাইমে অর্ডার স্ট্যাটাস ট্র্যাক করুন",
+    benefitFasterCheckout: "পরবর্তী বার দ্রুত চেকআউট",
+    benefitOrderHistory: "সম্পূর্ণ অর্ডার ইতিহাস দেখুন",
+    createAccountButton: "বিনামূল্যে অ্যাকাউন্ট তৈরি করুন",
   },
 
   // Request Quote (RFQ)
