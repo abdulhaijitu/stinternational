@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, FolderOpen } from "lucide-react";
 import { useState } from "react";
-import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
+import { useCategoryHierarchy } from "@/hooks/useCategories";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -18,16 +18,16 @@ interface MobileCategoryDrawerProps {
 }
 
 const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) => {
-  const [openGroups, setOpenGroups] = useState<string[]>([]);
-  const { groups, isLoading } = useActiveCategoriesByGroup();
+  const [openParents, setOpenParents] = useState<string[]>([]);
+  const { parentCategories, isLoading } = useCategoryHierarchy();
   const { getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
 
-  const toggleGroup = (slug: string) => {
-    setOpenGroups(prev => 
-      prev.includes(slug) 
-        ? prev.filter(s => s !== slug)
-        : [...prev, slug]
+  const toggleParent = (id: string) => {
+    setOpenParents(prev => 
+      prev.includes(id) 
+        ? prev.filter(s => s !== id)
+        : [...prev, id]
     );
   };
 
@@ -43,7 +43,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
 
   return (
     <div className="py-2">
-      {/* All Products Link */}
+      {/* All Categories Link */}
       <Link 
         to="/categories" 
         onClick={onCategoryClick}
@@ -55,14 +55,35 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
 
       <ScrollArea className="h-[calc(100vh-280px)]">
         <div className="space-y-1 px-2">
-          {groups.map((group) => {
-            const isOpen = openGroups.includes(group.slug);
+          {parentCategories?.map((parent) => {
+            const isOpen = openParents.includes(parent.id);
+            const hasChildren = parent.subCategories && parent.subCategories.length > 0;
+            const ParentIcon = getCategoryIcon(parent.icon_name);
+            const { name: parentName } = getCategoryFields(parent);
+            
+            // If parent has no sub-categories, just show as link
+            if (!hasChildren) {
+              return (
+                <Link
+                  key={parent.id}
+                  to={`/category/${parent.slug}`}
+                  onClick={onCategoryClick}
+                  className={cn(
+                    "w-full flex items-center gap-3 py-3.5 px-4 rounded-lg transition-all duration-150",
+                    "hover:bg-muted/40 text-foreground"
+                  )}
+                >
+                  <ParentIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm font-medium">{parentName}</span>
+                </Link>
+              );
+            }
             
             return (
               <Collapsible
-                key={group.slug}
+                key={parent.id}
                 open={isOpen}
-                onOpenChange={() => toggleGroup(group.slug)}
+                onOpenChange={() => toggleParent(parent.id)}
               >
                 <CollapsibleTrigger className={cn(
                   "w-full flex items-center justify-between py-3.5 px-4 rounded-lg transition-all duration-150",
@@ -70,7 +91,10 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                     ? "bg-muted/70 text-foreground" 
                     : "hover:bg-muted/40 text-foreground"
                 )}>
-                  <span className="text-sm font-medium">{group.name}</span>
+                  <div className="flex items-center gap-3">
+                    <ParentIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="text-sm font-medium">{parentName}</span>
+                  </div>
                   <ChevronDown className={cn(
                     "h-4 w-4 text-muted-foreground transition-transform duration-200",
                     isOpen && "rotate-180"
@@ -79,21 +103,35 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                 
                 <CollapsibleContent className="animate-accordion-down">
                   <div className="py-1 pl-4 pr-2 space-y-0.5">
-                    {group.categories.map((category) => {
-                      const IconComponent = getCategoryIcon(category.icon_name);
-                      const { name: categoryName } = getCategoryFields(category);
+                    {/* View all in parent category link */}
+                    <Link
+                      to={`/category/${parent.slug}`}
+                      onClick={onCategoryClick}
+                      className={cn(
+                        "flex items-center gap-3 py-3 px-3 rounded-md text-sm transition-colors duration-150",
+                        "text-primary hover:text-primary hover:bg-primary/5 font-medium"
+                      )}
+                    >
+                      <FolderOpen className="h-4 w-4 shrink-0" />
+                      <span>{t.common.viewAll} {parentName}</span>
+                    </Link>
+                    
+                    {/* Sub-categories */}
+                    {parent.subCategories?.map((subCategory) => {
+                      const SubIcon = getCategoryIcon(subCategory.icon_name);
+                      const { name: subName } = getCategoryFields(subCategory);
                       return (
                         <Link
-                          key={category.id}
-                          to={`/category/${category.slug}`}
+                          key={subCategory.id}
+                          to={`/category/${parent.slug}/${subCategory.slug}`}
                           onClick={onCategoryClick}
                           className={cn(
                             "flex items-center gap-3 py-3 px-3 rounded-md text-sm transition-colors duration-150",
                             "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           )}
                         >
-                          <IconComponent className="h-4 w-4 shrink-0" />
-                          <span>{categoryName}</span>
+                          <SubIcon className="h-4 w-4 shrink-0" />
+                          <span>{subName}</span>
                         </Link>
                       );
                     })}

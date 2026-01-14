@@ -30,7 +30,7 @@ export interface DBProduct {
   stock_quantity: number;
   is_featured: boolean;
   is_active: boolean;
-  category?: { name: string; slug: string } | null;
+  category?: { id: string; name: string; name_bn?: string; slug: string; description?: string; description_bn?: string; parent_id: string | null } | null;
 }
 
 export const useCategories = () => {
@@ -79,7 +79,7 @@ export const useFeaturedProducts = () => {
         .from("products")
         .select(`
           *,
-          category:categories(name, slug)
+          category:categories(id, name, slug, parent_id)
         `)
         .eq("is_featured", true)
         .eq("is_active", true)
@@ -108,7 +108,7 @@ export const useProductsByCategory = (categorySlug: string) => {
         .from("products")
         .select(`
           *,
-          category:categories(name, slug)
+          category:categories(id, name, slug, parent_id)
         `)
         .eq("category_id", category.id)
         .eq("is_active", true);
@@ -128,7 +128,7 @@ export const useProduct = (slug: string) => {
         .from("products")
         .select(`
           *,
-          category:categories(name, slug)
+          category:categories(id, name, slug, parent_id)
         `)
         .eq("slug", slug)
         .eq("is_active", true)
@@ -149,7 +149,7 @@ export const useAllProducts = () => {
         .from("products")
         .select(`
           *,
-          category:categories(name, slug)
+          category:categories(id, name, slug, parent_id)
         `)
         .eq("is_active", true)
         .order("created_at", { ascending: false });

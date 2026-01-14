@@ -1,6 +1,5 @@
 import { useParams, Link } from "react-router-dom";
 import { 
-  ChevronRight, 
   ShoppingCart, 
   Truck, 
   Shield, 
@@ -9,7 +8,8 @@ import {
   Plus, 
   Check, 
   Package,
-  FileText
+  FileText,
+  Home
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
@@ -29,6 +29,15 @@ import { toast } from "sonner";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useActiveCategories } from "@/hooks/useCategories";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // Product Page Skeleton
 const ProductPageSkeleton = () => (
@@ -73,10 +82,17 @@ const ProductPage = () => {
   const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
   const { getProductFields, getCategoryFields } = useBilingualContent();
   const { t, language } = useLanguage();
+  const { data: allCategories } = useActiveCategories();
 
   // Get bilingual fields
   const productFields = product ? getProductFields(product) : null;
   const categoryFields = product?.category ? getCategoryFields(product.category) : null;
+  
+  // Find parent category if current category is a sub-category
+  const parentCategory = product?.category?.parent_id 
+    ? allCategories?.find(c => c.id === product.category?.parent_id) 
+    : null;
+  const parentCategoryFields = parentCategory ? getCategoryFields(parentCategory) : null;
 
   // Track product view
   useEffect(() => {
@@ -143,33 +159,71 @@ const ProductPage = () => {
 
   return (
     <Layout>
-      {/* Breadcrumb */}
+      {/* Breadcrumb with full hierarchy */}
       <div className="bg-muted/30 border-b border-border">
         <div className="container-premium py-3">
-          <nav className="flex items-center gap-1.5 text-sm flex-wrap">
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t.nav.home}
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t.nav.products}
-            </Link>
-            {categoryFields && product.category && (
-              <>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                <Link 
-                  to={`/category/${product.category.slug}`} 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {categoryFields.name}
-                </Link>
-              </>
-            )}
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-foreground font-medium truncate max-w-[200px]">
-              {productFields.name}
-            </span>
-          </nav>
+          <Breadcrumb>
+            <BreadcrumbList>
+              {/* Home */}
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/" className="flex items-center gap-1">
+                    <Home className="h-3.5 w-3.5" />
+                    <span className="sr-only md:not-sr-only">{t.nav.home}</span>
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+
+              {/* Products */}
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/products">{t.nav.products}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              {/* Parent Category (if exists) */}
+              {parentCategory && parentCategoryFields && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to={`/category/${parentCategory.slug}`}>
+                        {parentCategoryFields.name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+
+              {/* Current Category (Sub-Category or Parent if no parent) */}
+              {categoryFields && product.category && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link 
+                        to={parentCategory 
+                          ? `/category/${parentCategory.slug}/${product.category.slug}` 
+                          : `/category/${product.category.slug}`
+                        }
+                      >
+                        {categoryFields.name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+
+              {/* Product Name */}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="truncate max-w-[200px]">
+                  {productFields.name}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
 
