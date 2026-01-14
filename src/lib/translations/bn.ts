@@ -256,6 +256,26 @@ export const bn = {
     notesPlaceholder: "বিশেষ কোনো নির্দেশনা থাকলে লিখুন...",
     delivery: "ডেলিভারি",
     processing: "প্রক্রিয়াকরণ হচ্ছে...",
+    
+    // Step-based checkout
+    steps: {
+      cart: "কার্ট",
+      login: "অ্যাকাউন্ট",
+      shipping: "শিপিং",
+      payment: "পেমেন্ট",
+      confirmation: "নিশ্চিত",
+    },
+    loginToComplete: "আপনার অর্ডার সম্পন্ন করতে লগইন করুন",
+    loginToTrack: "অর্ডার ট্র্যাক করতে এবং পুনরায় অর্ডার করতে লগইন করুন",
+    b2bPurchase: "B2B / প্রাতিষ্ঠানিক ক্রয়?",
+    b2bDescription: "বাল্ক অর্ডার বা প্রাতিষ্ঠানিক ক্রয়ের জন্য কোটেশন অনুরোধ করুন। বিশেষ মূল্য এবং ক্রেডিট সুবিধা পান।",
+    requestQuote: "কোটেশন অনুরোধ করুন",
+    accountBenefits: "অ্যাকাউন্টের সুবিধা",
+    trackOrders: "অর্ডার ট্র্যাক করুন",
+    fasterCheckout: "দ্রুত চেকআউট",
+    viewOrderHistory: "অর্ডার ইতিহাস দেখুন",
+    saveWishlist: "পছন্দের তালিকা সংরক্ষণ করুন",
+    secureCheckoutLabel: "নিরাপদ চেকআউট",
   },
 
   // Request Quote (RFQ)

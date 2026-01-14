@@ -256,6 +256,26 @@ export const en = {
     notesPlaceholder: "Any special instructions...",
     delivery: "Delivery",
     processing: "Processing...",
+    
+    // Step-based checkout
+    steps: {
+      cart: "Cart",
+      login: "Account",
+      shipping: "Shipping",
+      payment: "Payment",
+      confirmation: "Confirm",
+    },
+    loginToComplete: "Sign in to complete your order",
+    loginToTrack: "Login to track your orders and reorder easily",
+    b2bPurchase: "B2B / Institutional Purchase?",
+    b2bDescription: "Request a quote for bulk orders or institutional purchases. Get special pricing and credit terms.",
+    requestQuote: "Request a Quote",
+    accountBenefits: "Account Benefits",
+    trackOrders: "Track your orders",
+    fasterCheckout: "Faster checkout",
+    viewOrderHistory: "View order history",
+    saveWishlist: "Save wishlist items",
+    secureCheckoutLabel: "Secure Checkout",
   },
 
   // Request Quote (RFQ)
