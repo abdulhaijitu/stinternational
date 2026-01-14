@@ -3,8 +3,11 @@ import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 const ProductExport = () => {
+  const { t, language } = useAdminLanguage();
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
@@ -25,7 +28,7 @@ const ProductExport = () => {
       if (error) throw error;
 
       if (!products || products.length === 0) {
-        toast.error("এক্সপোর্ট করার মতো কোনো পণ্য নেই");
+        toast.error(t.productExport?.noProducts || "No products to export");
         return;
       }
 
@@ -88,10 +91,11 @@ const ProductExport = () => {
       a.click();
       URL.revokeObjectURL(url);
 
-      toast.success(`${products.length}টি পণ্য এক্সপোর্ট হয়েছে`);
+      const successMsg = (t.productExport?.success || "{count} products exported").replace("{count}", String(products.length));
+      toast.success(successMsg);
     } catch (error: any) {
       console.error("Export error:", error);
-      toast.error("এক্সপোর্ট করতে সমস্যা হয়েছে");
+      toast.error(t.productExport?.error || "Failed to export");
     } finally {
       setExporting(false);
     }
@@ -107,13 +111,21 @@ const ProductExport = () => {
   };
 
   return (
-    <Button variant="outline" onClick={handleExport} disabled={exporting}>
+    <Button 
+      variant="outline" 
+      onClick={handleExport} 
+      disabled={exporting}
+      className={cn(language === "bn" && "font-siliguri")}
+    >
       {exporting ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <Download className="h-4 w-4" />
       )}
-      এক্সপোর্ট
+      {exporting 
+        ? (t.productExport?.exporting || "Exporting...") 
+        : (t.productExport?.export || "Export")
+      }
     </Button>
   );
 };

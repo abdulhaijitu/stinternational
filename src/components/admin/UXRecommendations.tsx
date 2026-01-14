@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 
 interface RecommendationData {
   summary?: {
@@ -72,6 +73,26 @@ interface UXRecommendationsProps {
 }
 
 const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) => {
+  const { t, language } = useAdminLanguage();
+  const rec = t.uxRecommendations;
+
+  // Helper to get category label
+  const getCategoryLabel = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'Data': rec?.categoryData || 'Data',
+      'Hero Slider': rec?.categoryHeroSlider || 'Hero Slider',
+      'Navigation': rec?.categoryNavigation || 'Navigation',
+      'Conversion': rec?.categoryConversion || 'Conversion',
+      'Audience': rec?.categoryAudience || 'Audience',
+      'Device': rec?.categoryDevice || 'Device',
+      'Localization': rec?.categoryLocalization || 'Localization',
+      'UX Preference': rec?.categoryUxPreference || 'UX Preference',
+      'Products': rec?.categoryProducts || 'Products',
+      'Overall': rec?.categoryOverall || 'Overall',
+    };
+    return categoryMap[category] || category;
+  };
+
   // Generate AI-style recommendations based on telemetry data
   const recommendations = useMemo((): UXRecommendation[] => {
     const results: UXRecommendation[] = [];
@@ -81,8 +102,8 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
         id: 'no-data',
         type: 'insight',
         category: 'Data',
-        title: 'Not enough data yet',
-        description: 'Continue collecting user interactions to generate meaningful insights.',
+        title: rec?.noDataTitle || 'Not enough data yet',
+        description: rec?.noDataDescription || 'Continue collecting user interactions to generate meaningful insights.',
       }];
     }
 
@@ -99,14 +120,15 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
       });
 
       if (lowPerformingSlides.length > 0) {
+        const slidesStr = lowPerformingSlides.map(s => s.slide + 1).join(', ');
         results.push({
           id: 'hero-low-engagement',
           type: 'warning',
           category: 'Hero Slider',
-          title: 'Low engagement on some slides',
-          description: `Slide ${lowPerformingSlides.map(s => s.slide + 1).join(', ')} has significantly lower click rates than average. Consider updating the CTA or visual content.`,
-          metric: `${(avgClickRate * 100).toFixed(1)}% avg CTR`,
-          action: 'Review slide content and CTAs',
+          title: rec?.heroLowEngagementTitle || 'Low engagement on some slides',
+          description: (rec?.heroLowEngagementDesc || 'Slide {slides} has significantly lower click rates than average. Consider updating the CTA or visual content.').replace('{slides}', slidesStr),
+          metric: (rec?.avgCtr || '{rate}% avg CTR').replace('{rate}', (avgClickRate * 100).toFixed(1)),
+          action: rec?.heroLowEngagementAction || 'Review slide content and CTAs',
         });
       }
 
@@ -115,9 +137,9 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
           id: 'hero-no-clicks',
           type: 'warning',
           category: 'Hero Slider',
-          title: 'No CTA clicks detected',
-          description: 'Users are viewing the hero slider but not clicking any CTAs. The call-to-action may need to be more compelling or visible.',
-          action: 'Strengthen CTA messaging',
+          title: rec?.heroNoClicksTitle || 'No CTA clicks detected',
+          description: rec?.heroNoClicksDesc || 'Users are viewing the hero slider but not clicking any CTAs. The call-to-action may need to be more compelling or visible.',
+          action: rec?.heroNoClicksAction || 'Strengthen CTA messaging',
         });
       }
     }
@@ -133,10 +155,10 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
           id: 'category-hover-drop',
           type: 'opportunity',
           category: 'Navigation',
-          title: 'Category interest not converting',
-          description: `"${highHoverLowClick[0].name}" receives high hover attention but few clicks. Users may be curious but not finding what they expect.`,
-          metric: `${highHoverLowClick[0].hovers} hovers, ${highHoverLowClick[0].clicks} clicks`,
-          action: 'Improve category previews',
+          title: rec?.categoryHoverDropTitle || 'Category interest not converting',
+          description: (rec?.categoryHoverDropDesc || '"{name}" receives high hover attention but few clicks. Users may be curious but not finding what they expect.').replace('{name}', highHoverLowClick[0].name),
+          metric: (rec?.hoversClicks || '{hovers} hovers, {clicks} clicks').replace('{hovers}', String(highHoverLowClick[0].hovers)).replace('{clicks}', String(highHoverLowClick[0].clicks)),
+          action: rec?.categoryHoverDropAction || 'Improve category previews',
         });
       }
     }
@@ -153,10 +175,10 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'cart-abandonment',
             type: 'warning',
             category: 'Conversion',
-            title: 'High cart abandonment detected',
-            description: `Only ${(cartToCheckoutRate * 100).toFixed(0)}% of add-to-cart events lead to checkout. Users may be abandoning carts due to pricing, shipping, or friction.`,
-            metric: `${addToCart} carts → ${checkoutStart} checkouts`,
-            action: 'Simplify checkout flow',
+            title: rec?.cartAbandonmentTitle || 'High cart abandonment detected',
+            description: (rec?.cartAbandonmentDesc || 'Only {rate}% of add-to-cart events lead to checkout. Users may be abandoning carts due to pricing, shipping, or friction.').replace('{rate}', (cartToCheckoutRate * 100).toFixed(0)),
+            metric: (rec?.cartsToCheckouts || '{carts} carts → {checkouts} checkouts').replace('{carts}', String(addToCart)).replace('{checkouts}', String(checkoutStart)),
+            action: rec?.cartAbandonmentAction || 'Simplify checkout flow',
           });
         }
       }
@@ -169,10 +191,10 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'checkout-dropout',
             type: 'warning',
             category: 'Conversion',
-            title: 'Checkout completion is low',
-            description: `Only ${(checkoutCompletionRate * 100).toFixed(0)}% of started checkouts are completed. Payment options or form complexity may be causing drop-offs.`,
-            metric: `${checkoutStart} starts → ${orderComplete} orders`,
-            action: 'Review checkout UX',
+            title: rec?.checkoutDropoutTitle || 'Checkout completion is low',
+            description: (rec?.checkoutDropoutDesc || 'Only {rate}% of started checkouts are completed. Payment options or form complexity may be causing drop-offs.').replace('{rate}', (checkoutCompletionRate * 100).toFixed(0)),
+            metric: (rec?.startsToOrders || '{starts} starts → {orders} orders').replace('{starts}', String(checkoutStart)).replace('{orders}', String(orderComplete)),
+            action: rec?.checkoutDropoutAction || 'Review checkout UX',
           });
         }
       }
@@ -186,18 +208,18 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'b2b-dominant',
             type: 'insight',
             category: 'Audience',
-            title: 'B2B traffic is dominant',
-            description: `${(b2bRatio * 100).toFixed(0)}% of conversions are RFQ submissions. Your audience prefers bulk/institutional purchasing over direct checkout.`,
-            metric: `${rfqSubmit} RFQs vs ${orderComplete} orders`,
+            title: rec?.b2bDominantTitle || 'B2B traffic is dominant',
+            description: (rec?.b2bDominantDesc || '{ratio}% of conversions are RFQ submissions. Your audience prefers bulk/institutional purchasing over direct checkout.').replace('{ratio}', (b2bRatio * 100).toFixed(0)),
+            metric: (rec?.rfqsVsOrders || '{rfqs} RFQs vs {orders} orders').replace('{rfqs}', String(rfqSubmit)).replace('{orders}', String(orderComplete)),
           });
         } else if (b2bRatio < 0.2 && rfqSubmit + orderComplete > 5) {
           results.push({
             id: 'b2c-dominant',
             type: 'insight',
             category: 'Audience',
-            title: 'B2C traffic is dominant',
-            description: `Direct purchases dominate your conversions. Consider optimizing the B2C checkout experience and promoting the RFQ option for larger orders.`,
-            metric: `${orderComplete} orders vs ${rfqSubmit} RFQs`,
+            title: rec?.b2cDominantTitle || 'B2C traffic is dominant',
+            description: rec?.b2cDominantDesc || 'Direct purchases dominate your conversions. Consider optimizing the B2C checkout experience and promoting the RFQ option for larger orders.',
+            metric: (rec?.ordersVsRfqs || '{orders} orders vs {rfqs} RFQs').replace('{orders}', String(orderComplete)).replace('{rfqs}', String(rfqSubmit)),
           });
         }
       }
@@ -215,9 +237,9 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'mobile-heavy',
             type: 'insight',
             category: 'Device',
-            title: 'Mobile traffic is significant',
-            description: `${(mobileRatio * 100).toFixed(0)}% of sessions are from mobile devices. Ensure mobile UX is optimized and touch targets are accessible.`,
-            metric: `${mobile} mobile sessions`,
+            title: rec?.mobileHeavyTitle || 'Mobile traffic is significant',
+            description: (rec?.mobileHeavyDesc || '{ratio}% of sessions are from mobile devices. Ensure mobile UX is optimized and touch targets are accessible.').replace('{ratio}', (mobileRatio * 100).toFixed(0)),
+            metric: (rec?.mobileSessions || '{count} mobile sessions').replace('{count}', String(mobile)),
           });
         }
       }
@@ -233,9 +255,9 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'bangla-preferred',
             type: 'insight',
             category: 'Localization',
-            title: 'Bangla language is preferred',
-            description: 'Users are switching to Bangla more frequently. Ensure all Bangla translations are complete and natural.',
-            metric: `${bn} switches to Bangla`,
+            title: rec?.banglaPreferredTitle || 'Bangla language is preferred',
+            description: rec?.banglaPreferredDesc || 'Users are switching to Bangla more frequently. Ensure all Bangla translations are complete and natural.',
+            metric: (rec?.switchesToBangla || '{count} switches to Bangla').replace('{count}', String(bn)),
           });
         }
       }
@@ -248,9 +270,9 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
             id: 'compact-preferred',
             type: 'success',
             category: 'UX Preference',
-            title: 'Users prefer compact view',
-            description: 'Desktop users favor the compact product grid. This suggests power users who want to browse efficiently.',
-            metric: `${compact} compact vs ${comfortable} comfortable`,
+            title: rec?.compactPreferredTitle || 'Users prefer compact view',
+            description: rec?.compactPreferredDesc || 'Desktop users favor the compact product grid. This suggests power users who want to browse efficiently.',
+            metric: (rec?.compactVsComfortable || '{compact} compact vs {comfortable} comfortable').replace('{compact}', String(compact)).replace('{comfortable}', String(comfortable)),
           });
         }
       }
@@ -264,9 +286,11 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
           id: 'product-interest-no-conversion',
           type: 'opportunity',
           category: 'Products',
-          title: 'Popular products not converting',
-          description: `"${viewsWithNoCart[0].name}" has ${viewsWithNoCart[0].views} views but no cart additions. Check pricing, stock status, or product information quality.`,
-          action: 'Review product page',
+          title: rec?.productInterestNoConversionTitle || 'Popular products not converting',
+          description: (rec?.productInterestNoConversionDesc || '"{name}" has {views} views but no cart additions. Check pricing, stock status, or product information quality.')
+            .replace('{name}', viewsWithNoCart[0].name)
+            .replace('{views}', String(viewsWithNoCart[0].views)),
+          action: rec?.productInterestNoConversionAction || 'Review product page',
         });
       }
     }
@@ -277,13 +301,13 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
         id: 'metrics-healthy',
         type: 'success',
         category: 'Overall',
-        title: 'Metrics are looking healthy',
-        description: 'No significant UX issues detected. Continue monitoring for trends and opportunities.',
+        title: rec?.metricsHealthyTitle || 'Metrics are looking healthy',
+        description: rec?.metricsHealthyDescription || 'No significant UX issues detected. Continue monitoring for trends and opportunities.',
       });
     }
 
     return results;
-  }, [data]);
+  }, [data, rec]);
 
   const getTypeIcon = (type: UXRecommendation['type']) => {
     switch (type) {
@@ -296,22 +320,22 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
 
   const getTypeBadge = (type: UXRecommendation['type']) => {
     switch (type) {
-      case 'warning': return { variant: 'destructive' as const, label: 'Issue' };
-      case 'opportunity': return { variant: 'default' as const, label: 'Opportunity' };
-      case 'success': return { variant: 'secondary' as const, label: 'Positive' };
-      default: return { variant: 'outline' as const, label: 'Insight' };
+      case 'warning': return { variant: 'destructive' as const, label: rec?.badgeIssue || 'Issue' };
+      case 'opportunity': return { variant: 'default' as const, label: rec?.badgeOpportunity || 'Opportunity' };
+      case 'success': return { variant: 'secondary' as const, label: rec?.badgePositive || 'Positive' };
+      default: return { variant: 'outline' as const, label: rec?.badgeInsight || 'Insight' };
     }
   };
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className={cn(language === "bn" && "font-siliguri")}>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Lightbulb className="h-4 w-4" />
-            AI Recommendations
+            {rec?.title || "AI Recommendations"}
           </CardTitle>
-          <CardDescription>Analyzing your UX data...</CardDescription>
+          <CardDescription>{rec?.analyzing || "Analyzing your UX data..."}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -325,74 +349,74 @@ const UXRecommendations = ({ data, isLoading = false }: UXRecommendationsProps) 
   }
 
   return (
-    <Card>
+    <Card className={cn(language === "bn" && "font-siliguri")}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Lightbulb className="h-4 w-4 text-amber-500" />
-          AI-Powered UX Insights
+          {rec?.title || "AI-Powered UX Insights"}
         </CardTitle>
         <CardDescription>
-          {recommendations.length} recommendations based on your telemetry data
+          {(rec?.recommendationsCount || "{count} recommendations based on your telemetry data").replace('{count}', String(recommendations.length))}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {recommendations.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Collecting more data to generate insights...
+            {rec?.collecting || "Collecting more data to generate insights..."}
           </p>
         ) : (
           <div className="space-y-3">
-            {recommendations.map((rec) => {
-              const Icon = getTypeIcon(rec.type);
-              const badge = getTypeBadge(rec.type);
+            {recommendations.map((item) => {
+              const Icon = getTypeIcon(item.type);
+              const badge = getTypeBadge(item.type);
               
               return (
                 <div
-                  key={rec.id}
+                  key={item.id}
                   className={cn(
                     "border rounded-lg p-4 transition-colors",
-                    rec.type === 'warning' && "border-destructive/30 bg-destructive/5",
-                    rec.type === 'opportunity' && "border-primary/30 bg-primary/5",
-                    rec.type === 'success' && "border-green-500/30 bg-green-500/5",
-                    rec.type === 'insight' && "border-border bg-muted/30"
+                    item.type === 'warning' && "border-destructive/30 bg-destructive/5",
+                    item.type === 'opportunity' && "border-primary/30 bg-primary/5",
+                    item.type === 'success' && "border-green-500/30 bg-green-500/5",
+                    item.type === 'insight' && "border-border bg-muted/30"
                   )}
                 >
                   <div className="flex items-start gap-3">
                     <div className={cn(
                       "p-1.5 rounded-md shrink-0",
-                      rec.type === 'warning' && "bg-destructive/10 text-destructive",
-                      rec.type === 'opportunity' && "bg-primary/10 text-primary",
-                      rec.type === 'success' && "bg-green-500/10 text-green-600",
-                      rec.type === 'insight' && "bg-muted text-muted-foreground"
+                      item.type === 'warning' && "bg-destructive/10 text-destructive",
+                      item.type === 'opportunity' && "bg-primary/10 text-primary",
+                      item.type === 'success' && "bg-green-500/10 text-green-600",
+                      item.type === 'insight' && "bg-muted text-muted-foreground"
                     )}>
                       <Icon className="h-4 w-4" />
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-medium text-sm">{rec.title}</span>
+                        <span className="font-medium text-sm">{item.title}</span>
                         <Badge variant={badge.variant} className="text-[10px] h-5">
                           {badge.label}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {rec.category}
+                          {getCategoryLabel(item.category)}
                         </span>
                       </div>
                       
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {rec.description}
+                        {item.description}
                       </p>
                       
                       <div className="flex items-center gap-4 mt-2 flex-wrap">
-                        {rec.metric && (
+                        {item.metric && (
                           <span className="text-xs font-medium bg-background px-2 py-1 rounded border">
-                            {rec.metric}
+                            {item.metric}
                           </span>
                         )}
-                        {rec.action && (
+                        {item.action && (
                           <span className="text-xs text-primary flex items-center gap-1">
                             <ArrowRight className="h-3 w-3" />
-                            {rec.action}
+                            {item.action}
                           </span>
                         )}
                       </div>
