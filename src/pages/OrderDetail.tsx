@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import OrderStatusTimeline from "@/components/orders/OrderStatusTimeline";
 
 interface OrderItem {
   id: string;
@@ -329,7 +330,7 @@ const OrderDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Order Status Card */}
+              {/* Order Status Timeline Card */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -337,8 +338,14 @@ const OrderDetail = () => {
                     {dt.orderStatus}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{getStatusMessage(order.status)}</p>
+                <CardContent className="space-y-4">
+                  <OrderStatusTimeline 
+                    currentStatus={order.status} 
+                    language={language as "en" | "bn"} 
+                  />
+                  <p className="text-muted-foreground text-sm text-center md:text-left pt-2 border-t">
+                    {getStatusMessage(order.status)}
+                  </p>
                 </CardContent>
               </Card>
 
