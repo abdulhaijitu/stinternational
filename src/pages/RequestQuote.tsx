@@ -198,6 +198,8 @@ const RequestQuote = () => {
         preferred_payment: values.preferred_payment || null,
         additional_notes: values.additional_notes || null,
         user_id: user?.id || null,
+        source_page: "request-quote",
+        language: language,
       });
 
       if (error) throw error;

@@ -340,6 +340,19 @@ export const adminBn = {
       quoted: "কোটেড",
       closed: "ক্লোজড",
     },
+    activityLog: "অ্যাক্টিভিটি লগ",
+    activityLogDescription: "সোর্স ও ভাষাসহ সাম্প্রতিক কোটেশন জমা",
+    sourcePage: "সোর্স",
+    language: "ভাষা",
+    sourcePages: {
+      "request-quote": "রিকোয়েস্ট কোট পেজ",
+      "homepage-quick-rfq": "হোমপেজ কুইক আরএফকিউ",
+      "unknown": "অজানা",
+    },
+    languages: {
+      en: "ইংরেজি",
+      bn: "বাংলা",
+    },
   },
 
   // Logos

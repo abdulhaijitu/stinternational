@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCtaAnalytics } from "@/hooks/useCtaAnalytics";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const rfqSchema = z.object({
   name: z.string().trim().min(2, "Name is required").max(100, "Name too long"),
@@ -35,6 +36,7 @@ const QuickRfqForm = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
   const { trackRfqSubmit } = useCtaAnalytics();
+  const { language } = useLanguage();
 
   const form = useForm<RfqFormData>({
     resolver: zodResolver(rfqSchema),
@@ -66,6 +68,8 @@ const QuickRfqForm = () => {
         delivery_address: "To be confirmed",
         delivery_city: "To be confirmed",
         status: "pending",
+        source_page: "homepage-quick-rfq",
+        language: language,
       });
 
       if (error) throw error;
