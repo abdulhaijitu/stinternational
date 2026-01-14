@@ -45,11 +45,24 @@ const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: Check
           setLoading(false);
           return;
         }
-        const { error } = await signUp(email, password, fullName);
+        const { error, linkedOrdersCount } = await signUp(email, password, fullName);
         if (error) {
           toast.error(error.message);
         } else {
           toast.success(language === "bn" ? "অ্যাকাউন্ট তৈরি হয়েছে!" : "Account created successfully!");
+          
+          // Show additional toast if guest orders were linked
+          if (linkedOrdersCount && linkedOrdersCount > 0) {
+            setTimeout(() => {
+              toast.success(
+                language === "bn" 
+                  ? `${linkedOrdersCount}টি অতীত অর্ডার আপনার অ্যাকাউন্টে যুক্ত হয়েছে!`
+                  : `${linkedOrdersCount} previous order${linkedOrdersCount > 1 ? 's' : ''} linked to your account!`,
+                { duration: 5000 }
+              );
+            }, 1000);
+          }
+          
           onSuccess();
         }
       }
