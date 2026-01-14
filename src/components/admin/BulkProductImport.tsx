@@ -16,6 +16,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 
 interface Category {
   id: string;
@@ -47,6 +49,8 @@ const productRowSchema = z.object({
 });
 
 const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
+  const { language, t } = useAdminLanguage();
+  const isBangla = language === "bn";
   const [open, setOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -157,7 +161,7 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
     if (!file) return;
 
     if (!file.name.endsWith(".csv")) {
-      toast.error("শুধুমাত্র CSV ফাইল সাপোর্টেড");
+      toast.error(t.products.csvOnlySupported);
       return;
     }
 
@@ -170,7 +174,7 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
       const rows = parseCSV(text);
 
       if (rows.length === 0) {
-        toast.error("ফাইলে কোনো ডাটা পাওয়া যায়নি");
+        toast.error(t.products.noDataInFile);
         setImporting(false);
         return;
       }
@@ -242,16 +246,16 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
       setResult(importResult);
 
       if (importResult.success > 0) {
-        toast.success(`${importResult.success}টি পণ্য আমদানি হয়েছে`);
+        toast.success(t.products.productsImported.replace("{count}", String(importResult.success)));
         onSuccess?.();
       }
 
       if (importResult.failed > 0) {
-        toast.error(`${importResult.failed}টি পণ্য আমদানি ব্যর্থ হয়েছে`);
+        toast.error(t.products.productsFailed.replace("{count}", String(importResult.failed)));
       }
     } catch (error: any) {
       console.error("Import error:", error);
-      toast.error("ফাইল প্রসেস করতে সমস্যা হয়েছে");
+      toast.error(t.products.fileProcessError);
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
@@ -265,29 +269,29 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Upload className="h-4 w-4" />
-          বাল্ক ইম্পোর্ট
+          {t.products.bulkImport}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className={cn("max-w-lg", isBangla && "font-siliguri")}>
         <DialogHeader>
-          <DialogTitle>পণ্য বাল্ক ইম্পোর্ট</DialogTitle>
+          <DialogTitle>{t.products.bulkImportTitle}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Instructions */}
           <div className="text-sm text-muted-foreground space-y-2">
-            <p>CSV ফাইল থেকে একসাথে অনেক পণ্য আমদানি করুন।</p>
+            <p>{t.products.bulkImportDescription}</p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>প্রথমে টেমপ্লেট ডাউনলোড করুন</li>
-              <li>টেমপ্লেটে আপনার পণ্যের তথ্য পূরণ করুন</li>
-              <li>CSV ফাইল আপলোড করুন</li>
+              <li>{t.products.bulkImportSteps.step1}</li>
+              <li>{t.products.bulkImportSteps.step2}</li>
+              <li>{t.products.bulkImportSteps.step3}</li>
             </ol>
           </div>
 
           {/* Download Template */}
           <Button variant="outline" onClick={downloadTemplate} className="w-full">
             <Download className="h-4 w-4" />
-            টেমপ্লেট ডাউনলোড করুন
+            {t.products.downloadTemplate}
           </Button>
 
           {/* File Upload */}
@@ -308,12 +312,12 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
             {importing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                ইম্পোর্ট হচ্ছে...
+                {t.products.importing}
               </>
             ) : (
               <>
                 <Upload className="h-4 w-4" />
-                CSV ফাইল আপলোড করুন
+                {t.products.uploadCsvFile}
               </>
             )}
           </Button>
@@ -322,7 +326,9 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
           {importing && (
             <div className="space-y-2">
               <Progress value={progress} />
-              <p className="text-sm text-center text-muted-foreground">{progress}% সম্পন্ন</p>
+              <p className="text-sm text-center text-muted-foreground">
+                {progress}% {t.products.completed}
+              </p>
             </div>
           )}
 
@@ -333,7 +339,7 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
                 <Alert>
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription>
-                    {result.success}টি পণ্য সফলভাবে আমদানি হয়েছে
+                    {t.products.productsImported.replace("{count}", String(result.success))}
                   </AlertDescription>
                 </Alert>
               )}
@@ -342,14 +348,14 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <p>{result.failed}টি পণ্য আমদানি ব্যর্থ হয়েছে</p>
+                    <p>{t.products.productsFailed.replace("{count}", String(result.failed))}</p>
                     {result.errors.length > 0 && (
                       <ul className="mt-2 text-xs space-y-1 max-h-32 overflow-y-auto">
                         {result.errors.slice(0, 10).map((error, i) => (
                           <li key={i}>• {error}</li>
                         ))}
                         {result.errors.length > 10 && (
-                          <li>...এবং আরো {result.errors.length - 10}টি ত্রুটি</li>
+                          <li>{t.products.andMoreErrors.replace("{count}", String(result.errors.length - 10))}</li>
                         )}
                       </ul>
                     )}
@@ -363,7 +369,7 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
                 className="w-full"
               >
                 <X className="h-4 w-4" />
-                বন্ধ করুন
+                {t.products.closeDialog}
               </Button>
             </div>
           )}
@@ -371,7 +377,7 @@ const BulkProductImport = ({ onSuccess }: { onSuccess?: () => void }) => {
           {/* Available Categories Info */}
           {categories.length > 0 && !importing && !result && (
             <div className="text-xs text-muted-foreground">
-              <p className="font-medium mb-1">ব্যবহারযোগ্য category_slug মানসমূহ:</p>
+              <p className="font-medium mb-1">{t.products.availableCategorySlugs}</p>
               <div className="flex flex-wrap gap-1">
                 {categories.map((cat) => (
                   <code key={cat.id} className="bg-muted px-1 py-0.5 rounded">
