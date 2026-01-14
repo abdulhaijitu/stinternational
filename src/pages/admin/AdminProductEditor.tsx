@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -20,6 +20,22 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load rich text editor for performance
+const RichTextEditor = lazy(() => import("@/components/admin/RichTextEditor"));
+
+// Editor loading skeleton
+const EditorSkeleton = () => (
+  <div className="border border-input rounded-md">
+    <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/30">
+      {[...Array(10)].map((_, i) => (
+        <Skeleton key={i} className="h-8 w-8" />
+      ))}
+    </div>
+    <Skeleton className="h-[150px] m-3" />
+  </div>
+);
 
 interface Category {
   id: string;
@@ -267,23 +283,26 @@ const AdminProductEditor = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="short_description">{t.products.shortDescription}</Label>
-                  <Input
-                    id="short_description"
-                    value={formData.short_description}
-                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                    placeholder={t.products.shortDescriptionPlaceholder}
-                  />
+                  <Suspense fallback={<EditorSkeleton />}>
+                    <RichTextEditor
+                      value={formData.short_description}
+                      onChange={(value) => setFormData({ ...formData, short_description: value })}
+                      placeholder={t.products.shortDescriptionPlaceholder}
+                      minHeight="80px"
+                    />
+                  </Suspense>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description">{t.products.fullDescription}</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
-                    placeholder={t.products.fullDescriptionPlaceholder}
-                  />
+                  <Suspense fallback={<EditorSkeleton />}>
+                    <RichTextEditor
+                      value={formData.description}
+                      onChange={(value) => setFormData({ ...formData, description: value })}
+                      placeholder={t.products.fullDescriptionPlaceholder}
+                      minHeight="200px"
+                    />
+                  </Suspense>
                 </div>
               </>
             ) : (
@@ -306,27 +325,30 @@ const AdminProductEditor = () => {
                   <Label htmlFor="short_description_bn" className="font-siliguri">
                     {t.products.shortDescription}
                   </Label>
-                  <Input
-                    id="short_description_bn"
-                    value={formData.short_description_bn}
-                    onChange={(e) => setFormData({ ...formData, short_description_bn: e.target.value })}
-                    placeholder={t.products.shortDescriptionPlaceholder}
-                    className="font-siliguri"
-                  />
+                  <Suspense fallback={<EditorSkeleton />}>
+                    <RichTextEditor
+                      value={formData.short_description_bn}
+                      onChange={(value) => setFormData({ ...formData, short_description_bn: value })}
+                      placeholder={t.products.shortDescriptionPlaceholder}
+                      isBangla={true}
+                      minHeight="80px"
+                    />
+                  </Suspense>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description_bn" className="font-siliguri">
                     {t.products.fullDescription}
                   </Label>
-                  <Textarea
-                    id="description_bn"
-                    value={formData.description_bn}
-                    onChange={(e) => setFormData({ ...formData, description_bn: e.target.value })}
-                    rows={4}
-                    placeholder={t.products.fullDescriptionPlaceholder}
-                    className="font-siliguri"
-                  />
+                  <Suspense fallback={<EditorSkeleton />}>
+                    <RichTextEditor
+                      value={formData.description_bn}
+                      onChange={(value) => setFormData({ ...formData, description_bn: value })}
+                      placeholder={t.products.fullDescriptionPlaceholder}
+                      isBangla={true}
+                      minHeight="200px"
+                    />
+                  </Suspense>
                 </div>
               </>
             )}

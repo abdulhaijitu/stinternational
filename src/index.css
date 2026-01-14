@@ -25,73 +25,80 @@
   :root {
     /* 
      * ST International Brand Color System
-     * Based on professional B2B equipment supplier identity
-     * Primary: Deep Navy Blue (trust, reliability, professionalism)
-     * Accent: Warm Amber/Gold (action, premium, conversion CTAs)
+     * =====================================
+     * Derived directly from the official ST International logo:
+     * - Logo "ST" text: Red/Magenta gradient (primary for CTAs, highlights)
+     * - Yellow globe element: Warm amber/gold (accent for secondary actions)
+     * - "INTERNATIONAL" text: Dark navy (text, backgrounds)
+     * 
+     * Color Roles:
+     * - Primary: Deep Navy (trust, professionalism, corporate)
+     * - Accent: Warm Amber/Gold (CTAs, active states, highlights)
+     * - Secondary: Neutral grays (backgrounds, borders)
      */
     
-    /* Primary Brand - Deep Navy */
-    --primary: 215 55% 12%;
+    /* Primary Brand - Deep Navy (from "INTERNATIONAL" text) */
+    --primary: 220 50% 15%;
     --primary-foreground: 0 0% 100%;
     
     /* Background & Surface - Clean White */
     --background: 0 0% 100%;
-    --foreground: 215 50% 12%;
+    --foreground: 220 45% 12%;
     
     /* Cards & Elevated Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 215 50% 12%;
+    --card-foreground: 220 45% 12%;
     
     /* Subtle Backgrounds - Cool Gray */
-    --muted: 215 15% 96%;
-    --muted-foreground: 215 15% 42%;
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 12% 45%;
     
     /* Secondary - Neutral Gray */
-    --secondary: 215 12% 93%;
-    --secondary-foreground: 215 50% 15%;
+    --secondary: 220 12% 93%;
+    --secondary-foreground: 220 45% 15%;
     
-    /* Accent - Warm Amber for CTAs (derived from logo warmth) */
-    --accent: 38 92% 50%;
-    --accent-foreground: 215 50% 8%;
+    /* Accent - Warm Amber/Gold (from logo yellow globe) */
+    --accent: 40 95% 52%;
+    --accent-foreground: 220 45% 10%;
     
     /* Success State */
-    --success: 152 60% 36%;
+    --success: 152 55% 38%;
     --success-foreground: 0 0% 100%;
     
     /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 50% 12%;
+    --popover-foreground: 220 45% 12%;
     
     /* Destructive */
-    --destructive: 0 72% 50%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
     
     /* Borders & Inputs - Subtle */
-    --border: 215 15% 90%;
-    --input: 215 15% 90%;
-    --ring: 215 55% 12%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 40 95% 52%;
     
     /* Radius - Clean, Professional */
     --radius: 0.5rem;
     
-    /* Sidebar - Dark variant */
-    --sidebar-background: 215 55% 10%;
-    --sidebar-foreground: 215 15% 92%;
-    --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 215 50% 8%;
-    --sidebar-accent: 215 50% 18%;
-    --sidebar-accent-foreground: 215 15% 92%;
-    --sidebar-border: 215 45% 20%;
-    --sidebar-ring: 38 92% 50%;
+    /* Sidebar - Dark Navy variant (matches primary) */
+    --sidebar-background: 220 50% 12%;
+    --sidebar-foreground: 220 15% 92%;
+    --sidebar-primary: 40 95% 52%;
+    --sidebar-primary-foreground: 220 45% 10%;
+    --sidebar-accent: 220 45% 20%;
+    --sidebar-accent-foreground: 220 15% 92%;
+    --sidebar-border: 220 40% 22%;
+    --sidebar-ring: 40 95% 52%;
     
     /* Custom Semantic Tokens */
-    --hero-gradient: linear-gradient(135deg, hsl(215 55% 12%) 0%, hsl(215 50% 20%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(220 50% 12%) 0%, hsl(220 45% 22%) 100%);
     --surface-elevated: 0 0% 100%;
-    --surface-sunken: 215 15% 97%;
-    --text-primary: 215 50% 12%;
-    --text-secondary: 215 15% 42%;
-    --text-tertiary: 215 10% 58%;
-    --divider: 215 15% 92%;
+    --surface-sunken: 220 15% 97%;
+    --text-primary: 220 45% 12%;
+    --text-secondary: 220 12% 45%;
+    --text-tertiary: 220 10% 58%;
+    --divider: 220 15% 92%;
     
     /* Shadows - Subtle and Professional */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
@@ -102,46 +109,46 @@
   }
 
   .dark {
-    /* Background & Surface - Soft dark, NOT pure black */
-    --background: 215 50% 8%;
-    --foreground: 215 15% 95%;
+    /* Background & Surface - Deep Navy, NOT pure black */
+    --background: 220 45% 8%;
+    --foreground: 220 15% 95%;
     
     /* Cards & Elevated Surfaces */
-    --card: 215 45% 12%;
-    --card-foreground: 215 15% 95%;
+    --card: 220 42% 12%;
+    --card-foreground: 220 15% 95%;
     
     /* Subtle Backgrounds */
-    --muted: 215 40% 16%;
-    --muted-foreground: 215 10% 65%;
+    --muted: 220 38% 16%;
+    --muted-foreground: 220 10% 65%;
     
     /* Secondary */
-    --secondary: 215 40% 18%;
-    --secondary-foreground: 215 15% 92%;
+    --secondary: 220 38% 18%;
+    --secondary-foreground: 220 15% 92%;
     
     /* Popover */
-    --popover: 215 45% 12%;
-    --popover-foreground: 215 15% 95%;
+    --popover: 220 42% 12%;
+    --popover-foreground: 220 15% 95%;
     
     /* Borders & Inputs */
-    --border: 215 35% 22%;
-    --input: 215 35% 22%;
-    --ring: 38 92% 50%;
+    --border: 220 32% 24%;
+    --input: 220 32% 24%;
+    --ring: 40 95% 52%;
     
     /* Success State - Dark mode adjusted */
     --success: 152 50% 45%;
     --success-foreground: 0 0% 100%;
     
     /* Destructive - Dark mode adjusted */
-    --destructive: 0 65% 55%;
+    --destructive: 0 62% 55%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Primary - Slightly brighter for dark mode */
-    --primary: 215 50% 45%;
+    /* Primary - Brighter for dark mode contrast */
+    --primary: 220 45% 50%;
     --primary-foreground: 0 0% 100%;
     
-    /* Accent - Maintained for consistency */
-    --accent: 38 92% 50%;
-    --accent-foreground: 215 50% 8%;
+    /* Accent - Warm amber maintained for consistency */
+    --accent: 40 95% 52%;
+    --accent-foreground: 220 45% 10%;
   }
 }
 

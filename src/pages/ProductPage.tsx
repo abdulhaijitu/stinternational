@@ -21,6 +21,7 @@ import { useProduct, useFeaturedProducts } from "@/hooks/useProducts";
 import RelatedProducts from "@/components/products/RelatedProducts";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
+import RichTextContent from "@/components/products/RichTextContent";
 import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { formatPrice } from "@/lib/formatPrice";
@@ -71,7 +72,7 @@ const ProductPage = () => {
   const { addItem } = useCart();
   const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
   const { getProductFields, getCategoryFields } = useBilingualContent();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Get bilingual fields
   const productFields = product ? getProductFields(product) : null;
@@ -250,11 +251,13 @@ const ProductPage = () => {
                 </div>
               </div>
 
-              {/* Short Description */}
+              {/* Short Description - Render as rich text */}
               {productFields.shortDescription && (
-                <p className="text-muted-foreground leading-relaxed">
-                  {productFields.shortDescription}
-                </p>
+                <RichTextContent 
+                  content={productFields.shortDescription} 
+                  className="text-muted-foreground"
+                  isBangla={language === 'bn'}
+                />
               )}
 
               <Separator />
@@ -437,17 +440,16 @@ const ProductPage = () => {
             {/* Description Tab */}
             <TabsContent value="description" className="mt-0">
               <div className="bg-card border border-border rounded-xl p-6 max-w-3xl">
-                <div className="prose prose-sm max-w-none text-muted-foreground">
-                  {productFields.description ? (
-                    <p className="whitespace-pre-line leading-relaxed">
-                      {productFields.description}
-                    </p>
-                  ) : (
-                    <p className="text-center py-4">
-                      {t.products.noDescription}
-                    </p>
-                  )}
-                </div>
+                {productFields.description ? (
+                  <RichTextContent 
+                    content={productFields.description} 
+                    isBangla={language === 'bn'}
+                  />
+                ) : (
+                  <p className="text-center py-4 text-muted-foreground">
+                    {t.products.noDescription}
+                  </p>
+                )}
               </div>
             </TabsContent>
           </Tabs>
