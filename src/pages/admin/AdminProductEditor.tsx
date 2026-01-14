@@ -485,6 +485,19 @@ const AdminProductEditor = () => {
     setAddingSubCategory(true);
 
     try {
+      // Check for duplicate slug
+      const { data: existingCategory } = await supabase
+        .from("categories")
+        .select("id, slug")
+        .eq("slug", newSubCategory.slug.trim())
+        .maybeSingle();
+
+      if (existingCategory) {
+        setSubCategoryErrors({ slug: language === "bn" ? "এই স্লাগটি ইতিমধ্যে ব্যবহৃত হয়েছে" : "This slug is already in use" });
+        setAddingSubCategory(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("categories")
         .insert([{
@@ -561,6 +574,19 @@ const AdminProductEditor = () => {
     setAddingParentCategory(true);
 
     try {
+      // Check for duplicate slug
+      const { data: existingCategory } = await supabase
+        .from("categories")
+        .select("id, slug")
+        .eq("slug", newParentCategory.slug.trim())
+        .maybeSingle();
+
+      if (existingCategory) {
+        setParentCategoryErrors({ slug: language === "bn" ? "এই স্লাগটি ইতিমধ্যে ব্যবহৃত হয়েছে" : "This slug is already in use" });
+        setAddingParentCategory(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("categories")
         .insert([{
