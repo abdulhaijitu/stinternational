@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface AdminProduct {
   id: string;
@@ -17,8 +18,9 @@ export interface AdminProduct {
 
 export const ADMIN_PRODUCTS_QUERY_KEY = ["admin", "products"];
 
-export const useAdminProducts = () => {
+export const useAdminProducts = (showRealtimeToasts = true) => {
   const queryClient = useQueryClient();
+  const initialLoadDone = useRef(false);
 
   // Set up realtime subscription for products table
   useEffect(() => {
@@ -34,6 +36,15 @@ export const useAdminProducts = () => {
         (payload) => {
           console.log('Product realtime update:', payload.eventType, payload);
           
+          // Show toast notification for new products (only after initial load)
+          if (showRealtimeToasts && initialLoadDone.current && payload.eventType === 'INSERT') {
+            const newProduct = payload.new as { name?: string };
+            toast.info(`New product added`, {
+              description: newProduct.name || 'A new product was added',
+              duration: 5000,
+            });
+          }
+          
           // Invalidate and refetch on any change
           queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_QUERY_KEY });
         }
@@ -43,7 +54,7 @@ export const useAdminProducts = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, showRealtimeToasts]);
 
   return useQuery({
     queryKey: ADMIN_PRODUCTS_QUERY_KEY,
@@ -57,6 +68,7 @@ export const useAdminProducts = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      initialLoadDone.current = true;
       return (data || []) as AdminProduct[];
     },
     staleTime: 0,
