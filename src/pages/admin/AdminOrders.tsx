@@ -120,30 +120,45 @@ const AdminOrders = () => {
   const handleDeleteConfirm = async () => {
     if (!orderToDelete || !canDelete) return;
 
+    const orderIdToDelete = orderToDelete.id;
+
     try {
       // First delete order items
       const { error: itemsError } = await supabase
         .from("order_items")
         .delete()
-        .eq("order_id", orderToDelete.id);
+        .eq("order_id", orderIdToDelete);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error("Error deleting order items:", itemsError);
+        throw itemsError;
+      }
 
       // Then delete the order
-      const { error: orderError } = await supabase
+      const { error: orderError, count } = await supabase
         .from("orders")
         .delete()
-        .eq("id", orderToDelete.id);
+        .eq("id", orderIdToDelete)
+        .select();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Error deleting order:", orderError);
+        throw orderError;
+      }
 
-      setOrders(orders.filter((o) => o.id !== orderToDelete.id));
-      toast.success(t.orders.deleteSuccess);
+      // Close dialog first
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
-    } catch (error) {
+      
+      // Show success message
+      toast.success(t.orders.deleteSuccess);
+      
+      // Refetch orders from database to ensure state sync
+      await fetchOrders();
+    } catch (error: any) {
       console.error("Error deleting order:", error);
-      toast.error(t.orders.deleteError);
+      // Keep dialog open on error so user knows it failed
+      toast.error(t.orders.deleteError + (error?.message ? `: ${error.message}` : ""));
     }
   };
 
