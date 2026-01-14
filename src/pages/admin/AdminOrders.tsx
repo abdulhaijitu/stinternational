@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Eye, Plus, Trash2, FileText } from "lucide-react";
+import { Lock, Eye, Plus, Trash2, FileText, ShoppingCart } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -285,25 +285,27 @@ const AdminOrders = () => {
     <AdminLayout>
       <TooltipProvider>
         <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Page Header - Enterprise Standard */}
+          <div className="admin-page-header">
             <div>
-              <h1 className="text-2xl font-bold">{t.orders.title}</h1>
-              <p className="text-muted-foreground">{t.orders.subtitle}</p>
+              <h1 className="admin-page-title">{t.orders.title}</h1>
+              <p className="admin-page-subtitle">{t.orders.subtitle}</p>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="admin-action-bar">
               {/* Bulk actions when items are selected */}
               {canDelete && selectedOrders.size > 0 && (
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="text-xs">
                     {t.orders.selectedCount.replace("{count}", String(selectedOrders.size))}
                   </Badge>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={handleBulkDeleteClick}
+                    className="gap-1.5"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    {t.orders.bulkDelete}
+                    <Trash2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t.orders.bulkDelete}</span>
                   </Button>
                 </div>
               )}
@@ -314,14 +316,16 @@ const AdminOrders = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setDeletionLogDialogOpen(true)}
+                  className="gap-1.5"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  {t.orders.deletionLog}
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t.orders.deletionLog}</span>
                 </Button>
               )}
               
+              {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-40 h-9">
                   <SelectValue placeholder={t.orders.allOrders} />
                 </SelectTrigger>
                 <SelectContent>
@@ -336,27 +340,28 @@ const AdminOrders = () => {
               
               {/* Only show Create button for Super Admin */}
               {canCreate && (
-                <Button onClick={() => navigate("/admin/orders/new")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t.orders.createOrder}
+                <Button onClick={() => navigate("/admin/orders/new")} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t.orders.createOrder}</span>
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Orders Table */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          {/* Orders Table - Enterprise Standard with Sticky Header */}
+          <div className="admin-table-wrapper">
             {filteredOrders.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                {t.orders.noOrders}
+              <div className="admin-empty-state">
+                <ShoppingCart className="admin-empty-state-icon" />
+                <p className="admin-empty-state-text">{t.orders.noOrders}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
+                <table className="admin-table">
+                  <thead>
                     <tr>
                       {canDelete && (
-                        <th className="w-12 p-4">
+                        <th className="w-12">
                           <Checkbox
                             checked={selectedOrders.size === filteredOrders.length && filteredOrders.length > 0}
                             onCheckedChange={toggleSelectAll}
@@ -364,21 +369,21 @@ const AdminOrders = () => {
                           />
                         </th>
                       )}
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.orderNumber}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.customer}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.city}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.total}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.paymentMethod}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.status}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.orders.date}</th>
-                      <th className="text-left p-4 text-sm font-medium">{t.common.actions}</th>
+                      <th>{t.orders.orderNumber}</th>
+                      <th>{t.orders.customer}</th>
+                      <th className="hidden md:table-cell">{t.orders.city}</th>
+                      <th>{t.orders.total}</th>
+                      <th className="hidden lg:table-cell">{t.orders.paymentMethod}</th>
+                      <th>{t.orders.status}</th>
+                      <th className="hidden sm:table-cell">{t.orders.date}</th>
+                      <th className="text-right">{t.common.actions}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredOrders.map((order) => (
-                      <tr key={order.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                      <tr key={order.id}>
                         {canDelete && (
-                          <td className="p-4">
+                          <td>
                             <Checkbox
                               checked={selectedOrders.has(order.id)}
                               onCheckedChange={() => toggleOrderSelection(order.id)}
@@ -386,24 +391,30 @@ const AdminOrders = () => {
                             />
                           </td>
                         )}
-                        <td className="p-4 text-sm font-medium">{order.order_number}</td>
-                        <td className="p-4">
-                          <p className="text-sm font-medium">{order.customer_name}</p>
-                          <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
+                        <td>
+                          <span className="font-medium">{order.order_number}</span>
                         </td>
-                        <td className="p-4 text-sm">{order.shipping_city}</td>
-                        <td className="p-4 text-sm font-medium">{formatPrice(order.total, language)}</td>
-                        <td className="p-4 text-sm">
+                        <td>
+                          <div>
+                            <p className="font-medium text-sm">{order.customer_name}</p>
+                            <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
+                          </div>
+                        </td>
+                        <td className="hidden md:table-cell">{order.shipping_city}</td>
+                        <td>
+                          <span className="font-medium">{formatPrice(order.total, language)}</span>
+                        </td>
+                        <td className="hidden lg:table-cell text-muted-foreground">
                           {getPaymentMethodLabel(order.payment_method)}
                         </td>
-                        <td className="p-4">
+                        <td>
                           {canUpdateStatus ? (
                             <Select
                               value={order.status}
                               onValueChange={(value) => handleStatusChange(order.id, value)}
                               disabled={updatingStatus === order.id}
                             >
-                              <SelectTrigger className="w-40 h-8 text-xs">
+                              <SelectTrigger className="w-32 h-8 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -417,7 +428,7 @@ const AdminOrders = () => {
                           ) : (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Badge variant="secondary" className="cursor-not-allowed">
+                                <Badge variant="secondary" className="cursor-not-allowed text-xs">
                                   <Lock className="h-3 w-3 mr-1" />
                                   {getStatusLabel(order.status)}
                                 </Badge>
@@ -428,19 +439,19 @@ const AdminOrders = () => {
                             </Tooltip>
                           )}
                         </td>
-                        <td className="p-4 text-sm text-muted-foreground">
+                        <td className="hidden sm:table-cell text-muted-foreground text-xs">
                           {formatDate(order.created_at)}
                         </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-1">
+                        <td>
+                          <div className="admin-table-actions">
                             <Button 
                               variant="ghost" 
                               size="sm"
                               onClick={() => navigate(`/admin/orders/${order.id}`)}
-                              className="h-8"
+                              className="h-8 gap-1.5"
                             >
-                              <Eye className="h-4 w-4 mr-1" />
-                              {t.orders.viewDetails}
+                              <Eye className="h-4 w-4" />
+                              <span className="hidden lg:inline">{t.orders.viewDetails}</span>
                             </Button>
                             
                             {/* Only show Delete button for Super Admin */}

@@ -290,56 +290,64 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <TooltipProvider>
       <div className={cn("min-h-screen bg-muted/30", language === "bn" && "font-siliguri")}>
-        {/* Desktop Topbar */}
-        <header className="hidden lg:flex h-14 bg-card border-b border-border items-center justify-between px-6 sticky top-0 z-30">
-          <div className="flex items-center gap-3">
+        {/* Desktop Topbar - Clean, distraction-free */}
+        <header className="hidden lg:flex h-14 bg-card border-b border-border items-center justify-between px-4 sticky top-0 z-30">
+          {/* Left: Collapse button + Logo */}
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className="text-muted-foreground hover:text-foreground"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground shrink-0"
             >
               {collapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </Button>
-            <Link to="/admin" className="flex items-center gap-3">
+            <Link to="/admin" className="flex items-center gap-2.5">
               <img src={logo} alt="ST International" className="h-8 w-auto" />
-              <div>
-                <h2 className="font-bold text-sm">ST International</h2>
-                <p className="text-xs text-muted-foreground">{t.nav.adminPanel}</p>
+              <div className="hidden sm:block">
+                <h2 className="font-semibold text-sm leading-tight">ST International</h2>
+                <p className="text-[11px] text-muted-foreground">{t.nav.adminPanel}</p>
               </div>
             </Link>
           </div>
           
-          {/* Right side: View Website, Language Toggle, User */}
-          <div className="flex items-center gap-4">
+          {/* Right side: View Website | Language | Dark Mode | Profile */}
+          <div className="flex items-center gap-1">
+            {/* View Website */}
             <Button
               variant="ghost"
               size="sm"
               asChild
-              className="text-muted-foreground hover:text-foreground"
+              className="h-9 px-3 text-muted-foreground hover:text-foreground"
             >
               <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                 <ExternalLink className="h-4 w-4" />
-                <span>{t.layout?.viewWebsite || (language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website")}</span>
+                <span className="hidden xl:inline text-sm">
+                  {t.layout?.viewWebsite || (language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website")}
+                </span>
               </a>
             </Button>
             
-            <div className="h-5 w-px bg-border" />
+            <div className="h-6 w-px bg-border mx-1" />
             
-            <AdminThemeToggle />
-            
+            {/* Language Toggle */}
             <AdminLanguageSwitcher variant="compact" />
             
-            <div className="h-5 w-px bg-border" />
+            {/* Dark Mode Toggle */}
+            <AdminThemeToggle />
             
-            {/* User Profile Menu */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
+            <div className="h-6 w-px bg-border mx-1" />
+            
+            {/* User Profile */}
+            <div className="flex items-center gap-2 pl-2">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium shrink-0">
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
-              <div className="hidden xl:block">
-                <p className="text-sm font-medium leading-none">{user?.email?.split('@')[0]}</p>
-                <p className="text-xs text-muted-foreground">{getPrimaryRoleLabel()}</p>
+              <div className="hidden xl:block min-w-0">
+                <p className="text-sm font-medium leading-tight truncate max-w-[120px]">
+                  {user?.email?.split('@')[0]}
+                </p>
+                <p className="text-[11px] text-muted-foreground truncate">{getPrimaryRoleLabel()}</p>
               </div>
             </div>
           </div>
@@ -475,9 +483,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             />
           )}
 
-          {/* Main Content */}
-          <main className="flex-1 min-h-[calc(100vh-3.5rem)]">
-            <div className="p-4 md:p-6 lg:p-8">
+          {/* Main Content - Consistent spacing */}
+          <main className="flex-1 min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
+            <div className="p-4 md:p-6 lg:p-8 max-w-[1600px]">
               {children}
             </div>
           </main>

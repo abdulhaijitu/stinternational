@@ -325,24 +325,126 @@
     @apply focus:outline-none focus:ring-2 focus:ring-ring;
   }
 
-  /* Admin Panel - Enterprise Styling (Dark mode compatible) */
+  /* ===========================================
+   * ADMIN PANEL - Enterprise SaaS Design System
+   * Global ecommerce standards enforcement
+   * =========================================== */
+  
+  /* Admin Card - Consistent elevation */
   .admin-card {
     @apply bg-card border border-border rounded-lg shadow-sm;
+  }
+
+  /* Admin Page Header - Unified spacing */
+  .admin-page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+  }
+
+  .admin-page-title {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .admin-page-subtitle {
+    @apply text-sm text-muted-foreground mt-0.5;
+  }
+
+  /* Admin Table - Enterprise Standard */
+  .admin-table-wrapper {
+    @apply bg-card border border-border rounded-lg overflow-hidden;
   }
 
   .admin-table {
     @apply w-full;
   }
 
+  .admin-table thead {
+    @apply bg-muted/50 sticky top-0 z-10;
+  }
+
   .admin-table th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50;
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap;
   }
 
   .admin-table td {
-    @apply px-4 py-3 text-sm border-t border-border;
+    @apply px-4 py-3 text-sm border-t border-border align-middle;
   }
 
-  /* Unified Button States - 200ms max transition */
+  .admin-table tbody tr {
+    @apply transition-colors duration-100;
+  }
+
+  .admin-table tbody tr:hover {
+    @apply bg-muted/30;
+  }
+
+  /* Admin Table Action Column */
+  .admin-table-actions {
+    @apply flex items-center gap-1 justify-end;
+  }
+
+  /* Admin Empty State */
+  .admin-empty-state {
+    @apply py-16 px-4 text-center;
+  }
+
+  .admin-empty-state-icon {
+    @apply h-12 w-12 mx-auto text-muted-foreground/50 mb-4;
+  }
+
+  .admin-empty-state-text {
+    @apply text-muted-foreground text-sm;
+  }
+
+  /* Admin Form - Consistent Layout */
+  .admin-form-group {
+    @apply space-y-2;
+  }
+
+  .admin-form-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .admin-form-label-required::after {
+    content: " *";
+    @apply text-destructive;
+  }
+
+  .admin-form-hint {
+    @apply text-xs text-muted-foreground mt-1;
+  }
+
+  .admin-form-error {
+    @apply text-xs text-destructive mt-1 flex items-center gap-1;
+  }
+
+  /* Admin Dialog - Consistent Modal */
+  .admin-dialog-header {
+    @apply pb-4 border-b border-border mb-4;
+  }
+
+  .admin-dialog-footer {
+    @apply pt-4 border-t border-border mt-4 flex items-center justify-end gap-3;
+  }
+
+  /* Admin Stats Card */
+  .admin-stats-card {
+    @apply bg-card border border-border rounded-lg p-4 flex flex-col;
+  }
+
+  .admin-stats-label {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  .admin-stats-value {
+    @apply text-2xl font-bold mt-1;
+  }
+
+  /* Admin Action Button Groups */
+  .admin-action-bar {
+    @apply flex items-center gap-2 flex-wrap;
+  }
+
+  /* Unified Button States - 150ms max transition */
   .btn-transition {
     @apply transition-all duration-150 ease-out;
   }
@@ -352,6 +454,27 @@
     font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif;
     line-height: 1.7;
     letter-spacing: 0.01em;
+  }
+
+  /* Admin Status Badges */
+  .admin-badge-success {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+
+  .admin-badge-warning {
+    @apply bg-amber-500/10 text-amber-600 border border-amber-500/20;
+  }
+
+  .admin-badge-danger {
+    @apply bg-destructive/10 text-destructive border border-destructive/20;
+  }
+
+  .admin-badge-info {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+
+  .admin-badge-neutral {
+    @apply bg-muted text-muted-foreground border border-border;
   }
 }
 
