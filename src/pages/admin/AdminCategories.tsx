@@ -1,5 +1,26 @@
-import { useEffect, useState, useMemo } from "react";
-import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown, Lock, ChevronDown, ChevronRight, FolderOpen, Folder } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, Lock, ChevronDown, ChevronRight, FolderOpen, Folder } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  DragOverlay,
+  DragEndEvent,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
@@ -23,11 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -56,6 +72,253 @@ interface Category {
   is_parent: boolean;
 }
 
+// Sortable category row component
+function SortableCategoryRow({
+  category,
+  isSubCategory,
+  index,
+  siblings,
+  isExpanded,
+  onToggleExpand,
+  onToggleVisibility,
+  onEdit,
+  onDelete,
+  onAddSubCategory,
+  canEdit,
+  canDelete,
+  canCreate,
+  togglingId,
+  deletingId,
+  saving,
+  subCount,
+  getCategoryName,
+  t,
+  language,
+  isReordering,
+}: {
+  category: Category;
+  isSubCategory: boolean;
+  index: number;
+  siblings: Category[];
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onToggleVisibility: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onAddSubCategory: () => void;
+  canEdit: boolean;
+  canDelete: boolean;
+  canCreate: boolean;
+  togglingId: string | null;
+  deletingId: string | null;
+  saving: boolean;
+  subCount: number;
+  getCategoryName: (c: Category) => string;
+  t: any;
+  language: string;
+  isReordering: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id, disabled: !canEdit || isReordering });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    position: isDragging ? "relative" as const : undefined,
+  };
+
+  const IconComponent = getCategoryIcon(category.icon_name);
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center justify-between p-4 border-b border-border last:border-b-0 transition-all",
+        !category.is_active && 'bg-muted/30 opacity-60',
+        isSubCategory && 'pl-12 bg-muted/10',
+        isDragging && 'shadow-lg bg-card ring-2 ring-primary/20 opacity-95 rounded-lg'
+      )}
+    >
+      <div className="flex items-center gap-4">
+        {/* Expand/Collapse for parents */}
+        {!isSubCategory && (
+          <button
+            onClick={onToggleExpand}
+            className="p-1 hover:bg-muted rounded transition-colors"
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
+        )}
+        
+        {/* Drag Handle */}
+        <button
+          {...attributes}
+          {...listeners}
+          className={cn(
+            "touch-none p-1.5 rounded hover:bg-muted transition-colors",
+            "cursor-grab active:cursor-grabbing",
+            (!canEdit || isReordering) && "opacity-30 cursor-not-allowed pointer-events-none"
+          )}
+          disabled={!canEdit || isReordering}
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </button>
+        
+        {/* Icon */}
+        <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center border border-border">
+          <IconComponent className="h-5 w-5 text-muted-foreground" />
+        </div>
+        
+        {/* Image */}
+        {category.image_url ? (
+          <img
+            src={category.image_url}
+            alt={getCategoryName(category)}
+            className="w-12 h-12 object-cover rounded-lg border border-border"
+          />
+        ) : (
+          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+            <span className="text-muted-foreground text-xs">{t.categories.noImage}</span>
+          </div>
+        )}
+        
+        {/* Info */}
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{getCategoryName(category)}</span>
+            {!isSubCategory && (
+              <Badge variant="outline" className="text-xs">
+                {t.categories.parentCategory}
+              </Badge>
+            )}
+            {isSubCategory && (
+              <Badge variant="secondary" className="text-xs">
+                {t.categories.subCategory}
+              </Badge>
+            )}
+            {!category.is_active && (
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                {t.status.inactive}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>/{category.slug}</span>
+            {!isSubCategory && subCount > 0 && (
+              <span className="text-xs">• {subCount} {t.categories.subCategoriesCount}</span>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        {/* Add Sub-Category button for parent categories */}
+        {!isSubCategory && canCreate && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onAddSubCategory}
+                className="text-xs"
+                disabled={isReordering}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {t.categories.addSubCategory}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t.categories.addSubCategory}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleVisibility}
+              disabled={!canEdit || togglingId === category.id || isReordering}
+            >
+              {togglingId === category.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : category.is_active ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{category.is_active ? t.categories.hidden : t.categories.shown}</p>
+          </TooltipContent>
+        </Tooltip>
+        
+        {canEdit ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onEdit}
+            disabled={saving || isReordering}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" disabled className="opacity-50">
+                <Lock className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t.products.noEditPermission}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        
+        {canDelete ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onDelete}
+            disabled={(!isSubCategory && subCount > 0) || deletingId === category.id || isReordering}
+          >
+            {deletingId === category.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 text-destructive" />
+            )}
+          </Button>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" disabled className="opacity-50">
+                <Lock className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t.products.noDeletePermission}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const AdminCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,9 +328,12 @@ const AdminCategories = () => {
   const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [movingId, setMovingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeDragType, setActiveDragType] = useState<'parent' | 'sub' | null>(null);
+  const [activeParentId, setActiveParentId] = useState<string | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     name_bn: "",
@@ -92,6 +358,19 @@ const AdminCategories = () => {
 
   // Helper for text class
   const getTextClass = () => cn(language === "bn" && "font-siliguri");
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Organize categories into hierarchy
   const { parentCategories, subCategoriesByParent } = useMemo(() => {
@@ -152,6 +431,92 @@ const AdminCategories = () => {
       .replace(/-+/g, "-");
   };
 
+  // Drag and drop handlers
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    if (!canEdit) return;
+    
+    const draggedId = event.active.id as string;
+    setActiveId(draggedId);
+    
+    // Determine if dragging a parent or sub-category
+    const category = categories.find(c => c.id === draggedId);
+    if (category) {
+      if (category.parent_id) {
+        setActiveDragType('sub');
+        setActiveParentId(category.parent_id);
+      } else {
+        setActiveDragType('parent');
+        setActiveParentId(null);
+      }
+    }
+  }, [canEdit, categories]);
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    setActiveDragType(null);
+    setActiveParentId(null);
+
+    if (!over || active.id === over.id || !canEdit) {
+      return;
+    }
+
+    const draggedCategory = categories.find(c => c.id === active.id);
+    const targetCategory = categories.find(c => c.id === over.id);
+    
+    if (!draggedCategory || !targetCategory) return;
+
+    // Only allow reordering within the same group (parents with parents, subs with same-parent subs)
+    if (draggedCategory.parent_id !== targetCategory.parent_id) {
+      toast.error(language === "bn" ? "শুধুমাত্র একই গ্রুপে পুনর্বিন্যাস করা যায়" : "Can only reorder within the same group");
+      return;
+    }
+
+    setIsReordering(true);
+    
+    try {
+      // Get the correct list of siblings
+      const siblings = draggedCategory.parent_id 
+        ? subCategoriesByParent[draggedCategory.parent_id] || []
+        : parentCategories;
+      
+      const oldIndex = siblings.findIndex(c => c.id === active.id);
+      const newIndex = siblings.findIndex(c => c.id === over.id);
+      
+      if (oldIndex === -1 || newIndex === -1) return;
+      
+      const reorderedItems = arrayMove(siblings, oldIndex, newIndex);
+      
+      // Update display_order for all items
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        display_order: index + 1,
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("categories")
+          .update({ display_order: update.display_order })
+          .eq("id", update.id);
+        if (error) throw error;
+      }
+      
+      await fetchCategories();
+      toast.success(t.categories.orderUpdated);
+    } catch (error) {
+      console.error("Error reordering:", error);
+      toast.error(t.categories.orderError);
+    } finally {
+      setIsReordering(false);
+    }
+  }, [categories, parentCategories, subCategoriesByParent, canEdit, language, t.categories.orderUpdated, t.categories.orderError]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+    setActiveDragType(null);
+    setActiveParentId(null);
+  }, []);
+
   const handleOpenDialog = (category?: Category, parentIdForNew?: string) => {
     if (category) {
       if (!canEdit) {
@@ -196,13 +561,11 @@ const AdminCategories = () => {
   };
 
   const handleSave = async () => {
-    // English name is always required for slug generation
     if (!formData.name || !formData.slug) {
       toast.error(t.categories.slugRequired);
       return;
     }
 
-    // If it's a sub-category, parent_id is required
     if (!formData.is_parent && !formData.parent_id) {
       toast.error(t.categories.parentCategoryRequired);
       return;
@@ -233,7 +596,6 @@ const AdminCategories = () => {
         if (error) throw error;
         toast.success(t.categories.updateSuccess);
       } else {
-        // Calculate display_order based on category type
         let newDisplayOrder = 0;
         if (formData.is_parent) {
           newDisplayOrder = parentCategories.length + 1;
@@ -271,7 +633,6 @@ const AdminCategories = () => {
       return;
     }
     
-    // Check if this parent has sub-categories
     const hasChildren = subCategoriesByParent[category.id]?.length > 0;
     if (hasChildren) {
       toast.error(t.categories.deleteErrorHasChildren);
@@ -297,13 +658,12 @@ const AdminCategories = () => {
         return;
       }
       
-      // Refetch to ensure UI is in sync with database
       await fetchCategories();
       toast.success(t.categories.deleteSuccess);
     } catch (error) {
       console.error("Error deleting category:", error);
       toast.error(t.categories.deleteError);
-      throw error; // Re-throw to let dialog know it failed
+      throw error;
     } finally {
       setDeletingId(null);
       setCategoryToDelete(null);
@@ -328,7 +688,6 @@ const AdminCategories = () => {
       if (error) throw error;
       if (!data) throw new Error("No data returned from update");
       
-      // Refetch to ensure UI is in sync with database
       await fetchCategories();
       toast.success(t.categories.visibilityUpdated);
     } catch (error) {
@@ -336,50 +695,6 @@ const AdminCategories = () => {
       toast.error(t.categories.saveError);
     } finally {
       setTogglingId(null);
-    }
-  };
-
-  const handleMoveCategory = async (category: Category, direction: 'up' | 'down') => {
-    if (!canEdit) {
-      toast.error(t.products.noPermission);
-      return;
-    }
-    
-    // Get siblings (either other parents or same-parent subs)
-    const siblings = category.parent_id 
-      ? subCategoriesByParent[category.parent_id] || []
-      : parentCategories;
-    
-    const currentIndex = siblings.findIndex(c => c.id === category.id);
-    
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === siblings.length - 1) return;
-
-    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const swapCategory = siblings[swapIndex];
-
-    setMovingId(category.id);
-    try {
-      const updates = [
-        { id: category.id, display_order: swapCategory.display_order },
-        { id: swapCategory.id, display_order: category.display_order },
-      ];
-
-      for (const update of updates) {
-        const { error } = await supabase
-          .from("categories")
-          .update({ display_order: update.display_order })
-          .eq("id", update.id);
-        if (error) throw error;
-      }
-
-      await fetchCategories();
-      toast.success(t.categories.orderUpdated);
-    } catch (error) {
-      console.error("Error moving category:", error);
-      toast.error(t.categories.orderError);
-    } finally {
-      setMovingId(null);
     }
   };
 
@@ -403,221 +718,15 @@ const AdminCategories = () => {
     setExpandedParents(new Set());
   };
 
-  // Get category display name based on language
   const getCategoryName = (category: Category) => {
     if (language === "bn" && category.name_bn) return category.name_bn;
     return category.name;
   };
 
-  // Determine if we're showing English or Bangla fields
   const isEnglish = language === "en";
+  const isBangla = language === "bn";
 
-  // Render a single category row
-  const renderCategoryRow = (category: Category, isSubCategory: boolean, index: number, siblings: Category[]) => {
-    const IconComponent = getCategoryIcon(category.icon_name);
-    const subCount = subCategoriesByParent[category.id]?.length || 0;
-    const isExpanded = expandedParents.has(category.id);
-
-    return (
-      <div 
-        key={category.id} 
-        className={cn(
-          "flex items-center justify-between p-4 border-b border-border last:border-b-0",
-          !category.is_active && 'bg-muted/30 opacity-60',
-          isSubCategory && 'pl-12 bg-muted/10'
-        )}
-      >
-        <div className="flex items-center gap-4">
-          {/* Expand/Collapse for parents */}
-          {!isSubCategory && (
-            <button
-              onClick={() => toggleParentExpand(category.id)}
-              className="p-1 hover:bg-muted rounded transition-colors"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-          )}
-          
-          {/* Drag Handle Visual */}
-          <div className="text-muted-foreground/50">
-            <GripVertical className="h-5 w-5" />
-          </div>
-          
-          {/* Order Controls */}
-          <div className="flex flex-col gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => handleMoveCategory(category, 'up')}
-              disabled={index === 0 || !canEdit || movingId === category.id}
-            >
-              {movingId === category.id ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <ArrowUp className="h-3 w-3" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => handleMoveCategory(category, 'down')}
-              disabled={index === siblings.length - 1 || !canEdit || movingId === category.id}
-            >
-              {movingId === category.id ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <ArrowDown className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
-          
-          {/* Icon */}
-          <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center border border-border">
-            <IconComponent className="h-5 w-5 text-muted-foreground" />
-          </div>
-          
-          {/* Image */}
-          {category.image_url ? (
-            <img
-              src={category.image_url}
-              alt={getCategoryName(category)}
-              className="w-12 h-12 object-cover rounded-lg border border-border"
-            />
-          ) : (
-            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-muted-foreground text-xs">{t.categories.noImage}</span>
-            </div>
-          )}
-          
-          {/* Info */}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{getCategoryName(category)}</span>
-              {!isSubCategory && (
-                <Badge variant="outline" className="text-xs">
-                  {t.categories.parentCategory}
-                </Badge>
-              )}
-              {isSubCategory && (
-                <Badge variant="secondary" className="text-xs">
-                  {t.categories.subCategory}
-                </Badge>
-              )}
-              {!category.is_active && (
-                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
-                  {t.status.inactive}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>/{category.slug}</span>
-              {!isSubCategory && subCount > 0 && (
-                <span className="text-xs">• {subCount} {t.categories.subCategoriesCount}</span>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {/* Add Sub-Category button for parent categories */}
-          {!isSubCategory && canCreate && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleOpenDialog(undefined, category.id)}
-                  className="text-xs"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t.categories.addSubCategory}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t.categories.addSubCategory}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleToggleVisibility(category)}
-                disabled={!canEdit || togglingId === category.id}
-              >
-                {togglingId === category.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : category.is_active ? (
-                  <Eye className="h-4 w-4" />
-                ) : (
-                  <EyeOff className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{category.is_active ? t.categories.hidden : t.categories.shown}</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          {canEdit ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleOpenDialog(category)}
-              disabled={saving}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" disabled className="opacity-50">
-                  <Lock className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t.products.noEditPermission}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          {canDelete ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => openDeleteDialog(category)}
-              disabled={(!isSubCategory && subCount > 0) || deletingId === category.id}
-            >
-              {deletingId === category.id ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4 text-destructive" />
-              )}
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" disabled className="opacity-50">
-                  <Lock className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t.products.noDeletePermission}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </div>
-    );
-  };
+  const activeCategory = activeId ? categories.find(c => c.id === activeId) : null;
 
   return (
     <AdminLayout>
@@ -694,7 +803,7 @@ const AdminCategories = () => {
                       </div>
                     </div>
 
-                    {/* Parent Category Selection (only for sub-categories) */}
+                    {/* Parent Category Selection */}
                     {!formData.is_parent && (
                       <div className="space-y-1.5">
                         <Label htmlFor="parent_id">
@@ -848,6 +957,9 @@ const AdminCategories = () => {
             <p className="text-sm text-blue-800 dark:text-blue-200">
               <strong>{t.categories.tip}</strong> {t.categories.tipText}
             </p>
+            <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
+              {isBangla ? "💡 পুনর্বিন্যাস করতে টেনে আনুন এবং ফেলুন" : "💡 Drag and drop to reorder categories"}
+            </p>
           </div>
 
           {/* Categories List */}
@@ -874,44 +986,128 @@ const AdminCategories = () => {
                 </span>
               </div>
               
-              <div>
-                {parentCategories.map((parent, index) => {
-                  const subs = subCategoriesByParent[parent.id] || [];
-                  const isExpanded = expandedParents.has(parent.id);
-                  
-                  return (
-                    <div key={parent.id}>
-                      {renderCategoryRow(parent, false, index, parentCategories)}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
+                modifiers={[restrictToVerticalAxis]}
+              >
+                <div>
+                  {/* Parent Categories */}
+                  <SortableContext items={parentCategories.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                    {parentCategories.map((parent, index) => {
+                      const subs = subCategoriesByParent[parent.id] || [];
+                      const isExpanded = expandedParents.has(parent.id);
                       
-                      {/* Sub-categories */}
-                      {isExpanded && subs.length > 0 && (
-                        <div className="border-l-4 border-primary/20 ml-4">
-                          {subs.map((sub, subIndex) => 
-                            renderCategoryRow(sub, true, subIndex, subs)
+                      return (
+                        <div key={parent.id}>
+                          <SortableCategoryRow
+                            category={parent}
+                            isSubCategory={false}
+                            index={index}
+                            siblings={parentCategories}
+                            isExpanded={isExpanded}
+                            onToggleExpand={() => toggleParentExpand(parent.id)}
+                            onToggleVisibility={() => handleToggleVisibility(parent)}
+                            onEdit={() => handleOpenDialog(parent)}
+                            onDelete={() => openDeleteDialog(parent)}
+                            onAddSubCategory={() => handleOpenDialog(undefined, parent.id)}
+                            canEdit={canEdit}
+                            canDelete={canDelete}
+                            canCreate={canCreate}
+                            togglingId={togglingId}
+                            deletingId={deletingId}
+                            saving={saving}
+                            subCount={subs.length}
+                            getCategoryName={getCategoryName}
+                            t={t}
+                            language={language}
+                            isReordering={isReordering}
+                          />
+                          
+                          {/* Sub-categories with their own sortable context */}
+                          {isExpanded && subs.length > 0 && (
+                            <div className="border-l-4 border-primary/20 ml-4">
+                              <SortableContext items={subs.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                                {subs.map((sub, subIndex) => (
+                                  <SortableCategoryRow
+                                    key={sub.id}
+                                    category={sub}
+                                    isSubCategory={true}
+                                    index={subIndex}
+                                    siblings={subs}
+                                    isExpanded={false}
+                                    onToggleExpand={() => {}}
+                                    onToggleVisibility={() => handleToggleVisibility(sub)}
+                                    onEdit={() => handleOpenDialog(sub)}
+                                    onDelete={() => openDeleteDialog(sub)}
+                                    onAddSubCategory={() => {}}
+                                    canEdit={canEdit}
+                                    canDelete={canDelete}
+                                    canCreate={canCreate}
+                                    togglingId={togglingId}
+                                    deletingId={deletingId}
+                                    saving={saving}
+                                    subCount={0}
+                                    getCategoryName={getCategoryName}
+                                    t={t}
+                                    language={language}
+                                    isReordering={isReordering}
+                                  />
+                                ))}
+                              </SortableContext>
+                            </div>
+                          )}
+                          
+                          {/* No sub-categories message */}
+                          {isExpanded && subs.length === 0 && (
+                            <div className="pl-16 py-3 text-sm text-muted-foreground border-l-4 border-primary/20 ml-4">
+                              {t.categories.noSubCategories}
+                              {canCreate && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="ml-2 p-0 h-auto"
+                                  onClick={() => handleOpenDialog(undefined, parent.id)}
+                                >
+                                  {t.categories.addSubCategory}
+                                </Button>
+                              )}
+                            </div>
                           )}
                         </div>
+                      );
+                    })}
+                  </SortableContext>
+                </div>
+                
+                <DragOverlay>
+                  {activeCategory && (
+                    <div className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg shadow-lg">
+                      <GripVertical className="h-5 w-5 text-muted-foreground" />
+                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center border border-border">
+                        {(() => {
+                          const IconComponent = getCategoryIcon(activeCategory.icon_name);
+                          return <IconComponent className="h-5 w-5 text-muted-foreground" />;
+                        })()}
+                      </div>
+                      <span className="font-medium">{getCategoryName(activeCategory)}</span>
+                      {!activeCategory.parent_id && (
+                        <Badge variant="outline" className="text-xs">
+                          {t.categories.parentCategory}
+                        </Badge>
                       )}
-                      
-                      {/* No sub-categories message */}
-                      {isExpanded && subs.length === 0 && (
-                        <div className="pl-16 py-3 text-sm text-muted-foreground border-l-4 border-primary/20 ml-4">
-                          {t.categories.noSubCategories}
-                          {canCreate && (
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="ml-2 p-0 h-auto"
-                              onClick={() => handleOpenDialog(undefined, parent.id)}
-                            >
-                              {t.categories.addSubCategory}
-                            </Button>
-                          )}
-                        </div>
+                      {activeCategory.parent_id && (
+                        <Badge variant="secondary" className="text-xs">
+                          {t.categories.subCategory}
+                        </Badge>
                       )}
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </DragOverlay>
+              </DndContext>
             </div>
           )}
         </div>
