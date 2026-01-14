@@ -125,17 +125,22 @@ const AdminQuotes = () => {
   // Update status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("quote_requests")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUOTES_QUERY_KEY });
       toast.success(t.quotes.statusUpdateSuccess);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Failed to update status:", error);
       toast.error(t.quotes.statusUpdateError);
     },
   });
@@ -166,11 +171,16 @@ const AdminQuotes = () => {
 
       if (response.error) throw response.error;
 
-      // Update status to quoted
-      await supabase
+      // Update status to quoted and verify the update
+      const { data, error } = await supabase
         .from("quote_requests")
         .update({ status: "quoted" })
-        .eq("id", quote.id);
+        .eq("id", quote.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      if (!data) throw new Error("Failed to update quote status");
 
       return response.data;
     },

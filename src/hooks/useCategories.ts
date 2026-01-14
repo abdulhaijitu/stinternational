@@ -166,14 +166,17 @@ export const useUpdateCategoryOrder = () => {
 
   return useMutation({
     mutationFn: async (updates: { id: string; display_order: number }[]) => {
-      // Update each category's display_order
+      // Update each category's display_order and validate response
       for (const update of updates) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("categories")
           .update({ display_order: update.display_order })
-          .eq("id", update.id);
+          .eq("id", update.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        if (!data) throw new Error("No data returned from update");
       }
     },
     onSuccess: () => {
@@ -193,12 +196,16 @@ export const useToggleCategoryVisibility = () => {
 
   return useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("categories")
         .update({ is_active })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });

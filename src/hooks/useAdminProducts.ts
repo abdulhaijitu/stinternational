@@ -89,10 +89,10 @@ export const useDeleteProduct = () => {
       
       if (error) throw error;
       
-      // Optimistically update cache
-      queryClient.setQueryData<AdminProduct[]>(ADMIN_PRODUCTS_QUERY_KEY, (old) => 
-        old?.filter((p) => p.id !== productId) ?? []
-      );
+      // Invalidate and refetch to ensure UI is in sync with database
+      // Do NOT use optimistic update - wait for backend confirmation
+      await queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
       
       return productId;
     },

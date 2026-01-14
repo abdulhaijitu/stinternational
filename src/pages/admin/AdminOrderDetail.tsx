@@ -169,14 +169,18 @@ const AdminOrderDetail = () => {
     
     setUpdatingStatus(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("orders")
         .update({ status: newStatus as any })
-        .eq("id", order.id);
+        .eq("id", order.id)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
 
-      setOrder({ ...order, status: newStatus });
+      // Update local state only after backend confirmation
+      setOrder({ ...order, status: data.status });
       toast.success(t.orders.updateSuccess);
     } catch (error) {
       console.error("Error updating status:", error);
@@ -193,7 +197,7 @@ const AdminOrderDetail = () => {
     try {
       const newTotal = order.subtotal + editForm.shipping_cost;
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("orders")
         .update({
           customer_name: editForm.customer_name,
@@ -207,17 +211,26 @@ const AdminOrderDetail = () => {
           shipping_cost: editForm.shipping_cost,
           total: newTotal,
         })
-        .eq("id", order.id);
+        .eq("id", order.id)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
 
+      // Update local state only after backend confirmation with returned data
       setOrder({
         ...order,
-        ...editForm,
-        company_name: editForm.company_name || null,
-        shipping_postal_code: editForm.shipping_postal_code || null,
-        notes: editForm.notes || null,
-        total: newTotal,
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        customer_phone: data.customer_phone,
+        company_name: data.company_name,
+        shipping_address: data.shipping_address,
+        shipping_city: data.shipping_city,
+        shipping_postal_code: data.shipping_postal_code,
+        notes: data.notes,
+        shipping_cost: data.shipping_cost,
+        total: data.total,
       });
       
       setIsEditing(false);

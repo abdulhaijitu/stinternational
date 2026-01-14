@@ -89,31 +89,38 @@ const AdminLogos = () => {
     setSaving(true);
     try {
       if (editingLogo) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("institution_logos")
           .update({
             name: formData.name,
             logo_url: formData.logo_url,
             is_active: formData.is_active,
           })
-          .eq("id", editingLogo.id);
+          .eq("id", editingLogo.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        if (!data) throw new Error("No data returned from update");
+        
+        setDialogOpen(false);
+        await fetchLogos();
         toast.success(t.logos.updateSuccess);
       } else {
-        const { error } = await supabase.from("institution_logos").insert([{
+        const { data, error } = await supabase.from("institution_logos").insert([{
           name: formData.name,
           logo_url: formData.logo_url,
           is_active: formData.is_active,
           display_order: logos.length + 1,
-        }]);
+        }]).select().single();
 
         if (error) throw error;
+        if (!data) throw new Error("No data returned from insert");
+        
+        setDialogOpen(false);
+        await fetchLogos();
         toast.success(t.logos.saveSuccess);
       }
-
-      setDialogOpen(false);
-      fetchLogos();
     } catch (error: any) {
       console.error("Error saving logo:", error);
       toast.error(t.logos.saveError);
@@ -128,7 +135,9 @@ const AdminLogos = () => {
     try {
       const { error } = await supabase.from("institution_logos").delete().eq("id", id);
       if (error) throw error;
-      setLogos(logos.filter((l) => l.id !== id));
+      
+      // Refetch to ensure UI is in sync with database
+      await fetchLogos();
       toast.success(t.logos.deleteSuccess);
     } catch (error) {
       console.error("Error deleting logo:", error);
@@ -138,16 +147,18 @@ const AdminLogos = () => {
 
   const handleToggleActive = async (logo: InstitutionLogo) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("institution_logos")
         .update({ is_active: !logo.is_active })
-        .eq("id", logo.id);
+        .eq("id", logo.id)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
       
-      setLogos(logos.map(l => 
-        l.id === logo.id ? { ...l, is_active: !l.is_active } : l
-      ));
+      // Refetch to ensure UI is in sync with database
+      await fetchLogos();
       toast.success(!logo.is_active ? t.logos.statusEnabled : t.logos.statusDisabled);
     } catch (error) {
       console.error("Error toggling logo:", error);
@@ -158,24 +169,23 @@ const AdminLogos = () => {
   const handleMoveUp = async (index: number) => {
     if (index === 0) return;
     
-    const newLogos = [...logos];
-    const currentLogo = newLogos[index];
-    const prevLogo = newLogos[index - 1];
+    const currentLogo = logos[index];
+    const prevLogo = logos[index - 1];
     
     const currentOrder = currentLogo.display_order;
     const prevOrder = prevLogo.display_order;
     
     try {
-      await Promise.all([
-        supabase.from("institution_logos").update({ display_order: prevOrder }).eq("id", currentLogo.id),
-        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", prevLogo.id),
+      const [result1, result2] = await Promise.all([
+        supabase.from("institution_logos").update({ display_order: prevOrder }).eq("id", currentLogo.id).select(),
+        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", prevLogo.id).select(),
       ]);
       
-      [newLogos[index], newLogos[index - 1]] = [newLogos[index - 1], newLogos[index]];
-      newLogos[index].display_order = currentOrder;
-      newLogos[index - 1].display_order = prevOrder;
+      if (result1.error) throw result1.error;
+      if (result2.error) throw result2.error;
       
-      setLogos(newLogos);
+      // Refetch to ensure UI is in sync with database
+      await fetchLogos();
     } catch (error) {
       console.error("Error reordering:", error);
       toast.error(t.logos.reorderError);
@@ -185,24 +195,23 @@ const AdminLogos = () => {
   const handleMoveDown = async (index: number) => {
     if (index === logos.length - 1) return;
     
-    const newLogos = [...logos];
-    const currentLogo = newLogos[index];
-    const nextLogo = newLogos[index + 1];
+    const currentLogo = logos[index];
+    const nextLogo = logos[index + 1];
     
     const currentOrder = currentLogo.display_order;
     const nextOrder = nextLogo.display_order;
     
     try {
-      await Promise.all([
-        supabase.from("institution_logos").update({ display_order: nextOrder }).eq("id", currentLogo.id),
-        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", nextLogo.id),
+      const [result1, result2] = await Promise.all([
+        supabase.from("institution_logos").update({ display_order: nextOrder }).eq("id", currentLogo.id).select(),
+        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", nextLogo.id).select(),
       ]);
       
-      [newLogos[index], newLogos[index + 1]] = [newLogos[index + 1], newLogos[index]];
-      newLogos[index].display_order = currentOrder;
-      newLogos[index + 1].display_order = nextOrder;
+      if (result1.error) throw result1.error;
+      if (result2.error) throw result2.error;
       
-      setLogos(newLogos);
+      // Refetch to ensure UI is in sync with database
+      await fetchLogos();
     } catch (error) {
       console.error("Error reordering:", error);
       toast.error(t.logos.reorderError);

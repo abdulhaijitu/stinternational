@@ -153,16 +153,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error("No user logged in") };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .update(updates)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select()
+      .single();
 
-    if (!error) {
-      await refreshProfile();
+    if (error) {
+      return { error };
+    }
+    
+    if (!data) {
+      return { error: new Error("No data returned from update") };
     }
 
-    return { error };
+    // Refetch profile to ensure UI is in sync with database
+    await refreshProfile();
+    return { error: null };
   };
 
   return (
