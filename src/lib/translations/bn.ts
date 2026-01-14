@@ -261,42 +261,128 @@ export const bn = {
   // Request Quote (RFQ)
   rfq: {
     title: "মূল্য জানতে চান",
-    subtitle: "বাল্ক অর্ডার এবং প্রাতিষ্ঠানিক ক্রয়ের জন্য প্রতিযোগিতামূলক মূল্য পান",
+    subtitle: "বাল্ক অর্ডার এবং প্রাতিষ্ঠানিক ক্রয়ের জন্য ব্যক্তিগত মূল্য পান। আমাদের টিম ২৪ ঘন্টার মধ্যে সাড়া দেবে।",
     
-    // Form sections
-    contactInfo: "যোগাযোগের তথ্য",
-    productInfo: "পণ্যের তথ্য",
-    deliveryInfo: "ডেলিভারি তথ্য",
-    additionalInfo: "অতিরিক্ত তথ্য",
+    // Steps
+    step1: "প্রতিষ্ঠানের তথ্য",
+    step2: "প্রয়োজনীয়তা",
+    step3: "ডেলিভারি",
+    step4: "নিশ্চিত করুন",
     
-    // Form fields
+    // Step 1
+    companyInfo: "প্রতিষ্ঠানের তথ্য",
+    tellUsAbout: "আপনার প্রতিষ্ঠান সম্পর্কে বলুন",
+    companyName: "কোম্পানি / প্রতিষ্ঠানের নাম",
+    companyNamePlaceholder: "যেমন, ঢাকা বিশ্ববিদ্যালয়",
+    organizationType: "প্রতিষ্ঠানের ধরন",
+    selectOrganization: "প্রতিষ্ঠানের ধরন নির্বাচন করুন",
     contactPerson: "যোগাযোগকারী ব্যক্তি",
-    companyType: "প্রতিষ্ঠানের ধরন",
-    productCategory: "পণ্যের ক্যাটাগরি",
-    productDetails: "পণ্যের বিবরণ",
-    quantity: "প্রয়োজনীয় পরিমাণ",
-    deliveryUrgency: "ডেলিভারি জরুরিতা",
-    deliveryAddress: "ডেলিভারি ঠিকানা",
-    deliveryCity: "ডেলিভারি শহর",
-    budgetRange: "বাজেট সীমা",
-    preferredPayment: "পছন্দের পেমেন্ট পদ্ধতি",
-    additionalNotes: "অতিরিক্ত নোট",
+    contactPersonPlaceholder: "আপনার পুরো নাম",
+    emailAddress: "ইমেইল ঠিকানা",
+    emailPlaceholder: "you@company.com",
+    phoneNumber: "ফোন নম্বর",
+    phonePlaceholder: "+৮৮০ ১XXX XXXXXX",
     
     // Company types
-    educational: "শিক্ষা প্রতিষ্ঠান",
+    university: "বিশ্ববিদ্যালয় / কলেজ",
+    researchLab: "গবেষণা ল্যাবরেটরি",
+    hospital: "হাসপাতাল / মেডিকেল সেন্টার",
+    factory: "কারখানা / উৎপাদন",
     government: "সরকারি প্রতিষ্ঠান",
-    private: "বেসরকারি কোম্পানি",
-    hospital: "হাসপাতাল/স্বাস্থ্যসেবা",
-    research: "গবেষণা প্রতিষ্ঠান",
-    individual: "ব্যক্তিগত",
+    school: "স্কুল / শিক্ষা প্রতিষ্ঠান",
+    ngo: "এনজিও / অলাভজনক",
+    privateBusiness: "বেসরকারি ব্যবসা",
+    other: "অন্যান্য",
     
-    // Urgency options
+    // Step 2
+    productRequirements: "পণ্যের প্রয়োজনীয়তা",
+    describeNeeds: "আপনার কী প্রয়োজন তা বর্ণনা করুন",
+    productCategory: "পণ্যের ক্যাটাগরি",
+    selectCategory: "পণ্যের ক্যাটাগরি নির্বাচন করুন",
+    productDetails: "পণ্যের বিবরণ",
+    productDetailsPlaceholder: "আপনার প্রয়োজনীয় পণ্য বর্ণনা করুন, নির্দিষ্ট মডেল, স্পেসিফিকেশন, ব্র্যান্ড ইত্যাদি সহ।",
+    quantityRequired: "পরিমাণের প্রয়োজনীয়তা",
+    quantityPlaceholder: "যেমন, ১০ ইউনিট, ৫০-১০০ পিস, বাল্ক পরিমাণ",
+    budgetRange: "বাজেট সীমা (ঐচ্ছিক)",
+    selectBudget: "বাজেট সীমা নির্বাচন করুন (ঐচ্ছিক)",
+    
+    // Product categories
+    catLaboratory: "ল্যাবরেটরি যন্ত্রপাতি",
+    catMeasurement: "পরিমাপ যন্ত্র",
+    catIndustrial: "শিল্প যন্ত্রপাতি",
+    catEducational: "শিক্ষা সরবরাহ",
+    catSafety: "নিরাপত্তা যন্ত্রপাতি",
+    catChemicals: "রাসায়নিক ও রিএজেন্ট",
+    catMultiple: "একাধিক ক্যাটাগরি",
+    catOther: "অন্যান্য",
+    
+    // Budget ranges
+    budgetUnder50k: "৳৫০,০০০ এর নিচে",
+    budget50k100k: "৳৫০,০০০ - ৳১,০০,০০০",
+    budget100k500k: "৳১,০০,০০০ - ৳৫,০০,০০০",
+    budget500k1m: "৳৫,০০,০০০ - ৳১০,০০,০০০",
+    budgetAbove1m: "৳১০,০০,০০০ এর উপরে",
+    budgetNotSpecified: "উল্লেখ করতে চাই না",
+    
+    // Step 3
+    deliveryPreferences: "ডেলিভারি পছন্দ",
+    whereWhen: "কোথায় এবং কখন প্রয়োজন?",
+    deliveryAddress: "ডেলিভারি ঠিকানা",
+    addressPlaceholder: "পূর্ণ ডেলিভারি ঠিকানা",
+    deliveryCity: "শহর",
+    cityPlaceholder: "যেমন, ঢাকা, চট্টগ্রাম",
+    deliveryTimeline: "ডেলিভারি সময়সীমা",
+    timelinePlaceholder: "কত তাড়াতাড়ি প্রয়োজন?",
+    preferredPayment: "পছন্দের পেমেন্ট পদ্ধতি (ঐচ্ছিক)",
+    paymentPlaceholder: "পেমেন্ট পদ্ধতি নির্বাচন করুন (ঐচ্ছিক)",
+    additionalNotes: "অতিরিক্ত নোট (ঐচ্ছিক)",
+    notesPlaceholder: "অন্য কোনো প্রয়োজনীয়তা বা প্রশ্ন",
+    
+    // Delivery urgency
     urgent: "জরুরি (১ সপ্তাহের মধ্যে)",
-    standard: "সাধারণ (২-৪ সপ্তাহ)",
-    flexible: "নমনীয় (১+ মাস)",
+    within2Weeks: "২ সপ্তাহের মধ্যে",
+    within1Month: "১ মাসের মধ্যে",
+    flexible: "নমনীয় / তাড়া নেই",
     
+    // Payment methods
+    bankTransfer: "ব্যাংক ট্রান্সফার",
+    cashOnDelivery: "ক্যাশ অন ডেলিভারি",
+    creditTerms: "ক্রেডিট টার্মস (প্রতিষ্ঠানের জন্য)",
+    letterOfCredit: "লেটার অব ক্রেডিট (LC)",
+    
+    // Step 4
+    reviewRequest: "আপনার অনুরোধ পর্যালোচনা করুন",
+    verifyInfo: "জমা দেওয়ার আগে তথ্য যাচাই করুন",
+    companyInfoSummary: "প্রতিষ্ঠানের তথ্য",
+    productReqSummary: "পণ্যের প্রয়োজনীয়তা",
+    deliveryPrefSummary: "ডেলিভারি পছন্দ",
+    company: "কোম্পানি",
+    type: "ধরন",
+    contact: "যোগাযোগ",
+    email: "ইমেইল",
+    phone: "ফোন",
+    category: "ক্যাটাগরি",
+    quantity: "পরিমাণ",
+    budget: "বাজেট",
+    details: "বিবরণ",
+    city: "শহর",
+    timeline: "সময়সীমা",
+    payment: "পেমেন্ট",
+    address: "ঠিকানা",
+    notes: "নোট",
+    
+    // Navigation
+    previous: "পূর্ববর্তী",
+    next: "পরবর্তী",
+    submitting: "জমা দেওয়া হচ্ছে...",
     submitRequest: "অনুরোধ জমা দিন",
-    successMessage: "আপনার মূল্য অনুরোধ সফলভাবে জমা হয়েছে!",
+    
+    // Success/Error
+    successMessage: "কোটেশন অনুরোধ সফলভাবে জমা হয়েছে! আমরা ২৪ ঘন্টার মধ্যে আপনার সাথে যোগাযোগ করব।",
+    errorMessage: "অনুরোধ জমা দিতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    
+    // Contact
+    needAssistance: "তাৎক্ষণিক সহায়তা প্রয়োজন? আমাদের কল করুন",
     
     // Product page specific
     forInstitutional: "প্রাতিষ্ঠানিক ক্রয়ের জন্য?",

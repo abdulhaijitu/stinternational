@@ -261,42 +261,128 @@ export const en = {
   // Request Quote (RFQ)
   rfq: {
     title: "Request a Quote",
-    subtitle: "Get competitive pricing for bulk orders and institutional purchases",
+    subtitle: "Get personalized pricing for bulk orders and institutional purchases. Our team will respond within 24 hours.",
     
-    // Form sections
-    contactInfo: "Contact Information",
-    productInfo: "Product Information",
-    deliveryInfo: "Delivery Information",
-    additionalInfo: "Additional Information",
+    // Steps
+    step1: "Company Info",
+    step2: "Requirements",
+    step3: "Delivery",
+    step4: "Confirm",
     
-    // Form fields
+    // Step 1
+    companyInfo: "Company Information",
+    tellUsAbout: "Tell us about your organization",
+    companyName: "Company / Institution Name",
+    companyNamePlaceholder: "e.g., Dhaka University",
+    organizationType: "Organization Type",
+    selectOrganization: "Select organization type",
     contactPerson: "Contact Person",
-    companyType: "Company Type",
-    productCategory: "Product Category",
-    productDetails: "Product Details",
-    quantity: "Quantity Required",
-    deliveryUrgency: "Delivery Urgency",
-    deliveryAddress: "Delivery Address",
-    deliveryCity: "Delivery City",
-    budgetRange: "Budget Range",
-    preferredPayment: "Preferred Payment Method",
-    additionalNotes: "Additional Notes",
+    contactPersonPlaceholder: "Your full name",
+    emailAddress: "Email Address",
+    emailPlaceholder: "you@company.com",
+    phoneNumber: "Phone Number",
+    phonePlaceholder: "+880 1XXX XXXXXX",
     
     // Company types
-    educational: "Educational Institution",
-    government: "Government Organization",
-    private: "Private Company",
-    hospital: "Hospital/Healthcare",
-    research: "Research Institute",
-    individual: "Individual",
+    university: "University / College",
+    researchLab: "Research Laboratory",
+    hospital: "Hospital / Medical Center",
+    factory: "Factory / Manufacturing",
+    government: "Government Institution",
+    school: "School / Educational Institute",
+    ngo: "NGO / Non-Profit",
+    privateBusiness: "Private Business",
+    other: "Other",
     
-    // Urgency options
+    // Step 2
+    productRequirements: "Product Requirements",
+    describeNeeds: "Describe what you need",
+    productCategory: "Product Category",
+    selectCategory: "Select product category",
+    productDetails: "Product Details",
+    productDetailsPlaceholder: "Describe the products you need, including specific models, specifications, brands, etc.",
+    quantityRequired: "Quantity Requirements",
+    quantityPlaceholder: "e.g., 10 units, 50-100 pieces, bulk quantity",
+    budgetRange: "Budget Range (Optional)",
+    selectBudget: "Select budget range (optional)",
+    
+    // Product categories
+    catLaboratory: "Laboratory Equipment",
+    catMeasurement: "Measurement Instruments",
+    catIndustrial: "Industrial Equipment",
+    catEducational: "Educational Supplies",
+    catSafety: "Safety Equipment",
+    catChemicals: "Chemicals & Reagents",
+    catMultiple: "Multiple Categories",
+    catOther: "Other",
+    
+    // Budget ranges
+    budgetUnder50k: "Under ৳50,000",
+    budget50k100k: "৳50,000 - ৳100,000",
+    budget100k500k: "৳100,000 - ৳500,000",
+    budget500k1m: "৳500,000 - ৳10,00,000",
+    budgetAbove1m: "Above ৳10,00,000",
+    budgetNotSpecified: "Prefer not to specify",
+    
+    // Step 3
+    deliveryPreferences: "Delivery Preferences",
+    whereWhen: "Where and when do you need it?",
+    deliveryAddress: "Delivery Address",
+    addressPlaceholder: "Full delivery address",
+    deliveryCity: "City",
+    cityPlaceholder: "e.g., Dhaka, Chittagong",
+    deliveryTimeline: "Delivery Timeline",
+    timelinePlaceholder: "How soon do you need it?",
+    preferredPayment: "Preferred Payment Method (Optional)",
+    paymentPlaceholder: "Select payment method (optional)",
+    additionalNotes: "Additional Notes (Optional)",
+    notesPlaceholder: "Any other requirements or questions",
+    
+    // Delivery urgency
     urgent: "Urgent (Within 1 week)",
-    standard: "Standard (2-4 weeks)",
-    flexible: "Flexible (1+ month)",
+    within2Weeks: "Within 2 weeks",
+    within1Month: "Within 1 month",
+    flexible: "Flexible / No Rush",
     
-    submitRequest: "Submit Quote Request",
-    successMessage: "Your quote request has been submitted successfully!",
+    // Payment methods
+    bankTransfer: "Bank Transfer",
+    cashOnDelivery: "Cash on Delivery",
+    creditTerms: "Credit Terms (for institutions)",
+    letterOfCredit: "Letter of Credit (LC)",
+    
+    // Step 4
+    reviewRequest: "Review Your Request",
+    verifyInfo: "Please verify the information before submitting",
+    companyInfoSummary: "Company Information",
+    productReqSummary: "Product Requirements",
+    deliveryPrefSummary: "Delivery Preferences",
+    company: "Company",
+    type: "Type",
+    contact: "Contact",
+    email: "Email",
+    phone: "Phone",
+    category: "Category",
+    quantity: "Quantity",
+    budget: "Budget",
+    details: "Details",
+    city: "City",
+    timeline: "Timeline",
+    payment: "Payment",
+    address: "Address",
+    notes: "Notes",
+    
+    // Navigation
+    previous: "Previous",
+    next: "Next",
+    submitting: "Submitting...",
+    submitRequest: "Submit Request",
+    
+    // Success/Error
+    successMessage: "Quote request submitted successfully! We'll contact you within 24 hours.",
+    errorMessage: "Failed to submit request. Please try again.",
+    
+    // Contact
+    needAssistance: "Need immediate assistance? Call us at",
     
     // Product page specific
     forInstitutional: "For institutional purchases?",

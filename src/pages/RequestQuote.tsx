@@ -27,6 +27,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Validation schemas for each step
 const step1Schema = z.object({
@@ -55,64 +56,68 @@ const step3Schema = z.object({
 const fullSchema = step1Schema.merge(step2Schema).merge(step3Schema);
 type FormData = z.infer<typeof fullSchema>;
 
-const companyTypes = [
-  { value: "university", label: "University / College" },
-  { value: "research_lab", label: "Research Laboratory" },
-  { value: "hospital", label: "Hospital / Medical Center" },
-  { value: "factory", label: "Factory / Manufacturing" },
-  { value: "government", label: "Government Institution" },
-  { value: "school", label: "School / Educational Institute" },
-  { value: "ngo", label: "NGO / Non-Profit" },
-  { value: "private_business", label: "Private Business" },
-  { value: "other", label: "Other" },
-];
-
-const productCategories = [
-  { value: "laboratory", label: "Laboratory Equipment" },
-  { value: "measurement", label: "Measurement Instruments" },
-  { value: "industrial", label: "Industrial Equipment" },
-  { value: "educational", label: "Educational Supplies" },
-  { value: "safety", label: "Safety Equipment" },
-  { value: "chemicals", label: "Chemicals & Reagents" },
-  { value: "multiple", label: "Multiple Categories" },
-  { value: "other", label: "Other" },
-];
-
-const deliveryUrgency = [
-  { value: "urgent", label: "Urgent (Within 1 week)" },
-  { value: "within_week", label: "Within 2 weeks" },
-  { value: "within_month", label: "Within 1 month" },
-  { value: "flexible", label: "Flexible / No Rush" },
-];
-
-const paymentMethods = [
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cash_on_delivery", label: "Cash on Delivery" },
-  { value: "credit", label: "Credit Terms (for institutions)" },
-  { value: "lc", label: "Letter of Credit (LC)" },
-];
-
-const budgetRanges = [
-  { value: "under_50k", label: "Under ৳50,000" },
-  { value: "50k_100k", label: "৳50,000 - ৳100,000" },
-  { value: "100k_500k", label: "৳100,000 - ৳500,000" },
-  { value: "500k_1m", label: "৳500,000 - ৳10,00,000" },
-  { value: "above_1m", label: "Above ৳10,00,000" },
-  { value: "not_specified", label: "Prefer not to specify" },
-];
-
-const steps = [
-  { id: 1, title: "Company Info", icon: Building2 },
-  { id: 2, title: "Requirements", icon: Package },
-  { id: 3, title: "Delivery", icon: Truck },
-  { id: 4, title: "Confirm", icon: CheckCircle },
-];
-
 const RequestQuote = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, language } = useLanguage();
+
+  const fontClass = language === "bn" ? "font-siliguri" : "";
+
+  // Translated options
+  const companyTypes = [
+    { value: "university", label: t.rfq.university },
+    { value: "research_lab", label: t.rfq.researchLab },
+    { value: "hospital", label: t.rfq.hospital },
+    { value: "factory", label: t.rfq.factory },
+    { value: "government", label: t.rfq.government },
+    { value: "school", label: t.rfq.school },
+    { value: "ngo", label: t.rfq.ngo },
+    { value: "private_business", label: t.rfq.privateBusiness },
+    { value: "other", label: t.rfq.other },
+  ];
+
+  const productCategories = [
+    { value: "laboratory", label: t.rfq.catLaboratory },
+    { value: "measurement", label: t.rfq.catMeasurement },
+    { value: "industrial", label: t.rfq.catIndustrial },
+    { value: "educational", label: t.rfq.catEducational },
+    { value: "safety", label: t.rfq.catSafety },
+    { value: "chemicals", label: t.rfq.catChemicals },
+    { value: "multiple", label: t.rfq.catMultiple },
+    { value: "other", label: t.rfq.catOther },
+  ];
+
+  const deliveryUrgency = [
+    { value: "urgent", label: t.rfq.urgent },
+    { value: "within_week", label: t.rfq.within2Weeks },
+    { value: "within_month", label: t.rfq.within1Month },
+    { value: "flexible", label: t.rfq.flexible },
+  ];
+
+  const paymentMethods = [
+    { value: "bank_transfer", label: t.rfq.bankTransfer },
+    { value: "cash_on_delivery", label: t.rfq.cashOnDelivery },
+    { value: "credit", label: t.rfq.creditTerms },
+    { value: "lc", label: t.rfq.letterOfCredit },
+  ];
+
+  const budgetRanges = [
+    { value: "under_50k", label: t.rfq.budgetUnder50k },
+    { value: "50k_100k", label: t.rfq.budget50k100k },
+    { value: "100k_500k", label: t.rfq.budget100k500k },
+    { value: "500k_1m", label: t.rfq.budget500k1m },
+    { value: "above_1m", label: t.rfq.budgetAbove1m },
+    { value: "not_specified", label: t.rfq.budgetNotSpecified },
+  ];
+
+  const steps = [
+    { id: 1, title: t.rfq.step1, icon: Building2 },
+    { id: 2, title: t.rfq.step2, icon: Package },
+    { id: 3, title: t.rfq.step3, icon: Truck },
+    { id: 4, title: t.rfq.step4, icon: CheckCircle },
+  ];
 
   const form = useForm<FormData>({
     resolver: zodResolver(fullSchema),
@@ -218,14 +223,13 @@ const RequestQuote = () => {
         });
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
-        // Don't fail the submission if email fails
       }
 
-      toast.success("Quote request submitted successfully! We'll contact you within 24 hours.");
+      toast.success(t.rfq.successMessage);
       navigate("/");
     } catch (error: any) {
       console.error("Error submitting quote request:", error);
-      toast.error("Failed to submit request. Please try again.");
+      toast.error(t.rfq.errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -235,14 +239,13 @@ const RequestQuote = () => {
 
   return (
     <Layout>
-      <div className="bg-muted/30 min-h-screen py-12">
+      <div className={`bg-muted/30 min-h-screen py-12 ${fontClass}`}>
         <div className="container-premium">
           {/* Header */}
           <div className="text-center mb-10">
-            <h1 className="mb-4">Request a Quote</h1>
+            <h1 className="mb-4">{t.rfq.title}</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Get personalized pricing for bulk orders and institutional purchases. 
-              Our team will respond within 24 hours.
+              {t.rfq.subtitle}
             </p>
           </div>
 
@@ -286,17 +289,17 @@ const RequestQuote = () => {
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Company Information</h2>
-                    <p className="text-sm text-muted-foreground">Tell us about your organization</p>
+                    <h2 className="text-xl font-semibold mb-1">{t.rfq.companyInfo}</h2>
+                    <p className="text-sm text-muted-foreground">{t.rfq.tellUsAbout}</p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="company_name">Company / Institution Name *</Label>
+                      <Label htmlFor="company_name">{t.rfq.companyName} *</Label>
                       <Input
                         id="company_name"
                         {...register("company_name")}
-                        placeholder="e.g., Dhaka University"
+                        placeholder={t.rfq.companyNamePlaceholder}
                         className="mt-1.5"
                       />
                       {errors.company_name && (
@@ -305,13 +308,13 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="company_type">Organization Type *</Label>
+                      <Label htmlFor="company_type">{t.rfq.organizationType} *</Label>
                       <Select
                         value={watchedValues.company_type}
                         onValueChange={(value) => setValue("company_type", value, { shouldValidate: true })}
                       >
                         <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="Select organization type" />
+                          <SelectValue placeholder={t.rfq.selectOrganization} />
                         </SelectTrigger>
                         <SelectContent>
                           {companyTypes.map((type) => (
@@ -327,11 +330,11 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="contact_person">Contact Person *</Label>
+                      <Label htmlFor="contact_person">{t.rfq.contactPerson} *</Label>
                       <Input
                         id="contact_person"
                         {...register("contact_person")}
-                        placeholder="Your full name"
+                        placeholder={t.rfq.contactPersonPlaceholder}
                         className="mt-1.5"
                       />
                       {errors.contact_person && (
@@ -341,12 +344,12 @@ const RequestQuote = () => {
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="email">Email Address *</Label>
+                        <Label htmlFor="email">{t.rfq.emailAddress} *</Label>
                         <Input
                           id="email"
                           type="email"
                           {...register("email")}
-                          placeholder="you@company.com"
+                          placeholder={t.rfq.emailPlaceholder}
                           className="mt-1.5"
                         />
                         {errors.email && (
@@ -354,12 +357,12 @@ const RequestQuote = () => {
                         )}
                       </div>
                       <div>
-                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Label htmlFor="phone">{t.rfq.phoneNumber} *</Label>
                         <Input
                           id="phone"
                           type="tel"
                           {...register("phone")}
-                          placeholder="+880 1XXX XXXXXX"
+                          placeholder={t.rfq.phonePlaceholder}
                           className="mt-1.5"
                         />
                         {errors.phone && (
@@ -375,19 +378,19 @@ const RequestQuote = () => {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Product Requirements</h2>
-                    <p className="text-sm text-muted-foreground">Describe what you need</p>
+                    <h2 className="text-xl font-semibold mb-1">{t.rfq.productRequirements}</h2>
+                    <p className="text-sm text-muted-foreground">{t.rfq.describeNeeds}</p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="product_category">Product Category *</Label>
+                      <Label htmlFor="product_category">{t.rfq.productCategory} *</Label>
                       <Select
                         value={watchedValues.product_category}
                         onValueChange={(value) => setValue("product_category", value, { shouldValidate: true })}
                       >
                         <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="Select product category" />
+                          <SelectValue placeholder={t.rfq.selectCategory} />
                         </SelectTrigger>
                         <SelectContent>
                           {productCategories.map((cat) => (
@@ -403,11 +406,11 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="product_details">Product Details *</Label>
+                      <Label htmlFor="product_details">{t.rfq.productDetails} *</Label>
                       <Textarea
                         id="product_details"
                         {...register("product_details")}
-                        placeholder="Describe the products you need, including specific models, specifications, brands, etc."
+                        placeholder={t.rfq.productDetailsPlaceholder}
                         className="mt-1.5 min-h-[120px]"
                       />
                       {errors.product_details && (
@@ -416,11 +419,11 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="quantity">Quantity Requirements *</Label>
+                      <Label htmlFor="quantity">{t.rfq.quantityRequired} *</Label>
                       <Input
                         id="quantity"
                         {...register("quantity")}
-                        placeholder="e.g., 10 units, 50-100 pieces, bulk quantity"
+                        placeholder={t.rfq.quantityPlaceholder}
                         className="mt-1.5"
                       />
                       {errors.quantity && (
@@ -429,13 +432,13 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="budget_range">Budget Range (Optional)</Label>
+                      <Label htmlFor="budget_range">{t.rfq.budgetRange}</Label>
                       <Select
                         value={watchedValues.budget_range}
                         onValueChange={(value) => setValue("budget_range", value)}
                       >
                         <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="Select budget range (optional)" />
+                          <SelectValue placeholder={t.rfq.selectBudget} />
                         </SelectTrigger>
                         <SelectContent>
                           {budgetRanges.map((range) => (
@@ -454,17 +457,17 @@ const RequestQuote = () => {
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Delivery Preferences</h2>
-                    <p className="text-sm text-muted-foreground">Where and when do you need it?</p>
+                    <h2 className="text-xl font-semibold mb-1">{t.rfq.deliveryPreferences}</h2>
+                    <p className="text-sm text-muted-foreground">{t.rfq.whereWhen}</p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="delivery_address">Delivery Address *</Label>
+                      <Label htmlFor="delivery_address">{t.rfq.deliveryAddress} *</Label>
                       <Textarea
                         id="delivery_address"
                         {...register("delivery_address")}
-                        placeholder="Full delivery address"
+                        placeholder={t.rfq.addressPlaceholder}
                         className="mt-1.5"
                       />
                       {errors.delivery_address && (
@@ -473,11 +476,11 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="delivery_city">City *</Label>
+                      <Label htmlFor="delivery_city">{t.rfq.deliveryCity} *</Label>
                       <Input
                         id="delivery_city"
                         {...register("delivery_city")}
-                        placeholder="e.g., Dhaka, Chittagong"
+                        placeholder={t.rfq.cityPlaceholder}
                         className="mt-1.5"
                       />
                       {errors.delivery_city && (
@@ -486,13 +489,13 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="delivery_urgency">Delivery Timeline *</Label>
+                      <Label htmlFor="delivery_urgency">{t.rfq.deliveryTimeline} *</Label>
                       <Select
                         value={watchedValues.delivery_urgency}
                         onValueChange={(value) => setValue("delivery_urgency", value, { shouldValidate: true })}
                       >
                         <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="How soon do you need it?" />
+                          <SelectValue placeholder={t.rfq.timelinePlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
                           {deliveryUrgency.map((urgency) => (
@@ -508,13 +511,13 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="preferred_payment">Preferred Payment Method (Optional)</Label>
+                      <Label htmlFor="preferred_payment">{t.rfq.preferredPayment}</Label>
                       <Select
                         value={watchedValues.preferred_payment}
                         onValueChange={(value) => setValue("preferred_payment", value)}
                       >
                         <SelectTrigger className="mt-1.5">
-                          <SelectValue placeholder="Select payment method (optional)" />
+                          <SelectValue placeholder={t.rfq.paymentPlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
                           {paymentMethods.map((method) => (
@@ -527,11 +530,11 @@ const RequestQuote = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="additional_notes">Additional Notes (Optional)</Label>
+                      <Label htmlFor="additional_notes">{t.rfq.additionalNotes}</Label>
                       <Textarea
                         id="additional_notes"
                         {...register("additional_notes")}
-                        placeholder="Any other requirements or questions"
+                        placeholder={t.rfq.notesPlaceholder}
                         className="mt-1.5"
                       />
                     </div>
@@ -543,8 +546,8 @@ const RequestQuote = () => {
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Review Your Request</h2>
-                    <p className="text-sm text-muted-foreground">Please verify the information before submitting</p>
+                    <h2 className="text-xl font-semibold mb-1">{t.rfq.reviewRequest}</h2>
+                    <p className="text-sm text-muted-foreground">{t.rfq.verifyInfo}</p>
                   </div>
 
                   <div className="space-y-6">
@@ -552,18 +555,18 @@ const RequestQuote = () => {
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
-                        Company Information
+                        {t.rfq.companyInfoSummary}
                       </h4>
                       <dl className="grid grid-cols-2 gap-2 text-sm">
-                        <dt className="text-muted-foreground">Company:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.company}:</dt>
                         <dd className="font-medium">{watchedValues.company_name}</dd>
-                        <dt className="text-muted-foreground">Type:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.type}:</dt>
                         <dd className="font-medium">{companyTypes.find(t => t.value === watchedValues.company_type)?.label}</dd>
-                        <dt className="text-muted-foreground">Contact:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.contact}:</dt>
                         <dd className="font-medium">{watchedValues.contact_person}</dd>
-                        <dt className="text-muted-foreground">Email:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.email}:</dt>
                         <dd className="font-medium">{watchedValues.email}</dd>
-                        <dt className="text-muted-foreground">Phone:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.phone}:</dt>
                         <dd className="font-medium">{watchedValues.phone}</dd>
                       </dl>
                     </div>
@@ -572,23 +575,23 @@ const RequestQuote = () => {
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                         <Package className="h-4 w-4" />
-                        Product Requirements
+                        {t.rfq.productReqSummary}
                       </h4>
                       <dl className="space-y-2 text-sm">
                         <div className="grid grid-cols-2 gap-2">
-                          <dt className="text-muted-foreground">Category:</dt>
+                          <dt className="text-muted-foreground">{t.rfq.category}:</dt>
                           <dd className="font-medium">{productCategories.find(c => c.value === watchedValues.product_category)?.label}</dd>
-                          <dt className="text-muted-foreground">Quantity:</dt>
+                          <dt className="text-muted-foreground">{t.rfq.quantity}:</dt>
                           <dd className="font-medium">{watchedValues.quantity}</dd>
                           {watchedValues.budget_range && (
                             <>
-                              <dt className="text-muted-foreground">Budget:</dt>
+                              <dt className="text-muted-foreground">{t.rfq.budget}:</dt>
                               <dd className="font-medium">{budgetRanges.find(b => b.value === watchedValues.budget_range)?.label}</dd>
                             </>
                           )}
                         </div>
                         <div>
-                          <dt className="text-muted-foreground mb-1">Details:</dt>
+                          <dt className="text-muted-foreground mb-1">{t.rfq.details}:</dt>
                           <dd className="font-medium bg-background p-2 rounded text-sm">{watchedValues.product_details}</dd>
                         </div>
                       </dl>
@@ -598,27 +601,27 @@ const RequestQuote = () => {
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                         <Truck className="h-4 w-4" />
-                        Delivery Preferences
+                        {t.rfq.deliveryPrefSummary}
                       </h4>
                       <dl className="grid grid-cols-2 gap-2 text-sm">
-                        <dt className="text-muted-foreground">City:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.city}:</dt>
                         <dd className="font-medium">{watchedValues.delivery_city}</dd>
-                        <dt className="text-muted-foreground">Timeline:</dt>
+                        <dt className="text-muted-foreground">{t.rfq.timeline}:</dt>
                         <dd className="font-medium">{deliveryUrgency.find(u => u.value === watchedValues.delivery_urgency)?.label}</dd>
                         {watchedValues.preferred_payment && (
                           <>
-                            <dt className="text-muted-foreground">Payment:</dt>
+                            <dt className="text-muted-foreground">{t.rfq.payment}:</dt>
                             <dd className="font-medium">{paymentMethods.find(p => p.value === watchedValues.preferred_payment)?.label}</dd>
                           </>
                         )}
                       </dl>
                       <div className="mt-2 text-sm">
-                        <dt className="text-muted-foreground mb-1">Address:</dt>
+                        <dt className="text-muted-foreground mb-1">{t.rfq.address}:</dt>
                         <dd className="font-medium">{watchedValues.delivery_address}</dd>
                       </div>
                       {watchedValues.additional_notes && (
                         <div className="mt-2 text-sm">
-                          <dt className="text-muted-foreground mb-1">Notes:</dt>
+                          <dt className="text-muted-foreground mb-1">{t.rfq.notes}:</dt>
                           <dd className="font-medium">{watchedValues.additional_notes}</dd>
                         </div>
                       )}
@@ -632,7 +635,7 @@ const RequestQuote = () => {
                 {currentStep > 1 ? (
                   <Button variant="outline" onClick={prevStep} className="active:scale-95">
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
+                    {t.rfq.previous}
                   </Button>
                 ) : (
                   <div />
@@ -640,7 +643,7 @@ const RequestQuote = () => {
 
                 {currentStep < 4 ? (
                   <Button onClick={nextStep} className="active:scale-95">
-                    Next
+                    {t.rfq.next}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
@@ -651,10 +654,10 @@ const RequestQuote = () => {
                     className="active:scale-95"
                   >
                     {isSubmitting ? (
-                      <>Submitting...</>
+                      <>{t.rfq.submitting}</>
                     ) : (
                       <>
-                        Submit Request
+                        {t.rfq.submitRequest}
                         <Send className="h-4 w-4 ml-2" />
                       </>
                     )}
@@ -665,7 +668,7 @@ const RequestQuote = () => {
 
             {/* Contact Info */}
             <div className="mt-8 text-center text-sm text-muted-foreground">
-              <p>Need immediate assistance? Call us at{" "}
+              <p>{t.rfq.needAssistance}{" "}
                 <a href="tel:+8801715575665" className="text-primary hover:text-accent font-medium">
                   01715-575665
                 </a>
