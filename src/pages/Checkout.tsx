@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { 
   CreditCard, 
@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   CheckCircle
 } from "lucide-react";
-import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,42 +20,83 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
+import CheckoutLayout from "@/components/checkout/CheckoutLayout";
+import CheckoutLoginStep from "@/components/checkout/CheckoutLoginStep";
+import { CheckoutStep } from "@/components/checkout/CheckoutStepIndicator";
 
 type PaymentMethod = "cash_on_delivery" | "bank_transfer";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, getSubtotal, clearCart } = useCart();
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  
+  // Determine current step
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>("login");
 
   const fontClass = language === "bn" ? "font-siliguri" : "";
 
   const [formData, setFormData] = useState({
-    customer_name: profile?.full_name || "",
-    customer_email: user?.email || "",
-    customer_phone: profile?.phone || "",
-    company_name: profile?.company_name || "",
-    shipping_address: profile?.shipping_address || "",
-    shipping_city: profile?.shipping_city || "",
-    shipping_postal_code: profile?.shipping_postal_code || "",
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    company_name: "",
+    shipping_address: "",
+    shipping_city: "",
+    shipping_postal_code: "",
     notes: "",
     payment_method: "cash_on_delivery" as PaymentMethod,
   });
 
+  // Update form data when profile loads
+  useEffect(() => {
+    if (profile || user) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name: profile?.full_name || prev.customer_name,
+        customer_email: user?.email || prev.customer_email,
+        customer_phone: profile?.phone || prev.customer_phone,
+        company_name: profile?.company_name || prev.company_name,
+        shipping_address: profile?.shipping_address || prev.shipping_address,
+        shipping_city: profile?.shipping_city || prev.shipping_city,
+        shipping_postal_code: profile?.shipping_postal_code || prev.shipping_postal_code,
+      }));
+    }
+  }, [profile, user]);
+
+  // Update current step based on auth state and order state
+  useEffect(() => {
+    if (orderPlaced) {
+      setCurrentStep("confirmation");
+    } else if (!authLoading && user) {
+      setCurrentStep("shipping");
+    } else if (!authLoading) {
+      setCurrentStep("login");
+    }
+  }, [user, authLoading, orderPlaced]);
+
   const subtotal = getSubtotal();
   const shippingCost = subtotal >= 10000 ? 0 : 150;
   const total = subtotal + shippingCost;
+
+  const handleLoginSuccess = () => {
+    setCurrentStep("shipping");
+  };
+
+  const handleRequestQuote = () => {
+    navigate("/request-quote");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) {
       toast.error(t.checkout.loginRequired);
-      navigate("/account");
+      setCurrentStep("login");
       return;
     }
 
@@ -115,6 +155,7 @@ const Checkout = () => {
       // Success
       setOrderNumber(order.order_number);
       setOrderPlaced(true);
+      setCurrentStep("confirmation");
       clearCart();
       toast.success(t.checkout.orderSuccess);
     } catch (error) {
@@ -125,305 +166,307 @@ const Checkout = () => {
     }
   };
 
-  if (!user) {
+  // Redirect to cart if empty (unless order just placed)
+  if (items.length === 0 && !orderPlaced) {
     return (
-      <Layout>
-        <div className={`container-premium py-16 text-center ${fontClass}`}>
-          <h1 className="text-2xl font-bold mb-4">{t.nav.login}</h1>
-          <p className="text-muted-foreground mb-6">{t.checkout.loginToOrder}</p>
-          <Button onClick={() => navigate("/account")}>{t.nav.login}</Button>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (orderPlaced) {
-    return (
-      <Layout>
-        <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
-          <div className="max-w-lg mx-auto text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-10 w-10 text-green-600" />
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.checkout.orderSuccessTitle}</h1>
-            <p className="text-muted-foreground mb-2">
-              {t.checkout.orderNumber}:
-            </p>
-            <p className="text-xl font-bold text-primary mb-6">{orderNumber}</p>
-            <p className="text-muted-foreground mb-6">
-              {t.checkout.orderConfirmationMessage}
-            </p>
-            <p className="text-xs text-muted-foreground mb-8">
-              Operated by ST International, Dhaka, Bangladesh
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button onClick={() => navigate("/account")}>
-                {t.checkout.viewOrders}
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/categories")}>
-                {t.checkout.continueShopping}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <Layout>
-        <div className={`container-premium py-16 text-center ${fontClass}`}>
+      <CheckoutLayout currentStep="cart" isLoggedIn={!!user} showBackToCart={false}>
+        <div className={`py-8 text-center ${fontClass}`}>
           <h1 className="text-2xl font-bold mb-4">{t.cart.cartEmpty}</h1>
           <p className="text-muted-foreground mb-6">{t.checkout.addProductsToCheckout}</p>
           <Button onClick={() => navigate("/categories")}>{t.checkout.browseProducts}</Button>
         </div>
-      </Layout>
+      </CheckoutLayout>
     );
   }
 
-  return (
-    <Layout>
-      <section className="bg-muted/50 border-b border-border">
-        <div className={`container-premium py-6 md:py-8 ${fontClass}`}>
-          <Link to="/cart" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
-            <ArrowLeft className="h-4 w-4" />
-            {t.checkout.backToCart}
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-bold">{t.checkout.checkout}</h1>
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <CheckoutLayout currentStep="login" isLoggedIn={false}>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </section>
+      </CheckoutLayout>
+    );
+  }
 
-      <section className="py-8 md:py-12">
-        <div className={`container-premium ${fontClass}`}>
-          <form onSubmit={handleSubmit}>
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Form */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* Contact Info */}
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4">{t.checkout.contactInformation}</h2>
+  // Order Confirmation Step
+  if (orderPlaced) {
+    return (
+      <CheckoutLayout currentStep="confirmation" isLoggedIn={!!user} showBackToCart={false}>
+        <div className={`max-w-lg mx-auto text-center py-8 ${fontClass}`}>
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="h-10 w-10 text-green-600" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.checkout.orderSuccessTitle}</h1>
+          <p className="text-muted-foreground mb-2">
+            {t.checkout.orderNumber}:
+          </p>
+          <p className="text-xl font-bold text-primary mb-6">{orderNumber}</p>
+          <p className="text-muted-foreground mb-6">
+            {t.checkout.orderConfirmationMessage}
+          </p>
+          <p className="text-xs text-muted-foreground mb-8">
+            Operated by ST International, Dhaka, Bangladesh
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button onClick={() => navigate("/account")}>
+              {t.checkout.viewOrders}
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/categories")}>
+              {t.checkout.continueShopping}
+            </Button>
+          </div>
+        </div>
+      </CheckoutLayout>
+    );
+  }
+
+  // Login Step - Show when not authenticated
+  if (!user) {
+    return (
+      <CheckoutLayout currentStep="login" isLoggedIn={false}>
+        <CheckoutLoginStep 
+          onSuccess={handleLoginSuccess}
+          onRequestQuote={handleRequestQuote}
+        />
+      </CheckoutLayout>
+    );
+  }
+
+  // Shipping & Payment Steps (combined for simplicity)
+  return (
+    <CheckoutLayout currentStep="shipping" isLoggedIn={true}>
+      <div className={fontClass}>
+        <h1 className="text-2xl md:text-3xl font-bold mb-8">{t.checkout.checkout}</h1>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Form */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Contact Info */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <h2 className="font-semibold text-lg mb-4">{t.checkout.contactInformation}</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="customer_name">{t.checkout.fullName} *</Label>
-                      <Input
-                        id="customer_name"
-                        value={formData.customer_name}
-                        onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="company_name">{t.checkout.companyOptional}</Label>
-                      <Input
-                        id="company_name"
-                        value={formData.company_name}
-                        onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                        placeholder={t.checkout.leaveBlankForPersonal}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer_email">{t.checkout.email} *</Label>
-                      <Input
-                        id="customer_email"
-                        type="email"
-                        value={formData.customer_email}
-                        onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer_phone">{t.checkout.phone} *</Label>
-                      <Input
-                        id="customer_phone"
-                        value={formData.customer_phone}
-                        onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
-                        placeholder="+880"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customer_name">{t.checkout.fullName} *</Label>
+                    <Input
+                      id="customer_name"
+                      value={formData.customer_name}
+                      onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                      required
+                    />
                   </div>
-                </div>
-
-                {/* Shipping Address */}
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    {t.checkout.deliveryAddress}
-                  </h2>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2 space-y-2">
-                      <Label htmlFor="shipping_address">{t.checkout.address} *</Label>
-                      <Input
-                        id="shipping_address"
-                        value={formData.shipping_address}
-                        onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
-                        placeholder={t.checkout.addressPlaceholder}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shipping_city">{t.checkout.city} *</Label>
-                      <Input
-                        id="shipping_city"
-                        value={formData.shipping_city}
-                        onChange={(e) => setFormData({ ...formData, shipping_city: e.target.value })}
-                        placeholder={t.checkout.cityPlaceholder}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shipping_postal_code">{t.checkout.postalCode}</Label>
-                      <Input
-                        id="shipping_postal_code"
-                        value={formData.shipping_postal_code}
-                        onChange={(e) => setFormData({ ...formData, shipping_postal_code: e.target.value })}
-                        placeholder="1000"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="company_name">{t.checkout.companyOptional}</Label>
+                    <Input
+                      id="company_name"
+                      value={formData.company_name}
+                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                      placeholder={t.checkout.leaveBlankForPersonal}
+                    />
                   </div>
-                </div>
-
-                {/* Payment Method */}
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    {t.checkout.paymentMethod}
-                  </h2>
-                  <RadioGroup
-                    value={formData.payment_method}
-                    onValueChange={(value) => setFormData({ ...formData, payment_method: value as PaymentMethod })}
-                    className="space-y-3"
-                  >
-                    <div className="flex items-center space-x-3 border border-border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="cash_on_delivery" id="cod" />
-                      <Label htmlFor="cod" className="flex-1 cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <Truck className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{t.checkout.cashOnDelivery}</p>
-                            <p className="text-sm text-muted-foreground">{t.checkout.cashOnDeliveryDesc}</p>
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-3 border border-border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="bank_transfer" id="bank" />
-                      <Label htmlFor="bank" className="flex-1 cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <Building2 className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{t.checkout.bankTransfer}</p>
-                            <p className="text-sm text-muted-foreground">{t.checkout.bankTransferDesc}</p>
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-
-                  {formData.payment_method === "bank_transfer" && (
-                    <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
-                      <p className="font-medium mb-2">{t.checkout.bankInfo}:</p>
-                      <p>{t.checkout.bankName}: Dutch-Bangla Bank Limited</p>
-                      <p>{t.checkout.accountName}: ST International</p>
-                      <p>{t.checkout.accountNumber}: 1234567890</p>
-                      <p>{t.checkout.branch}: Bangla Motor, Dhaka</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div className="bg-card border border-border rounded-lg p-6">
-                  <h2 className="font-semibold text-lg mb-4">{t.checkout.additionalNotes}</h2>
-                  <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder={t.checkout.notesPlaceholder}
-                    rows={3}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="customer_email">{t.checkout.email} *</Label>
+                    <Input
+                      id="customer_email"
+                      type="email"
+                      value={formData.customer_email}
+                      onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customer_phone">{t.checkout.phone} *</Label>
+                    <Input
+                      id="customer_phone"
+                      value={formData.customer_phone}
+                      onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                      placeholder="+880"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
-                  <h2 className="font-semibold text-lg mb-4">{t.checkout.orderSummary}</h2>
-                  
-                  <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                    {items.map((item) => (
-                      <div key={item.id} className="flex gap-3 text-sm">
-                        <div className="w-12 h-12 bg-muted rounded overflow-hidden shrink-0">
-                          {item.image_url && (
-                            <img
-                              src={item.image_url}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{item.name}</p>
-                          <p className="text-muted-foreground">
-                            {item.quantity} × {formatPrice(item.price)}
-                          </p>
-                        </div>
-                        <p className="font-medium shrink-0">
-                          {formatPrice(item.price * item.quantity)}
-                        </p>
-                      </div>
-                    ))}
+              {/* Shipping Address */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Truck className="h-5 w-5" />
+                  {t.checkout.deliveryAddress}
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="shipping_address">{t.checkout.address} *</Label>
+                    <Input
+                      id="shipping_address"
+                      value={formData.shipping_address}
+                      onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                      placeholder={t.checkout.addressPlaceholder}
+                      required
+                    />
                   </div>
-
-                  <div className="border-t border-border pt-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t.common.subtotal}</span>
-                      <span>{formatPrice(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t.checkout.delivery}</span>
-                      <span>{shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}</span>
-                    </div>
-                    {subtotal < 10000 && (
-                      <p className="text-xs text-muted-foreground">
-                        {t.checkout.freeShippingThreshold}
-                      </p>
-                    )}
-                    <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-                      <span>{t.common.total}</span>
-                      <span className="text-primary">{formatPrice(total)}</span>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shipping_city">{t.checkout.city} *</Label>
+                    <Input
+                      id="shipping_city"
+                      value={formData.shipping_city}
+                      onChange={(e) => setFormData({ ...formData, shipping_city: e.target.value })}
+                      placeholder={t.checkout.cityPlaceholder}
+                      required
+                    />
                   </div>
-
-                  <Button
-                    type="submit"
-                    variant="accent"
-                    size="lg"
-                    className="w-full mt-6"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t.checkout.processing}
-                      </>
-                    ) : (
-                      <>
-                        <ShieldCheck className="mr-2 h-4 w-4" />
-                        {t.checkout.placeOrder}
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-xs text-center text-muted-foreground mt-4">
-                    {t.checkout.secureCheckout}
-                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="shipping_postal_code">{t.checkout.postalCode}</Label>
+                    <Input
+                      id="shipping_postal_code"
+                      value={formData.shipping_postal_code}
+                      onChange={(e) => setFormData({ ...formData, shipping_postal_code: e.target.value })}
+                      placeholder="1000"
+                    />
+                  </div>
                 </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  {t.checkout.paymentMethod}
+                </h2>
+                <RadioGroup
+                  value={formData.payment_method}
+                  onValueChange={(value) => setFormData({ ...formData, payment_method: value as PaymentMethod })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3 border border-border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="cash_on_delivery" id="cod" />
+                    <Label htmlFor="cod" className="flex-1 cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <Truck className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium">{t.checkout.cashOnDelivery}</p>
+                          <p className="text-sm text-muted-foreground">{t.checkout.cashOnDeliveryDesc}</p>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 border border-border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="bank_transfer" id="bank" />
+                    <Label htmlFor="bank" className="flex-1 cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <Building2 className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="font-medium">{t.checkout.bankTransfer}</p>
+                          <p className="text-sm text-muted-foreground">{t.checkout.bankTransferDesc}</p>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+                {formData.payment_method === "bank_transfer" && (
+                  <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
+                    <p className="font-medium mb-2">{t.checkout.bankInfo}:</p>
+                    <p>{t.checkout.bankName}: Dutch-Bangla Bank Limited</p>
+                    <p>{t.checkout.accountName}: ST International</p>
+                    <p>{t.checkout.accountNumber}: 1234567890</p>
+                    <p>{t.checkout.branch}: Bangla Motor, Dhaka</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              <div className="bg-card border border-border rounded-lg p-6">
+                <h2 className="font-semibold text-lg mb-4">{t.checkout.additionalNotes}</h2>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder={t.checkout.notesPlaceholder}
+                  rows={3}
+                />
               </div>
             </div>
-          </form>
-        </div>
-      </section>
-    </Layout>
+
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-card border border-border rounded-lg p-6 sticky top-24">
+                <h2 className="font-semibold text-lg mb-4">{t.checkout.orderSummary}</h2>
+                
+                <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-3 text-sm">
+                      <div className="w-12 h-12 bg-muted rounded overflow-hidden shrink-0">
+                        {item.image_url && (
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.name}</p>
+                        <p className="text-muted-foreground">
+                          {item.quantity} × {formatPrice(item.price)}
+                        </p>
+                      </div>
+                      <p className="font-medium shrink-0">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-border pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t.common.subtotal}</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t.checkout.delivery}</span>
+                    <span>{shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}</span>
+                  </div>
+                  {subtotal < 10000 && (
+                    <p className="text-xs text-muted-foreground">
+                      {t.checkout.freeShippingThreshold}
+                    </p>
+                  )}
+                  <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
+                    <span>{t.common.total}</span>
+                    <span className="text-primary">{formatPrice(total)}</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="accent"
+                  size="lg"
+                  className="w-full mt-6"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t.checkout.processing}
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      {t.checkout.placeOrder}
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  {t.checkout.secureCheckout}
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </CheckoutLayout>
   );
 };
 
