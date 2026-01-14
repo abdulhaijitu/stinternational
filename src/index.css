@@ -389,6 +389,10 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
+  }
+
   .pt-safe-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
