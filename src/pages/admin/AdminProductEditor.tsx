@@ -280,14 +280,9 @@ const AdminProductEditor = () => {
       return;
     }
 
-    // Validate category selection - BOTH parent category AND sub-category are REQUIRED
+    // Validate category selection - Parent Category is REQUIRED, Sub-Category is OPTIONAL
     if (!formData.parent_category_id) {
       toast.error(language === "bn" ? "প্যারেন্ট ক্যাটাগরি নির্বাচন করুন" : "Please select a parent category");
-      return;
-    }
-
-    if (!formData.category_id) {
-      toast.error(language === "bn" ? "সাব-ক্যাটাগরি নির্বাচন করুন" : "Please select a sub-category");
       return;
     }
 
@@ -308,12 +303,12 @@ const AdminProductEditor = () => {
       : [];
 
     // Build product data payload with proper typing
-    // category_id is REQUIRED - validation above ensures it's set
+    // category_id is optional - can be null if no sub-category selected
     const baseProductData = {
       name: formData.name.trim(),
       slug: formData.slug.trim(),
       price: parseFloat(formData.price),
-      category_id: formData.category_id, // Required - never null
+      category_id: formData.category_id || null, // Optional - can be null
       image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
       images: formData.images,
       in_stock: formData.in_stock,
@@ -912,10 +907,10 @@ const AdminProductEditor = () => {
               )}
             </div>
 
-            {/* Sub-Category (REQUIRED) */}
+            {/* Sub-Category (OPTIONAL) */}
             <div className="space-y-2">
               <Label htmlFor="category" className={getInputClass()}>
-                {t.categories.subCategory} <span className="text-destructive">*</span>
+                {t.categories.subCategory} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <div className="flex gap-2">
                 <Select
@@ -923,11 +918,7 @@ const AdminProductEditor = () => {
                   onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                   disabled={!formData.parent_category_id}
                 >
-                  <SelectTrigger className={cn(
-                    "flex-1", 
-                    getInputClass(),
-                    formData.parent_category_id && !formData.category_id && "border-destructive focus:ring-destructive"
-                  )}>
+                  <SelectTrigger className={cn("flex-1", getInputClass())}>
                     <SelectValue 
                       placeholder={
                         !formData.parent_category_id 
@@ -955,11 +946,6 @@ const AdminProductEditor = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              {formData.parent_category_id && !formData.category_id && (
-                <p className="text-xs text-destructive">
-                  {language === "bn" ? "সাব-ক্যাটাগরি আবশ্যক" : "Sub-category is required"}
-                </p>
-              )}
               {formData.parent_category_id && filteredSubCategories.length === 0 && (
                 <p className="text-xs text-muted-foreground">
                   {language === "bn" ? "এই প্যারেন্টে কোনো সাব-ক্যাটাগরি নেই। নতুন তৈরি করতে + বাটনে ক্লিক করুন।" : "No sub-categories under this parent. Click + to create one."}
