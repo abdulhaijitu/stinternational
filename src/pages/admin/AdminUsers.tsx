@@ -12,6 +12,9 @@ import {
   Lock
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -302,8 +305,9 @@ const AdminUsers = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-6">
+          <AdminPageHeader title={t.users.title} subtitle={t.users.subtitle} />
+          <AdminTableSkeleton columns={5} rows={5} />
         </div>
       </AdminLayout>
     );
@@ -313,37 +317,27 @@ const AdminUsers = () => {
     <AdminLayout>
       <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Users className="h-6 w-6" />
-              {t.users.title}
-            </h1>
-            <p className="text-muted-foreground">
-              {t.users.subtitle}
-            </p>
-          </div>
+        <AdminPageHeader 
+          title={t.users.title} 
+          subtitle={t.users.subtitle}
+        >
           <Button onClick={() => setAddDialogOpen(true)} className="gap-2">
             <UserPlus className="h-4 w-4" />
             {t.users.addUser}
           </Button>
-        </div>
+        </AdminPageHeader>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ADMIN_ROLES.map(role => {
             const count = users.filter(u => u.role === role).length;
             return (
-              <Card key={role}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {getRoleLabel(role)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{count}</div>
-                </CardContent>
-              </Card>
+              <div key={role} className="admin-stats-card">
+                <p className="text-sm text-muted-foreground mb-1">
+                  {getRoleLabel(role)}
+                </p>
+                <p className="text-2xl font-bold">{count}</p>
+              </div>
             );
           })}
         </div>
@@ -360,29 +354,29 @@ const AdminUsers = () => {
         </div>
 
         {/* Users Table */}
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t.users.name}</TableHead>
-                  <TableHead>{t.users.role}</TableHead>
-                  <TableHead>{t.users.status}</TableHead>
-                  <TableHead>{t.users.joined}</TableHead>
-                  <TableHead className="w-[80px]">{t.users.actions}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      {t.users.noUsers}
-                    </TableCell>
-                  </TableRow>
-                ) : (
+        <div className="admin-table-wrapper">
+          {filteredUsers.length === 0 ? (
+            <AdminEmptyState
+              icon={Users}
+              title={t.users.noUsers}
+              description={t.users.subtitle}
+            />
+          ) : (
+            <table className="admin-table">
+              <thead className="sticky top-0 z-10 bg-muted/50">
+                <tr>
+                  <th>{t.users.name}</th>
+                  <th>{t.users.role}</th>
+                  <th>{t.users.status}</th>
+                  <th>{t.users.joined}</th>
+                  <th className="w-[80px]">{t.users.actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
                   filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
+                    <tr key={user.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                      <td className="p-4 text-sm">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                             <Shield className="h-4 w-4 text-primary" />
@@ -394,13 +388,13 @@ const AdminUsers = () => {
                             </p>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm">
                         <Badge className={cn("text-xs", getRoleBadgeColor(user.role))}>
                           {getRoleLabel(user.role)}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm">
                         <Badge 
                           variant="outline"
                           className={cn(
@@ -412,11 +406,11 @@ const AdminUsers = () => {
                         >
                           {user.is_active ? t.users.active : t.users.inactive}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      </td>
+                      <td className="p-4 text-sm text-muted-foreground">
                         {new Date(user.created_at).toLocaleDateString(language === "bn" ? "bn-BD" : "en-US")}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -462,14 +456,14 @@ const AdminUsers = () => {
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                }
+              </tbody>
+            </table>
+          )}
+        </div>
 
         {/* Add User Dialog */}
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
