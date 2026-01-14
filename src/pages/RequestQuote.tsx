@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 // Validation schemas for each step
 const step1Schema = z.object({
@@ -309,26 +310,32 @@ const RequestQuote = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="company_name">{t.rfq.companyName} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="company_name">
+                        {t.rfq.companyName}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Input
                         id="company_name"
                         {...register("company_name")}
                         placeholder={t.rfq.companyNamePlaceholder}
-                        className="mt-1.5"
+                        className={cn(errors.company_name && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.company_name && (
-                        <p className="text-sm text-destructive mt-1">{errors.company_name.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.company_name.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="company_type">{t.rfq.organizationType} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="company_type">
+                        {t.rfq.organizationType}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Select
                         value={watchedValues.company_type}
                         onValueChange={(value) => setValue("company_type", value, { shouldValidate: true })}
                       >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger className={cn(errors.company_type && "border-destructive focus-visible:ring-destructive")}>
                           <SelectValue placeholder={t.rfq.selectOrganization} />
                         </SelectTrigger>
                         <SelectContent>
@@ -340,48 +347,57 @@ const RequestQuote = () => {
                         </SelectContent>
                       </Select>
                       {errors.company_type && (
-                        <p className="text-sm text-destructive mt-1">{errors.company_type.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.company_type.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="contact_person">{t.rfq.contactPerson} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="contact_person">
+                        {t.rfq.contactPerson}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Input
                         id="contact_person"
                         {...register("contact_person")}
                         placeholder={t.rfq.contactPersonPlaceholder}
-                        className="mt-1.5"
+                        className={cn(errors.contact_person && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.contact_person && (
-                        <p className="text-sm text-destructive mt-1">{errors.contact_person.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.contact_person.message}</p>
                       )}
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="email">{t.rfq.emailAddress} *</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email">
+                          {t.rfq.emailAddress}
+                          <span className="text-destructive ml-0.5">*</span>
+                        </Label>
                         <Input
                           id="email"
                           type="email"
                           {...register("email")}
                           placeholder={t.rfq.emailPlaceholder}
-                          className="mt-1.5"
+                          className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
                         />
                         {errors.email && (
-                          <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                          <p className="text-xs font-medium text-destructive">{errors.email.message}</p>
                         )}
                       </div>
-                      <div>
-                        <Label htmlFor="phone">{t.rfq.phoneNumber} *</Label>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone">
+                          {t.rfq.phoneNumber}
+                          <span className="text-destructive ml-0.5">*</span>
+                        </Label>
                         <Input
                           id="phone"
                           type="tel"
                           {...register("phone")}
                           placeholder={t.rfq.phonePlaceholder}
-                          className="mt-1.5"
+                          className={cn(errors.phone && "border-destructive focus-visible:ring-destructive")}
                         />
                         {errors.phone && (
-                          <p className="text-sm text-destructive mt-1">{errors.phone.message}</p>
+                          <p className="text-xs font-medium text-destructive">{errors.phone.message}</p>
                         )}
                       </div>
                     </div>
@@ -398,13 +414,16 @@ const RequestQuote = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="product_category">{t.rfq.productCategory} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="product_category">
+                        {t.rfq.productCategory}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Select
                         value={watchedValues.product_category}
                         onValueChange={(value) => setValue("product_category", value, { shouldValidate: true })}
                       >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger className={cn(errors.product_category && "border-destructive focus-visible:ring-destructive")}>
                           <SelectValue placeholder={t.rfq.selectCategory} />
                         </SelectTrigger>
                         <SelectContent>
@@ -416,43 +435,54 @@ const RequestQuote = () => {
                         </SelectContent>
                       </Select>
                       {errors.product_category && (
-                        <p className="text-sm text-destructive mt-1">{errors.product_category.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.product_category.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="product_details">{t.rfq.productDetails} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="product_details">
+                        {t.rfq.productDetails}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Textarea
                         id="product_details"
                         {...register("product_details")}
                         placeholder={t.rfq.productDetailsPlaceholder}
-                        className="mt-1.5 min-h-[120px]"
+                        className={cn("min-h-[120px]", errors.product_details && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.product_details && (
-                        <p className="text-sm text-destructive mt-1">{errors.product_details.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.product_details.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="quantity">{t.rfq.quantityRequired} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="quantity">
+                        {t.rfq.quantityRequired}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Input
                         id="quantity"
                         {...register("quantity")}
                         placeholder={t.rfq.quantityPlaceholder}
-                        className="mt-1.5"
+                        className={cn(errors.quantity && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.quantity && (
-                        <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.quantity.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="budget_range">{t.rfq.budgetRange}</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="budget_range">
+                        {t.rfq.budgetRange}
+                        <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                          ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                        </span>
+                      </Label>
                       <Select
                         value={watchedValues.budget_range}
                         onValueChange={(value) => setValue("budget_range", value)}
                       >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger>
                           <SelectValue placeholder={t.rfq.selectBudget} />
                         </SelectTrigger>
                         <SelectContent>
@@ -477,39 +507,48 @@ const RequestQuote = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="delivery_address">{t.rfq.deliveryAddress} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="delivery_address">
+                        {t.rfq.deliveryAddress}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Textarea
                         id="delivery_address"
                         {...register("delivery_address")}
                         placeholder={t.rfq.addressPlaceholder}
-                        className="mt-1.5"
+                        className={cn(errors.delivery_address && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.delivery_address && (
-                        <p className="text-sm text-destructive mt-1">{errors.delivery_address.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.delivery_address.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="delivery_city">{t.rfq.deliveryCity} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="delivery_city">
+                        {t.rfq.deliveryCity}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Input
                         id="delivery_city"
                         {...register("delivery_city")}
                         placeholder={t.rfq.cityPlaceholder}
-                        className="mt-1.5"
+                        className={cn(errors.delivery_city && "border-destructive focus-visible:ring-destructive")}
                       />
                       {errors.delivery_city && (
-                        <p className="text-sm text-destructive mt-1">{errors.delivery_city.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.delivery_city.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="delivery_urgency">{t.rfq.deliveryTimeline} *</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="delivery_urgency">
+                        {t.rfq.deliveryTimeline}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
                       <Select
                         value={watchedValues.delivery_urgency}
                         onValueChange={(value) => setValue("delivery_urgency", value, { shouldValidate: true })}
                       >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger className={cn(errors.delivery_urgency && "border-destructive focus-visible:ring-destructive")}>
                           <SelectValue placeholder={t.rfq.timelinePlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
@@ -521,17 +560,22 @@ const RequestQuote = () => {
                         </SelectContent>
                       </Select>
                       {errors.delivery_urgency && (
-                        <p className="text-sm text-destructive mt-1">{errors.delivery_urgency.message}</p>
+                        <p className="text-xs font-medium text-destructive">{errors.delivery_urgency.message}</p>
                       )}
                     </div>
 
-                    <div>
-                      <Label htmlFor="preferred_payment">{t.rfq.preferredPayment}</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="preferred_payment">
+                        {t.rfq.preferredPayment}
+                        <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                          ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                        </span>
+                      </Label>
                       <Select
                         value={watchedValues.preferred_payment}
                         onValueChange={(value) => setValue("preferred_payment", value)}
                       >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger>
                           <SelectValue placeholder={t.rfq.paymentPlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
@@ -544,13 +588,17 @@ const RequestQuote = () => {
                       </Select>
                     </div>
 
-                    <div>
-                      <Label htmlFor="additional_notes">{t.rfq.additionalNotes}</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="additional_notes">
+                        {t.rfq.additionalNotes}
+                        <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                          ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                        </span>
+                      </Label>
                       <Textarea
                         id="additional_notes"
                         {...register("additional_notes")}
                         placeholder={t.rfq.notesPlaceholder}
-                        className="mt-1.5"
                       />
                     </div>
                   </div>

@@ -72,6 +72,86 @@ const AdminOrderCreate = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [shippingCost, setShippingCost] = useState(0);
 
+  // Validation state
+  const [formErrors, setFormErrors] = useState<{
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    shippingCity?: string;
+  }>({});
+  const [touched, setTouched] = useState<{
+    customerName?: boolean;
+    customerEmail?: boolean;
+    customerPhone?: boolean;
+    shippingAddress?: boolean;
+    shippingCity?: boolean;
+  }>({});
+
+  const validateField = (field: string, value: string) => {
+    let error = "";
+    switch (field) {
+      case "customerName":
+        if (!value.trim()) error = language === "bn" ? "নাম প্রয়োজন" : "Name is required";
+        else if (value.trim().length < 2) error = language === "bn" ? "নাম কমপক্ষে ২ অক্ষর হতে হবে" : "Name must be at least 2 characters";
+        break;
+      case "customerEmail":
+        if (!value.trim()) error = language === "bn" ? "ইমেইল প্রয়োজন" : "Email is required";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = language === "bn" ? "সঠিক ইমেইল দিন" : "Enter a valid email";
+        break;
+      case "customerPhone":
+        if (!value.trim()) error = language === "bn" ? "ফোন নম্বর প্রয়োজন" : "Phone is required";
+        else if (value.trim().length < 10) error = language === "bn" ? "ফোন নম্বর কমপক্ষে ১০ সংখ্যা হতে হবে" : "Phone must be at least 10 digits";
+        break;
+      case "shippingAddress":
+        if (!value.trim()) error = language === "bn" ? "ঠিকানা প্রয়োজন" : "Address is required";
+        else if (value.trim().length < 5) error = language === "bn" ? "ঠিকানা কমপক্ষে ৫ অক্ষর হতে হবে" : "Address must be at least 5 characters";
+        break;
+      case "shippingCity":
+        if (!value.trim()) error = language === "bn" ? "শহর প্রয়োজন" : "City is required";
+        break;
+    }
+    return error;
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const value = field === "customerName" ? customerName :
+                  field === "customerEmail" ? customerEmail :
+                  field === "customerPhone" ? customerPhone :
+                  field === "shippingAddress" ? shippingAddress :
+                  shippingCity;
+    const error = validateField(field, value);
+    setFormErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleFieldChange = (field: string, value: string, setter: (v: string) => void) => {
+    setter(value);
+    if (touched[field as keyof typeof touched]) {
+      const error = validateField(field, value);
+      setFormErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      customerName: validateField("customerName", customerName),
+      customerEmail: validateField("customerEmail", customerEmail),
+      customerPhone: validateField("customerPhone", customerPhone),
+      shippingAddress: validateField("shippingAddress", shippingAddress),
+      shippingCity: validateField("shippingCity", shippingCity),
+    };
+    setFormErrors(errors);
+    setTouched({
+      customerName: true,
+      customerEmail: true,
+      customerPhone: true,
+      shippingAddress: true,
+      shippingCity: true,
+    });
+    return !Object.values(errors).some(e => e);
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -158,12 +238,8 @@ const AdminOrderCreate = () => {
   const total = subtotal + shippingCost;
 
   const handleSubmit = async () => {
-    if (!customerName || !customerEmail || !customerPhone) {
-      toast.error(t.orders.customerRequired);
-      return;
-    }
-    if (!shippingAddress || !shippingCity) {
-      toast.error(t.orders.shippingRequired);
+    if (!validateForm()) {
+      toast.error(language === "bn" ? "সব প্রয়োজনীয় ক্ষেত্র পূরণ করুন" : "Please fill all required fields correctly");
       return;
     }
     if (orderItems.length === 0) {
@@ -240,16 +316,29 @@ const AdminOrderCreate = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{t.orders.customerName} *</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.customerName}
+                      <span className="text-destructive ml-0.5">*</span>
+                    </Label>
                     <Input
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      onChange={(e) => handleFieldChange("customerName", e.target.value, setCustomerName)}
+                      onBlur={() => handleBlur("customerName")}
                       placeholder={t.orders.customerNamePlaceholder}
+                      className={cn(formErrors.customerName && touched.customerName && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.customerName && touched.customerName && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customerName}</p>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t.orders.companyNameLabel}</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.companyNameLabel}
+                      <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                        ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                      </span>
+                    </Label>
                     <Input
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
@@ -258,22 +347,38 @@ const AdminOrderCreate = () => {
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{t.orders.customerEmail} *</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.customerEmail}
+                      <span className="text-destructive ml-0.5">*</span>
+                    </Label>
                     <Input
                       type="email"
                       value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      onChange={(e) => handleFieldChange("customerEmail", e.target.value, setCustomerEmail)}
+                      onBlur={() => handleBlur("customerEmail")}
                       placeholder={t.orders.customerEmailPlaceholder}
+                      className={cn(formErrors.customerEmail && touched.customerEmail && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.customerEmail && touched.customerEmail && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customerEmail}</p>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t.orders.customerPhone} *</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.customerPhone}
+                      <span className="text-destructive ml-0.5">*</span>
+                    </Label>
                     <Input
                       value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      onChange={(e) => handleFieldChange("customerPhone", e.target.value, setCustomerPhone)}
+                      onBlur={() => handleBlur("customerPhone")}
                       placeholder={t.orders.customerPhonePlaceholder}
+                      className={cn(formErrors.customerPhone && touched.customerPhone && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.customerPhone && touched.customerPhone && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.customerPhone}</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -285,26 +390,47 @@ const AdminOrderCreate = () => {
                 <CardTitle>{t.orders.shippingAddress}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>{t.orders.address} *</Label>
+                <div className="space-y-1.5">
+                  <Label>
+                    {t.orders.address}
+                    <span className="text-destructive ml-0.5">*</span>
+                  </Label>
                   <Textarea
                     value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
+                    onChange={(e) => handleFieldChange("shippingAddress", e.target.value, setShippingAddress)}
+                    onBlur={() => handleBlur("shippingAddress")}
                     placeholder={t.orders.addressPlaceholder}
                     rows={2}
+                    className={cn(formErrors.shippingAddress && touched.shippingAddress && "border-destructive focus-visible:ring-destructive")}
                   />
+                  {formErrors.shippingAddress && touched.shippingAddress && (
+                    <p className="text-xs font-medium text-destructive">{formErrors.shippingAddress}</p>
+                  )}
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{t.orders.city} *</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.city}
+                      <span className="text-destructive ml-0.5">*</span>
+                    </Label>
                     <Input
                       value={shippingCity}
-                      onChange={(e) => setShippingCity(e.target.value)}
+                      onChange={(e) => handleFieldChange("shippingCity", e.target.value, setShippingCity)}
+                      onBlur={() => handleBlur("shippingCity")}
                       placeholder={t.orders.cityPlaceholder}
+                      className={cn(formErrors.shippingCity && touched.shippingCity && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {formErrors.shippingCity && touched.shippingCity && (
+                      <p className="text-xs font-medium text-destructive">{formErrors.shippingCity}</p>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t.orders.postalCode}</Label>
+                  <div className="space-y-1.5">
+                    <Label>
+                      {t.orders.postalCode}
+                      <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                        ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                      </span>
+                    </Label>
                     <Input
                       value={shippingPostalCode}
                       onChange={(e) => setShippingPostalCode(e.target.value)}
@@ -433,7 +559,13 @@ const AdminOrderCreate = () => {
               <CardHeader>
                 <CardTitle>{t.orders.notes}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-1.5">
+                <Label>
+                  {t.orders.notes}
+                  <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                    ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                  </span>
+                </Label>
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -452,7 +584,7 @@ const AdminOrderCreate = () => {
                 <CardTitle>{t.orders.orderSettings}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label>{t.orders.paymentMethod}</Label>
                   <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                     <SelectTrigger>
@@ -472,7 +604,7 @@ const AdminOrderCreate = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label>{t.orders.status}</Label>
                   <Select value={orderStatus} onValueChange={setOrderStatus}>
                     <SelectTrigger>
