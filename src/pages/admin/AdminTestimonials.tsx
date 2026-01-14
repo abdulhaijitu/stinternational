@@ -225,8 +225,11 @@ const AdminTestimonials = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="admin-form-group space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="client_name">{t.testimonials.clientName} *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="client_name">
+                    {t.testimonials.clientName}
+                    <span className="text-destructive ml-0.5">*</span>
+                  </Label>
                   <Input
                     id="client_name"
                     value={formData.client_name}
@@ -235,8 +238,11 @@ const AdminTestimonials = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company_name">{t.testimonials.companyName} *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="company_name">
+                    {t.testimonials.companyName}
+                    <span className="text-destructive ml-0.5">*</span>
+                  </Label>
                   <Input
                     id="company_name"
                     value={formData.company_name}
@@ -246,8 +252,13 @@ const AdminTestimonials = () => {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="designation">{t.testimonials.designation}</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="designation">
+                  {t.testimonials.designation}
+                  <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                    {isBangla ? "(ঐচ্ছিক)" : "(Optional)"}
+                  </span>
+                </Label>
                 <Input
                   id="designation"
                   value={formData.designation}
@@ -255,8 +266,11 @@ const AdminTestimonials = () => {
                   placeholder={t.testimonials.designationPlaceholder}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="quote">{t.testimonials.testimonialQuote} *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="quote">
+                  {t.testimonials.testimonialQuote}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
                 <Textarea
                   id="quote"
                   value={formData.quote}
@@ -266,8 +280,13 @@ const AdminTestimonials = () => {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="avatar_url">{t.testimonials.avatarUrl}</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="avatar_url">
+                  {t.testimonials.avatarUrl}
+                  <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                    {isBangla ? "(ঐচ্ছিক)" : "(Optional)"}
+                  </span>
+                </Label>
                 <Input
                   id="avatar_url"
                   value={formData.avatar_url}
@@ -276,8 +295,13 @@ const AdminTestimonials = () => {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="rating">{t.testimonials.rating}</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="rating">
+                    {t.testimonials.rating}
+                    <span className="text-muted-foreground text-xs font-normal ml-1.5">
+                      {isBangla ? "(ঐচ্ছিক)" : "(Optional)"}
+                    </span>
+                  </Label>
                   <Input
                     id="rating"
                     type="number"
