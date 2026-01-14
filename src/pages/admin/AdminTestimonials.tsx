@@ -1,6 +1,16 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  DndContext,
+  closestCenter,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
@@ -17,11 +27,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown, MessageSquare, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Star, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { SortableRow } from "@/components/admin/SortableRow";
+import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 
 interface Testimonial {
   id: string;
@@ -65,6 +77,39 @@ const AdminTestimonials = () => {
       return data as Testimonial[];
     },
   });
+
+  // Drag and drop reorder handler
+  const handleReorder = useCallback(async (reorderedItems: Testimonial[]) => {
+    try {
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        display_order: index + 1,
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("testimonials")
+          .update({ display_order: update.display_order })
+          .eq("id", update.id);
+        if (error) throw error;
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
+      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+      toast.success(isBangla ? "ক্রম আপডেট হয়েছে" : "Order updated");
+    } catch (error) {
+      console.error("Error reordering:", error);
+      toast.error(t.common.error);
+    }
+  }, [queryClient, isBangla, t.common.error]);
+
+  const { sensors, activeId, isReordering, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop({
+    items: testimonials || [],
+    onReorder: handleReorder,
+    getId: (item) => item.id,
+  });
+
+  const activeTestimonial = activeId ? testimonials?.find(t => t.id === activeId) : null;
 
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData & { id?: string }) => {
@@ -143,27 +188,6 @@ const AdminTestimonials = () => {
     await deleteMutation.mutateAsync(testimonialToDelete.id);
   };
 
-  const reorderMutation = useMutation({
-    mutationFn: async ({ id, newOrder }: { id: string; newOrder: number }) => {
-      const { data, error } = await supabase
-        .from("testimonials")
-        .update({ display_order: newOrder })
-        .eq("id", id)
-        .select()
-        .single();
-      if (error) throw error;
-      if (!data) throw new Error("No data returned from update");
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
-      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
-    },
-    onError: (error) => {
-      toast.error(t.common.error + ": " + error.message);
-    },
-  });
-
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
       const { data, error } = await supabase
@@ -213,20 +237,6 @@ const AdminTestimonials = () => {
     setIsDialogOpen(true);
   };
 
-  const handleMoveUp = (testimonial: Testimonial, index: number) => {
-    if (index === 0 || !testimonials) return;
-    const prevTestimonial = testimonials[index - 1];
-    reorderMutation.mutate({ id: testimonial.id, newOrder: prevTestimonial.display_order });
-    reorderMutation.mutate({ id: prevTestimonial.id, newOrder: testimonial.display_order });
-  };
-
-  const handleMoveDown = (testimonial: Testimonial, index: number) => {
-    if (!testimonials || index === testimonials.length - 1) return;
-    const nextTestimonial = testimonials[index + 1];
-    reorderMutation.mutate({ id: testimonial.id, newOrder: nextTestimonial.display_order });
-    reorderMutation.mutate({ id: nextTestimonial.id, newOrder: testimonial.display_order });
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveMutation.mutate({
@@ -234,6 +244,66 @@ const AdminTestimonials = () => {
       id: editingTestimonial?.id,
     });
   };
+
+  const renderTestimonialRow = (testimonial: Testimonial) => (
+    <>
+      <td className="p-4 text-sm">
+        <div>
+          <p className="font-medium">{testimonial.client_name}</p>
+          {testimonial.designation && (
+            <p className="text-xs text-muted-foreground">{testimonial.designation}</p>
+          )}
+        </div>
+      </td>
+      <td className="p-4 text-sm">{testimonial.company_name}</td>
+      <td className="p-4 text-sm">
+        <div className="flex items-center gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={cn(
+                "h-3 w-3",
+                i < testimonial.rating ? "text-amber-500 fill-amber-500" : "text-muted"
+              )}
+            />
+          ))}
+        </div>
+      </td>
+      <td className="p-4 text-sm">
+        <Switch
+          checked={testimonial.is_active}
+          disabled={toggleActiveMutation.isPending || isReordering}
+          onCheckedChange={(checked) =>
+            toggleActiveMutation.mutate({ id: testimonial.id, isActive: checked })
+          }
+        />
+      </td>
+      <td className="p-4 text-sm">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(testimonial)}
+            disabled={isReordering}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => openDeleteDialog(testimonial)}
+            disabled={deleteMutation.isPending || isReordering}
+          >
+            {deleteMutation.isPending && testimonialToDelete?.id === testimonial.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 text-destructive" />
+            )}
+          </Button>
+        </div>
+      </td>
+    </>
+  );
 
   return (
     <AdminLayout>
@@ -368,114 +438,72 @@ const AdminTestimonials = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Table */}
+        {/* Info Box */}
+        <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
+          <p>{isBangla ? "💡 পুনর্বিন্যাস করতে টেনে আনুন এবং ফেলুন" : "💡 Drag and drop to reorder testimonials"}</p>
+        </div>
+
+        {/* Table with Drag and Drop */}
         <div className="admin-table-wrapper">
           {isLoading ? (
             <AdminTableSkeleton columns={6} rows={4} />
           ) : testimonials && testimonials.length > 0 ? (
-            <table className="admin-table">
-              <thead className="sticky top-0 z-10 bg-muted/50">
-                <tr>
-                  <th className="w-12">{t.testimonials.order}</th>
-                  <th>{t.testimonials.client}</th>
-                  <th>{t.testimonials.company}</th>
-                  <th>{t.testimonials.rating}</th>
-                  <th>{t.testimonials.status}</th>
-                  <th className="text-right">{t.testimonials.actions}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {testimonials.map((testimonial, index) => (
-                  <tr key={testimonial.id} className="border-t border-border hover:bg-muted/30 transition-colors">
-                    <td className="p-4 text-sm">
-                      <div className="flex flex-col gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleMoveUp(testimonial, index)}
-                          disabled={index === 0 || reorderMutation.isPending}
-                        >
-                          {reorderMutation.isPending ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <ArrowUp className="h-3 w-3" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleMoveDown(testimonial, index)}
-                          disabled={index === testimonials.length - 1 || reorderMutation.isPending}
-                        >
-                          {reorderMutation.isPending ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <ArrowDown className="h-3 w-3" />
-                          )}
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm">
-                      <div>
-                        <p className="font-medium">{testimonial.client_name}</p>
-                        {testimonial.designation && (
-                          <p className="text-xs text-muted-foreground">{testimonial.designation}</p>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <SortableContext items={testimonials.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <table className="admin-table">
+                  <thead className="sticky top-0 z-10 bg-muted/50">
+                    <tr>
+                      <th className="w-10"></th>
+                      <th>{t.testimonials.client}</th>
+                      <th>{t.testimonials.company}</th>
+                      <th>{t.testimonials.rating}</th>
+                      <th>{t.testimonials.status}</th>
+                      <th className="text-right">{t.testimonials.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {testimonials.map((testimonial) => (
+                      <SortableRow
+                        key={testimonial.id}
+                        id={testimonial.id}
+                        disabled={isReordering}
+                        renderAsTableRow
+                        className={cn(
+                          "hover:bg-muted/30 transition-colors",
+                          !testimonial.is_active && "opacity-50"
                         )}
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm">{testimonial.company_name}</td>
-                    <td className="p-4 text-sm">
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={cn(
-                              "h-3 w-3",
-                              i < testimonial.rating ? "text-amber-500 fill-amber-500" : "text-muted"
-                            )}
-                          />
-                        ))}
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm">
-                      <Switch
-                        checked={testimonial.is_active}
-                        disabled={toggleActiveMutation.isPending}
-                        onCheckedChange={(checked) =>
-                          toggleActiveMutation.mutate({ id: testimonial.id, isActive: checked })
-                        }
-                      />
-                    </td>
-                    <td className="p-4 text-sm text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(testimonial)}
-                          disabled={saveMutation.isPending}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={deleteMutation.isPending}
-                          onClick={() => openDeleteDialog(testimonial)}
-                        >
-                          {deleteMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          )}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      >
+                        {renderTestimonialRow(testimonial)}
+                      </SortableRow>
+                    ))}
+                  </tbody>
+                </table>
+              </SortableContext>
+              
+              <DragOverlay>
+                {activeTestimonial && (
+                  <table className="admin-table bg-card shadow-lg rounded-lg border border-border">
+                    <tbody>
+                      <tr>
+                        <td className="p-2 w-10">
+                          <div className="p-1.5">
+                            <div className="h-4 w-4" />
+                          </div>
+                        </td>
+                        {renderTestimonialRow(activeTestimonial)}
+                      </tr>
+                    </tbody>
+                  </table>
+                )}
+              </DragOverlay>
+            </DndContext>
           ) : (
             <AdminEmptyState
               icon={MessageSquare}

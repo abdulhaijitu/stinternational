@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, CheckSquare, Square, X } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import BulkProductImport from "@/components/admin/BulkProductImport";
@@ -15,6 +16,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { cn } from "@/lib/utils";
 import { useAdminProducts, useDeleteProduct, useInvalidateProducts } from "@/hooks/useAdminProducts";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { BulkProductDeleteDialog } from "@/components/admin/BulkProductDeleteDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -35,6 +38,11 @@ const AdminProducts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
   
@@ -47,6 +55,66 @@ const AdminProducts = () => {
   const canCreate = isSuperAdmin || hasPermission("products", "create");
   const canEdit = isSuperAdmin || hasPermission("products", "update");
   const canDelete = isSuperAdmin || hasPermission("products", "delete");
+
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Bulk selection handlers
+  const handleSelectAll = useCallback(() => {
+    if (selectedIds.size === filteredProducts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+    }
+  }, [filteredProducts, selectedIds.size]);
+
+  const handleSelectOne = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkDelete = async () => {
+    if (!canDelete || selectedIds.size === 0) return;
+    
+    setIsBulkDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .in("id", Array.from(selectedIds));
+      
+      if (error) throw error;
+      
+      toast.success(
+        language === "bn" 
+          ? `${selectedIds.size}টি পণ্য মুছে ফেলা হয়েছে` 
+          : `${selectedIds.size} products deleted`
+      );
+      
+      setSelectedIds(new Set());
+      invalidateProducts();
+    } catch (error) {
+      console.error("Bulk delete failed:", error);
+      toast.error(language === "bn" ? "মুছে ফেলতে ব্যর্থ" : "Failed to delete products");
+      throw error;
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   const openDeleteDialog = (product: Product) => {
     if (!canDelete) {
@@ -67,18 +135,12 @@ const AdminProducts = () => {
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error(t.products.deleteError);
-      throw error; // Re-throw to let dialog know it failed
+      throw error;
     } finally {
       setDeletingId(null);
       setProductToDelete(null);
     }
   };
-
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(search.toLowerCase())
-  );
 
   const getStatusInfo = (product: Product) => {
     if (!product.is_active) {
@@ -89,6 +151,9 @@ const AdminProducts = () => {
     }
     return { label: t.products.outOfStock, className: "bg-destructive/10 text-destructive" };
   };
+
+  const isAllSelected = filteredProducts.length > 0 && selectedIds.size === filteredProducts.length;
+  const isSomeSelected = selectedIds.size > 0 && selectedIds.size < filteredProducts.length;
 
   if (loading) {
     return (
@@ -136,15 +201,50 @@ const AdminProducts = () => {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t.products.searchProducts}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9"
-            />
+          {/* Search and Bulk Actions Bar */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t.products.searchProducts}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+            
+            {/* Bulk Actions */}
+            {selectedIds.size > 0 && canDelete && (
+              <div className="flex items-center gap-3 bg-muted/50 border border-border rounded-lg px-4 py-2">
+                <span className="text-sm font-medium">
+                  {language === "bn" 
+                    ? `${selectedIds.size}টি নির্বাচিত` 
+                    : `${selectedIds.size} selected`}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="h-7 px-2"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setBulkDeleteDialogOpen(true)}
+                  disabled={isBulkDeleting}
+                  className="h-7"
+                >
+                  {isBulkDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
+                  {language === "bn" ? "মুছুন" : "Delete"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Products Table - Enterprise Standard */}
@@ -161,6 +261,16 @@ const AdminProducts = () => {
                 <table className="admin-table">
                   <thead>
                     <tr>
+                      {canDelete && (
+                        <th className="w-12">
+                          <Checkbox
+                            checked={isAllSelected}
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all"
+                            className={cn(isSomeSelected && "data-[state=checked]:bg-primary/50")}
+                          />
+                        </th>
+                      )}
                       <th>{t.products.productName}</th>
                       <th className="hidden md:table-cell">{t.products.sku}</th>
                       <th className="hidden lg:table-cell">{t.products.category}</th>
@@ -173,8 +283,21 @@ const AdminProducts = () => {
                   <tbody>
                     {filteredProducts.map((product) => {
                       const status = getStatusInfo(product);
+                      const isSelected = selectedIds.has(product.id);
                       return (
-                        <tr key={product.id}>
+                        <tr 
+                          key={product.id}
+                          className={cn(isSelected && "bg-primary/5")}
+                        >
+                          {canDelete && (
+                            <td>
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => handleSelectOne(product.id)}
+                                aria-label={`Select ${product.name}`}
+                              />
+                            </td>
+                          )}
                           <td>
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-muted rounded overflow-hidden shrink-0">
@@ -273,6 +396,26 @@ const AdminProducts = () => {
           translations={{
             cancel: t.common.cancel,
             delete: t.common.delete || "Delete",
+            deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
+          }}
+          language={language}
+        />
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <BulkProductDeleteDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+          selectedCount={selectedIds.size}
+          onConfirm={handleBulkDelete}
+          translations={{
+            title: language === "bn" ? "পণ্য মুছে ফেলুন" : "Delete Products",
+            description: language === "bn" 
+              ? "আপনি কি নিশ্চিত যে আপনি {count}টি পণ্য মুছে ফেলতে চান? এই ক্রিয়া অপরিবর্তনীয়।" 
+              : "Are you sure you want to delete {count} products? This action cannot be undone.",
+            typeToConfirm: language === "bn" ? "নিশ্চিত করতে টাইপ করুন:" : "Type to confirm:",
+            confirmWord: "DELETE",
+            cancel: t.common.cancel,
+            delete: language === "bn" ? "মুছুন" : "Delete",
             deleting: language === "bn" ? "মুছে ফেলা হচ্ছে..." : "Deleting...",
           }}
           language={language}
