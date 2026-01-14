@@ -1,5 +1,15 @@
-import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2, GripVertical, Eye, EyeOff, ArrowUp, ArrowDown, Image } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Image } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
@@ -21,6 +31,8 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { SortableRow } from "@/components/admin/SortableRow";
+import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 
 interface InstitutionLogo {
   id: string;
@@ -41,7 +53,6 @@ const AdminLogos = () => {
   const [editingLogo, setEditingLogo] = useState<InstitutionLogo | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [movingId, setMovingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [logoToDelete, setLogoToDelete] = useState<InstitutionLogo | null>(null);
   const [formData, setFormData] = useState({
@@ -70,6 +81,45 @@ const AdminLogos = () => {
       setLoading(false);
     }
   };
+
+  // Drag and drop reorder handler
+  const handleReorder = useCallback(async (reorderedItems: InstitutionLogo[]) => {
+    // Optimistically update UI
+    const previousLogos = [...logos];
+    setLogos(reorderedItems);
+    
+    try {
+      // Update display_order for all items
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        display_order: index + 1,
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("institution_logos")
+          .update({ display_order: update.display_order })
+          .eq("id", update.id);
+        if (error) throw error;
+      }
+      
+      // Refetch to ensure sync
+      await fetchLogos();
+      toast.success(isBangla ? "ক্রম আপডেট হয়েছে" : "Order updated");
+    } catch (error) {
+      console.error("Error reordering:", error);
+      setLogos(previousLogos); // Revert on error
+      toast.error(t.logos.reorderError);
+    }
+  }, [logos, isBangla, t.logos.reorderError]);
+
+  const { sensors, activeId, isReordering, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop({
+    items: logos,
+    onReorder: handleReorder,
+    getId: (logo) => logo.id,
+  });
+
+  const activeLogo = activeId ? logos.find(l => l.id === activeId) : null;
 
   const handleOpenDialog = (logo?: InstitutionLogo) => {
     if (logo) {
@@ -148,13 +198,12 @@ const AdminLogos = () => {
       const { error } = await supabase.from("institution_logos").delete().eq("id", logoToDelete.id);
       if (error) throw error;
       
-      // Refetch to ensure UI is in sync with database
       await fetchLogos();
       toast.success(t.logos.deleteSuccess);
     } catch (error) {
       console.error("Error deleting logo:", error);
       toast.error(t.logos.deleteError);
-      throw error; // Re-throw to let dialog know it failed
+      throw error;
     } finally {
       setDeletingId(null);
       setLogoToDelete(null);
@@ -174,7 +223,6 @@ const AdminLogos = () => {
       if (error) throw error;
       if (!data) throw new Error("No data returned from update");
       
-      // Refetch to ensure UI is in sync with database
       await fetchLogos();
       toast.success(!logo.is_active ? t.logos.statusEnabled : t.logos.statusDisabled);
     } catch (error) {
@@ -185,63 +233,65 @@ const AdminLogos = () => {
     }
   };
 
-  const handleMoveUp = async (index: number) => {
-    if (index === 0) return;
-    
-    const currentLogo = logos[index];
-    const prevLogo = logos[index - 1];
-    
-    const currentOrder = currentLogo.display_order;
-    const prevOrder = prevLogo.display_order;
-    
-    setMovingId(currentLogo.id);
-    try {
-      const [result1, result2] = await Promise.all([
-        supabase.from("institution_logos").update({ display_order: prevOrder }).eq("id", currentLogo.id).select(),
-        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", prevLogo.id).select(),
-      ]);
-      
-      if (result1.error) throw result1.error;
-      if (result2.error) throw result2.error;
-      
-      // Refetch to ensure UI is in sync with database
-      await fetchLogos();
-    } catch (error) {
-      console.error("Error reordering:", error);
-      toast.error(t.logos.reorderError);
-    } finally {
-      setMovingId(null);
-    }
-  };
+  const renderLogoRow = (logo: InstitutionLogo) => (
+    <>
+      {/* Logo preview */}
+      <div className="w-24 h-16 bg-muted rounded-lg border border-border flex items-center justify-center p-2">
+        <img
+          src={logo.logo_url}
+          alt={logo.name}
+          className="max-h-full max-w-full object-contain"
+        />
+      </div>
 
-  const handleMoveDown = async (index: number) => {
-    if (index === logos.length - 1) return;
-    
-    const currentLogo = logos[index];
-    const nextLogo = logos[index + 1];
-    
-    const currentOrder = currentLogo.display_order;
-    const nextOrder = nextLogo.display_order;
-    
-    setMovingId(currentLogo.id);
-    try {
-      const [result1, result2] = await Promise.all([
-        supabase.from("institution_logos").update({ display_order: nextOrder }).eq("id", currentLogo.id).select(),
-        supabase.from("institution_logos").update({ display_order: currentOrder }).eq("id", nextLogo.id).select(),
-      ]);
-      
-      if (result1.error) throw result1.error;
-      if (result2.error) throw result2.error;
-      
-      // Refetch to ensure UI is in sync with database
-      await fetchLogos();
-    } catch (error) {
-      console.error("Error reordering:", error);
-      toast.error(t.logos.reorderError);
-    } finally {
-      setMovingId(null);
-    }
-  };
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate">{logo.name}</p>
+        <p className="text-sm text-muted-foreground">
+          {t.logos.order}: {logo.display_order} • {logo.is_active ? t.logos.active : t.logos.hidden}
+        </p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleToggleActive(logo)}
+          disabled={togglingId === logo.id || isReordering}
+          title={logo.is_active ? t.logos.hidden : t.logos.active}
+        >
+          {togglingId === logo.id ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : logo.is_active ? (
+            <Eye className="h-4 w-4 text-green-600" />
+          ) : (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          )}
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => handleOpenDialog(logo)} 
+          disabled={saving || isReordering}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => openDeleteDialog(logo)}
+          disabled={deletingId === logo.id || isReordering}
+        >
+          {deletingId === logo.id ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4 text-destructive" />
+          )}
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <AdminLayout>
@@ -315,9 +365,12 @@ const AdminLogos = () => {
         {/* Info Box */}
         <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
           <p>{t.logos.infoBox}</p>
+          <p className="mt-2 text-xs">
+            {isBangla ? "💡 পুনর্বিন্যাস করতে টেনে আনুন এবং ফেলুন" : "💡 Drag and drop to reorder"}
+          </p>
         </div>
 
-        {/* Logos List */}
+        {/* Logos List with Drag and Drop */}
         {loading ? (
           <AdminTableSkeleton columns={4} rows={4} />
         ) : logos.length === 0 ? (
@@ -333,100 +386,40 @@ const AdminLogos = () => {
             }
           />
         ) : (
-          <div className="admin-table-wrapper divide-y divide-border">
-            {logos.map((logo, index) => (
-              <div 
-                key={logo.id} 
-                className={cn(
-                  "flex items-center gap-4 p-4",
-                  !logo.is_active && "opacity-50 bg-muted/30"
-                )}
-              >
-                {/* Reorder controls */}
-                <div className="flex flex-col gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => handleMoveUp(index)}
-                    disabled={index === 0 || movingId === logo.id}
-                  >
-                    {movingId === logo.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <ArrowUp className="h-3 w-3" />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext items={logos.map(l => l.id)} strategy={verticalListSortingStrategy}>
+              <div className="admin-table-wrapper divide-y divide-border">
+                {logos.map((logo) => (
+                  <SortableRow
+                    key={logo.id}
+                    id={logo.id}
+                    disabled={isReordering}
+                    className={cn(
+                      "p-4",
+                      !logo.is_active && "opacity-50 bg-muted/30"
                     )}
-                    <span className="sr-only">Move up</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => handleMoveDown(index)}
-                    disabled={index === logos.length - 1 || movingId === logo.id}
                   >
-                    {movingId === logo.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <ArrowDown className="h-3 w-3" />
-                    )}
-                    <span className="sr-only">Move down</span>
-                  </Button>
-                </div>
-
-                {/* Logo preview */}
-                <div className="w-24 h-16 bg-muted rounded-lg border border-border flex items-center justify-center p-2">
-                  <img
-                    src={logo.logo_url}
-                    alt={logo.name}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{logo.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t.logos.order}: {logo.display_order} • {logo.is_active ? t.logos.active : t.logos.hidden}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleActive(logo)}
-                    disabled={togglingId === logo.id}
-                    title={logo.is_active ? t.logos.hidden : t.logos.active}
-                  >
-                    {togglingId === logo.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : logo.is_active ? (
-                      <Eye className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(logo)} disabled={saving}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openDeleteDialog(logo)}
-                    disabled={deletingId === logo.id}
-                  >
-                    {deletingId === logo.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    )}
-                  </Button>
-                </div>
+                    {renderLogoRow(logo)}
+                  </SortableRow>
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+            
+            <DragOverlay>
+              {activeLogo && (
+                <div className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg shadow-lg">
+                  {renderLogoRow(activeLogo)}
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
         )}
 
         {/* Delete Confirmation Dialog */}
