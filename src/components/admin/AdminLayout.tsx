@@ -19,7 +19,7 @@ import {
   PanelLeft,
   Users
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -64,10 +64,21 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return saved === "true";
   });
 
+  // Ref for nav container to enable auto-scroll to active item
+  const navRef = useRef<HTMLElement>(null);
+
   // Save collapsed state to localStorage
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
   }, [collapsed]);
+
+  // Auto-scroll to active nav item on route change
+  useEffect(() => {
+    const activeElement = navRef.current?.querySelector('[data-active="true"]') as HTMLElement | null;
+    if (activeElement) {
+      activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [location.pathname]);
 
   // Navigation items with module mapping for permissions and groups
   const allNavItems: NavItem[] = [
@@ -200,6 +211,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <Link
         to={item.href}
         onClick={() => setSidebarOpen(false)}
+        data-active={isActive}
         className={cn(
           "group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150",
           isActive 
@@ -411,9 +423,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </div>
 
             <ScrollArea className={cn(
-              collapsed ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-7rem)] lg:h-[calc(100%-3.5rem)]"
+              collapsed ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-7rem)] lg:h-[calc(100%-3.5rem)]",
+              "sidebar-scroll-area"
             )}>
-              <nav className={cn("p-2", collapsed && "p-1.5")}>
+              <nav className={cn("p-2", collapsed && "p-1.5")} ref={navRef}>
                 {renderNavGroups()}
                 
                 {/* Locked items section */}
