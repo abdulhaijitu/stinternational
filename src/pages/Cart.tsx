@@ -9,7 +9,9 @@ import { formatPrice } from "@/lib/formatPrice";
 const Cart = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, getSubtotal } = useCart();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const fontClass = language === "bn" ? "font-siliguri" : "";
 
   const subtotal = getSubtotal();
   const shippingCost = subtotal >= 10000 ? 0 : 150;
@@ -18,7 +20,7 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
-        <div className="container-premium py-16 md:py-24 text-center">
+        <div className={`container-premium py-16 md:py-24 text-center ${fontClass}`}>
           <div className="max-w-md mx-auto">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="h-10 w-10 text-muted-foreground" />
@@ -43,7 +45,7 @@ const Cart = () => {
     <Layout>
       {/* Page Header */}
       <section className="bg-muted/50 border-b border-border">
-        <div className="container-premium py-8 md:py-12">
+        <div className={`container-premium py-8 md:py-12 ${fontClass}`}>
           <h1 className="text-2xl md:text-3xl font-bold">{t.cart.yourCart}</h1>
           <p className="text-muted-foreground mt-2">
             {t.products.productsCount.replace('{count}', String(items.length))}
@@ -53,7 +55,7 @@ const Cart = () => {
 
       {/* Cart Content */}
       <section className="py-8 md:py-12">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
@@ -105,7 +107,7 @@ const Cart = () => {
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="h-8 w-8 flex items-center justify-center hover:bg-muted transition-colors"
-                        aria-label="Decrease quantity"
+                        aria-label={t.cart.decreaseQuantity}
                       >
                         <Minus className="h-3 w-3" />
                       </button>
@@ -115,7 +117,7 @@ const Cart = () => {
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="h-8 w-8 flex items-center justify-center hover:bg-muted transition-colors"
-                        aria-label="Increase quantity"
+                        aria-label={t.cart.increaseQuantity}
                       >
                         <Plus className="h-3 w-3" />
                       </button>
@@ -137,12 +139,12 @@ const Cart = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t.common.shipping}</span>
                     <span className="font-medium">
-                      {shippingCost === 0 ? t.checkout.freeShipping || "Free" : formatPrice(shippingCost)}
+                      {shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}
                     </span>
                   </div>
                   {subtotal < 10000 && (
                     <p className="text-xs text-muted-foreground">
-                      {t.checkout.freeShippingThreshold || "Free delivery on orders ৳10,000+"}
+                      {t.checkout.freeShippingThreshold}
                     </p>
                   )}
                   <div className="border-t border-border pt-4">
@@ -165,7 +167,7 @@ const Cart = () => {
                   <Link to="/categories">{t.cart.continueShopping}</Link>
                 </Button>
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  {t.checkout.secureCheckout || "Secure checkout • Cash on delivery available"}
+                  {t.checkout.secureCheckout}
                 </p>
               </div>
             </div>

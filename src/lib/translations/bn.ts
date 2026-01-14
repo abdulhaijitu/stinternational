@@ -191,6 +191,8 @@ export const bn = {
     removeItem: "আইটেম সরান",
     cartSummary: "কার্ট সারসংক্ষেপ",
     orderTotal: "অর্ডার মোট",
+    decreaseQuantity: "পরিমাণ কমান",
+    increaseQuantity: "পরিমাণ বাড়ান",
   },
 
   // Checkout
