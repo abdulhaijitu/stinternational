@@ -169,7 +169,7 @@ const Account = () => {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="full_name" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       {acc?.fullName || "Full Name"}
@@ -182,7 +182,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="company_name" className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
                       {acc?.companyName || "Company Name"}
@@ -195,7 +195,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="email" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
                       {acc?.email || "Email"}
@@ -208,7 +208,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="phone" className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
                       {acc?.phone || "Phone Number"}
@@ -222,7 +222,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="md:col-span-2 space-y-2">
+                  <div className="md:col-span-2 space-y-1.5">
                     <Label htmlFor="shipping_address" className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       {acc?.shippingAddress || "Shipping Address"}
@@ -236,7 +236,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="shipping_city">{acc?.city || "City"}</Label>
                     <Input
                       id="shipping_city"
@@ -247,7 +247,7 @@ const Account = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="shipping_postal_code">{acc?.postalCode || "Postal Code"}</Label>
                     <Input
                       id="shipping_postal_code"

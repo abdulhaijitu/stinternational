@@ -65,7 +65,8 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn("space-y-2", className)} {...props} />
+        {/* Standardized inline form spacing - tight 1.5 spacing */}
+        <div ref={ref} className={cn("space-y-1.5", className)} {...props} />
       </FormItemContext.Provider>
     );
   },

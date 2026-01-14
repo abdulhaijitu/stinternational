@@ -2,7 +2,19 @@ import { MapPin, Phone, Mail, Clock, Send, Building2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const Contact = () => {
   const { t, language } = useLanguage();
@@ -57,14 +69,54 @@ const Contact = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = language === "bn" ? "নাম আবশ্যক" : "Name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = language === "bn" ? "ইমেইল আবশ্যক" : "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = language === "bn" ? "সঠিক ইমেইল দিন" : "Enter a valid email";
+    }
+    
+    if (!formData.subject) {
+      newErrors.subject = language === "bn" ? "বিষয় নির্বাচন করুন" : "Please select a subject";
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = language === "bn" ? "বার্তা আবশ্যক" : "Message is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setSubmitting(true);
+    
+    // Simulate submission
+    setTimeout(() => {
+      toast.success(language === "bn" ? "বার্তা পাঠানো হয়েছে!" : "Message sent successfully!");
+      setFormData({ name: "", email: "", phone: "", company: "", subject: "", message: "" });
+      setSubmitting(false);
+    }, 1000);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
   };
 
   return (
@@ -145,89 +197,126 @@ const Contact = () => {
               <p className="text-muted-foreground mb-8">
                 {t.contact.formSubtitle}
               </p>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Row 1: Name & Email */}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{t.contact.fullName} *</label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className={cn(errors.name && "text-destructive")}>
+                      {t.contact.fullName} <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="name"
                       type="text"
-                      name="name"
-                      required
                       value={formData.name}
-                      onChange={handleChange}
-                      className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      onChange={(e) => handleChange("name", e.target.value)}
                       placeholder={t.contact.yourName}
+                      className={cn(errors.name && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {errors.name && (
+                      <p className="text-xs font-medium text-destructive">{errors.name}</p>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{t.contact.email} *</label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className={cn(errors.email && "text-destructive")}>
+                      {t.contact.email} <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="email"
                       type="email"
-                      name="email"
-                      required
                       value={formData.email}
-                      onChange={handleChange}
-                      className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      onChange={(e) => handleChange("email", e.target.value)}
                       placeholder={t.contact.yourEmail}
+                      className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
                     />
+                    {errors.email && (
+                      <p className="text-xs font-medium text-destructive">{errors.email}</p>
+                    )}
                   </div>
                 </div>
+
+                {/* Row 2: Phone & Company */}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{t.contact.phone}</label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone">
+                      {t.contact.phone} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
+                    </Label>
+                    <Input
+                      id="phone"
                       type="tel"
-                      name="phone"
                       value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      onChange={(e) => handleChange("phone", e.target.value)}
                       placeholder={t.contact.phonePlaceholder}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">{t.contact.company}</label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company">
+                      {t.contact.company} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
+                    </Label>
+                    <Input
+                      id="company"
                       type="text"
-                      name="company"
                       value={formData.company}
-                      onChange={handleChange}
-                      className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      onChange={(e) => handleChange("company", e.target.value)}
                       placeholder={t.contact.organizationName}
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t.contact.subject} *</label>
-                  <select
-                    name="subject"
-                    required
+
+                {/* Subject */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="subject" className={cn(errors.subject && "text-destructive")}>
+                    {t.contact.subject} <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
                     value={formData.subject}
-                    onChange={handleChange}
-                    className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    onValueChange={(value) => handleChange("subject", value)}
                   >
-                    <option value="">{t.contact.selectSubject}</option>
-                    <option value="product-inquiry">{t.contact.productInquiry}</option>
-                    <option value="quote-request">{t.contact.quoteRequest}</option>
-                    <option value="bulk-order">{t.contact.bulkOrder}</option>
-                    <option value="technical-support">{t.contact.technicalSupport}</option>
-                    <option value="other">{t.contact.other}</option>
-                  </select>
+                    <SelectTrigger 
+                      id="subject"
+                      className={cn(errors.subject && "border-destructive focus:ring-destructive")}
+                    >
+                      <SelectValue placeholder={t.contact.selectSubject} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product-inquiry">{t.contact.productInquiry}</SelectItem>
+                      <SelectItem value="quote-request">{t.contact.quoteRequest}</SelectItem>
+                      <SelectItem value="bulk-order">{t.contact.bulkOrder}</SelectItem>
+                      <SelectItem value="technical-support">{t.contact.technicalSupport}</SelectItem>
+                      <SelectItem value="other">{t.contact.other}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.subject && (
+                    <p className="text-xs font-medium text-destructive">{errors.subject}</p>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t.contact.message} *</label>
-                  <textarea
-                    name="message"
-                    required
+
+                {/* Message */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="message" className={cn(errors.message && "text-destructive")}>
+                    {t.contact.message} <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="message"
                     value={formData.message}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange("message", e.target.value)}
                     rows={5}
-                    className="w-full px-4 py-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     placeholder={t.contact.messagePlaceholder}
+                    className={cn(
+                      "resize-none",
+                      errors.message && "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
+                  {errors.message && (
+                    <p className="text-xs font-medium text-destructive">{errors.message}</p>
+                  )}
                 </div>
-                <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto">
+
+                <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto" disabled={submitting}>
                   <Send className="h-4 w-4" />
-                  {t.contact.sendButton}
+                  {submitting 
+                    ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...") 
+                    : t.contact.sendButton
+                  }
                 </Button>
               </form>
             </div>
