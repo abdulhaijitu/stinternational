@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, ChevronDown, Menu, Package, Sparkles } from "lucide-react";
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useActiveCategoriesByGroup, DBCategory } from "@/hooks/useCategories";
+import { ChevronRight, ChevronDown, Menu, Package, Sparkles, FolderOpen } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useActiveCategories, DBCategory } from "@/hooks/useCategories";
 import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import { useMegaMenuAnalytics } from "@/hooks/useMegaMenuAnalytics";
@@ -11,6 +11,10 @@ import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { formatPrice } from "@/lib/formatPrice";
+
+interface ParentWithSubs extends DBCategory {
+  subCategories: DBCategory[];
+}
 
 interface MegaMenuProps {
   isCompact?: boolean;
@@ -28,14 +32,54 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
   const categoryRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const featuredRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   
-  const { groups, isLoading } = useActiveCategoriesByGroup();
+  const { data: categories, isLoading } = useActiveCategories();
   const { data: featuredProducts, isLoading: featuredLoading } = useFeaturedProducts();
   const { getCategoryFields, getProductFields } = useBilingualContent();
   const { t } = useLanguage();
   const { trackFeaturedProductClick } = useMegaMenuAnalytics();
 
-  // Flatten all categories for navigation
-  const allCategories = groups.flatMap(g => g.categories);
+  // Organize into hierarchy
+  const hierarchy = useMemo(() => {
+    if (!categories) return [];
+
+    const parentMap: Record<string, ParentWithSubs> = {};
+    const subCategories: DBCategory[] = [];
+
+    categories.forEach(cat => {
+      if (!cat.parent_id) {
+        parentMap[cat.id] = { ...cat, subCategories: [] };
+      } else {
+        subCategories.push(cat);
+      }
+    });
+
+    subCategories.forEach(sub => {
+      if (sub.parent_id && parentMap[sub.parent_id]) {
+        parentMap[sub.parent_id].subCategories.push(sub);
+      }
+    });
+
+    return Object.values(parentMap)
+      .sort((a, b) => a.display_order - b.display_order)
+      .map(parent => ({
+        ...parent,
+        subCategories: parent.subCategories.sort((a, b) => a.display_order - b.display_order),
+      }));
+  }, [categories]);
+
+  // Flatten all categories for navigation (parents + subs)
+  const allCategories = useMemo(() => {
+    const result: { category: DBCategory; parent?: DBCategory }[] = [];
+    hierarchy.forEach(parent => {
+      if (parent.subCategories.length === 0) {
+        result.push({ category: parent });
+      }
+      parent.subCategories.forEach(sub => {
+        result.push({ category: sub, parent });
+      });
+    });
+    return result;
+  }, [hierarchy]);
 
   // Get bilingual names
   const getCategoryName = useCallback((category: DBCategory) => {
@@ -53,9 +97,9 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
     activeIndex: activeCategoryIndex,
     onActiveIndexChange: setActiveCategoryIndex,
     onSelect: (index) => {
-      const category = allCategories[index];
-      if (category) {
-        const ref = categoryRefs.current.get(category.id);
+      const item = allCategories[index];
+      if (item) {
+        const ref = categoryRefs.current.get(item.category.id);
         ref?.click();
       }
     },
@@ -158,15 +202,20 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
             <div className="w-[280px] border-r border-border">
               <ScrollArea className="max-h-[420px]">
                 <div className="py-1">
-                  {allCategories.map((category, index) => {
+                  {allCategories.map((item, index) => {
+                    const { category, parent } = item;
                     const IconComponent = getCategoryIcon(category.icon_name);
+                    const categoryUrl = parent 
+                      ? `/category/${parent.slug}/${category.slug}`
+                      : `/category/${category.slug}`;
+                    
                     return (
                       <Link
                         key={category.id}
                         ref={(el) => {
                           if (el) categoryRefs.current.set(category.id, el);
                         }}
-                        to={`/category/${category.slug}`}
+                        to={categoryUrl}
                         onClick={handleCategorySelect}
                         onMouseEnter={() => setActiveCategoryIndex(index)}
                         role="menuitem"
@@ -175,6 +224,7 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
                           "flex items-center gap-3 px-4 py-3 text-sm transition-all duration-150",
                           "border-b border-border/30 last:border-b-0",
                           "focus:outline-none",
+                          parent && "pl-8", // Indent sub-categories
                           activeCategoryIndex === index
                             ? "bg-muted/60 text-foreground"
                             : "text-foreground/80 hover:bg-muted/40 hover:text-foreground"

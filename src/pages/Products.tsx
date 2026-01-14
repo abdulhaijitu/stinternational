@@ -40,8 +40,9 @@ import ProductQuickView from "@/components/products/ProductQuickView";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
-import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
+import { useActiveCategoriesByGroup, useActiveCategories } from "@/hooks/useCategories";
 import { useProductCompare } from "@/hooks/useProductCompare";
+import HierarchicalCategoryFilter from "@/components/products/HierarchicalCategoryFilter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { cn } from "@/lib/utils";
@@ -395,85 +396,12 @@ const Products = () => {
     </div>
   );
 
-  // Category Sidebar Component
+  // Category Sidebar using hierarchical filter
   const CategorySidebar = () => (
-    <Card className="border-border overflow-hidden">
-      <CardHeader className="py-3 px-4 border-b bg-muted/40">
-        <div className="flex items-center gap-2">
-          <LayoutGrid className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">{t.nav.categories}</h3>
-        </div>
-      </CardHeader>
-      <ScrollArea className="h-[400px]">
-        <CardContent className="p-0">
-          {groupsLoading ? (
-            <div className="p-4 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-8 bg-muted animate-pulse rounded" />
-              ))}
-            </div>
-          ) : (
-            <>
-              {groups.map((group) => (
-                <Collapsible
-                  key={group.slug}
-                  open={expandedGroups.includes(group.slug)}
-                  onOpenChange={() => toggleGroup(group.slug)}
-                >
-                  <CollapsibleTrigger className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-muted/50 transition-colors border-b border-border/50">
-                    <span className="text-foreground">{group.name}</span>
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 text-muted-foreground transition-transform duration-200",
-                        expandedGroups.includes(group.slug) && "rotate-180"
-                      )}
-                    />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-muted/20">
-                    <div className="py-2 px-2">
-                      {group.categories.map((category) => {
-                        const isSelected = selectedCategories.includes(category.slug);
-                        return (
-                          <button
-                            key={category.id}
-                            onClick={() => handleCategoryToggle(category.slug)}
-                            className={cn(
-                              "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-all text-left",
-                              isSelected
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                "w-2 h-2 rounded-full shrink-0 transition-colors",
-                                isSelected ? "bg-primary" : "bg-border"
-                              )}
-                            />
-                            <span className="truncate">{category.name}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
-              
-              {/* View All Categories Link */}
-              <div className="p-3 border-t">
-                <Link
-                  to="/categories"
-                  className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Browse All Categories
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </ScrollArea>
-    </Card>
+    <HierarchicalCategoryFilter
+      selectedCategories={selectedCategories}
+      onCategoryToggle={handleCategoryToggle}
+    />
   );
 
   return (
