@@ -631,4 +631,21 @@ export const adminEn = {
     compactVsComfortable: "{compact} compact vs {comfortable} comfortable",
     hoversClicks: "{hovers} hovers, {clicks} clicks",
   },
+
+  // Image Upload
+  imageUpload: {
+    uploadImage: "Upload Image",
+    changeImage: "Change",
+    removeImage: "Remove",
+    uploading: "Uploading...",
+    imageOnly: "Only images can be uploaded",
+    maxSize: "Image size cannot exceed 5MB",
+    uploadSuccess: "Image uploaded successfully",
+    uploadError: "Failed to upload image",
+    dropzone: "Upload an image",
+    dropzoneHint: "PNG, JPG (max 5MB)",
+    dragToReorder: "Drag to reorder images. First image is primary.",
+    addMore: "Add More",
+    maxReached: "Maximum images reached",
+  },
 } as const;

@@ -3,6 +3,7 @@ import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 
 interface ImageUploadProps {
   value: string;
@@ -17,8 +18,11 @@ const ImageUpload = ({
   bucket = "product-images",
   folder = "products"
 }: ImageUploadProps) => {
+  const { language, t } = useAdminLanguage();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const img = t.imageUpload;
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -26,13 +30,13 @@ const ImageUpload = ({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("শুধুমাত্র ছবি আপলোড করা যাবে");
+      toast.error(img?.imageOnly || "Only images can be uploaded");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("ছবির সাইজ ৫MB এর বেশি হতে পারবে না");
+      toast.error(img?.maxSize || "Image size cannot exceed 5MB");
       return;
     }
 
@@ -59,10 +63,10 @@ const ImageUpload = ({
         .getPublicUrl(fileName);
 
       onChange(publicUrl);
-      toast.success("ছবি আপলোড হয়েছে");
+      toast.success(img?.uploadSuccess || "Image uploaded successfully");
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error(error.message || "আপলোড করতে সমস্যা হয়েছে");
+      toast.error(error.message || img?.uploadError || "Failed to upload image");
     } finally {
       setUploading(false);
       // Reset input
@@ -76,8 +80,10 @@ const ImageUpload = ({
     onChange("");
   };
 
+  const fontClass = language === "bn" ? "font-siliguri" : "";
+
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${fontClass}`}>
       <input
         ref={fileInputRef}
         type="file"
@@ -107,7 +113,7 @@ const ImageUpload = ({
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              <span className="ml-1">পরিবর্তন</span>
+              <span className="ml-1">{img?.changeImage || "Change"}</span>
             </Button>
             <Button
               type="button"
@@ -129,13 +135,13 @@ const ImageUpload = ({
           {uploading ? (
             <>
               <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
-              <span className="text-sm text-muted-foreground">আপলোড হচ্ছে...</span>
+              <span className="text-sm text-muted-foreground">{img?.uploading || "Uploading..."}</span>
             </>
           ) : (
             <>
               <ImageIcon className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">ছবি আপলোড করুন</span>
-              <span className="text-xs text-muted-foreground">PNG, JPG (সর্বোচ্চ 5MB)</span>
+              <span className="text-sm text-muted-foreground">{img?.dropzone || "Upload an image"}</span>
+              <span className="text-xs text-muted-foreground">{img?.dropzoneHint || "PNG, JPG (max 5MB)"}</span>
             </>
           )}
         </button>
