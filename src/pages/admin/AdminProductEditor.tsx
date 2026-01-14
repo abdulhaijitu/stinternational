@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
+import IconPicker from "@/components/admin/IconPicker";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,12 +93,12 @@ const AdminProductEditor = () => {
   
   // Quick-add sub-category modal state
   const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
-  const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "" });
+  const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingSubCategory, setAddingSubCategory] = useState(false);
 
   // Quick-add parent category modal state
   const [showAddParentCategoryModal, setShowAddParentCategoryModal] = useState(false);
-  const [newParentCategory, setNewParentCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "" });
+  const [newParentCategory, setNewParentCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingParentCategory, setAddingParentCategory] = useState(false);
 
   const [formData, setFormData] = useState(initialFormData);
@@ -478,6 +479,7 @@ const AdminProductEditor = () => {
           name_bn: newSubCategory.name_bn.trim() || null,
           slug: newSubCategory.slug.trim(),
           image_url: newSubCategory.image_url || null,
+          icon_name: newSubCategory.icon_name || null,
           parent_id: formData.parent_category_id,
           is_parent: false,
           is_active: true,
@@ -505,7 +507,7 @@ const AdminProductEditor = () => {
       toast.success(language === "bn" ? "সাব-ক্যাটাগরি তৈরি হয়েছে" : "Sub-category created");
       
       // Reset modal
-      setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+      setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
       setShowAddSubCategoryModal(false);
     } catch (error: any) {
       console.error("Error creating sub-category:", error);
@@ -541,6 +543,7 @@ const AdminProductEditor = () => {
           name_bn: newParentCategory.name_bn.trim() || null,
           slug: newParentCategory.slug.trim(),
           image_url: newParentCategory.image_url || null,
+          icon_name: newParentCategory.icon_name || null,
           parent_id: null,
           is_parent: true,
           is_active: true,
@@ -567,7 +570,7 @@ const AdminProductEditor = () => {
       toast.success(language === "bn" ? "প্যারেন্ট ক্যাটাগরি তৈরি হয়েছে" : "Parent category created");
       
       // Reset modal
-      setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+      setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
       setShowAddParentCategoryModal(false);
     } catch (error: any) {
       console.error("Error creating parent category:", error);
@@ -1098,6 +1101,10 @@ const AdminProductEditor = () => {
                 onChange={(url) => setNewSubCategory({ ...newSubCategory, image_url: url })}
               />
             </div>
+            <IconPicker
+              value={newSubCategory.icon_name || null}
+              onChange={(iconName) => setNewSubCategory({ ...newSubCategory, icon_name: iconName })}
+            />
           </div>
           <DialogFooter>
             <Button
@@ -1105,7 +1112,7 @@ const AdminProductEditor = () => {
               variant="outline"
               onClick={() => {
                 setShowAddSubCategoryModal(false);
-                setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+                setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
               }}
               className={getInputClass()}
             >
@@ -1193,6 +1200,10 @@ const AdminProductEditor = () => {
                 onChange={(url) => setNewParentCategory({ ...newParentCategory, image_url: url })}
               />
             </div>
+            <IconPicker
+              value={newParentCategory.icon_name || null}
+              onChange={(iconName) => setNewParentCategory({ ...newParentCategory, icon_name: iconName })}
+            />
           </div>
           <DialogFooter>
             <Button
@@ -1200,7 +1211,7 @@ const AdminProductEditor = () => {
               variant="outline"
               onClick={() => {
                 setShowAddParentCategoryModal(false);
-                setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "" });
+                setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
               }}
               className={getInputClass()}
             >
