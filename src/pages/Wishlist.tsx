@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 
@@ -12,6 +13,10 @@ const Wishlist = () => {
   const { user } = useAuth();
   const { wishlist, isLoading, removeFromWishlist } = useWishlist();
   const { addItem } = useCart();
+  const { t, language } = useLanguage();
+
+  const wl = t.wishlist;
+  const fontClass = language === "bn" ? "font-siliguri" : "";
 
   const handleAddToCart = (item: typeof wishlist[0]) => {
     if (!item.product) return;
@@ -24,7 +29,7 @@ const Wishlist = () => {
       image_url: item.product.image_url || (item.product.images?.[0] || null),
       sku: null,
     });
-    toast.success(`${item.product.name} কার্টে যোগ হয়েছে!`);
+    toast.success(wl?.addedToCart?.replace("{name}", item.product.name) || `${item.product.name} added to cart!`);
   };
 
   const handleMoveToCart = (item: typeof wishlist[0]) => {
@@ -35,15 +40,15 @@ const Wishlist = () => {
   if (!user) {
     return (
       <Layout>
-        <section className="py-16 md:py-24">
+        <section className={`py-16 md:py-24 ${fontClass}`}>
           <div className="container-premium text-center">
             <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">উইশলিস্ট</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-4">{wl?.title || "Wishlist"}</h1>
             <p className="text-muted-foreground mb-6">
-              উইশলিস্ট দেখতে অনুগ্রহ করে লগইন করুন
+              {wl?.loginToView || "Please login to view your wishlist"}
             </p>
             <Button asChild>
-              <Link to="/account">লগইন করুন</Link>
+              <Link to="/account">{wl?.login || "Login"}</Link>
             </Button>
           </div>
         </section>
@@ -66,30 +71,30 @@ const Wishlist = () => {
   return (
     <Layout>
       {/* Page Header */}
-      <section className="bg-muted/50 border-b border-border">
+      <section className={`bg-muted/50 border-b border-border ${fontClass}`}>
         <div className="container-premium py-8 md:py-12">
           <div className="flex items-center gap-3">
             <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl md:text-3xl font-bold">আমার উইশলিস্ট</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{wl?.myWishlist || "My Wishlist"}</h1>
           </div>
           <p className="text-muted-foreground mt-2">
-            {wishlist.length}টি পণ্য সংরক্ষিত আছে
+            {wl?.itemsSaved?.replace("{count}", String(wishlist.length)) || `${wishlist.length} products saved`}
           </p>
         </div>
       </section>
 
       {/* Wishlist Content */}
-      <section className="py-8 md:py-12">
+      <section className={`py-8 md:py-12 ${fontClass}`}>
         <div className="container-premium">
           {wishlist.length === 0 ? (
             <div className="text-center py-16 bg-card border border-border rounded-lg">
               <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
-              <h2 className="text-xl font-semibold mb-2">আপনার উইশলিস্ট খালি</h2>
+              <h2 className="text-xl font-semibold mb-2">{wl?.empty || "Your wishlist is empty"}</h2>
               <p className="text-muted-foreground mb-6">
-                আপনার পছন্দের পণ্য উইশলিস্টে যোগ করুন
+                {wl?.emptyMessage || "Add products you like to your wishlist"}
               </p>
               <Button asChild>
-                <Link to="/products">পণ্য দেখুন</Link>
+                <Link to="/products">{wl?.browseProducts || "Browse Products"}</Link>
               </Button>
             </div>
           ) : (
@@ -118,7 +123,7 @@ const Wishlist = () => {
                         />
                         {discount > 0 && (
                           <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded">
-                            {discount}% OFF
+                            {discount}% {t.products.off}
                           </span>
                         )}
                       </div>
@@ -154,9 +159,9 @@ const Wishlist = () => {
 
                       <div className="mt-2">
                         {product.in_stock ? (
-                          <span className="text-xs text-green-600 font-medium">স্টকে আছে</span>
+                          <span className="text-xs text-green-600 font-medium">{wl?.inStock || "In Stock"}</span>
                         ) : (
-                          <span className="text-xs text-destructive font-medium">স্টক নেই</span>
+                          <span className="text-xs text-destructive font-medium">{wl?.outOfStock || "Out of Stock"}</span>
                         )}
                       </div>
                     </div>
@@ -169,7 +174,7 @@ const Wishlist = () => {
                         className="flex-1 sm:flex-none"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        কার্টে নিন
+                        {wl?.moveToCart || "Move to Cart"}
                       </Button>
                       <Button
                         variant="outline"
@@ -177,7 +182,7 @@ const Wishlist = () => {
                         className="flex-1 sm:flex-none text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        সরান
+                        {wl?.remove || "Remove"}
                       </Button>
                     </div>
                   </div>
