@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
-import { ChevronRight, ChevronDown, FolderOpen } from "lucide-react";
-import { useState } from "react";
-import { useCategoryHierarchy } from "@/hooks/useCategories";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronRight, ChevronDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useCategoryHierarchy, ParentCategory, DBCategory } from "@/hooks/useCategories";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -18,23 +18,52 @@ interface MobileCategoryDrawerProps {
 }
 
 const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) => {
-  const [openParents, setOpenParents] = useState<string[]>([]);
+  const location = useLocation();
   const { parentCategories, isLoading } = useCategoryHierarchy();
   const { getCategoryFields } = useBilingualContent();
   const { t } = useLanguage();
+  
+  // Track expanded parent - only one at a time (accordion behavior)
+  const [expandedParentId, setExpandedParentId] = useState<string | null>(null);
 
-  const toggleParent = (id: string) => {
-    setOpenParents(prev => 
-      prev.includes(id) 
-        ? prev.filter(s => s !== id)
-        : [...prev, id]
-    );
+  // Parse current URL to determine active category
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const isOnCategoryPage = pathParts[0] === 'category';
+  const currentParentSlug = isOnCategoryPage ? pathParts[1] : null;
+  const currentSubSlug = isOnCategoryPage && pathParts.length > 2 ? pathParts[2] : null;
+
+  // Auto-expand parent that contains active category
+  useEffect(() => {
+    if (parentCategories.length > 0 && currentParentSlug) {
+      const activeParent = parentCategories.find(
+        p => p.slug === currentParentSlug
+      );
+      if (activeParent) {
+        setExpandedParentId(activeParent.id);
+      }
+    }
+  }, [parentCategories, currentParentSlug]);
+
+  const toggleParent = useCallback((parentId: string) => {
+    setExpandedParentId(prev => prev === parentId ? null : parentId);
+  }, []);
+
+  const isParentActive = (parent: ParentCategory) => {
+    return parent.slug === currentParentSlug && !currentSubSlug;
+  };
+
+  const isSubActive = (parent: ParentCategory, sub: DBCategory) => {
+    return parent.slug === currentParentSlug && sub.slug === currentSubSlug;
+  };
+
+  const hasActiveChild = (parent: ParentCategory) => {
+    return parent.slug === currentParentSlug;
   };
 
   if (isLoading) {
     return (
       <div className="py-4 px-4 space-y-3">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <div key={i} className="h-12 bg-muted rounded-lg animate-pulse" />
         ))}
       </div>
@@ -47,21 +76,28 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
       <Link 
         to="/categories" 
         onClick={onCategoryClick}
-        className="flex items-center justify-between py-3.5 px-4 mx-2 mb-2 text-sm font-medium bg-muted/50 rounded-lg hover:bg-muted transition-colors duration-150"
+        className={cn(
+          "flex items-center justify-between py-3.5 px-4 mx-2 mb-2 text-sm font-medium rounded-lg transition-colors duration-150",
+          location.pathname === '/categories'
+            ? "bg-primary/10 text-primary"
+            : "bg-muted/50 hover:bg-muted"
+        )}
       >
         <span>{t.nav.viewAllCategories}</span>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        <ChevronRight className="h-4 w-4" />
       </Link>
 
       <ScrollArea className="h-[calc(100vh-280px)]">
-        <div className="space-y-1 px-2">
+        <nav className="space-y-0.5 px-2" role="navigation" aria-label="Category navigation">
           {parentCategories?.map((parent) => {
-            const isOpen = openParents.includes(parent.id);
+            const isExpanded = expandedParentId === parent.id;
             const hasChildren = parent.subCategories && parent.subCategories.length > 0;
             const ParentIcon = getCategoryIcon(parent.icon_name);
-            const { name: parentName } = getCategoryFields(parent);
+            const parentName = getCategoryFields(parent).name;
+            const isActive = isParentActive(parent);
+            const hasActive = hasActiveChild(parent);
             
-            // If parent has no sub-categories, just show as link
+            // If parent has no sub-categories, show as simple link
             if (!hasChildren) {
               return (
                 <Link
@@ -69,12 +105,18 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
                   to={`/category/${parent.slug}`}
                   onClick={onCategoryClick}
                   className={cn(
-                    "w-full flex items-center gap-3 py-3.5 px-4 rounded-lg transition-all duration-150",
-                    "hover:bg-muted/40 text-foreground"
+                    "w-full flex items-center gap-3 py-3.5 px-4 rounded-lg transition-colors duration-150",
+                    isActive
+                      ? "bg-primary/10 text-primary font-semibold"
+                      : "hover:bg-muted/40 text-foreground"
                   )}
                 >
-                  <ParentIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm font-medium">{parentName}</span>
+                  <ParentIcon className={cn(
+                    "h-4 w-4 shrink-0",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  <span className="text-sm font-medium flex-1">{parentName}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
               );
             }
@@ -82,56 +124,74 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
             return (
               <Collapsible
                 key={parent.id}
-                open={isOpen}
+                open={isExpanded}
                 onOpenChange={() => toggleParent(parent.id)}
               >
-                <CollapsibleTrigger className={cn(
-                  "w-full flex items-center justify-between py-3.5 px-4 rounded-lg transition-all duration-150",
-                  isOpen 
-                    ? "bg-muted/70 text-foreground" 
-                    : "hover:bg-muted/40 text-foreground"
-                )}>
-                  <div className="flex items-center gap-3">
-                    <ParentIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="flex items-center">
+                  {/* Parent Category Link */}
+                  <Link
+                    to={`/category/${parent.slug}`}
+                    onClick={onCategoryClick}
+                    className={cn(
+                      "flex-1 flex items-center gap-3 py-3.5 pl-4 pr-2 rounded-l-lg transition-colors duration-150",
+                      isActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : hasActive
+                          ? "bg-muted/50 text-foreground font-medium"
+                          : "hover:bg-muted/40 text-foreground"
+                    )}
+                  >
+                    <ParentIcon className={cn(
+                      "h-4 w-4 shrink-0",
+                      isActive || hasActive ? "text-primary" : "text-muted-foreground"
+                    )} />
                     <span className="text-sm font-medium">{parentName}</span>
-                  </div>
-                  <ChevronDown className={cn(
-                    "h-4 w-4 text-muted-foreground transition-transform duration-200",
-                    isOpen && "rotate-180"
-                  )} />
-                </CollapsibleTrigger>
+                  </Link>
+
+                  {/* Expand/Collapse Toggle */}
+                  <CollapsibleTrigger
+                    className={cn(
+                      "p-3.5 rounded-r-lg hover:bg-muted/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20",
+                      isExpanded && "bg-muted/30",
+                      hasActive && "bg-muted/30"
+                    )}
+                    aria-label={isExpanded ? `Collapse ${parentName}` : `Expand ${parentName}`}
+                  >
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                      isExpanded && "rotate-180"
+                    )} />
+                  </CollapsibleTrigger>
+                </div>
                 
-                <CollapsibleContent className="animate-accordion-down">
+                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
                   <div className="py-1 pl-4 pr-2 space-y-0.5">
-                    {/* View all in parent category link */}
-                    <Link
-                      to={`/category/${parent.slug}`}
-                      onClick={onCategoryClick}
-                      className={cn(
-                        "flex items-center gap-3 py-3 px-3 rounded-md text-sm transition-colors duration-150",
-                        "text-primary hover:text-primary hover:bg-primary/5 font-medium"
-                      )}
-                    >
-                      <FolderOpen className="h-4 w-4 shrink-0" />
-                      <span>{t.common.viewAll} {parentName}</span>
-                    </Link>
-                    
                     {/* Sub-categories */}
-                    {parent.subCategories?.map((subCategory) => {
-                      const SubIcon = getCategoryIcon(subCategory.icon_name);
-                      const { name: subName } = getCategoryFields(subCategory);
+                    {parent.subCategories?.map((sub) => {
+                      const SubIcon = getCategoryIcon(sub.icon_name);
+                      const subName = getCategoryFields(sub).name;
+                      const isSubItemActive = isSubActive(parent, sub);
+
                       return (
                         <Link
-                          key={subCategory.id}
-                          to={`/category/${parent.slug}/${subCategory.slug}`}
+                          key={sub.id}
+                          to={`/category/${parent.slug}/${sub.slug}`}
                           onClick={onCategoryClick}
                           className={cn(
-                            "flex items-center gap-3 py-3 px-3 rounded-md text-sm transition-colors duration-150",
-                            "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            "flex items-center gap-3 py-3 pl-7 pr-3 rounded-md text-sm transition-colors duration-150",
+                            isSubItemActive
+                              ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           )}
                         >
-                          <SubIcon className="h-4 w-4 shrink-0" />
-                          <span>{subName}</span>
+                          <SubIcon className={cn(
+                            "h-4 w-4 shrink-0",
+                            isSubItemActive && "text-primary"
+                          )} />
+                          <span className="flex-1">{subName}</span>
+                          {isSubItemActive && (
+                            <ChevronRight className="h-4 w-4 text-primary" />
+                          )}
                         </Link>
                       );
                     })}
@@ -140,7 +200,7 @@ const MobileCategoryDrawer = ({ onCategoryClick }: MobileCategoryDrawerProps) =>
               </Collapsible>
             );
           })}
-        </div>
+        </nav>
       </ScrollArea>
 
       {/* Quick Links */}

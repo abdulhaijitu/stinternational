@@ -1,11 +1,12 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, SlidersHorizontal, FolderOpen } from "lucide-react";
+import { ChevronRight, FolderOpen } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
+import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useGridDensity } from "@/hooks/useGridDensity";
 import { useProductCompare } from "@/hooks/useProductCompare";
 import { useProductsByCategory } from "@/hooks/useCategoryProducts";
-import { useCategoryBySlug, useParentCategoryWithSubs, useSubCategoryBySlug, DBCategory } from "@/hooks/useCategories";
+import { useCategoryBySlug, useParentCategoryWithSubs, useSubCategoryBySlug } from "@/hooks/useCategories";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +29,6 @@ const CategoryPage = () => {
   
   // Determine if this is a hierarchical URL or flat URL
   const isHierarchical = !!parentSlug && !!subSlug;
-  const effectiveParentSlug = parentSlug || slug;
-  const effectiveSubSlug = subSlug;
 
   // Product comparison
   const {
@@ -68,9 +67,6 @@ const CategoryPage = () => {
 
   // Check if flat URL points to a parent category (show sub-categories instead of products)
   const isParentCategoryPage = !isHierarchical && flatCategory && !flatCategory.parent_id;
-  const subCategories = isParentCategoryPage && parentWithSubs?.parent?.slug === flatCategory?.slug 
-    ? parentWithSubs?.subCategories 
-    : [];
 
   // For parent category pages, fetch using parent's slug for sub-categories listing
   const { data: parentSubsData, isLoading: parentSubsLoading } = useParentCategoryWithSubs(
@@ -195,61 +191,71 @@ const CategoryPage = () => {
           </div>
         </section>
 
-        {/* Sub-Categories Grid */}
+        {/* Sub-Categories with Sidebar Layout */}
         <section className="py-8 md:py-12">
           <div className={`container-premium ${fontClass}`}>
-            <h2 className="text-xl font-semibold mb-6">Browse Sub-Categories</h2>
-            {subs.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-muted-foreground mb-4">
-                  No sub-categories found in this category.
-                </p>
-                <Button variant="outline" asChild>
-                  <Link to="/categories">{t.categories.browseAll}</Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {subs.map((sub) => {
-                  const SubIcon = getCategoryIcon(sub.icon_name);
-                  const subFields = getCategoryFields({
-                    name: sub.name,
-                    name_bn: sub.name_bn,
-                    description: sub.description,
-                    description_bn: sub.description_bn,
-                  });
+            <div className="flex gap-8">
+              {/* Sticky Category Sidebar - Desktop Only */}
+              <aside className="hidden lg:block w-64 shrink-0">
+                <StickyCategorySidebar />
+              </aside>
 
-                  return (
-                    <Link
-                      key={sub.id}
-                      to={`/category/${parentData.slug}/${sub.slug}`}
-                      className="group"
-                    >
-                      <Card className="h-full hover:shadow-md transition-shadow border-border">
-                        <CardContent className="p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                              <SubIcon className="h-6 w-6" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                                {subFields.name}
-                              </h3>
-                              {subFields.description && (
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                  {subFields.description}
-                                </p>
-                              )}
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
+              {/* Main Content */}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-semibold mb-6">Browse Sub-Categories</h2>
+                {subs.length === 0 ? (
+                  <div className="text-center py-16">
+                    <p className="text-muted-foreground mb-4">
+                      No sub-categories found in this category.
+                    </p>
+                    <Button variant="outline" asChild>
+                      <Link to="/categories">{t.categories.browseAll}</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {subs.map((sub) => {
+                      const SubIcon = getCategoryIcon(sub.icon_name);
+                      const subFields = getCategoryFields({
+                        name: sub.name,
+                        name_bn: sub.name_bn,
+                        description: sub.description,
+                        description_bn: sub.description_bn,
+                      });
+
+                      return (
+                        <Link
+                          key={sub.id}
+                          to={`/category/${parentData.slug}/${sub.slug}`}
+                          className="group"
+                        >
+                          <Card className="h-full hover:shadow-md transition-shadow border-border">
+                            <CardContent className="p-6">
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                                  <SubIcon className="h-6 w-6" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                                    {subFields.name}
+                                  </h3>
+                                  {subFields.description && (
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                      {subFields.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </section>
       </>
@@ -346,63 +352,69 @@ const CategoryPage = () => {
         </div>
       </section>
 
-      {/* Products Grid */}
+      {/* Products Grid with Sidebar */}
       <section className="py-8 md:py-12">
         <div className={`container-premium ${fontClass}`}>
-          {/* Toolbar */}
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
-            <p className="text-sm text-muted-foreground">
-              {t.products.productsCount.replace('{count}', String(products.length))}
-            </p>
-            <div className="flex items-center gap-4">
-              <GridDensityToggle
-                density={density}
-                onDensityChange={setDensity}
-                className="hidden sm:flex"
-              />
-              <Button variant="ghost" size="sm" className="hidden md:flex">
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                {t.products.filters}
-              </Button>
-              <select className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                <option>{t.products.sortNewest}</option>
-                <option>{t.products.sortPriceAsc}</option>
-                <option>{t.products.sortPriceDesc}</option>
-                <option>{t.products.sortNameAsc}</option>
-              </select>
+          <div className="flex gap-8">
+            {/* Sticky Category Sidebar - Desktop Only */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <StickyCategorySidebar />
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {/* Toolbar */}
+              <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
+                <p className="text-sm text-muted-foreground">
+                  {t.products.productsCount.replace('{count}', String(products.length))}
+                </p>
+                <div className="flex items-center gap-4">
+                  <GridDensityToggle
+                    density={density}
+                    onDensityChange={setDensity}
+                    className="hidden sm:flex"
+                  />
+                  <select className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option>{t.products.sortNewest}</option>
+                    <option>{t.products.sortPriceAsc}</option>
+                    <option>{t.products.sortPriceDesc}</option>
+                    <option>{t.products.sortNameAsc}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Products */}
+              {isLoading || productsLoading ? (
+                <div className={gridClasses}>
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <ProductCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : products.length > 0 ? (
+                <div className={gridClasses}>
+                  {products.map((product) => (
+                    <DBProductCard
+                      key={product.id}
+                      product={product}
+                      variant={density === 'compact' ? 'compact' : 'default'}
+                      isInCompare={isInCompare(product.id)}
+                      onToggleCompare={() => toggleCompare(product)}
+                      canAddToCompare={canAddMore}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground mb-4">
+                    {t.products.noProducts}
+                  </p>
+                  <Button variant="outline" asChild>
+                    <Link to="/categories">{t.categories.browseAll}</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Products */}
-          {isLoading || productsLoading ? (
-            <div className={gridClasses}>
-              {Array.from({ length: 8 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : products.length > 0 ? (
-            <div className={gridClasses}>
-              {products.map((product) => (
-                <DBProductCard
-                  key={product.id}
-                  product={product}
-                  variant={density === 'compact' ? 'compact' : 'default'}
-                  isInCompare={isInCompare(product.id)}
-                  onToggleCompare={() => toggleCompare(product)}
-                  canAddToCompare={canAddMore}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground mb-4">
-                {t.products.noProducts}
-              </p>
-              <Button variant="outline" asChild>
-                <Link to="/categories">{t.categories.browseAll}</Link>
-              </Button>
-            </div>
-          )}
         </div>
       </section>
     </Layout>

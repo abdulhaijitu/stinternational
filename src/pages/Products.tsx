@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, Loader2, LayoutGrid, Filter } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight, Loader2, Filter } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGridDensity, GridDensity } from "@/hooks/useGridDensity";
+import { useGridDensity } from "@/hooks/useGridDensity";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
 import Layout from "@/components/layout/Layout";
 import PageTransition from "@/components/layout/PageTransition";
@@ -26,13 +26,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import DBProductCard from "@/components/products/DBProductCard";
 import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
@@ -40,9 +34,9 @@ import ProductQuickView from "@/components/products/ProductQuickView";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
 import { useAllProducts, useCategories, DBProduct } from "@/hooks/useProducts";
-import { useActiveCategoriesByGroup, useActiveCategories } from "@/hooks/useCategories";
+import { useActiveCategoriesByGroup } from "@/hooks/useCategories";
 import { useProductCompare } from "@/hooks/useProductCompare";
-import HierarchicalCategoryFilter from "@/components/products/HierarchicalCategoryFilter";
+import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { cn } from "@/lib/utils";
@@ -396,12 +390,9 @@ const Products = () => {
     </div>
   );
 
-  // Category Sidebar using hierarchical filter
+  // Category Sidebar using new sticky sidebar
   const CategorySidebar = () => (
-    <HierarchicalCategoryFilter
-      selectedCategories={selectedCategories}
-      onCategoryToggle={handleCategoryToggle}
-    />
+    <StickyCategorySidebar className="sticky top-24" />
   );
 
   return (
@@ -460,9 +451,12 @@ const Products = () => {
         <div className="container-premium">
           <div className="flex gap-8">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:block w-72 shrink-0 space-y-6">
+            <aside className="hidden lg:block w-64 shrink-0 space-y-6">
+              {/* Category Sidebar - Primary */}
+              <CategorySidebar />
+              
               {/* Filters Card */}
-              <Card className="border-border sticky top-24">
+              <Card className="border-border sticky top-[500px]">
                 <CardHeader className="py-3 px-4 border-b bg-muted/40">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-primary" />
@@ -473,11 +467,6 @@ const Products = () => {
                   <FilterSidebar />
                 </CardContent>
               </Card>
-
-              {/* Categories Card */}
-              <div className="sticky top-[440px]">
-                <CategorySidebar />
-              </div>
             </aside>
 
             {/* Products Grid */}
