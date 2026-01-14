@@ -231,8 +231,11 @@ const AdminLogos = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="admin-form-group space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t.logos.institutionName} *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="name">
+                  {t.logos.institutionName}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -240,9 +243,12 @@ const AdminLogos = () => {
                   placeholder={t.logos.institutionNamePlaceholder}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>{t.logos.logoImage} *</Label>
-                <p className="text-xs text-muted-foreground mb-2">
+              <div className="space-y-1.5">
+                <Label>
+                  {t.logos.logoImage}
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <p className="text-xs text-muted-foreground">
                   {t.logos.logoImageHint}
                 </p>
                 <ImageUpload
