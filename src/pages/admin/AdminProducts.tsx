@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Pencil, Trash2, Search, Loader2, Lock } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +104,14 @@ const AdminProducts = () => {
     return { label: t.products.outOfStock, className: "bg-destructive/10 text-destructive" };
   };
 
+  if (loading) {
+    return (
+      <AdminLayout>
+        <AdminTableSkeleton columns={7} rows={10} />
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <TooltipProvider>
@@ -153,11 +162,7 @@ const AdminProducts = () => {
 
           {/* Products Table */}
           <div className="bg-card border border-border rounded-lg overflow-hidden">
-            {loading ? (
-              <div className="p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              </div>
-            ) : filteredProducts.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 {search ? t.products.noProducts : t.common.noData}
               </div>

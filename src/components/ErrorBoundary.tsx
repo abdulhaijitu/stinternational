@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { captureException, errorTracking } from "@/lib/errorTracking";
 
 interface Props {
   children: ReactNode;
@@ -13,6 +14,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  errorId: string | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -20,6 +22,7 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false,
     error: null,
     errorInfo: null,
+    errorId: null,
   };
 
   public static getDerivedStateFromError(error: Error): Partial<State> {
@@ -27,13 +30,23 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
-    this.setState({ errorInfo });
+    // Add breadcrumb before capturing
+    errorTracking.addBreadcrumb("Error boundary caught error", "error", {
+      componentStack: errorInfo.componentStack,
+    });
+    
+    // Capture the exception with error tracking service
+    const errorId = captureException(error, {
+      componentStack: errorInfo.componentStack || undefined,
+      route: window.location.pathname,
+    }, "error");
+    
+    this.setState({ errorInfo, errorId });
     this.props.onError?.(error, errorInfo);
   }
 
   private handleRetry = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+    this.setState({ hasError: false, error: null, errorInfo: null, errorId: null });
   };
 
   private handleGoHome = () => {
@@ -60,10 +73,15 @@ class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="space-y-4">
               {this.state.error && (
-                <div className="p-3 bg-muted rounded-lg">
+                <div className="p-3 bg-muted rounded-lg space-y-2">
                   <p className="text-sm font-mono text-muted-foreground break-all">
                     {this.state.error.message}
                   </p>
+                  {this.state.errorId && (
+                    <p className="text-xs text-muted-foreground">
+                      Error ID: <span className="font-mono">{this.state.errorId}</span>
+                    </p>
+                  )}
                 </div>
               )}
               <div className="flex gap-3">
