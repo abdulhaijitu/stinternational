@@ -19,7 +19,7 @@ import {
   PanelLeft,
   Users
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -63,6 +63,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     return saved === "true";
   });
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   // Ref for nav container to enable auto-scroll to active item
   const navRef = useRef<HTMLElement>(null);
@@ -79,6 +81,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [location.pathname]);
+
+  // Toggle collapse with animation
+  const handleToggleCollapse = useCallback(() => {
+    setIsAnimating(true);
+    setCollapsed(prev => !prev);
+    setTimeout(() => setIsAnimating(false), 250);
+  }, []);
 
   // Navigation items with module mapping for permissions and groups
   const allNavItems: NavItem[] = [
@@ -120,6 +129,53 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     acc[group].push(item);
     return acc;
   }, {} as Record<string, NavItem[]>);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const allAccessibleItems = navItems;
+    const totalItems = allAccessibleItems.length;
+    
+    if (totalItems === 0) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex(prev => (prev + 1) % totalItems);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex(prev => (prev - 1 + totalItems) % totalItems);
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < totalItems) {
+          navigate(allAccessibleItems[focusedIndex].href);
+          setSidebarOpen(false);
+        }
+        break;
+      case 'Home':
+        e.preventDefault();
+        setFocusedIndex(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        setFocusedIndex(totalItems - 1);
+        break;
+      case 'Escape':
+        setFocusedIndex(-1);
+        break;
+    }
+  }, [navItems, focusedIndex, navigate]);
+
+  // Focus the appropriate nav item when focusedIndex changes
+  useEffect(() => {
+    if (focusedIndex >= 0) {
+      const links = navRef.current?.querySelectorAll('[data-nav-item]');
+      const targetLink = links?.[focusedIndex] as HTMLElement | undefined;
+      targetLink?.focus();
+    }
+  }, [focusedIndex]);
 
   // Locked items
   const lockedItems = allNavItems.filter(item => !navItems.includes(item));
@@ -169,10 +225,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     );
   }
 
-  const NavLink = ({ item, isLocked = false }: { item: NavItem; isLocked?: boolean }) => {
+  const NavLink = ({ item, isLocked = false, itemIndex }: { item: NavItem; isLocked?: boolean; itemIndex?: number }) => {
     const isActive = location.pathname === item.href || 
       (item.href !== "/admin" && location.pathname.startsWith(item.href));
     const badgeCount = getBadgeCount(item);
+    const isFocused = itemIndex !== undefined && itemIndex === focusedIndex;
 
     if (isLocked) {
       return (
@@ -212,11 +269,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         to={item.href}
         onClick={() => setSidebarOpen(false)}
         data-active={isActive}
+        data-nav-item={itemIndex !== undefined ? itemIndex : undefined}
+        tabIndex={itemIndex !== undefined ? 0 : -1}
         className={cn(
           "group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150",
+          "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
           isActive 
             ? "bg-primary text-primary-foreground shadow-sm" 
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          isFocused && !isActive && "bg-accent text-accent-foreground",
           collapsed && "justify-center px-1.5"
         )}
       >
@@ -274,10 +335,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const renderNavGroups = () => {
     const groupOrder = ["main", "catalog", "sales", "content", "analytics", "settings"];
+    let globalIndex = 0;
     
     return groupOrder.map((groupKey, index) => {
       const items = groupedNavItems[groupKey];
       if (!items || items.length === 0) return null;
+
+      const startIndex = globalIndex;
+      globalIndex += items.length;
 
       return (
         <div key={groupKey} className={cn(index > 0 && "mt-4")}>
@@ -291,9 +356,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {groupKey !== "main" && collapsed && (
             <div className="my-2 mx-1.5 border-t border-border/50" />
           )}
-          <div className="space-y-0.5">
-            {items.map((item) => (
-              <NavLink key={item.href} item={item} />
+          <div className="space-y-0.5" role="menu">
+            {items.map((item, itemIdx) => (
+              <NavLink key={item.href} item={item} itemIndex={startIndex + itemIdx} />
             ))}
           </div>
         </div>
@@ -311,10 +376,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCollapsed(!collapsed)}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground shrink-0"
+              onClick={handleToggleCollapse}
+              className={cn(
+                "h-9 w-9 text-muted-foreground hover:text-foreground shrink-0 transition-transform duration-200",
+                isAnimating && "scale-95"
+              )}
             >
-              {collapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+              <PanelLeftClose className={cn(
+                "h-5 w-5 transition-all duration-200",
+                collapsed && "rotate-180"
+              )} />
             </Button>
             <Link to="/admin" className="flex items-center gap-2.5">
               <img src={logo} alt="ST International" className="h-8 w-auto" />
@@ -409,7 +480,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             "transform transition-all duration-200 ease-out",
             "lg:h-[calc(100vh-3.5rem)] overflow-hidden",
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-            collapsed ? "w-[60px]" : "w-60"
+            collapsed ? "w-[60px]" : "w-60",
+            isAnimating && "sidebar-collapse-indicator"
           )}>
             {/* Mobile sidebar header */}
             <div className="lg:hidden p-3 border-b border-border flex items-center justify-between">
@@ -426,7 +498,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               collapsed ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-7rem)] lg:h-[calc(100%-3.5rem)]",
               "sidebar-scroll-area"
             )}>
-              <nav className={cn("p-2", collapsed && "p-1.5")} ref={navRef}>
+              <nav 
+                className={cn("p-2", collapsed && "p-1.5")} 
+                ref={navRef}
+                onKeyDown={handleKeyDown}
+                role="navigation"
+                aria-label="Admin navigation"
+              >
                 {renderNavGroups()}
                 
                 {/* Locked items section */}

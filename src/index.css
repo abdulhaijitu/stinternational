@@ -629,7 +629,24 @@
   background-color: hsl(var(--muted-foreground) / 0.5) !important;
 }
 
-  /* Safe area insets for mobile devices */
+/* Admin Sidebar Collapse Animation */
+@keyframes sidebar-collapse-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.sidebar-collapse-indicator {
+  animation: sidebar-collapse-pulse 0.25s ease-out;
+}
+
+/* Admin Sidebar Nav Item Focus States */
+.sidebar-scroll-area [data-nav-item] {
+  outline: none;
+}
+
+.sidebar-scroll-area [data-nav-item]:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
