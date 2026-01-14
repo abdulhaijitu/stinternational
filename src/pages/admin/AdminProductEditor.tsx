@@ -121,10 +121,14 @@ const AdminProductEditor = () => {
   }, [formData, autoSave, initialDataLoaded, loading]);
 
   const fetchCategories = async () => {
+    // Fetch all categories with parent info for hierarchical display
     const { data } = await supabase
       .from("categories")
-      .select("id, name, name_bn")
-      .order("name");
+      .select("id, name, name_bn, parent_id")
+      .order("display_order");
+    
+    // For product assignment, we show all categories but prefer sub-categories
+    // Group them for better UX in the dropdown
     setCategories(data || []);
   };
 

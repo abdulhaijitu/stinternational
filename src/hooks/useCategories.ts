@@ -14,12 +14,18 @@ export interface DBCategory {
   icon_name: string | null;
   display_order: number;
   is_active: boolean;
+  parent_id: string | null;
+  is_parent: boolean;
 }
 
 export interface CategoryGroup {
   name: string;
   slug: string;
   categories: DBCategory[];
+}
+
+export interface ParentCategory extends DBCategory {
+  subCategories: DBCategory[];
 }
 
 // Fetch only active categories (for public use)
@@ -55,7 +61,82 @@ export const useAllCategories = () => {
   });
 };
 
-// Group active categories by parent_group
+// Fetch only parent categories (for admin dropdowns)
+export const useParentCategories = () => {
+  return useQuery({
+    queryKey: ["categories", "parents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .is("parent_id", null)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data as DBCategory[];
+    },
+  });
+};
+
+// Fetch only sub-categories (for product assignment)
+export const useSubCategories = () => {
+  return useQuery({
+    queryKey: ["categories", "subcategories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .not("parent_id", "is", null)
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data as DBCategory[];
+    },
+  });
+};
+
+// Fetch categories with hierarchy structure
+export const useCategoryHierarchy = () => {
+  const { data: categories, isLoading, error } = useActiveCategories();
+
+  const hierarchy = categories?.reduce((acc, cat) => {
+    if (!cat.parent_id) {
+      // This is a parent category
+      if (!acc[cat.id]) {
+        acc[cat.id] = { ...cat, subCategories: [] };
+      } else {
+        acc[cat.id] = { ...acc[cat.id], ...cat };
+      }
+    } else {
+      // This is a sub-category
+      if (!acc[cat.parent_id]) {
+        acc[cat.parent_id] = { subCategories: [cat] } as ParentCategory;
+      } else {
+        acc[cat.parent_id].subCategories.push(cat);
+      }
+    }
+    return acc;
+  }, {} as Record<string, ParentCategory>);
+
+  // Filter out incomplete entries and sort sub-categories
+  const parentCategories = hierarchy
+    ? Object.values(hierarchy)
+        .filter(cat => cat.id && cat.name)
+        .map(cat => ({
+          ...cat,
+          subCategories: cat.subCategories.sort((a, b) => a.display_order - b.display_order)
+        }))
+    : [];
+
+  return {
+    parentCategories,
+    isLoading,
+    error,
+  };
+};
+
+// Group active categories by parent_group (legacy support)
 export const useActiveCategoriesByGroup = () => {
   const { data: categories, isLoading, error } = useActiveCategories();
 
@@ -146,6 +227,77 @@ export const useCategoryBySlug = (slug: string) => {
       return data as DBCategory;
     },
     enabled: !!slug,
+  });
+};
+
+// Get parent category with its sub-categories
+export const useParentCategoryWithSubs = (parentSlug: string) => {
+  return useQuery({
+    queryKey: ["category", "parent-with-subs", parentSlug],
+    queryFn: async () => {
+      // First get the parent category
+      const { data: parent, error: parentError } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", parentSlug)
+        .is("parent_id", null)
+        .eq("is_active", true)
+        .single();
+
+      if (parentError) throw parentError;
+
+      // Then get all sub-categories
+      const { data: subCategories, error: subError } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("parent_id", parent.id)
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (subError) throw subError;
+
+      return {
+        parent: parent as DBCategory,
+        subCategories: subCategories as DBCategory[],
+      };
+    },
+    enabled: !!parentSlug,
+  });
+};
+
+// Get sub-category by slug with parent info
+export const useSubCategoryBySlug = (parentSlug: string, subSlug: string) => {
+  return useQuery({
+    queryKey: ["category", "sub", parentSlug, subSlug],
+    queryFn: async () => {
+      // First get the parent category
+      const { data: parent, error: parentError } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", parentSlug)
+        .is("parent_id", null)
+        .eq("is_active", true)
+        .single();
+
+      if (parentError) throw parentError;
+
+      // Then get the sub-category
+      const { data: subCategory, error: subError } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", subSlug)
+        .eq("parent_id", parent.id)
+        .eq("is_active", true)
+        .single();
+
+      if (subError) throw subError;
+
+      return {
+        parent: parent as DBCategory,
+        subCategory: subCategory as DBCategory,
+      };
+    },
+    enabled: !!parentSlug && !!subSlug,
   });
 };
 

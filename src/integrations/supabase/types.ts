@@ -51,9 +51,11 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_parent: boolean | null
           name: string
           name_bn: string | null
           parent_group: string | null
+          parent_id: string | null
           slug: string
           updated_at: string
         }
@@ -66,9 +68,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_parent?: boolean | null
           name: string
           name_bn?: string | null
           parent_group?: string | null
+          parent_id?: string | null
           slug: string
           updated_at?: string
         }
@@ -81,13 +85,23 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_parent?: boolean | null
           name?: string
           name_bn?: string | null
           parent_group?: string | null
+          parent_id?: string | null
           slug?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cta_analytics: {
         Row: {
