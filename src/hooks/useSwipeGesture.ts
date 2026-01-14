@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, type TouchEvent } from 'react';
 
 interface SwipeConfig {
   onSwipeDown?: () => void;
@@ -10,9 +10,9 @@ interface SwipeConfig {
 }
 
 interface SwipeHandlers {
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: (e: React.TouchEvent) => void;
+  onTouchStart: (e: TouchEvent) => void;
+  onTouchMove: (e: TouchEvent) => void;
+  onTouchEnd: (e: TouchEvent) => void;
 }
 
 /**
@@ -31,7 +31,7 @@ export function useSwipeGesture(config: SwipeConfig): SwipeHandlers {
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const touchCurrentRef = useRef<{ x: number; y: number } | null>(null);
 
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
+  const onTouchStart = useCallback((e: TouchEvent) => {
     const touch = e.touches[0];
     touchStartRef.current = {
       x: touch.clientX,
@@ -44,9 +44,9 @@ export function useSwipeGesture(config: SwipeConfig): SwipeHandlers {
     };
   }, []);
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
+  const onTouchMove = useCallback((e: TouchEvent) => {
     if (!touchStartRef.current) return;
-    
+
     const touch = e.touches[0];
     touchCurrentRef.current = {
       x: touch.clientX,
@@ -54,7 +54,7 @@ export function useSwipeGesture(config: SwipeConfig): SwipeHandlers {
     };
   }, []);
 
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+  const onTouchEnd = useCallback((e: TouchEvent) => {
     if (!touchStartRef.current || !touchCurrentRef.current) {
       touchStartRef.current = null;
       touchCurrentRef.current = null;
