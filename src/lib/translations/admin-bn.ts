@@ -550,4 +550,10 @@ export const adminBn = {
     viewWebsite: "ওয়েবসাইট দেখুন",
     restricted: "সীমিত",
   },
+
+  // Theme Toggle
+  theme: {
+    lightMode: "লাইট মোড",
+    darkMode: "ডার্ক মোড",
+  },
 } as const;

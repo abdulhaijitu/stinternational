@@ -550,4 +550,10 @@ export const adminEn = {
     viewWebsite: "View Website",
     restricted: "Restricted",
   },
+
+  // Theme Toggle
+  theme: {
+    lightMode: "Light Mode",
+    darkMode: "Dark Mode",
+  },
 } as const;
