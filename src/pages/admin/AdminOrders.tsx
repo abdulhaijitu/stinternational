@@ -74,14 +74,18 @@ const AdminOrders = () => {
     
     setUpdatingStatus(orderId);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("orders")
         .update({ status: newStatus as any })
-        .eq("id", orderId);
+        .eq("id", orderId)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
+      
       toast.success(t.orders.updateSuccess);
-      // Realtime will handle the refresh
+      // Realtime will handle the refresh, but we've confirmed the update succeeded
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error(t.orders.updateError);

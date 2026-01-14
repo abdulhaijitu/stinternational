@@ -66,7 +66,7 @@ const AdminTestimonials = () => {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData & { id?: string }) => {
       if (data.id) {
-        const { error } = await supabase
+        const { data: result, error } = await supabase
           .from("testimonials")
           .update({
             client_name: data.client_name,
@@ -77,11 +77,15 @@ const AdminTestimonials = () => {
             rating: data.rating,
             is_active: data.is_active,
           })
-          .eq("id", data.id);
+          .eq("id", data.id)
+          .select()
+          .single();
         if (error) throw error;
+        if (!result) throw new Error("No data returned from update");
+        return result;
       } else {
         const maxOrder = testimonials?.reduce((max, t) => Math.max(max, t.display_order), 0) || 0;
-        const { error } = await supabase.from("testimonials").insert({
+        const { data: result, error } = await supabase.from("testimonials").insert({
           client_name: data.client_name,
           company_name: data.company_name,
           designation: data.designation || null,
@@ -90,8 +94,10 @@ const AdminTestimonials = () => {
           rating: data.rating,
           is_active: data.is_active,
           display_order: maxOrder + 1,
-        });
+        }).select().single();
         if (error) throw error;
+        if (!result) throw new Error("No data returned from insert");
+        return result;
       }
     },
     onSuccess: () => {
@@ -108,8 +114,9 @@ const AdminTestimonials = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("testimonials").delete().eq("id", id);
+      const { error, count } = await supabase.from("testimonials").delete().eq("id", id);
       if (error) throw error;
+      return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
@@ -123,30 +130,44 @@ const AdminTestimonials = () => {
 
   const reorderMutation = useMutation({
     mutationFn: async ({ id, newOrder }: { id: string; newOrder: number }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("testimonials")
         .update({ display_order: newOrder })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+    },
+    onError: (error) => {
+      toast.error(t.common.error + ": " + error.message);
     },
   });
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("testimonials")
         .update({ is_active: isActive })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-testimonials"] });
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       toast.success(t.testimonials.statusUpdated);
+    },
+    onError: (error) => {
+      toast.error(t.common.error + ": " + error.message);
     },
   });
 

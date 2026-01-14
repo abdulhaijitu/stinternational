@@ -284,7 +284,9 @@ const AdminCategories = () => {
         }
         return;
       }
-      setCategories(categories.filter((c) => c.id !== id));
+      
+      // Refetch to ensure UI is in sync with database
+      await fetchCategories();
       toast.success(t.categories.deleteSuccess);
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -299,16 +301,18 @@ const AdminCategories = () => {
     }
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("categories")
         .update({ is_active: !category.is_active })
-        .eq("id", category.id);
+        .eq("id", category.id)
+        .select()
+        .single();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from update");
       
-      setCategories(categories.map(c => 
-        c.id === category.id ? { ...c, is_active: !c.is_active } : c
-      ));
+      // Refetch to ensure UI is in sync with database
+      await fetchCategories();
       toast.success(t.categories.visibilityUpdated);
     } catch (error) {
       console.error("Error toggling visibility:", error);
