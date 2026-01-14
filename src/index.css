@@ -324,6 +324,74 @@
     @apply bg-background text-foreground px-4 py-2 rounded-md shadow-lg border border-border;
     @apply focus:outline-none focus:ring-2 focus:ring-ring;
   }
+  
+  /* ===========================================
+   * INLINE FORM FIELD PATTERN - Global Standardization
+   * Applies consistent spacing across all forms
+   * =========================================== */
+  
+  /* Standard inline form field wrapper */
+  .form-field {
+    @apply space-y-1.5;
+  }
+  
+  /* Form field with error state */
+  .form-field-error input,
+  .form-field-error textarea,
+  .form-field-error select,
+  .form-field-error button[role="combobox"] {
+    @apply border-destructive focus:ring-destructive focus-visible:ring-destructive;
+  }
+  
+  .form-field-error label {
+    @apply text-destructive;
+  }
+  
+  /* Error message styling */
+  .form-error {
+    @apply text-xs font-medium text-destructive mt-1;
+  }
+  
+  /* Helper text styling */
+  .form-hint {
+    @apply text-xs text-muted-foreground mt-1;
+  }
+  
+  /* Required indicator */
+  .form-required {
+    @apply text-destructive ml-0.5;
+  }
+  
+  /* Optional indicator */
+  .form-optional {
+    @apply text-muted-foreground text-xs font-normal ml-1.5;
+  }
+  
+  /* Form grid layouts */
+  .form-grid-1 {
+    @apply grid grid-cols-1 gap-4;
+  }
+  
+  .form-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+  
+  .form-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  /* Form section */
+  .form-section {
+    @apply space-y-4;
+  }
+  
+  .form-section-title {
+    @apply text-base font-semibold leading-none tracking-tight;
+  }
+  
+  .form-section-description {
+    @apply text-sm text-muted-foreground;
+  }
 
   /* ===========================================
    * ADMIN PANEL - Enterprise SaaS Design System

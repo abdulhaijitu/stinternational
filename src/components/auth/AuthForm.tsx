@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -17,11 +18,38 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
   const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
   
   const { signIn, signUp } = useAuth();
 
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!email.trim()) {
+      newErrors.email = "ইমেইল আবশ্যক";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "সঠিক ইমেইল দিন";
+    }
+    
+    if (!password) {
+      newErrors.password = "পাসওয়ার্ড আবশ্যক";
+    } else if (password.length < 6) {
+      newErrors.password = "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে";
+    }
+    
+    if (!isLogin && !fullName.trim()) {
+      newErrors.fullName = "নাম আবশ্যক";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setLoading(true);
 
     try {
@@ -34,18 +62,12 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
           onSuccess?.();
         }
       } else {
-        if (!fullName.trim()) {
-          toast.error("অনুগ্রহ করে আপনার নাম দিন");
-          setLoading(false);
-          return;
-        }
         const { error, linkedOrdersCount } = await signUp(email, password, fullName);
         if (error) {
           toast.error(error.message);
         } else {
           toast.success("অ্যাকাউন্ট তৈরি হয়েছে! আপনি এখন লগইন করতে পারবেন।");
           
-          // Show additional toast if guest orders were linked
           if (linkedOrdersCount && linkedOrdersCount > 0) {
             setTimeout(() => {
               toast.success(
@@ -80,43 +102,69 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name - Only for signup */}
           {!isLogin && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">পুরো নাম</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="fullName" className={cn(errors.fullName && "text-destructive")}>
+                পুরো নাম <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="fullName"
                 type="text"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  if (errors.fullName) setErrors({ ...errors, fullName: undefined });
+                }}
                 placeholder="আপনার নাম"
-                required={!isLogin}
+                className={cn(errors.fullName && "border-destructive focus-visible:ring-destructive")}
               />
+              {errors.fullName && (
+                <p className="text-xs font-medium text-destructive">{errors.fullName}</p>
+              )}
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">ইমেইল</Label>
+          {/* Email */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className={cn(errors.email && "text-destructive")}>
+              ইমেইল <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors({ ...errors, email: undefined });
+              }}
               placeholder="you@example.com"
-              required
+              className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
             />
+            {errors.email && (
+              <p className="text-xs font-medium text-destructive">{errors.email}</p>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">পাসওয়ার্ড</Label>
+          {/* Password */}
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className={cn(errors.password && "text-destructive")}>
+              পাসওয়ার্ড <span className="text-destructive">*</span>
+            </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({ ...errors, password: undefined });
+                }}
                 placeholder="••••••••"
-                required
-                minLength={6}
+                className={cn(
+                  "pr-10",
+                  errors.password && "border-destructive focus-visible:ring-destructive"
+                )}
               />
               <button
                 type="button"
@@ -130,6 +178,12 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs font-medium text-destructive">{errors.password}</p>
+            )}
+            {!isLogin && !errors.password && (
+              <p className="text-xs text-muted-foreground">কমপক্ষে ৬ অক্ষর</p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -151,7 +205,10 @@ const AuthForm = ({ onSuccess }: AuthFormProps) => {
             {isLogin ? "অ্যাকাউন্ট নেই?" : "ইতিমধ্যে অ্যাকাউন্ট আছে?"}{" "}
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setErrors({});
+              }}
               className="text-primary font-medium hover:underline"
             >
               {isLogin ? "তৈরি করুন" : "লগইন করুন"}

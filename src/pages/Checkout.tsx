@@ -281,8 +281,8 @@ const Checkout = () => {
               <div className="bg-card border border-border rounded-lg p-6">
                 <h2 className="font-semibold text-lg mb-4">{t.checkout.contactInformation}</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="customer_name">{t.checkout.fullName} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="customer_name">{t.checkout.fullName} <span className="text-destructive">*</span></Label>
                     <Input
                       id="customer_name"
                       value={formData.customer_name}
@@ -290,8 +290,8 @@ const Checkout = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_name">{t.checkout.companyOptional}</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company_name">{t.checkout.companyOptional} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span></Label>
                     <Input
                       id="company_name"
                       value={formData.company_name}
@@ -299,8 +299,8 @@ const Checkout = () => {
                       placeholder={t.checkout.leaveBlankForPersonal}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="customer_email">{t.checkout.email} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="customer_email">{t.checkout.email} <span className="text-destructive">*</span></Label>
                     <Input
                       id="customer_email"
                       type="email"
@@ -309,8 +309,8 @@ const Checkout = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="customer_phone">{t.checkout.phone} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="customer_phone">{t.checkout.phone} <span className="text-destructive">*</span></Label>
                     <Input
                       id="customer_phone"
                       value={formData.customer_phone}
@@ -329,8 +329,8 @@ const Checkout = () => {
                   {t.checkout.deliveryAddress}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="shipping_address">{t.checkout.address} *</Label>
+                  <div className="md:col-span-2 space-y-1.5">
+                    <Label htmlFor="shipping_address">{t.checkout.address} <span className="text-destructive">*</span></Label>
                     <Input
                       id="shipping_address"
                       value={formData.shipping_address}
@@ -339,8 +339,8 @@ const Checkout = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="shipping_city">{t.checkout.city} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="shipping_city">{t.checkout.city} <span className="text-destructive">*</span></Label>
                     <Input
                       id="shipping_city"
                       value={formData.shipping_city}
@@ -349,8 +349,8 @@ const Checkout = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="shipping_postal_code">{t.checkout.postalCode}</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="shipping_postal_code">{t.checkout.postalCode} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span></Label>
                     <Input
                       id="shipping_postal_code"
                       value={formData.shipping_postal_code}
