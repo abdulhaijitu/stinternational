@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
+import { Plus, Edit, Trash2, Star, Quote, ArrowUp, ArrowDown, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
@@ -379,18 +379,26 @@ const AdminTestimonials = () => {
                           size="icon"
                           className="h-6 w-6"
                           onClick={() => handleMoveUp(testimonial, index)}
-                          disabled={index === 0}
+                          disabled={index === 0 || reorderMutation.isPending}
                         >
-                          <ArrowUp className="h-3 w-3" />
+                          {reorderMutation.isPending ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <ArrowUp className="h-3 w-3" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
                           onClick={() => handleMoveDown(testimonial, index)}
-                          disabled={index === testimonials.length - 1}
+                          disabled={index === testimonials.length - 1 || reorderMutation.isPending}
                         >
-                          <ArrowDown className="h-3 w-3" />
+                          {reorderMutation.isPending ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          )}
                         </Button>
                       </div>
                     </td>
@@ -419,6 +427,7 @@ const AdminTestimonials = () => {
                     <td className="p-4 text-sm">
                       <Switch
                         checked={testimonial.is_active}
+                        disabled={toggleActiveMutation.isPending}
                         onCheckedChange={(checked) =>
                           toggleActiveMutation.mutate({ id: testimonial.id, isActive: checked })
                         }
@@ -430,19 +439,25 @@ const AdminTestimonials = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(testimonial)}
+                          disabled={saveMutation.isPending}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
+                          disabled={deleteMutation.isPending}
                           onClick={() => {
                             if (confirm(t.testimonials.deleteConfirm)) {
                               deleteMutation.mutate(testimonial.id);
                             }
                           }}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          {deleteMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          )}
                         </Button>
                       </div>
                     </td>

@@ -38,6 +38,9 @@ const AdminLogos = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingLogo, setEditingLogo] = useState<InstitutionLogo | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     logo_url: "",
@@ -132,6 +135,7 @@ const AdminLogos = () => {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(t.logos.deleteConfirm.replace("{name}", name))) return;
 
+    setDeletingId(id);
     try {
       const { error } = await supabase.from("institution_logos").delete().eq("id", id);
       if (error) throw error;
@@ -142,10 +146,13 @@ const AdminLogos = () => {
     } catch (error) {
       console.error("Error deleting logo:", error);
       toast.error(t.logos.deleteError);
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const handleToggleActive = async (logo: InstitutionLogo) => {
+    setTogglingId(logo.id);
     try {
       const { data, error } = await supabase
         .from("institution_logos")
@@ -163,6 +170,8 @@ const AdminLogos = () => {
     } catch (error) {
       console.error("Error toggling logo:", error);
       toast.error(t.logos.statusError);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -175,6 +184,7 @@ const AdminLogos = () => {
     const currentOrder = currentLogo.display_order;
     const prevOrder = prevLogo.display_order;
     
+    setMovingId(currentLogo.id);
     try {
       const [result1, result2] = await Promise.all([
         supabase.from("institution_logos").update({ display_order: prevOrder }).eq("id", currentLogo.id).select(),
@@ -189,6 +199,8 @@ const AdminLogos = () => {
     } catch (error) {
       console.error("Error reordering:", error);
       toast.error(t.logos.reorderError);
+    } finally {
+      setMovingId(null);
     }
   };
 
@@ -201,6 +213,7 @@ const AdminLogos = () => {
     const currentOrder = currentLogo.display_order;
     const nextOrder = nextLogo.display_order;
     
+    setMovingId(currentLogo.id);
     try {
       const [result1, result2] = await Promise.all([
         supabase.from("institution_logos").update({ display_order: nextOrder }).eq("id", currentLogo.id).select(),
@@ -215,6 +228,8 @@ const AdminLogos = () => {
     } catch (error) {
       console.error("Error reordering:", error);
       toast.error(t.logos.reorderError);
+    } finally {
+      setMovingId(null);
     }
   };
 
@@ -324,9 +339,13 @@ const AdminLogos = () => {
                     size="icon"
                     className="h-6 w-6"
                     onClick={() => handleMoveUp(index)}
-                    disabled={index === 0}
+                    disabled={index === 0 || movingId === logo.id}
                   >
-                    <ArrowUp className="h-3 w-3" />
+                    {movingId === logo.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <ArrowUp className="h-3 w-3" />
+                    )}
                     <span className="sr-only">Move up</span>
                   </Button>
                   <Button
@@ -334,9 +353,13 @@ const AdminLogos = () => {
                     size="icon"
                     className="h-6 w-6"
                     onClick={() => handleMoveDown(index)}
-                    disabled={index === logos.length - 1}
+                    disabled={index === logos.length - 1 || movingId === logo.id}
                   >
-                    <ArrowDown className="h-3 w-3" />
+                    {movingId === logo.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3" />
+                    )}
                     <span className="sr-only">Move down</span>
                   </Button>
                 </div>
@@ -364,23 +387,31 @@ const AdminLogos = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleToggleActive(logo)}
+                    disabled={togglingId === logo.id}
                     title={logo.is_active ? t.logos.hidden : t.logos.active}
                   >
-                    {logo.is_active ? (
+                    {togglingId === logo.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : logo.is_active ? (
                       <Eye className="h-4 w-4 text-green-600" />
                     ) : (
                       <EyeOff className="h-4 w-4 text-muted-foreground" />
                     )}
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(logo)}>
+                  <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(logo)} disabled={saving}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDelete(logo.id, logo.name)}
+                    disabled={deletingId === logo.id}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    {deletingId === logo.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    )}
                   </Button>
                 </div>
               </div>

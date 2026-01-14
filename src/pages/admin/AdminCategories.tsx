@@ -62,6 +62,9 @@ const AdminCategories = () => {
   const [saving, setSaving] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     name_bn: "",
@@ -274,6 +277,7 @@ const AdminCategories = () => {
     
     if (!confirm(t.categories.deleteConfirm)) return;
 
+    setDeletingId(id);
     try {
       const { error } = await supabase.from("categories").delete().eq("id", id);
       if (error) {
@@ -291,6 +295,8 @@ const AdminCategories = () => {
     } catch (error) {
       console.error("Error deleting category:", error);
       toast.error(t.categories.deleteError);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -300,6 +306,7 @@ const AdminCategories = () => {
       return;
     }
     
+    setTogglingId(category.id);
     try {
       const { data, error } = await supabase
         .from("categories")
@@ -317,6 +324,8 @@ const AdminCategories = () => {
     } catch (error) {
       console.error("Error toggling visibility:", error);
       toast.error(t.categories.saveError);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -339,6 +348,7 @@ const AdminCategories = () => {
     const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     const swapCategory = siblings[swapIndex];
 
+    setMovingId(category.id);
     try {
       const updates = [
         { id: category.id, display_order: swapCategory.display_order },
@@ -358,6 +368,8 @@ const AdminCategories = () => {
     } catch (error) {
       console.error("Error moving category:", error);
       toast.error(t.categories.orderError);
+    } finally {
+      setMovingId(null);
     }
   };
 
@@ -432,18 +444,26 @@ const AdminCategories = () => {
               size="icon"
               className="h-6 w-6"
               onClick={() => handleMoveCategory(category, 'up')}
-              disabled={index === 0 || !canEdit}
+              disabled={index === 0 || !canEdit || movingId === category.id}
             >
-              <ArrowUp className="h-3 w-3" />
+              {movingId === category.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <ArrowUp className="h-3 w-3" />
+              )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6"
               onClick={() => handleMoveCategory(category, 'down')}
-              disabled={index === siblings.length - 1 || !canEdit}
+              disabled={index === siblings.length - 1 || !canEdit || movingId === category.id}
             >
-              <ArrowDown className="h-3 w-3" />
+              {movingId === category.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <ArrowDown className="h-3 w-3" />
+              )}
             </Button>
           </div>
           
@@ -521,9 +541,11 @@ const AdminCategories = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => handleToggleVisibility(category)}
-                disabled={!canEdit}
+                disabled={!canEdit || togglingId === category.id}
               >
-                {category.is_active ? (
+                {togglingId === category.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : category.is_active ? (
                   <Eye className="h-4 w-4" />
                 ) : (
                   <EyeOff className="h-4 w-4" />
@@ -540,6 +562,7 @@ const AdminCategories = () => {
               variant="ghost"
               size="icon"
               onClick={() => handleOpenDialog(category)}
+              disabled={saving}
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -561,9 +584,13 @@ const AdminCategories = () => {
               variant="ghost"
               size="icon"
               onClick={() => handleDelete(category.id)}
-              disabled={!isSubCategory && subCount > 0}
+              disabled={(!isSubCategory && subCount > 0) || deletingId === category.id}
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              {deletingId === category.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 text-destructive" />
+              )}
             </Button>
           ) : (
             <Tooltip>
