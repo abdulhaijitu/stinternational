@@ -280,14 +280,9 @@ const AdminProductEditor = () => {
       return;
     }
 
-    // Validate category selection - sub-category is required
+    // Validate category selection - parent category is required, sub-category is optional
     if (!formData.parent_category_id) {
       toast.error(language === "bn" ? "প্যারেন্ট ক্যাটাগরি নির্বাচন করুন" : "Please select a parent category");
-      return;
-    }
-
-    if (!formData.category_id) {
-      toast.error(language === "bn" ? "সাব-ক্যাটাগরি নির্বাচন করুন" : "Please select a sub-category");
       return;
     }
 
@@ -902,10 +897,10 @@ const AdminProductEditor = () => {
               )}
             </div>
 
-            {/* Sub-Category */}
+            {/* Sub-Category (Optional) */}
             <div className="space-y-2">
               <Label htmlFor="category" className={getInputClass()}>
-                {t.categories.subCategory} *
+                {t.categories.subCategory} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <div className="flex gap-2">
                 <Select
@@ -941,11 +936,6 @@ const AdminProductEditor = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              {formData.parent_category_id && !formData.category_id && (
-                <p className="text-xs text-destructive">
-                  {language === "bn" ? "সাব-ক্যাটাগরি আবশ্যক" : "Sub-category is required"}
-                </p>
-              )}
               {formData.parent_category_id && filteredSubCategories.length === 0 && (
                 <p className="text-xs text-muted-foreground">
                   {language === "bn" ? "এই প্যারেন্টে কোনো সাব-ক্যাটাগরি নেই। নতুন তৈরি করতে + বাটনে ক্লিক করুন।" : "No sub-categories under this parent. Click + to create one."}
