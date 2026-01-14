@@ -2,48 +2,52 @@ import { MapPin, Phone, Mail, Clock, Send, Building2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-
-const contactInfo = [
-  {
-    icon: MapPin,
-    title: "Visit Us",
-    details: [
-      "Mamun Mansion, 52/2,",
-      "Toyeanbee Circular Road,",
-      "Hatkhola, Tikatuli,",
-      "Dhaka-1203, Bangladesh"
-    ],
-  },
-  {
-    icon: Phone,
-    title: "Call Us",
-    details: [
-      "+880 2-7165562 (Office)",
-      "01715-575665",
-      "01713-297170"
-    ],
-    links: [
-      { href: "tel:+88027165562", text: "+880 2-7165562" },
-      { href: "tel:+8801715575665", text: "01715-575665" },
-      { href: "tel:+8801713297170", text: "01713-297170" }
-    ],
-  },
-  {
-    icon: Mail,
-    title: "Email Us",
-    details: ["info@stinternationalbd.com"],
-    links: [
-      { href: "mailto:info@stinternationalbd.com", text: "info@stinternationalbd.com" }
-    ],
-  },
-  {
-    icon: Clock,
-    title: "Business Hours",
-    details: ["Saturday - Thursday", "9:00 AM - 6:00 PM"],
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Contact = () => {
+  const { t, language } = useLanguage();
+  const fontClass = language === "bn" ? "font-siliguri" : "";
+
+  const contactInfo = [
+    {
+      icon: MapPin,
+      title: t.contact.visitUs,
+      details: [
+        "Mamun Mansion, 52/2,",
+        "Toyeanbee Circular Road,",
+        "Hatkhola, Tikatuli,",
+        "Dhaka-1203, Bangladesh"
+      ],
+    },
+    {
+      icon: Phone,
+      title: t.contact.callUs,
+      details: [
+        "+880 2-7165562 (Office)",
+        "01715-575665",
+        "01713-297170"
+      ],
+      links: [
+        { href: "tel:+88027165562", text: "+880 2-7165562" },
+        { href: "tel:+8801715575665", text: "01715-575665" },
+        { href: "tel:+8801713297170", text: "01713-297170" }
+      ],
+    },
+    {
+      icon: Mail,
+      title: t.contact.emailUs,
+      details: ["info@stinternationalbd.com"],
+      links: [
+        { href: "mailto:info@stinternationalbd.com", text: "info@stinternationalbd.com" }
+      ],
+    },
+    {
+      icon: Clock,
+      title: t.contact.businessHours,
+      details: [t.contact.satThurs, t.contact.businessTime],
+    },
+  ];
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -67,12 +71,11 @@ const Contact = () => {
     <Layout>
       {/* Hero Section */}
       <section className="hero-gradient text-primary-foreground">
-        <div className="container-premium py-16 md:py-20">
+        <div className={`container-premium py-16 md:py-20 ${fontClass}`}>
           <div className="max-w-2xl">
-            <h1 className="mb-4">Contact Us</h1>
+            <h1 className="mb-4">{t.contact.title}</h1>
             <p className="text-lg text-primary-foreground/80">
-              Have questions about our products or need a custom quote? 
-              Our team is here to help you find the right solutions.
+              {t.contact.subtitle}
             </p>
           </div>
         </div>
@@ -80,7 +83,7 @@ const Contact = () => {
 
       {/* Contact Info Cards */}
       <section className="py-12 md:py-16">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {contactInfo.map((item, index) => (
               <div key={index} className="bg-card border border-border rounded-lg p-6">
@@ -111,7 +114,7 @@ const Contact = () => {
 
       {/* Official Business Info Banner */}
       <section className="py-8 bg-muted/50 border-y border-border">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-center md:text-left">
             <div className="flex items-center gap-3">
               <Building2 className="h-5 w-5 text-primary shrink-0" />
@@ -134,18 +137,18 @@ const Contact = () => {
 
       {/* Contact Form & Map */}
       <section className="py-12 md:py-16 bg-muted/30">
-        <div className="container-premium">
+        <div className={`container-premium ${fontClass}`}>
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Form */}
             <div className="bg-card border border-border rounded-lg p-8">
-              <h2 className="text-2xl font-bold mb-2">Send us a Message</h2>
+              <h2 className="text-2xl font-bold mb-2">{t.contact.sendMessage}</h2>
               <p className="text-muted-foreground mb-8">
-                Fill out the form below and we'll get back to you within 24 hours.
+                {t.contact.formSubtitle}
               </p>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Full Name *</label>
+                    <label className="block text-sm font-medium mb-2">{t.contact.fullName} *</label>
                     <input
                       type="text"
                       name="name"
@@ -153,11 +156,11 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="Your name"
+                      placeholder={t.contact.yourName}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email *</label>
+                    <label className="block text-sm font-medium mb-2">{t.contact.email} *</label>
                     <input
                       type="email"
                       name="email"
@@ -165,36 +168,36 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="you@company.com"
+                      placeholder={t.contact.yourEmail}
                     />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Phone</label>
+                    <label className="block text-sm font-medium mb-2">{t.contact.phone}</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
                       className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="+880 1XXX XXX XXX"
+                      placeholder={t.contact.phonePlaceholder}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Company / Institution</label>
+                    <label className="block text-sm font-medium mb-2">{t.contact.company}</label>
                     <input
                       type="text"
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
                       className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="Organization name"
+                      placeholder={t.contact.organizationName}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject *</label>
+                  <label className="block text-sm font-medium mb-2">{t.contact.subject} *</label>
                   <select
                     name="subject"
                     required
@@ -202,16 +205,16 @@ const Contact = () => {
                     onChange={handleChange}
                     className="w-full h-11 px-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="">Select a subject</option>
-                    <option value="product-inquiry">Product Inquiry</option>
-                    <option value="quote-request">Quote Request</option>
-                    <option value="bulk-order">Bulk Order</option>
-                    <option value="technical-support">Technical Support</option>
-                    <option value="other">Other</option>
+                    <option value="">{t.contact.selectSubject}</option>
+                    <option value="product-inquiry">{t.contact.productInquiry}</option>
+                    <option value="quote-request">{t.contact.quoteRequest}</option>
+                    <option value="bulk-order">{t.contact.bulkOrder}</option>
+                    <option value="technical-support">{t.contact.technicalSupport}</option>
+                    <option value="other">{t.contact.other}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Message *</label>
+                  <label className="block text-sm font-medium mb-2">{t.contact.message} *</label>
                   <textarea
                     name="message"
                     required
@@ -219,12 +222,12 @@ const Contact = () => {
                     onChange={handleChange}
                     rows={5}
                     className="w-full px-4 py-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                    placeholder="Tell us about your requirements..."
+                    placeholder={t.contact.messagePlaceholder}
                   />
                 </div>
                 <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto">
                   <Send className="h-4 w-4" />
-                  Send Message
+                  {t.contact.sendButton}
                 </Button>
               </form>
             </div>
@@ -245,23 +248,23 @@ const Contact = () => {
                 />
               </div>
               <div className="bg-primary text-primary-foreground rounded-lg p-8">
-                <h3 className="text-xl font-semibold mb-4">Why Choose ST International?</h3>
+                <h3 className="text-xl font-semibold mb-4">{t.contact.whyChoose}</h3>
                 <ul className="space-y-3 text-primary-foreground/80">
                   <li className="flex items-start gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-2" />
-                    <span>19+ years of experience in Bangladesh</span>
+                    <span>{t.contact.experience}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-2" />
-                    <span>Authorized distributor for premium brands</span>
+                    <span>{t.contact.authorized}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-2" />
-                    <span>Nationwide delivery and installation</span>
+                    <span>{t.contact.nationwide}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-2" />
-                    <span>Dedicated after-sales support</span>
+                    <span>{t.contact.afterSales}</span>
                   </li>
                 </ul>
               </div>
