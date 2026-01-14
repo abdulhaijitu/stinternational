@@ -229,7 +229,7 @@ const AdminOrders = () => {
                             className="h-8"
                           >
                             <Eye className="h-4 w-4 mr-1" />
-                            {t.orders.viewDetails || "View"}
+                            {t.orders.viewDetails}
                           </Button>
                         </td>
                       </tr>
