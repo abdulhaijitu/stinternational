@@ -8,7 +8,7 @@ interface RichTextContentProps {
 
 /**
  * Renders HTML content from rich text editor with proper styling
- * Sanitization happens server-side; this component applies typography styles
+ * Supports headings, lists, links, images, and tables
  */
 const RichTextContent = ({ content, className, isBangla = false }: RichTextContentProps) => {
   if (!content || content === '<p></p>') {
@@ -34,6 +34,15 @@ const RichTextContent = ({ content, className, isBangla = false }: RichTextConte
         "prose-strong:text-foreground prose-strong:font-semibold",
         // Italic
         "prose-em:text-foreground",
+        // Images
+        "prose-img:rounded-lg prose-img:max-w-full prose-img:h-auto prose-img:my-4",
+        // Tables - using custom styles since Tailwind prose doesn't handle tables well by default
+        "[&_table]:border-collapse [&_table]:w-full [&_table]:my-4",
+        "[&_table]:border [&_table]:border-border",
+        "[&_th]:border [&_th]:border-border [&_th]:bg-muted/50 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold [&_th]:text-foreground",
+        "[&_td]:border [&_td]:border-border [&_td]:p-2 [&_td]:text-foreground",
+        "[&_tr]:border-b [&_tr]:border-border",
+        "[&_tr:last-child]:border-b-0",
         // Bangla font
         isBangla && "font-siliguri",
         className
