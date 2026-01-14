@@ -434,11 +434,13 @@ export type Database = {
           delivery_urgency: string
           email: string
           id: string
+          language: string | null
           phone: string
           preferred_payment: string | null
           product_category: string
           product_details: string
           quantity: string
+          source_page: string | null
           status: string
           updated_at: string
           user_id: string | null
@@ -455,11 +457,13 @@ export type Database = {
           delivery_urgency: string
           email: string
           id?: string
+          language?: string | null
           phone: string
           preferred_payment?: string | null
           product_category: string
           product_details: string
           quantity: string
+          source_page?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -476,11 +480,13 @@ export type Database = {
           delivery_urgency?: string
           email?: string
           id?: string
+          language?: string | null
           phone?: string
           preferred_payment?: string | null
           product_category?: string
           product_details?: string
           quantity?: string
+          source_page?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null

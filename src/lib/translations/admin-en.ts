@@ -340,6 +340,19 @@ export const adminEn = {
       quoted: "Quoted",
       closed: "Closed",
     },
+    activityLog: "Activity Log",
+    activityLogDescription: "Recent quote submissions with source and language",
+    sourcePage: "Source",
+    language: "Language",
+    sourcePages: {
+      "request-quote": "Request Quote Page",
+      "homepage-quick-rfq": "Homepage Quick RFQ",
+      "unknown": "Unknown",
+    },
+    languages: {
+      en: "English",
+      bn: "Bangla",
+    },
   },
 
   // Logos

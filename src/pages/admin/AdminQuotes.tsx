@@ -11,7 +11,9 @@ import {
   MessageSquare,
   Send,
   Eye,
-  Filter
+  Filter,
+  Globe,
+  Activity
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -65,6 +67,8 @@ interface QuoteRequest {
   status: string;
   created_at: string;
   updated_at: string;
+  source_page?: string | null;
+  language?: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -97,6 +101,18 @@ const AdminQuotes = () => {
   const getStatusLabel = (status: string) => {
     const key = status as keyof typeof t.quotes.statuses;
     return t.quotes.statuses[key] || status;
+  };
+
+  const getSourcePageLabel = (source: string | null | undefined) => {
+    if (!source) return t.quotes.sourcePages?.["unknown"] || "Unknown";
+    const key = source as keyof typeof t.quotes.sourcePages;
+    return t.quotes.sourcePages?.[key] || source;
+  };
+
+  const getLanguageLabel = (lang: string | null | undefined) => {
+    if (!lang) return "-";
+    const key = lang as keyof typeof t.quotes.languages;
+    return t.quotes.languages?.[key] || lang.toUpperCase();
   };
 
   // Fetch quote requests
@@ -341,6 +357,75 @@ const AdminQuotes = () => {
             <div className="p-12 text-center">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">{t.quotes.noQuotes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Quote Activity Log */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">{t.quotes.activityLog}</h3>
+                <p className="text-sm text-muted-foreground">{t.quotes.activityLogDescription}</p>
+              </div>
+            </div>
+          </div>
+          {isLoading ? (
+            <div className="p-6 space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          ) : quotes && quotes.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t.quotes.date}</TableHead>
+                    <TableHead>{t.quotes.company}</TableHead>
+                    <TableHead>{t.quotes.contact}</TableHead>
+                    <TableHead>{t.quotes.sourcePage}</TableHead>
+                    <TableHead>{t.quotes.language}</TableHead>
+                    <TableHead>{t.quotes.status}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {quotes.slice(0, 10).map((quote) => (
+                    <TableRow key={quote.id} className="text-sm">
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{format(new Date(quote.created_at), "MMM d, HH:mm")}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{quote.company_name}</TableCell>
+                      <TableCell>{quote.contact_person}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {getSourcePageLabel(quote.source_page)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{getLanguageLabel(quote.language)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={cn("text-xs", statusColors[quote.status])}>
+                          {getStatusLabel(quote.status)}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground">
+              {t.quotes.noQuotes}
             </div>
           )}
         </div>
