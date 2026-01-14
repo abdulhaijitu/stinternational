@@ -42,6 +42,7 @@ import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminUXInsights from "./pages/admin/AdminUXInsights";
 import AdminRoles from "./pages/admin/AdminRoles";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
+import AdminOrderCreate from "./pages/admin/AdminOrderCreate";
 import AdminUsers from "./pages/admin/AdminUsers";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,7 @@ const App = () => (
                       <Route path="/admin/products/:id" element={<AdminProductEditor />} />
                       <Route path="/admin/categories" element={<AdminCategories />} />
                       <Route path="/admin/orders" element={<AdminOrders />} />
+                      <Route path="/admin/orders/new" element={<AdminOrderCreate />} />
                       <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
                       <Route path="/admin/quotes" element={<AdminQuotes />} />
                       <Route path="/admin/logos" element={<AdminLogos />} />

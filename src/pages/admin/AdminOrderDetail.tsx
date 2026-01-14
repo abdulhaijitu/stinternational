@@ -14,13 +14,20 @@ import {
   FileText,
   Loader2,
   Lock,
-  FileDown
+  FileDown,
+  Edit,
+  Trash2,
+  Save,
+  X
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -35,6 +42,7 @@ import { toast } from "sonner";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
+import { OrderDeleteDialog } from "@/components/admin/OrderDeleteDialog";
 
 interface OrderItem {
   id: string;
@@ -74,11 +82,30 @@ const AdminOrderDetail = () => {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    company_name: "",
+    shipping_address: "",
+    shipping_city: "",
+    shipping_postal_code: "",
+    notes: "",
+    shipping_cost: 0,
+  });
   
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
   
-  const canUpdateStatus = isSuperAdmin || hasPermission("orders", "update");
+  // Permission checks - Super Admin has full control
+  const canEdit = isSuperAdmin;
+  const canDelete = isSuperAdmin;
+  const canUpdateStatus = isSuperAdmin || hasPermission("orders", "edit");
 
   const statusOptions = [
     { value: "pending_payment", label: t.status.pending_payment, color: "bg-yellow-500" },
@@ -106,6 +133,19 @@ const AdminOrderDetail = () => {
 
       if (orderError) throw orderError;
       setOrder(orderData);
+      
+      // Initialize edit form
+      setEditForm({
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
+        customer_phone: orderData.customer_phone,
+        company_name: orderData.company_name || "",
+        shipping_address: orderData.shipping_address,
+        shipping_city: orderData.shipping_city,
+        shipping_postal_code: orderData.shipping_postal_code || "",
+        notes: orderData.notes || "",
+        shipping_cost: orderData.shipping_cost || 0,
+      });
 
       // Fetch order items
       const { data: itemsData, error: itemsError } = await supabase
@@ -143,6 +183,78 @@ const AdminOrderDetail = () => {
       toast.error(t.orders.updateError);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!order || !canEdit) return;
+    
+    setSaving(true);
+    try {
+      const newTotal = order.subtotal + editForm.shipping_cost;
+      
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          customer_name: editForm.customer_name,
+          customer_email: editForm.customer_email,
+          customer_phone: editForm.customer_phone,
+          company_name: editForm.company_name || null,
+          shipping_address: editForm.shipping_address,
+          shipping_city: editForm.shipping_city,
+          shipping_postal_code: editForm.shipping_postal_code || null,
+          notes: editForm.notes || null,
+          shipping_cost: editForm.shipping_cost,
+          total: newTotal,
+        })
+        .eq("id", order.id);
+
+      if (error) throw error;
+
+      setOrder({
+        ...order,
+        ...editForm,
+        company_name: editForm.company_name || null,
+        shipping_postal_code: editForm.shipping_postal_code || null,
+        notes: editForm.notes || null,
+        total: newTotal,
+      });
+      
+      setIsEditing(false);
+      toast.success(t.orders.editSuccess);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      toast.error(t.orders.editError);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!order || !canDelete) return;
+
+    try {
+      // First delete order items
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .delete()
+        .eq("order_id", order.id);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the order
+      const { error: orderError } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", order.id);
+
+      if (orderError) throw orderError;
+
+      toast.success(t.orders.deleteSuccess);
+      navigate("/admin/orders");
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error(t.orders.deleteError);
     }
   };
 
@@ -274,6 +386,36 @@ const AdminOrderDetail = () => {
           </div>
           
           <div className="flex items-center gap-2 print:hidden">
+            {/* Super Admin Edit/Delete buttons */}
+            {canEdit && !isEditing && (
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                {t.common.edit}
+              </Button>
+            )}
+            {isEditing && (
+              <>
+                <Button variant="default" size="sm" onClick={handleSaveEdit} disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                  {t.common.save}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} disabled={saving}>
+                  <X className="h-4 w-4 mr-2" />
+                  {t.common.cancel}
+                </Button>
+              </>
+            )}
+            {canDelete && !isEditing && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setDeleteDialogOpen(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t.common.delete}
+              </Button>
+            )}
             <Button variant="default" size="sm" onClick={handleDownloadInvoice}>
               <FileDown className="h-4 w-4 mr-2" />
               {t.orders.invoice}
@@ -334,12 +476,24 @@ const AdminOrderDetail = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t.orders.shipping}</span>
-                    <span>{formatPrice(order.shipping_cost || 0, language)}</span>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        min={0}
+                        value={editForm.shipping_cost}
+                        onChange={(e) => setEditForm({ ...editForm, shipping_cost: parseFloat(e.target.value) || 0 })}
+                        className="w-28 h-7 text-right"
+                      />
+                    ) : (
+                      <span>{formatPrice(order.shipping_cost || 0, language)}</span>
+                    )}
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>{t.orders.total}</span>
-                    <span className="text-primary">{formatPrice(order.total, language)}</span>
+                    <span className="text-primary">
+                      {formatPrice(isEditing ? order.subtotal + editForm.shipping_cost : order.total, language)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -394,33 +548,68 @@ const AdminOrderDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.customerName}</Label>
+                      <Input
+                        value={editForm.customer_name}
+                        onChange={(e) => setEditForm({ ...editForm, customer_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.companyNameLabel}</Label>
+                      <Input
+                        value={editForm.company_name}
+                        onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.customerPhone}</Label>
+                      <Input
+                        value={editForm.customer_phone}
+                        onChange={(e) => setEditForm({ ...editForm, customer_phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.customerEmail}</Label>
+                      <Input
+                        value={editForm.customer_email}
+                        onChange={(e) => setEditForm({ ...editForm, customer_email: e.target.value })}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{order.customer_name}</p>
-                    {order.company_name && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Building2 className="h-3 w-3" />
-                        {order.company_name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                    <span>{order.customer_phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <span>{order.customer_email}</span>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{order.customer_name}</p>
+                        {order.company_name && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {order.company_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span>{order.customer_phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <span>{order.customer_email}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -433,13 +622,40 @@ const AdminOrderDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-sm space-y-1">
-                  <p>{order.shipping_address}</p>
-                  <p>{order.shipping_city}</p>
-                  {order.shipping_postal_code && (
-                    <p>{order.shipping_postal_code}</p>
-                  )}
-                </div>
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.address}</Label>
+                      <Textarea
+                        value={editForm.shipping_address}
+                        onChange={(e) => setEditForm({ ...editForm, shipping_address: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.city}</Label>
+                      <Input
+                        value={editForm.shipping_city}
+                        onChange={(e) => setEditForm({ ...editForm, shipping_city: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.orders.postalCode}</Label>
+                      <Input
+                        value={editForm.shipping_postal_code}
+                        onChange={(e) => setEditForm({ ...editForm, shipping_postal_code: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm space-y-1">
+                    <p>{order.shipping_address}</p>
+                    <p>{order.shipping_city}</p>
+                    {order.shipping_postal_code && (
+                      <p>{order.shipping_postal_code}</p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -459,22 +675,48 @@ const AdminOrderDetail = () => {
             </Card>
 
             {/* Notes */}
-            {order.notes && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-5 w-5" />
-                    {t.orders.notes}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{order.notes}</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="h-5 w-5" />
+                  {t.orders.notes}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isEditing ? (
+                  <Textarea
+                    value={editForm.notes}
+                    onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                    rows={3}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {order.notes || "-"}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <OrderDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        orderNumber={order.order_number}
+        onConfirm={handleDeleteConfirm}
+        translations={{
+          title: t.orders.deleteTitle,
+          description: t.orders.deleteDescription,
+          typeToConfirm: t.orders.typeToConfirm,
+          confirmWord: t.orders.deleteConfirmWord,
+          cancel: t.common.cancel,
+          delete: t.common.delete,
+          deleting: t.orders.deleting,
+        }}
+        language={language}
+      />
 
       {/* Print Styles */}
       <style>{`
