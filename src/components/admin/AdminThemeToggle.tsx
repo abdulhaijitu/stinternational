@@ -2,6 +2,7 @@ import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAdminTheme } from "@/contexts/AdminThemeContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -10,11 +11,11 @@ import {
 
 export const AdminThemeToggle = () => {
   const { theme, toggleTheme } = useAdminTheme();
-  const { language } = useAdminLanguage();
+  const { t, language } = useAdminLanguage();
 
   const label = theme === "dark" 
-    ? (language === "bn" ? "লাইট মোড" : "Light Mode")
-    : (language === "bn" ? "ডার্ক মোড" : "Dark Mode");
+    ? (t.theme?.lightMode || "Light Mode")
+    : (t.theme?.darkMode || "Dark Mode");
 
   return (
     <Tooltip>
@@ -33,7 +34,7 @@ export const AdminThemeToggle = () => {
           )}
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom">
+      <TooltipContent side="bottom" className={cn(language === "bn" && "font-siliguri")}>
         {label}
       </TooltipContent>
     </Tooltip>

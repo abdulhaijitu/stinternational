@@ -6,7 +6,10 @@ interface AdminLanguageSwitcherProps {
 }
 
 const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherProps) => {
-  const { language, setLanguage } = useAdminLanguage();
+  const { language, setLanguage, t } = useAdminLanguage();
+
+  const enLabel = t.language?.en || "EN";
+  const bnLabel = t.language?.bn || "বাংলা";
 
   // Compact variant: text-only EN | বাংলা
   if (variant === "compact") {
@@ -21,7 +24,7 @@ const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherPro
               : "text-muted-foreground hover:text-foreground"
           )}
         >
-          EN
+          {enLabel}
         </button>
         <span className="text-muted-foreground/50">|</span>
         <button
@@ -33,7 +36,7 @@ const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherPro
               : "text-muted-foreground hover:text-foreground"
           )}
         >
-          বাংলা
+          {bnLabel}
         </button>
       </div>
     );
@@ -51,7 +54,7 @@ const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherPro
             : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
-        EN
+        {enLabel}
       </button>
       <div className="w-px h-6 bg-border" />
       <button
@@ -63,7 +66,7 @@ const AdminLanguageSwitcher = ({ variant = "default" }: AdminLanguageSwitcherPro
             : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
-        বাংলা
+        {bnLabel}
       </button>
     </div>
   );
