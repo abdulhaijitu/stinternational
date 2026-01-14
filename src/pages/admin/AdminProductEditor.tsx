@@ -96,12 +96,14 @@ const AdminProductEditor = () => {
   const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingSubCategory, setAddingSubCategory] = useState(false);
   const [subCategoryErrors, setSubCategoryErrors] = useState<{ name?: string; slug?: string }>({});
+  const [checkingSubCategorySlug, setCheckingSubCategorySlug] = useState(false);
 
   // Quick-add parent category modal state
   const [showAddParentCategoryModal, setShowAddParentCategoryModal] = useState(false);
   const [newParentCategory, setNewParentCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingParentCategory, setAddingParentCategory] = useState(false);
   const [parentCategoryErrors, setParentCategoryErrors] = useState<{ name?: string; slug?: string }>({});
+  const [checkingParentCategorySlug, setCheckingParentCategorySlug] = useState(false);
 
   const [formData, setFormData] = useState(initialFormData);
 
@@ -486,11 +488,13 @@ const AdminProductEditor = () => {
 
     try {
       // Check for duplicate slug
+      setCheckingSubCategorySlug(true);
       const { data: existingCategory } = await supabase
         .from("categories")
         .select("id, slug")
         .eq("slug", newSubCategory.slug.trim())
         .maybeSingle();
+      setCheckingSubCategorySlug(false);
 
       if (existingCategory) {
         setSubCategoryErrors({ slug: language === "bn" ? "এই স্লাগটি ইতিমধ্যে ব্যবহৃত হয়েছে" : "This slug is already in use" });
@@ -575,11 +579,13 @@ const AdminProductEditor = () => {
 
     try {
       // Check for duplicate slug
+      setCheckingParentCategorySlug(true);
       const { data: existingCategory } = await supabase
         .from("categories")
         .select("id, slug")
         .eq("slug", newParentCategory.slug.trim())
         .maybeSingle();
+      setCheckingParentCategorySlug(false);
 
       if (existingCategory) {
         setParentCategoryErrors({ slug: language === "bn" ? "এই স্লাগটি ইতিমধ্যে ব্যবহৃত হয়েছে" : "This slug is already in use" });
@@ -1143,21 +1149,31 @@ const AdminProductEditor = () => {
               <Label htmlFor="new_cat_slug" className={cn(getInputClass(), subCategoryErrors.slug && "text-destructive")}>
                 {language === "bn" ? "স্লাগ *" : "Slug *"}
               </Label>
-              <Input
-                id="new_cat_slug"
-                value={newSubCategory.slug}
-                onChange={(e) => {
-                  setNewSubCategory({
-                    ...newSubCategory,
-                    slug: e.target.value,
-                  });
-                  if (subCategoryErrors.slug) {
-                    setSubCategoryErrors(prev => ({ ...prev, slug: undefined }));
-                  }
-                }}
-                placeholder="digital-scales"
-                className={cn(subCategoryErrors.slug && "border-destructive focus-visible:ring-destructive")}
-              />
+              <div className="relative">
+                <Input
+                  id="new_cat_slug"
+                  value={newSubCategory.slug}
+                  onChange={(e) => {
+                    setNewSubCategory({
+                      ...newSubCategory,
+                      slug: e.target.value,
+                    });
+                    if (subCategoryErrors.slug) {
+                      setSubCategoryErrors(prev => ({ ...prev, slug: undefined }));
+                    }
+                  }}
+                  placeholder="digital-scales"
+                  className={cn(
+                    "pr-10",
+                    subCategoryErrors.slug && "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                {checkingSubCategorySlug && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
               {subCategoryErrors.slug && (
                 <p className="text-sm text-destructive">{subCategoryErrors.slug}</p>
               )}
@@ -1261,21 +1277,31 @@ const AdminProductEditor = () => {
               <Label htmlFor="new_parent_slug" className={cn(getInputClass(), parentCategoryErrors.slug && "text-destructive")}>
                 {language === "bn" ? "স্লাগ *" : "Slug *"}
               </Label>
-              <Input
-                id="new_parent_slug"
-                value={newParentCategory.slug}
-                onChange={(e) => {
-                  setNewParentCategory({
-                    ...newParentCategory,
-                    slug: e.target.value,
-                  });
-                  if (parentCategoryErrors.slug) {
-                    setParentCategoryErrors(prev => ({ ...prev, slug: undefined }));
-                  }
-                }}
-                placeholder="laboratory-equipment"
-                className={cn(parentCategoryErrors.slug && "border-destructive focus-visible:ring-destructive")}
-              />
+              <div className="relative">
+                <Input
+                  id="new_parent_slug"
+                  value={newParentCategory.slug}
+                  onChange={(e) => {
+                    setNewParentCategory({
+                      ...newParentCategory,
+                      slug: e.target.value,
+                    });
+                    if (parentCategoryErrors.slug) {
+                      setParentCategoryErrors(prev => ({ ...prev, slug: undefined }));
+                    }
+                  }}
+                  placeholder="laboratory-equipment"
+                  className={cn(
+                    "pr-10",
+                    parentCategoryErrors.slug && "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                {checkingParentCategorySlug && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
               {parentCategoryErrors.slug && (
                 <p className="text-sm text-destructive">{parentCategoryErrors.slug}</p>
               )}
