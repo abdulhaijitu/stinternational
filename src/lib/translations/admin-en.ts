@@ -273,6 +273,22 @@ export const adminEn = {
       bank_transfer: "Bank Transfer",
       online_payment: "Online Payment",
     },
+    // Bulk delete
+    bulkDelete: "Delete Selected",
+    bulkDeleteTitle: "Delete Multiple Orders",
+    bulkDeleteDescription: "Are you sure you want to delete {count} selected orders? This action cannot be undone.",
+    bulkDeleteSuccess: "{count} orders deleted successfully",
+    bulkDeleteError: "Failed to delete some orders",
+    selectAll: "Select All",
+    selectedCount: "{count} selected",
+    // Audit log
+    deletionLog: "Deletion Log",
+    deletionLogDescription: "Track deleted orders for compliance",
+    deletedBy: "Deleted By",
+    deletedAt: "Deleted At",
+    originalData: "Original Data",
+    viewOriginalData: "View Data",
+    noDeleteLogs: "No deletion logs found",
   },
 
   // Quote Requests

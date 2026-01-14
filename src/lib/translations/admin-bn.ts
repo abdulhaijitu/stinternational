@@ -273,6 +273,22 @@ export const adminBn = {
       bank_transfer: "ব্যাংক ট্রান্সফার",
       online_payment: "অনলাইন পেমেন্ট",
     },
+    // Bulk delete
+    bulkDelete: "নির্বাচিত মুছুন",
+    bulkDeleteTitle: "একাধিক অর্ডার মুছুন",
+    bulkDeleteDescription: "আপনি কি নিশ্চিত যে আপনি {count}টি নির্বাচিত অর্ডার মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    bulkDeleteSuccess: "{count}টি অর্ডার সফলভাবে মুছে ফেলা হয়েছে",
+    bulkDeleteError: "কিছু অর্ডার মুছতে সমস্যা হয়েছে",
+    selectAll: "সব নির্বাচন করুন",
+    selectedCount: "{count}টি নির্বাচিত",
+    // Audit log
+    deletionLog: "ডিলিশন লগ",
+    deletionLogDescription: "মুছে ফেলা অর্ডারের ট্র্যাকিং",
+    deletedBy: "মুছেছেন",
+    deletedAt: "মোছার সময়",
+    originalData: "আসল ডেটা",
+    viewOriginalData: "ডেটা দেখুন",
+    noDeleteLogs: "কোনো ডিলিশন লগ পাওয়া যায়নি",
   },
 
   // Quote Requests
