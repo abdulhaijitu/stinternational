@@ -325,14 +325,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             
             {/* View Website */}
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               asChild
-              className="h-9 px-3 text-muted-foreground hover:text-foreground"
+              className="h-9 px-3 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary hover:border-primary/50"
             >
               <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                 <ExternalLink className="h-4 w-4" />
-                <span className="hidden xl:inline text-sm">
+                <span className="hidden xl:inline text-sm font-medium">
                   {t.layout?.viewWebsite || (language === "bn" ? "ওয়েবসাইট দেখুন" : "View Website")}
                 </span>
               </a>
@@ -374,10 +374,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <AdminNotificationCenter />
             
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               asChild
-              className="text-muted-foreground h-9 w-9"
+              className="h-9 w-9 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/50"
             >
               <a href="/" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-5 w-5" />
