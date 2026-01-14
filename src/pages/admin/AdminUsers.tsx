@@ -9,7 +9,6 @@ import {
   UserCheck,
   Shield,
   Loader2,
-  Mail,
   Lock
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -161,7 +160,7 @@ const AdminUsers = () => {
             id: profile.id,
             user_id: profile.user_id,
             full_name: profile.full_name,
-            email: "", // Will be fetched from auth or displayed as user_id
+            email: "",
             is_active: profile.is_active ?? true,
             created_at: profile.created_at,
             role,
@@ -172,7 +171,7 @@ const AdminUsers = () => {
       setUsers(adminUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast.error(language === "bn" ? "ব্যবহারকারী লোড করতে সমস্যা" : "Failed to load users");
+      toast.error(t.users.loadError);
     } finally {
       setLoading(false);
     }
@@ -180,17 +179,16 @@ const AdminUsers = () => {
 
   const getRoleLabel = (role: AppRole | null) => {
     if (!role) return "-";
-    const labels: Record<AppRole, { en: string; bn: string }> = {
-      super_admin: { en: "Super Admin", bn: "সুপার অ্যাডমিন" },
-      admin: { en: "Admin", bn: "অ্যাডমিন" },
-      accounts: { en: "Accounts", bn: "অ্যাকাউন্টস" },
-      sales: { en: "Sales", bn: "সেলস" },
+    const labels: Record<AppRole, string> = {
+      super_admin: t.roles.superAdmin,
+      admin: t.roles.admin,
+      accounts: t.roles.accounts,
+      sales: t.roles.sales,
     };
-    return labels[role]?.[language] || role;
+    return labels[role] || role;
   };
 
   const getRoleBadgeColor = (role: AppRole | null) => {
-    // Using semantic colors that work in both light and dark modes
     switch (role) {
       case "super_admin": return "bg-destructive/10 text-destructive border-destructive/20";
       case "admin": return "bg-primary/10 text-primary border-primary/20";
@@ -202,25 +200,18 @@ const AdminUsers = () => {
 
   const handleAddUser = async (data: AddUserFormData) => {
     if (!isSuperAdmin) {
-      toast.error(language === "bn" ? "শুধুমাত্র সুপার অ্যাডমিন ব্যবহারকারী যোগ করতে পারেন" : "Only Super Admin can add users");
+      toast.error(t.users.onlySuperAdmin);
       return;
     }
 
     setProcessing(true);
     try {
-      // Note: In a real app, you'd call an edge function to create the user
-      // For now, we'll show a message about this limitation
-      toast.info(
-        language === "bn" 
-          ? "নতুন ব্যবহারকারী তৈরি করতে ইমেইল ইনভাইট পাঠানো হবে"
-          : "New user creation requires server-side implementation. User will be invited via email."
-      );
-      
+      toast.info(t.users.addUserInfo);
       setAddDialogOpen(false);
       form.reset();
     } catch (error) {
       console.error("Error adding user:", error);
-      toast.error(language === "bn" ? "ব্যবহারকারী যোগ করতে সমস্যা" : "Failed to add user");
+      toast.error(t.users.addUserError);
     } finally {
       setProcessing(false);
     }
@@ -245,12 +236,12 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      toast.success(language === "bn" ? "রোল আপডেট হয়েছে" : "Role updated successfully");
+      toast.success(t.users.roleUpdated);
       setEditDialogOpen(false);
       fetchUsers();
     } catch (error) {
       console.error("Error updating role:", error);
-      toast.error(language === "bn" ? "রোল আপডেট করতে সমস্যা" : "Failed to update role");
+      toast.error(t.users.roleUpdateError);
     } finally {
       setProcessing(false);
     }
@@ -270,16 +261,12 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      toast.success(
-        newStatus 
-          ? (language === "bn" ? "ব্যবহারকারী সক্রিয় করা হয়েছে" : "User activated")
-          : (language === "bn" ? "ব্যবহারকারী নিষ্ক্রিয় করা হয়েছে" : "User deactivated")
-      );
+      toast.success(newStatus ? t.users.userActivated : t.users.userDeactivated);
       setConfirmDialogOpen(false);
       fetchUsers();
     } catch (error) {
       console.error("Error updating user status:", error);
-      toast.error(language === "bn" ? "স্ট্যাটাস আপডেট করতে সমস্যা" : "Failed to update status");
+      toast.error(t.users.statusUpdateError);
     } finally {
       setProcessing(false);
     }
@@ -296,15 +283,16 @@ const AdminUsers = () => {
   if (!isSuperAdmin) {
     return (
       <AdminLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <div className={cn(
+          "flex flex-col items-center justify-center min-h-[400px] text-center",
+          language === "bn" && "font-siliguri"
+        )}>
           <Lock className="h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
-            {language === "bn" ? "অ্যাক্সেস নেই" : "Access Denied"}
+            {t.users.accessDenied}
           </h2>
           <p className="text-muted-foreground">
-            {language === "bn" 
-              ? "শুধুমাত্র সুপার অ্যাডমিন এই পেজে অ্যাক্সেস করতে পারেন"
-              : "Only Super Admins can access this page"}
+            {t.users.superAdminOnly}
           </p>
         </div>
       </AdminLayout>
@@ -329,17 +317,15 @@ const AdminUsers = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Users className="h-6 w-6" />
-              {language === "bn" ? "ব্যবহারকারী ব্যবস্থাপনা" : "User Management"}
+              {t.users.title}
             </h1>
             <p className="text-muted-foreground">
-              {language === "bn" 
-                ? "অ্যাডমিন ব্যবহারকারী এবং তাদের রোল পরিচালনা করুন"
-                : "Manage admin users and their roles"}
+              {t.users.subtitle}
             </p>
           </div>
           <Button onClick={() => setAddDialogOpen(true)} className="gap-2">
             <UserPlus className="h-4 w-4" />
-            {language === "bn" ? "ব্যবহারকারী যোগ করুন" : "Add User"}
+            {t.users.addUser}
           </Button>
         </div>
 
@@ -366,7 +352,7 @@ const AdminUsers = () => {
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={language === "bn" ? "ব্যবহারকারী খুঁজুন..." : "Search users..."}
+            placeholder={t.users.searchUsers}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -379,18 +365,18 @@ const AdminUsers = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{language === "bn" ? "নাম" : "Name"}</TableHead>
-                  <TableHead>{language === "bn" ? "রোল" : "Role"}</TableHead>
-                  <TableHead>{language === "bn" ? "স্ট্যাটাস" : "Status"}</TableHead>
-                  <TableHead>{language === "bn" ? "যোগদান" : "Joined"}</TableHead>
-                  <TableHead className="w-[80px]">{language === "bn" ? "অ্যাকশন" : "Actions"}</TableHead>
+                  <TableHead>{t.users.name}</TableHead>
+                  <TableHead>{t.users.role}</TableHead>
+                  <TableHead>{t.users.status}</TableHead>
+                  <TableHead>{t.users.joined}</TableHead>
+                  <TableHead className="w-[80px]">{t.users.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      {language === "bn" ? "কোনো ব্যবহারকারী পাওয়া যায়নি" : "No users found"}
+                      {t.users.noUsers}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -424,10 +410,7 @@ const AdminUsers = () => {
                               : "bg-destructive/10 text-destructive border-destructive/20"
                           )}
                         >
-                          {user.is_active 
-                            ? (language === "bn" ? "সক্রিয়" : "Active")
-                            : (language === "bn" ? "নিষ্ক্রিয়" : "Inactive")
-                          }
+                          {user.is_active ? t.users.active : t.users.inactive}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -449,7 +432,7 @@ const AdminUsers = () => {
                               }}
                             >
                               <Edit className="h-4 w-4 mr-2" />
-                              {language === "bn" ? "রোল পরিবর্তন" : "Change Role"}
+                              {t.users.changeRole}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {user.is_active ? (
@@ -462,7 +445,7 @@ const AdminUsers = () => {
                                 }}
                               >
                                 <UserX className="h-4 w-4 mr-2" />
-                                {language === "bn" ? "নিষ্ক্রিয় করুন" : "Deactivate"}
+                                {t.users.deactivate}
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem
@@ -474,7 +457,7 @@ const AdminUsers = () => {
                                 }}
                               >
                                 <UserCheck className="h-4 w-4 mr-2" />
-                                {language === "bn" ? "সক্রিয় করুন" : "Activate"}
+                                {t.users.activate}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -494,12 +477,10 @@ const AdminUsers = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <UserPlus className="h-5 w-5" />
-                {language === "bn" ? "নতুন ব্যবহারকারী" : "Add New User"}
+                {t.users.newUser}
               </DialogTitle>
               <DialogDescription>
-                {language === "bn" 
-                  ? "নতুন অ্যাডমিন ব্যবহারকারী তৈরি করুন এবং তাদের রোল নির্ধারণ করুন"
-                  : "Create a new admin user and assign their role"}
+                {t.users.newUserDescription}
               </DialogDescription>
             </DialogHeader>
             
@@ -510,7 +491,7 @@ const AdminUsers = () => {
                   name="full_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === "bn" ? "পুরো নাম" : "Full Name"}</FormLabel>
+                      <FormLabel>{t.users.fullName}</FormLabel>
                       <FormControl>
                         <Input placeholder="John Doe" {...field} />
                       </FormControl>
@@ -524,7 +505,7 @@ const AdminUsers = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === "bn" ? "ইমেইল" : "Email"}</FormLabel>
+                      <FormLabel>{t.users.email}</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="user@example.com" {...field} />
                       </FormControl>
@@ -538,7 +519,7 @@ const AdminUsers = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === "bn" ? "পাসওয়ার্ড" : "Password"}</FormLabel>
+                      <FormLabel>{t.users.password}</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="••••••••" {...field} />
                       </FormControl>
@@ -552,7 +533,7 @@ const AdminUsers = () => {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === "bn" ? "রোল" : "Role"}</FormLabel>
+                      <FormLabel>{t.users.role}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -574,11 +555,11 @@ const AdminUsers = () => {
 
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)}>
-                    {language === "bn" ? "বাতিল" : "Cancel"}
+                    {t.common.cancel}
                   </Button>
                   <Button type="submit" disabled={processing}>
                     {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {language === "bn" ? "যোগ করুন" : "Add User"}
+                    {t.users.addUser}
                   </Button>
                 </DialogFooter>
               </form>
@@ -591,7 +572,7 @@ const AdminUsers = () => {
           <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
               <DialogTitle>
-                {language === "bn" ? "রোল পরিবর্তন" : "Change Role"}
+                {t.users.changeRole}
               </DialogTitle>
               <DialogDescription>
                 {selectedUser?.full_name || selectedUser?.user_id}
@@ -600,7 +581,7 @@ const AdminUsers = () => {
             
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>{language === "bn" ? "নতুন রোল" : "New Role"}</Label>
+                <Label>{t.users.newRole}</Label>
                 <Select 
                   value={editRole || undefined} 
                   onValueChange={(value) => setEditRole(value as AppRole)}
@@ -621,11 +602,11 @@ const AdminUsers = () => {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                {language === "bn" ? "বাতিল" : "Cancel"}
+                {t.common.cancel}
               </Button>
               <Button onClick={handleEditRole} disabled={processing || !editRole}>
                 {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {language === "bn" ? "সংরক্ষণ" : "Save"}
+                {t.common.save}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -636,32 +617,22 @@ const AdminUsers = () => {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {confirmAction === "activate"
-                  ? (language === "bn" ? "ব্যবহারকারী সক্রিয় করুন?" : "Activate User?")
-                  : (language === "bn" ? "ব্যবহারকারী নিষ্ক্রিয় করুন?" : "Deactivate User?")}
+                {confirmAction === "activate" ? t.users.activateUser : t.users.deactivateUser}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {confirmAction === "activate"
-                  ? (language === "bn" 
-                      ? "এই ব্যবহারকারী আবার অ্যাডমিন প্যানেলে লগইন করতে পারবেন।"
-                      : "This user will be able to login to the admin panel again.")
-                  : (language === "bn"
-                      ? "এই ব্যবহারকারী আর অ্যাডমিন প্যানেলে লগইন করতে পারবেন না।"
-                      : "This user will no longer be able to login to the admin panel.")}
+                {confirmAction === "activate" ? t.users.activateDescription : t.users.deactivateDescription}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>
-                {language === "bn" ? "বাতিল" : "Cancel"}
+                {t.common.cancel}
               </AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleToggleStatus}
                 className={confirmAction === "deactivate" ? "bg-red-600 hover:bg-red-700" : ""}
               >
                 {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {confirmAction === "activate"
-                  ? (language === "bn" ? "সক্রিয় করুন" : "Activate")
-                  : (language === "bn" ? "নিষ্ক্রিয় করুন" : "Deactivate")}
+                {confirmAction === "activate" ? t.users.activate : t.users.deactivate}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
