@@ -175,12 +175,14 @@ const RequestQuote = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
       const values = getValues();
-      
-      // Insert into database
-      const { data: insertedQuote, error } = await supabase.from("quote_requests").insert({
+      const quoteId = crypto.randomUUID();
+
+      // Insert into database (avoid .select().single() because guests can't SELECT their row via RLS)
+      const { error } = await supabase.from("quote_requests").insert({
+        id: quoteId,
         company_name: values.company_name,
         company_type: values.company_type,
         contact_person: values.contact_person,
@@ -196,7 +198,7 @@ const RequestQuote = () => {
         preferred_payment: values.preferred_payment || null,
         additional_notes: values.additional_notes || null,
         user_id: user?.id || null,
-      }).select().single();
+      });
 
       if (error) throw error;
 
@@ -206,7 +208,7 @@ const RequestQuote = () => {
           body: {
             type: "new_quote",
             quote: {
-              id: insertedQuote.id,
+              id: quoteId,
               company_name: values.company_name,
               contact_person: values.contact_person,
               email: values.email,
@@ -219,6 +221,7 @@ const RequestQuote = () => {
               delivery_city: values.delivery_city,
               delivery_urgency: values.delivery_urgency,
             },
+            language,
           },
         });
       } catch (emailError) {
