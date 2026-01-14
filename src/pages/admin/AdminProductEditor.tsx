@@ -1,6 +1,7 @@
 import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Save, RotateCcw, Clock, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProductDraft } from "@/hooks/useProductDraft";
+import { ADMIN_PRODUCTS_QUERY_KEY } from "@/hooks/useAdminProducts";
 
 // Lazy load rich text editor for performance
 const RichTextEditor = lazy(() => import("@/components/admin/RichTextEditor"));
@@ -76,6 +78,7 @@ const AdminProductEditor = () => {
   const { id } = useParams<{ id: string }>();
   const isNew = id === "new";
   const { t, language } = useAdminLanguage();
+  const queryClient = useQueryClient();
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -268,21 +271,14 @@ const AdminProductEditor = () => {
       short_description_bn: formData.short_description_bn.trim() || null,
     };
 
-    // OPTIMISTIC UPDATE: Show success immediately and navigate
     setSaving(true);
     
-    // Show optimistic success toast
+    // Show loading toast
     const toastId = toast.loading(
       language === "bn" 
         ? (isNew ? "পণ্য তৈরি হচ্ছে..." : "পণ্য আপডেট হচ্ছে...") 
         : (isNew ? "Creating product..." : "Updating product...")
     );
-    
-    // Clear draft optimistically
-    clearDraft();
-    
-    // Navigate immediately for faster UX
-    navigate("/admin/products");
 
     console.log("Saving product data:", { isNew, id, productData: baseProductData });
 
@@ -301,10 +297,21 @@ const AdminProductEditor = () => {
         }
         
         console.log("Product created:", data);
+        
+        // Invalidate and refetch product queries to ensure fresh data
+        await queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_QUERY_KEY });
+        await queryClient.invalidateQueries({ queryKey: ["products"] });
+        
+        // Clear draft after successful save
+        clearDraft();
+        
         toast.success(
           language === "bn" ? "পণ্য সফলভাবে তৈরি হয়েছে" : "Product created successfully",
           { id: toastId }
         );
+        
+        // Navigate AFTER successful save and cache invalidation
+        navigate("/admin/products");
       } else {
         // UPDATE - Update existing product by ID
         if (!id) {
@@ -324,15 +331,26 @@ const AdminProductEditor = () => {
         }
         
         console.log("Product updated:", data);
+        
+        // Invalidate and refetch product queries to ensure fresh data
+        await queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_QUERY_KEY });
+        await queryClient.invalidateQueries({ queryKey: ["products"] });
+        
+        // Clear draft after successful save
+        clearDraft();
+        
         toast.success(
           language === "bn" ? "পণ্য সফলভাবে আপডেট হয়েছে" : "Product updated successfully",
           { id: toastId }
         );
+        
+        // Navigate AFTER successful save and cache invalidation
+        navigate("/admin/products");
       }
     } catch (error: any) {
       console.error("Error saving product:", error);
       
-      // Show detailed error message - rollback happened, user needs to retry
+      // Show detailed error message
       const errorMessage = error.message || error.details || "Unknown error occurred";
       toast.error(
         language === "bn" 
@@ -340,9 +358,7 @@ const AdminProductEditor = () => {
           : `Save failed: ${errorMessage}. Please try again.`,
         { id: toastId }
       );
-      
-      // Navigate back to editor so user can retry
-      navigate(isNew ? "/admin/products/new" : `/admin/products/${id}`);
+      // Stay on the editor page so user can retry
     } finally {
       setSaving(false);
     }
