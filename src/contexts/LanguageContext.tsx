@@ -88,7 +88,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    // Return a fallback for components that might render before provider is ready
+    // This can happen during HMR or SSR-like scenarios
+    console.warn('useLanguage called outside LanguageProvider, using fallback');
+    return {
+      language: 'en' as Language,
+      setLanguage: () => {},
+      t: translations['en'],
+      isRTL: false,
+      languageNames,
+    };
   }
   return context;
 };
