@@ -308,11 +308,12 @@ const AdminProductEditor = () => {
       : [];
 
     // Build product data payload with proper typing
+    // category_id is REQUIRED - validation above ensures it's set
     const baseProductData = {
       name: formData.name.trim(),
       slug: formData.slug.trim(),
       price: parseFloat(formData.price),
-      category_id: formData.category_id || null,
+      category_id: formData.category_id, // Required - never null
       image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
       images: formData.images,
       in_stock: formData.in_stock,
