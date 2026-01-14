@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Lock, Eye, Plus, Trash2 } from "lucide-react";
+import { Loader2, Lock, Eye, Plus, Trash2, FileText } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -15,10 +16,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { OrderDeleteDialog } from "@/components/admin/OrderDeleteDialog";
+import { BulkOrderDeleteDialog } from "@/components/admin/BulkOrderDeleteDialog";
+import { OrderDeletionLogDialog } from "@/components/admin/OrderDeletionLogDialog";
 
 interface Order {
   id: string;
@@ -30,6 +34,11 @@ interface Order {
   customer_email: string;
   customer_phone: string;
   shipping_city: string;
+  shipping_address: string;
+  company_name: string | null;
+  subtotal: number;
+  shipping_cost: number | null;
+  notes: string | null;
   created_at: string;
 }
 
@@ -41,8 +50,12 @@ const AdminOrders = () => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [deletionLogDialogOpen, setDeletionLogDialogOpen] = useState(false);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
+  const { user } = useAuth();
   const { t, language } = useAdminLanguage();
   
   // Permission checks - Super Admin has full control
@@ -73,6 +86,7 @@ const AdminOrders = () => {
 
       if (error) throw error;
       setOrders(data || []);
+      setSelectedOrders(new Set()); // Clear selection on refresh
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error(t.orders.loadError);
@@ -117,17 +131,28 @@ const AdminOrders = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!orderToDelete || !canDelete) return;
+  const logDeletion = async (order: Order) => {
+    if (!user?.id) return;
+    
+    try {
+      await supabase.from("order_deletion_logs").insert([{
+        order_id: order.id,
+        order_number: order.order_number,
+        order_data: JSON.parse(JSON.stringify(order)),
+        deleted_by: user.id,
+      }]);
+    } catch (error) {
+      console.error("Error logging deletion:", error);
+    }
+  };
 
-    const orderIdToDelete = orderToDelete.id;
-
+  const deleteOrder = async (orderId: string): Promise<boolean> => {
     try {
       // First delete order items
       const { error: itemsError } = await supabase
         .from("order_items")
         .delete()
-        .eq("order_id", orderIdToDelete);
+        .eq("order_id", orderId);
 
       if (itemsError) {
         console.error("Error deleting order items:", itemsError);
@@ -135,30 +160,94 @@ const AdminOrders = () => {
       }
 
       // Then delete the order
-      const { error: orderError, count } = await supabase
+      const { error: orderError } = await supabase
         .from("orders")
         .delete()
-        .eq("id", orderIdToDelete)
-        .select();
+        .eq("id", orderId);
 
       if (orderError) {
         console.error("Error deleting order:", orderError);
         throw orderError;
       }
 
-      // Close dialog first
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete || !canDelete) return;
+
+    // Log deletion first
+    await logDeletion(orderToDelete);
+
+    const success = await deleteOrder(orderToDelete.id);
+
+    if (success) {
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
-      
-      // Show success message
       toast.success(t.orders.deleteSuccess);
-      
-      // Refetch orders from database to ensure state sync
       await fetchOrders();
-    } catch (error: any) {
-      console.error("Error deleting order:", error);
-      // Keep dialog open on error so user knows it failed
-      toast.error(t.orders.deleteError + (error?.message ? `: ${error.message}` : ""));
+    } else {
+      toast.error(t.orders.deleteError);
+    }
+  };
+
+  const handleBulkDeleteClick = () => {
+    if (!canDelete || selectedOrders.size === 0) {
+      toast.error(t.orders.noPermission);
+      return;
+    }
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    if (!canDelete || selectedOrders.size === 0) return;
+
+    const selectedOrdersList = orders.filter(o => selectedOrders.has(o.id));
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const order of selectedOrdersList) {
+      // Log deletion first
+      await logDeletion(order);
+
+      const success = await deleteOrder(order.id);
+      if (success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    }
+
+    setBulkDeleteDialogOpen(false);
+    setSelectedOrders(new Set());
+
+    if (failCount === 0) {
+      toast.success(t.orders.bulkDeleteSuccess.replace("{count}", String(successCount)));
+    } else {
+      toast.error(t.orders.bulkDeleteError);
+    }
+
+    await fetchOrders();
+  };
+
+  const toggleOrderSelection = (orderId: string) => {
+    const newSelected = new Set(selectedOrders);
+    if (newSelected.has(orderId)) {
+      newSelected.delete(orderId);
+    } else {
+      newSelected.add(orderId);
+    }
+    setSelectedOrders(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrders.size === filteredOrders.length) {
+      setSelectedOrders(new Set());
+    } else {
+      setSelectedOrders(new Set(filteredOrders.map(o => o.id)));
     }
   };
 
@@ -192,7 +281,36 @@ const AdminOrders = () => {
               <h1 className="text-2xl font-bold">{t.orders.title}</h1>
               <p className="text-muted-foreground">{t.orders.subtitle}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Bulk actions when items are selected */}
+              {canDelete && selectedOrders.size > 0 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">
+                    {t.orders.selectedCount.replace("{count}", String(selectedOrders.size))}
+                  </Badge>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDeleteClick}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t.orders.bulkDelete}
+                  </Button>
+                </div>
+              )}
+              
+              {/* Deletion Log button for Super Admin */}
+              {canDelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeletionLogDialogOpen(true)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {t.orders.deletionLog}
+                </Button>
+              )}
+              
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder={t.orders.allOrders} />
@@ -232,6 +350,15 @@ const AdminOrders = () => {
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
+                      {canDelete && (
+                        <th className="w-12 p-4">
+                          <Checkbox
+                            checked={selectedOrders.size === filteredOrders.length && filteredOrders.length > 0}
+                            onCheckedChange={toggleSelectAll}
+                            aria-label={t.orders.selectAll}
+                          />
+                        </th>
+                      )}
                       <th className="text-left p-4 text-sm font-medium">{t.orders.orderNumber}</th>
                       <th className="text-left p-4 text-sm font-medium">{t.orders.customer}</th>
                       <th className="text-left p-4 text-sm font-medium">{t.orders.city}</th>
@@ -245,6 +372,15 @@ const AdminOrders = () => {
                   <tbody>
                     {filteredOrders.map((order) => (
                       <tr key={order.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                        {canDelete && (
+                          <td className="p-4">
+                            <Checkbox
+                              checked={selectedOrders.has(order.id)}
+                              onCheckedChange={() => toggleOrderSelection(order.id)}
+                              aria-label={`Select order ${order.order_number}`}
+                            />
+                          </td>
+                        )}
                         <td className="p-4 text-sm font-medium">{order.order_number}</td>
                         <td className="p-4">
                           <p className="text-sm font-medium">{order.customer_name}</p>
@@ -324,7 +460,7 @@ const AdminOrders = () => {
           </div>
         </div>
 
-        {/* Delete Confirmation Dialog */}
+        {/* Single Delete Confirmation Dialog */}
         {orderToDelete && (
           <OrderDeleteDialog
             open={deleteDialogOpen}
@@ -343,6 +479,40 @@ const AdminOrders = () => {
             language={language}
           />
         )}
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <BulkOrderDeleteDialog
+          open={bulkDeleteDialogOpen}
+          onOpenChange={setBulkDeleteDialogOpen}
+          orderCount={selectedOrders.size}
+          onConfirm={handleBulkDeleteConfirm}
+          translations={{
+            title: t.orders.bulkDeleteTitle,
+            description: t.orders.bulkDeleteDescription,
+            typeToConfirm: t.orders.typeToConfirm,
+            confirmWord: t.orders.deleteConfirmWord,
+            cancel: t.common.cancel,
+            delete: t.common.delete,
+            deleting: t.orders.deleting,
+          }}
+          language={language}
+        />
+
+        {/* Deletion Log Dialog */}
+        <OrderDeletionLogDialog
+          open={deletionLogDialogOpen}
+          onOpenChange={setDeletionLogDialogOpen}
+          translations={{
+            title: t.orders.deletionLog,
+            description: t.orders.deletionLogDescription,
+            deletedBy: t.orders.deletedBy,
+            deletedAt: t.orders.deletedAt,
+            originalData: t.orders.originalData,
+            viewOriginalData: t.orders.viewOriginalData,
+            noDeleteLogs: t.orders.noDeleteLogs,
+          }}
+          language={language}
+        />
       </TooltipProvider>
     </AdminLayout>
   );
