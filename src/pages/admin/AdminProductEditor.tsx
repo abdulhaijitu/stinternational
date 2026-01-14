@@ -723,8 +723,8 @@ const AdminProductEditor = () => {
               <>
                 {/* English Fields */}
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t.products.productName} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name">{t.products.productName} <span className="text-destructive">*</span></Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -738,8 +738,8 @@ const AdminProductEditor = () => {
                       placeholder={t.products.productNamePlaceholder}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="slug">{t.products.slug} *</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="slug">{t.products.slug} <span className="text-destructive">*</span></Label>
                     <Input
                       id="slug"
                       value={formData.slug}
@@ -749,7 +749,7 @@ const AdminProductEditor = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="short_description">{t.products.shortDescription}</Label>
                   <Suspense fallback={<EditorSkeleton />}>
                     <RichTextEditor
@@ -761,7 +761,7 @@ const AdminProductEditor = () => {
                   </Suspense>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="description">{t.products.fullDescription}</Label>
                   <Suspense fallback={<EditorSkeleton />}>
                     <RichTextEditor
@@ -776,7 +776,7 @@ const AdminProductEditor = () => {
             ) : (
               <>
                 {/* Bangla Fields */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="name_bn" className="font-siliguri">
                     {t.products.productName}
                   </Label>
@@ -789,7 +789,7 @@ const AdminProductEditor = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="short_description_bn" className="font-siliguri">
                     {t.products.shortDescription}
                   </Label>
@@ -804,7 +804,7 @@ const AdminProductEditor = () => {
                   </Suspense>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="description_bn" className="font-siliguri">
                     {t.products.fullDescription}
                   </Label>
@@ -824,9 +824,9 @@ const AdminProductEditor = () => {
 
           {/* Pricing - Always visible */}
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="price" className={getInputClass()}>
-                {t.products.price} (৳) *
+                {t.products.price} (৳) <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="price"
@@ -835,9 +835,9 @@ const AdminProductEditor = () => {
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="compare_price" className={getInputClass()}>
-                {t.products.comparePrice} (৳)
+                {t.products.comparePrice} (৳) <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <Input
                 id="compare_price"
@@ -846,9 +846,9 @@ const AdminProductEditor = () => {
                 onChange={(e) => setFormData({ ...formData, compare_price: e.target.value })}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="sku" className={getInputClass()}>
-                {t.products.sku}
+                {t.products.sku} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <Input
                 id="sku"
@@ -861,9 +861,9 @@ const AdminProductEditor = () => {
           {/* Category Selection */}
           <div className="grid md:grid-cols-2 gap-4">
             {/* Parent Category */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="parent_category" className={getInputClass()}>
-                {t.categories.parentCategory} *
+                {t.categories.parentCategory} <span className="text-destructive">*</span>
               </Label>
               <div className="flex gap-2">
                 <Select
@@ -908,7 +908,7 @@ const AdminProductEditor = () => {
             </div>
 
             {/* Sub-Category (OPTIONAL) */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="category" className={getInputClass()}>
                 {t.categories.subCategory} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
@@ -955,7 +955,7 @@ const AdminProductEditor = () => {
           </div>
 
           {/* Product Images Gallery */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className={getInputClass()}>{t.products.productGallery}</Label>
             <MultiImageUpload
               value={formData.images}
@@ -971,7 +971,7 @@ const AdminProductEditor = () => {
           </div>
 
           {/* Main Product Image (fallback/override) */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className={getInputClass()}>{t.products.mainImage}</Label>
             <p className={cn("text-xs text-muted-foreground mb-2", getInputClass())}>
               {t.products.mainImageHint}
@@ -990,7 +990,7 @@ const AdminProductEditor = () => {
 
           {/* Stock */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="stock_quantity" className={getInputClass()}>
                 {t.products.stockQuantity}
               </Label>
@@ -1038,9 +1038,9 @@ const AdminProductEditor = () => {
           </div>
 
           {/* Specifications */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="specifications" className={getInputClass()}>
-              {t.products.specifications} ({t.products.specificationsHint})
+              {t.products.specifications} <span className="text-muted-foreground text-xs font-normal">({t.products.specificationsHint})</span>
             </Label>
             <Textarea
               id="specifications"
@@ -1053,9 +1053,9 @@ const AdminProductEditor = () => {
           </div>
 
           {/* Features */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="features" className={getInputClass()}>
-              {t.products.features} ({t.products.featuresHint})
+              {t.products.features} <span className="text-muted-foreground text-xs font-normal">({t.products.featuresHint})</span>
             </Label>
             <Textarea
               id="features"

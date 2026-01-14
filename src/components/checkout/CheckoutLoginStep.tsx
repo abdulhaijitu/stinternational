@@ -7,11 +7,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff, ShoppingCart, FileText, LogIn, UserPlus, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CheckoutLoginStepProps {
   onSuccess: () => void;
   onRequestQuote: () => void;
   onGuestCheckout: () => void;
+}
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+  fullName?: string;
 }
 
 const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: CheckoutLoginStepProps) => {
@@ -21,13 +28,81 @@ const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: Check
   const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const { signIn, signUp } = useAuth();
   const { t, language } = useLanguage();
   const fontClass = language === "bn" ? "font-siliguri" : "";
 
+  // Validation functions
+  const validateField = (name: string, value: string): string | undefined => {
+    switch (name) {
+      case "email":
+        if (!value.trim()) {
+          return language === "bn" ? "ইমেইল আবশ্যক" : "Email is required";
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return language === "bn" ? "সঠিক ইমেইল দিন" : "Please enter a valid email";
+        }
+        break;
+      case "password":
+        if (!value) {
+          return language === "bn" ? "পাসওয়ার্ড আবশ্যক" : "Password is required";
+        }
+        if (value.length < 6) {
+          return language === "bn" ? "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে" : "Password must be at least 6 characters";
+        }
+        break;
+      case "fullName":
+        if (!isLogin && !value.trim()) {
+          return language === "bn" ? "নাম আবশ্যক" : "Name is required";
+        }
+        break;
+    }
+    return undefined;
+  };
+
+  const handleBlur = (name: string, value: string) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const handleFieldChange = (name: string, value: string, setter: (v: string) => void) => {
+    setter(value);
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setErrors(prev => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    const emailError = validateField("email", email);
+    if (emailError) newErrors.email = emailError;
+    
+    const passwordError = validateField("password", password);
+    if (passwordError) newErrors.password = passwordError;
+    
+    if (!isLogin) {
+      const nameError = validateField("fullName", fullName);
+      if (nameError) newErrors.fullName = nameError;
+    }
+
+    setErrors(newErrors);
+    setTouched({ email: true, password: true, fullName: true });
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -40,11 +115,6 @@ const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: Check
           onSuccess();
         }
       } else {
-        if (!fullName.trim()) {
-          toast.error(language === "bn" ? "অনুগ্রহ করে আপনার নাম দিন" : "Please enter your name");
-          setLoading(false);
-          return;
-        }
         const { error, linkedOrdersCount } = await signUp(email, password, fullName);
         if (error) {
           toast.error(error.message);
@@ -94,23 +164,55 @@ const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: Check
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">{t.checkout.fullName}</Label>
-                <Input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required={!isLogin} />
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName">{t.checkout.fullName} <span className="text-destructive">*</span></Label>
+                <Input 
+                  id="fullName" 
+                  type="text" 
+                  value={fullName} 
+                  onChange={(e) => handleFieldChange("fullName", e.target.value, setFullName)}
+                  onBlur={() => handleBlur("fullName", fullName)}
+                  className={cn(errors.fullName && touched.fullName && "border-destructive focus-visible:ring-destructive")}
+                />
+                {errors.fullName && touched.fullName && (
+                  <p className="text-xs font-medium text-destructive">{errors.fullName}</p>
+                )}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">{t.checkout.email}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+            <div className="space-y-1.5">
+              <Label htmlFor="email">{t.checkout.email} <span className="text-destructive">*</span></Label>
+              <Input 
+                id="email" 
+                type="email" 
+                value={email} 
+                onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
+                onBlur={() => handleBlur("email", email)}
+                placeholder="you@example.com" 
+                className={cn(errors.email && touched.email && "border-destructive focus-visible:ring-destructive")}
+              />
+              {errors.email && touched.email && (
+                <p className="text-xs font-medium text-destructive">{errors.email}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{language === "bn" ? "পাসওয়ার্ড" : "Password"}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">{language === "bn" ? "পাসওয়ার্ড" : "Password"} <span className="text-destructive">*</span></Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  onChange={(e) => handleFieldChange("password", e.target.value, setPassword)}
+                  onBlur={() => handleBlur("password", password)}
+                  placeholder="••••••••" 
+                  className={cn(errors.password && touched.password && "border-destructive focus-visible:ring-destructive")}
+                />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && touched.password && (
+                <p className="text-xs font-medium text-destructive">{errors.password}</p>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : isLogin ? <LogIn className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
@@ -121,7 +223,7 @@ const CheckoutLoginStep = ({ onSuccess, onRequestQuote, onGuestCheckout }: Check
           <div className="mt-4 text-center">
             <p className="text-sm text-muted-foreground">
               {isLogin ? (language === "bn" ? "অ্যাকাউন্ট নেই?" : "Don't have an account?") : (language === "bn" ? "ইতিমধ্যে অ্যাকাউন্ট আছে?" : "Already have an account?")}{" "}
-              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
+              <button type="button" onClick={() => { setIsLogin(!isLogin); setErrors({}); setTouched({}); }} className="text-primary font-medium hover:underline">
                 {isLogin ? (language === "bn" ? "তৈরি করুন" : "Sign up") : t.nav.login}
               </button>
             </p>
