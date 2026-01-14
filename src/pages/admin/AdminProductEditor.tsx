@@ -95,11 +95,13 @@ const AdminProductEditor = () => {
   const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
   const [newSubCategory, setNewSubCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingSubCategory, setAddingSubCategory] = useState(false);
+  const [subCategoryErrors, setSubCategoryErrors] = useState<{ name?: string; slug?: string }>({});
 
   // Quick-add parent category modal state
   const [showAddParentCategoryModal, setShowAddParentCategoryModal] = useState(false);
   const [newParentCategory, setNewParentCategory] = useState({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
   const [addingParentCategory, setAddingParentCategory] = useState(false);
+  const [parentCategoryErrors, setParentCategoryErrors] = useState<{ name?: string; slug?: string }>({});
 
   const [formData, setFormData] = useState(initialFormData);
 
@@ -454,13 +456,24 @@ const AdminProductEditor = () => {
 
   // Handle quick-add sub-category
   const handleAddSubCategory = async () => {
+    // Validate fields
+    const errors: { name?: string; slug?: string } = {};
+    
     if (!newSubCategory.name.trim()) {
-      toast.error(language === "bn" ? "ক্যাটাগরির নাম আবশ্যক" : "Category name is required");
-      return;
+      errors.name = language === "bn" ? "ক্যাটাগরির নাম আবশ্যক" : "Category name is required";
+    } else if (newSubCategory.name.trim().length > 100) {
+      errors.name = language === "bn" ? "নাম ১০০ অক্ষরের বেশি হতে পারবে না" : "Name must be less than 100 characters";
     }
 
     if (!newSubCategory.slug.trim()) {
-      toast.error(language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required");
+      errors.slug = language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required";
+    } else if (!/^[a-z0-9-]+$/.test(newSubCategory.slug.trim())) {
+      errors.slug = language === "bn" ? "স্লাগে শুধু ছোট হাতের অক্ষর, সংখ্যা এবং হাইফেন থাকতে পারবে" : "Slug can only contain lowercase letters, numbers, and hyphens";
+    }
+
+    setSubCategoryErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -506,8 +519,9 @@ const AdminProductEditor = () => {
 
       toast.success(language === "bn" ? "সাব-ক্যাটাগরি তৈরি হয়েছে" : "Sub-category created");
       
-      // Reset modal
+      // Reset modal and errors
       setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
+      setSubCategoryErrors({});
       setShowAddSubCategoryModal(false);
     } catch (error: any) {
       console.error("Error creating sub-category:", error);
@@ -523,13 +537,24 @@ const AdminProductEditor = () => {
 
   // Handle quick-add parent category
   const handleAddParentCategory = async () => {
+    // Validate fields
+    const errors: { name?: string; slug?: string } = {};
+    
     if (!newParentCategory.name.trim()) {
-      toast.error(language === "bn" ? "ক্যাটাগরির নাম আবশ্যক" : "Category name is required");
-      return;
+      errors.name = language === "bn" ? "ক্যাটাগরির নাম আবশ্যক" : "Category name is required";
+    } else if (newParentCategory.name.trim().length > 100) {
+      errors.name = language === "bn" ? "নাম ১০০ অক্ষরের বেশি হতে পারবে না" : "Name must be less than 100 characters";
     }
 
     if (!newParentCategory.slug.trim()) {
-      toast.error(language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required");
+      errors.slug = language === "bn" ? "স্লাগ আবশ্যক" : "Slug is required";
+    } else if (!/^[a-z0-9-]+$/.test(newParentCategory.slug.trim())) {
+      errors.slug = language === "bn" ? "স্লাগে শুধু ছোট হাতের অক্ষর, সংখ্যা এবং হাইফেন থাকতে পারবে" : "Slug can only contain lowercase letters, numbers, and hyphens";
+    }
+
+    setParentCategoryErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -569,8 +594,9 @@ const AdminProductEditor = () => {
 
       toast.success(language === "bn" ? "প্যারেন্ট ক্যাটাগরি তৈরি হয়েছে" : "Parent category created");
       
-      // Reset modal
+      // Reset modal and errors
       setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
+      setParentCategoryErrors({});
       setShowAddParentCategoryModal(false);
     } catch (error: any) {
       console.error("Error creating parent category:", error);
@@ -1049,19 +1075,28 @@ const AdminProductEditor = () => {
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
             <div className="space-y-2">
-              <Label htmlFor="new_cat_name" className={getInputClass()}>
+              <Label htmlFor="new_cat_name" className={cn(getInputClass(), subCategoryErrors.name && "text-destructive")}>
                 {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
               </Label>
               <Input
                 id="new_cat_name"
                 value={newSubCategory.name}
-                onChange={(e) => setNewSubCategory({
-                  ...newSubCategory,
-                  name: e.target.value,
-                  slug: generateCategorySlug(e.target.value),
-                })}
+                onChange={(e) => {
+                  setNewSubCategory({
+                    ...newSubCategory,
+                    name: e.target.value,
+                    slug: generateCategorySlug(e.target.value),
+                  });
+                  if (subCategoryErrors.name) {
+                    setSubCategoryErrors(prev => ({ ...prev, name: undefined }));
+                  }
+                }}
                 placeholder={language === "bn" ? "যেমন: Digital Scales" : "e.g., Digital Scales"}
+                className={cn(subCategoryErrors.name && "border-destructive focus-visible:ring-destructive")}
               />
+              {subCategoryErrors.name && (
+                <p className="text-sm text-destructive">{subCategoryErrors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="new_cat_name_bn" className="font-siliguri">
@@ -1079,18 +1114,27 @@ const AdminProductEditor = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new_cat_slug" className={getInputClass()}>
+              <Label htmlFor="new_cat_slug" className={cn(getInputClass(), subCategoryErrors.slug && "text-destructive")}>
                 {language === "bn" ? "স্লাগ *" : "Slug *"}
               </Label>
               <Input
                 id="new_cat_slug"
                 value={newSubCategory.slug}
-                onChange={(e) => setNewSubCategory({
-                  ...newSubCategory,
-                  slug: e.target.value,
-                })}
+                onChange={(e) => {
+                  setNewSubCategory({
+                    ...newSubCategory,
+                    slug: e.target.value,
+                  });
+                  if (subCategoryErrors.slug) {
+                    setSubCategoryErrors(prev => ({ ...prev, slug: undefined }));
+                  }
+                }}
                 placeholder="digital-scales"
+                className={cn(subCategoryErrors.slug && "border-destructive focus-visible:ring-destructive")}
               />
+              {subCategoryErrors.slug && (
+                <p className="text-sm text-destructive">{subCategoryErrors.slug}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className={getInputClass()}>
@@ -1113,6 +1157,7 @@ const AdminProductEditor = () => {
               onClick={() => {
                 setShowAddSubCategoryModal(false);
                 setNewSubCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
+                setSubCategoryErrors({});
               }}
               className={getInputClass()}
             >
@@ -1148,19 +1193,28 @@ const AdminProductEditor = () => {
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
             <div className="space-y-2">
-              <Label htmlFor="new_parent_name" className={getInputClass()}>
+              <Label htmlFor="new_parent_name" className={cn(getInputClass(), parentCategoryErrors.name && "text-destructive")}>
                 {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
               </Label>
               <Input
                 id="new_parent_name"
                 value={newParentCategory.name}
-                onChange={(e) => setNewParentCategory({
-                  ...newParentCategory,
-                  name: e.target.value,
-                  slug: generateCategorySlug(e.target.value),
-                })}
+                onChange={(e) => {
+                  setNewParentCategory({
+                    ...newParentCategory,
+                    name: e.target.value,
+                    slug: generateCategorySlug(e.target.value),
+                  });
+                  if (parentCategoryErrors.name) {
+                    setParentCategoryErrors(prev => ({ ...prev, name: undefined }));
+                  }
+                }}
                 placeholder={language === "bn" ? "যেমন: Laboratory Equipment" : "e.g., Laboratory Equipment"}
+                className={cn(parentCategoryErrors.name && "border-destructive focus-visible:ring-destructive")}
               />
+              {parentCategoryErrors.name && (
+                <p className="text-sm text-destructive">{parentCategoryErrors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="new_parent_name_bn" className="font-siliguri">
@@ -1178,18 +1232,27 @@ const AdminProductEditor = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new_parent_slug" className={getInputClass()}>
+              <Label htmlFor="new_parent_slug" className={cn(getInputClass(), parentCategoryErrors.slug && "text-destructive")}>
                 {language === "bn" ? "স্লাগ *" : "Slug *"}
               </Label>
               <Input
                 id="new_parent_slug"
                 value={newParentCategory.slug}
-                onChange={(e) => setNewParentCategory({
-                  ...newParentCategory,
-                  slug: e.target.value,
-                })}
+                onChange={(e) => {
+                  setNewParentCategory({
+                    ...newParentCategory,
+                    slug: e.target.value,
+                  });
+                  if (parentCategoryErrors.slug) {
+                    setParentCategoryErrors(prev => ({ ...prev, slug: undefined }));
+                  }
+                }}
                 placeholder="laboratory-equipment"
+                className={cn(parentCategoryErrors.slug && "border-destructive focus-visible:ring-destructive")}
               />
+              {parentCategoryErrors.slug && (
+                <p className="text-sm text-destructive">{parentCategoryErrors.slug}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className={getInputClass()}>
@@ -1212,6 +1275,7 @@ const AdminProductEditor = () => {
               onClick={() => {
                 setShowAddParentCategoryModal(false);
                 setNewParentCategory({ name: "", name_bn: "", slug: "", image_url: "", icon_name: "" });
+                setParentCategoryErrors({});
               }}
               className={getInputClass()}
             >
