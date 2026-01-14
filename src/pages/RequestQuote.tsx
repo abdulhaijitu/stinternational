@@ -174,67 +174,77 @@ const RequestQuote = () => {
   };
 
   const handleSubmit = async () => {
+    // Prevent double submission
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
       const values = getValues();
       const quoteId = crypto.randomUUID();
 
-      // Insert into database (avoid .select().single() because guests can't SELECT their row via RLS)
-      const { error } = await supabase.from("quote_requests").insert({
+      // Prepare the payload with trimmed values
+      const quotePayload = {
         id: quoteId,
-        company_name: values.company_name,
+        company_name: values.company_name.trim(),
         company_type: values.company_type,
-        contact_person: values.contact_person,
-        email: values.email,
-        phone: values.phone,
+        contact_person: values.contact_person.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
         product_category: values.product_category,
-        product_details: values.product_details,
-        quantity: values.quantity,
+        product_details: values.product_details.trim(),
+        quantity: values.quantity.trim(),
         budget_range: values.budget_range || null,
-        delivery_address: values.delivery_address,
-        delivery_city: values.delivery_city,
+        delivery_address: values.delivery_address.trim(),
+        delivery_city: values.delivery_city.trim(),
         delivery_urgency: values.delivery_urgency,
         preferred_payment: values.preferred_payment || null,
-        additional_notes: values.additional_notes || null,
+        additional_notes: values.additional_notes?.trim() || null,
         user_id: user?.id || null,
         source_page: "request-quote",
         language: language,
-      });
+      };
 
-      if (error) throw error;
+      // Insert into database (avoid .select().single() because guests can't SELECT their row via RLS)
+      const { error: insertError } = await supabase
+        .from("quote_requests")
+        .insert(quotePayload);
 
-      // Send email notifications (don't block on failure)
-      try {
-        await supabase.functions.invoke("send-quote-notification", {
-          body: {
-            type: "new_quote",
-            quote: {
-              id: quoteId,
-              company_name: values.company_name,
-              contact_person: values.contact_person,
-              email: values.email,
-              phone: values.phone,
-              company_type: values.company_type,
-              product_category: values.product_category,
-              product_details: values.product_details,
-              quantity: values.quantity,
-              budget_range: values.budget_range,
-              delivery_city: values.delivery_city,
-              delivery_urgency: values.delivery_urgency,
-            },
-            language,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
+      if (insertError) {
+        console.error("Database insert error:", insertError);
+        throw new Error(insertError.message || "Failed to save your request");
       }
+
+      // Send email notifications (non-blocking, don't throw on failure)
+      supabase.functions.invoke("send-quote-notification", {
+        body: {
+          type: "new_quote",
+          quote: {
+            id: quoteId,
+            company_name: values.company_name.trim(),
+            contact_person: values.contact_person.trim(),
+            email: values.email.trim(),
+            phone: values.phone.trim(),
+            company_type: values.company_type,
+            product_category: values.product_category,
+            product_details: values.product_details.trim(),
+            quantity: values.quantity.trim(),
+            budget_range: values.budget_range,
+            delivery_city: values.delivery_city.trim(),
+            delivery_urgency: values.delivery_urgency,
+          },
+          language,
+        },
+      }).catch((emailError) => {
+        // Log but don't block on email failure
+        console.warn("Email notification failed (non-critical):", emailError);
+      });
 
       toast.success(t.rfq.successMessage);
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting quote request:", error);
-      toast.error(t.rfq.errorMessage);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`${t.rfq.errorMessage} (${errorMessage})`);
     } finally {
       setIsSubmitting(false);
     }
