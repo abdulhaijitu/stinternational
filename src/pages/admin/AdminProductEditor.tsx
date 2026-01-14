@@ -45,12 +45,6 @@ const EditorSkeleton = () => (
   </div>
 );
 
-interface Category {
-  id: string;
-  name: string;
-  name_bn: string | null;
-}
-
 const initialFormData = {
   name: "",
   name_bn: "",
@@ -62,7 +56,8 @@ const initialFormData = {
   price: "",
   compare_price: "",
   sku: "",
-  category_id: "",
+  parent_category_id: "",
+  category_id: "", // This is the sub-category ID
   image_url: "",
   images: [] as string[],
   in_stock: true,
@@ -82,7 +77,8 @@ const AdminProductEditor = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [parentCategories, setParentCategories] = useState<{ id: string; name: string; name_bn: string | null }[]>([]);
+  const [subCategories, setSubCategories] = useState<{ id: string; name: string; name_bn: string | null; parent_id: string }[]>([]);
   const [showDraftPrompt, setShowDraftPrompt] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
@@ -124,19 +120,29 @@ const AdminProductEditor = () => {
   }, [formData, autoSave, initialDataLoaded, loading]);
 
   const fetchCategories = async () => {
-    // Fetch all categories with parent info for hierarchical display
-    const { data } = await supabase
+    // Fetch parent categories (where parent_id is null)
+    const { data: parents } = await supabase
       .from("categories")
-      .select("id, name, name_bn, parent_id")
+      .select("id, name, name_bn")
+      .is("parent_id", null)
+      .eq("is_active", true)
       .order("display_order");
     
-    // For product assignment, we show all categories but prefer sub-categories
-    // Group them for better UX in the dropdown
-    setCategories(data || []);
+    // Fetch sub-categories (where parent_id is not null)
+    const { data: subs } = await supabase
+      .from("categories")
+      .select("id, name, name_bn, parent_id")
+      .not("parent_id", "is", null)
+      .eq("is_active", true)
+      .order("display_order");
+    
+    setParentCategories(parents || []);
+    setSubCategories(subs || []);
   };
 
   const fetchProduct = async (productId: string) => {
     try {
+      // First fetch the product
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -144,6 +150,20 @@ const AdminProductEditor = () => {
         .single();
 
       if (error) throw error;
+
+      // If product has a category_id, find its parent
+      let parentCategoryId = "";
+      if (data.category_id) {
+        const { data: categoryData } = await supabase
+          .from("categories")
+          .select("parent_id")
+          .eq("id", data.category_id)
+          .single();
+        
+        if (categoryData?.parent_id) {
+          parentCategoryId = categoryData.parent_id;
+        }
+      }
 
       const loadedData = {
         name: data.name,
@@ -156,6 +176,7 @@ const AdminProductEditor = () => {
         price: String(data.price),
         compare_price: data.compare_price ? String(data.compare_price) : "",
         sku: data.sku || "",
+        parent_category_id: parentCategoryId,
         category_id: data.category_id || "",
         image_url: data.image_url || "",
         images: data.images || [],
@@ -188,7 +209,12 @@ const AdminProductEditor = () => {
   const handleRestoreDraft = useCallback(() => {
     const draftData = loadDraft();
     if (draftData) {
-      setFormData(draftData);
+      // Handle backwards compatibility - add parent_category_id if missing
+      const restoredData = {
+        ...draftData,
+        parent_category_id: draftData.parent_category_id || "",
+      };
+      setFormData(restoredData);
       setShowDraftPrompt(false);
       toast.success(language === "bn" ? "ড্রাফট পুনরুদ্ধার করা হয়েছে" : "Draft restored");
     }
@@ -228,6 +254,17 @@ const AdminProductEditor = () => {
     
     if (!formData.price || isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
       toast.error(language === "bn" ? "সঠিক মূল্য দিন" : "Please enter a valid price");
+      return;
+    }
+
+    // Validate category selection - sub-category is required
+    if (!formData.parent_category_id) {
+      toast.error(language === "bn" ? "প্যারেন্ট ক্যাটাগরি নির্বাচন করুন" : "Please select a parent category");
+      return;
+    }
+
+    if (!formData.category_id) {
+      toast.error(language === "bn" ? "সাব-ক্যাটাগরি নির্বাচন করুন" : "Please select a sub-category");
       return;
     }
 
@@ -368,9 +405,23 @@ const AdminProductEditor = () => {
   const getInputClass = () => cn(language === "bn" && "font-siliguri");
 
   // Get category display name based on language
-  const getCategoryName = (cat: Category) => {
+  const getCategoryName = (cat: { name: string; name_bn: string | null }) => {
     if (language === "bn" && cat.name_bn) return cat.name_bn;
     return cat.name;
+  };
+
+  // Filter sub-categories based on selected parent
+  const filteredSubCategories = subCategories.filter(
+    (sub) => sub.parent_id === formData.parent_category_id
+  );
+
+  // Handle parent category change - reset sub-category when parent changes
+  const handleParentCategoryChange = (parentId: string) => {
+    setFormData({
+      ...formData,
+      parent_category_id: parentId,
+      category_id: "", // Reset sub-category when parent changes
+    });
   };
 
   if (loading) {
@@ -593,26 +644,73 @@ const AdminProductEditor = () => {
             </div>
           </div>
 
-          {/* Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category" className={getInputClass()}>
-              {t.products.category}
-            </Label>
-            <Select
-              value={formData.category_id}
-              onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-            >
-              <SelectTrigger className={getInputClass()}>
-                <SelectValue placeholder={t.products.selectCategory} />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
-                    {getCategoryName(cat)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Category Selection */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Parent Category */}
+            <div className="space-y-2">
+              <Label htmlFor="parent_category" className={getInputClass()}>
+                {t.categories.parentCategory} *
+              </Label>
+              <Select
+                value={formData.parent_category_id}
+                onValueChange={handleParentCategoryChange}
+              >
+                <SelectTrigger className={getInputClass()}>
+                  <SelectValue placeholder={t.categories.selectParentCategory} />
+                </SelectTrigger>
+                <SelectContent>
+                  {parentCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
+                      {getCategoryName(cat)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!formData.parent_category_id && (
+                <p className="text-xs text-destructive">
+                  {language === "bn" ? "প্যারেন্ট ক্যাটাগরি আবশ্যক" : "Parent category is required"}
+                </p>
+              )}
+            </div>
+
+            {/* Sub-Category */}
+            <div className="space-y-2">
+              <Label htmlFor="category" className={getInputClass()}>
+                {t.categories.subCategory} *
+              </Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                disabled={!formData.parent_category_id}
+              >
+                <SelectTrigger className={getInputClass()}>
+                  <SelectValue 
+                    placeholder={
+                      !formData.parent_category_id 
+                        ? (language === "bn" ? "প্রথমে প্যারেন্ট নির্বাচন করুন" : "Select parent first")
+                        : t.products.selectCategory
+                    } 
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredSubCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
+                      {getCategoryName(cat)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.parent_category_id && !formData.category_id && (
+                <p className="text-xs text-destructive">
+                  {language === "bn" ? "সাব-ক্যাটাগরি আবশ্যক" : "Sub-category is required"}
+                </p>
+              )}
+              {formData.parent_category_id && filteredSubCategories.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {language === "bn" ? "এই প্যারেন্টে কোনো সাব-ক্যাটাগরি নেই" : "No sub-categories under this parent"}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Product Images Gallery */}

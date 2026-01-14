@@ -12,6 +12,7 @@ interface ProductFormData {
   price: string;
   compare_price: string;
   sku: string;
+  parent_category_id: string;
   category_id: string;
   image_url: string;
   images: string[];
