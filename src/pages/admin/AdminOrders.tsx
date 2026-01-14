@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Lock, Eye } from "lucide-react";
+import { Loader2, Lock, Eye, Plus, Trash2 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { OrderDeleteDialog } from "@/components/admin/OrderDeleteDialog";
 
 interface Order {
   id: string;
@@ -38,12 +39,16 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
   
-  // Permission checks
-  const canUpdateStatus = isSuperAdmin || hasPermission("orders", "update");
+  // Permission checks - Super Admin has full control
+  const canCreate = isSuperAdmin;
+  const canDelete = isSuperAdmin;
+  const canUpdateStatus = isSuperAdmin || hasPermission("orders", "edit");
 
   // Status options with translations
   const statusOptions = [
@@ -103,6 +108,45 @@ const AdminOrders = () => {
     }
   };
 
+  const handleDeleteClick = (order: Order) => {
+    if (!canDelete) {
+      toast.error(t.orders.noPermission);
+      return;
+    }
+    setOrderToDelete(order);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete || !canDelete) return;
+
+    try {
+      // First delete order items
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .delete()
+        .eq("order_id", orderToDelete.id);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the order
+      const { error: orderError } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderToDelete.id);
+
+      if (orderError) throw orderError;
+
+      setOrders(orders.filter((o) => o.id !== orderToDelete.id));
+      toast.success(t.orders.deleteSuccess);
+      setDeleteDialogOpen(false);
+      setOrderToDelete(null);
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error(t.orders.deleteError);
+    }
+  };
+
   const filteredOrders = statusFilter === "all"
     ? orders
     : orders.filter((o) => o.status === statusFilter);
@@ -133,19 +177,29 @@ const AdminOrders = () => {
               <h1 className="text-2xl font-bold">{t.orders.title}</h1>
               <p className="text-muted-foreground">{t.orders.subtitle}</p>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder={t.orders.allOrders} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t.orders.allOrders}</SelectItem>
-                {statusOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder={t.orders.allOrders} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.orders.allOrders}</SelectItem>
+                  {statusOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Only show Create button for Super Admin */}
+              {canCreate && (
+                <Button onClick={() => navigate("/admin/orders/new")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.orders.createOrder}
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Orders Table */}
@@ -222,15 +276,29 @@ const AdminOrders = () => {
                           {formatDate(order.created_at)}
                         </td>
                         <td className="p-4">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => navigate(`/admin/orders/${order.id}`)}
-                            className="h-8"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            {t.orders.viewDetails}
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => navigate(`/admin/orders/${order.id}`)}
+                              className="h-8"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              {t.orders.viewDetails}
+                            </Button>
+                            
+                            {/* Only show Delete button for Super Admin */}
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(order)}
+                                className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -240,6 +308,26 @@ const AdminOrders = () => {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        {orderToDelete && (
+          <OrderDeleteDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            orderNumber={orderToDelete.order_number}
+            onConfirm={handleDeleteConfirm}
+            translations={{
+              title: t.orders.deleteTitle,
+              description: t.orders.deleteDescription,
+              typeToConfirm: t.orders.typeToConfirm,
+              confirmWord: t.orders.deleteConfirmWord,
+              cancel: t.common.cancel,
+              delete: t.common.delete,
+              deleting: t.orders.deleting,
+            }}
+            language={language}
+          />
+        )}
       </TooltipProvider>
     </AdminLayout>
   );
