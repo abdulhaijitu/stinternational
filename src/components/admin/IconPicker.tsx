@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { availableIcons, getIconsByCategory, getCategoryIcon, type IconOption } from "@/lib/categoryIcons";
+import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 
 interface IconPickerProps {
   value: string | null;
@@ -12,9 +13,12 @@ interface IconPickerProps {
 }
 
 const IconPicker = ({ value, onChange }: IconPickerProps) => {
+  const { language, t } = useAdminLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const iconsByCategory = getIconsByCategory();
   
+  const picker = t.iconPicker;
+
   // Filter icons based on search
   const filteredIcons = searchQuery
     ? availableIcons.filter(
@@ -26,11 +30,12 @@ const IconPicker = ({ value, onChange }: IconPickerProps) => {
     : null;
 
   const CurrentIcon = getCategoryIcon(value);
+  const fontClass = language === "bn" ? "font-siliguri" : "";
 
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${fontClass}`}>
       <div className="flex items-center gap-3">
-        <Label>Category Icon</Label>
+        <Label>{picker?.label || "Category Icon"}</Label>
         {value && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CurrentIcon className="h-4 w-4" />
@@ -43,7 +48,7 @@ const IconPicker = ({ value, onChange }: IconPickerProps) => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search icons..."
+          placeholder={picker?.searchPlaceholder || "Search icons..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -66,7 +71,7 @@ const IconPicker = ({ value, onChange }: IconPickerProps) => {
               ))}
               {filteredIcons.length === 0 && (
                 <p className="col-span-full text-sm text-muted-foreground text-center py-4">
-                  No icons found
+                  {picker?.noIconsFound || "No icons found"}
                 </p>
               )}
             </div>

@@ -648,4 +648,11 @@ export const adminEn = {
     addMore: "Add More",
     maxReached: "Maximum images reached",
   },
+
+  // Icon Picker
+  iconPicker: {
+    label: "Category Icon",
+    searchPlaceholder: "Search icons...",
+    noIconsFound: "No icons found",
+  },
 } as const;

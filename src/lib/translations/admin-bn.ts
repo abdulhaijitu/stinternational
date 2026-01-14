@@ -648,4 +648,11 @@ export const adminBn = {
     addMore: "আরো যোগ করুন",
     maxReached: "সর্বোচ্চ সংখ্যক ছবি হয়ে গেছে",
   },
+
+  // Icon Picker
+  iconPicker: {
+    label: "ক্যাটাগরি আইকন",
+    searchPlaceholder: "আইকন খুঁজুন...",
+    noIconsFound: "কোনো আইকন পাওয়া যায়নি",
+  },
 } as const;
