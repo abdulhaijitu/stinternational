@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AdminLanguageProvider } from "@/contexts/AdminLanguageContext";
 import { AdminThemeProvider } from "@/contexts/AdminThemeContext";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import BilingualSEO from "@/components/seo/BilingualSEO";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Products from "./pages/Products";
@@ -57,6 +58,7 @@ const App = () => (
                   <Sonner />
                   <BrowserRouter>
                     <ScrollToTop />
+                    <BilingualSEO />
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/categories" element={<Categories />} />
