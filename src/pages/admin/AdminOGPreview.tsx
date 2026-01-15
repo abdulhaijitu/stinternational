@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getProductOgImage, getCategoryOgImage, getPageOgImage, BASE_URL, DEFAULT_OG_IMAGE } from "@/lib/ogImageUtils";
-import { Facebook, Twitter, Linkedin, ExternalLink, Image, Search } from "lucide-react";
+import { Facebook, Twitter, Linkedin, ExternalLink, Image, Search, Bug } from "lucide-react";
+import { toast } from "sonner";
 
 const translations = {
   en: {
@@ -27,10 +29,12 @@ const translations = {
     twitter: "Twitter/X",
     linkedin: "LinkedIn",
     openDebugger: "Open Debugger",
-    facebookDebugger: "Facebook Sharing Debugger",
-    twitterValidator: "Twitter Card Validator",
-    linkedinInspector: "LinkedIn Post Inspector",
+    facebookDebugger: "Facebook Debugger",
+    twitterValidator: "Twitter Validator",
+    linkedinInspector: "LinkedIn Inspector",
     copyUrl: "Copy URL",
+    urlCopied: "URL copied to clipboard!",
+    debugTools: "Debug Tools",
     noResults: "No results found",
   },
   bn: {
@@ -47,10 +51,12 @@ const translations = {
     twitter: "টুইটার/X",
     linkedin: "লিংকডইন",
     openDebugger: "ডিবাগার খুলুন",
-    facebookDebugger: "ফেসবুক শেয়ারিং ডিবাগার",
-    twitterValidator: "টুইটার কার্ড ভ্যালিডেটর",
-    linkedinInspector: "লিংকডইন পোস্ট ইন্সপেক্টর",
+    facebookDebugger: "ফেসবুক ডিবাগার",
+    twitterValidator: "টুইটার ভ্যালিডেটর",
+    linkedinInspector: "লিংকডইন ইন্সপেক্টর",
     copyUrl: "URL কপি করুন",
+    urlCopied: "URL ক্লিপবোর্ডে কপি হয়েছে!",
+    debugTools: "ডিবাগ টুলস",
     noResults: "কোন ফলাফল পাওয়া যায়নি",
   },
 };
@@ -114,6 +120,69 @@ const SocialPreviewCard = ({ title, description, imageUrl, pageUrl, platform }: 
   );
 };
 
+// Debugger URL generators
+const getFacebookDebuggerUrl = (url: string) => 
+  `https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(url)}`;
+
+const getTwitterValidatorUrl = (url: string) => 
+  `https://cards-dev.twitter.com/validator?url=${encodeURIComponent(url)}`;
+
+const getLinkedInInspectorUrl = (url: string) => 
+  `https://www.linkedin.com/post-inspector/inspect/${encodeURIComponent(url)}`;
+
+interface DebuggerButtonsProps {
+  pageUrl: string;
+  t: typeof translations.en;
+}
+
+const DebuggerButtons = ({ pageUrl, t }: DebuggerButtonsProps) => {
+  const copyUrl = () => {
+    navigator.clipboard.writeText(pageUrl);
+    toast.success(t.urlCopied);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(getFacebookDebuggerUrl(pageUrl), '_blank')}
+        className="text-xs"
+      >
+        <Facebook className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
+        {t.facebookDebugger}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(getTwitterValidatorUrl(pageUrl), '_blank')}
+        className="text-xs"
+      >
+        <Twitter className="h-3.5 w-3.5 mr-1.5" />
+        {t.twitterValidator}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(getLinkedInInspectorUrl(pageUrl), '_blank')}
+        className="text-xs"
+      >
+        <Linkedin className="h-3.5 w-3.5 mr-1.5 text-blue-700" />
+        {t.linkedinInspector}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={copyUrl}
+        className="text-xs"
+      >
+        <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+        {t.copyUrl}
+      </Button>
+    </div>
+  );
+};
+
 interface PreviewItemProps {
   title: string;
   titleBn?: string;
@@ -142,6 +211,14 @@ const PreviewItem = ({ title, titleBn, description, descriptionBn, imageUrl, pag
             <Image className="h-3 w-3 mr-1" />
             {hasCustomOg ? t.hasImage : t.noImage}
           </Badge>
+        </div>
+        {/* Debug Tools */}
+        <div className="mt-4 pt-3 border-t">
+          <div className="flex items-center gap-2 mb-2">
+            <Bug className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">{t.debugTools}</span>
+          </div>
+          <DebuggerButtons pageUrl={pageUrl} t={t} />
         </div>
       </CardHeader>
       <CardContent>
