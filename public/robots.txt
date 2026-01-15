@@ -30,6 +30,14 @@ Disallow: /admin/*
 Disallow: /checkout
 Disallow: /account
 Disallow: /orders
+Disallow: /cart
+Disallow: /wishlist
 
-# Sitemap
+# Dynamic Sitemap (generated from database)
+Sitemap: https://tmdktmnoeqezkbdaaayh.supabase.co/functions/v1/generate-sitemap
+
+# Static Sitemap fallback
 Sitemap: https://stinternational.lovable.app/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

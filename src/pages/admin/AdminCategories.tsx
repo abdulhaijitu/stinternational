@@ -48,6 +48,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import IconPicker from "@/components/admin/IconPicker";
+import SEOFieldsSection from "@/components/admin/SEOFieldsSection";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
@@ -351,6 +352,14 @@ const AdminCategories = () => {
     is_active: true,
     parent_id: "",
     is_parent: true,
+    // SEO fields
+    seo_title: "",
+    seo_title_bn: "",
+    seo_description: "",
+    seo_description_bn: "",
+    seo_keywords: "",
+    seo_keywords_bn: "",
+    og_image: "",
   });
   
   const { hasPermission, isSuperAdmin } = useAdmin();
@@ -541,6 +550,14 @@ const AdminCategories = () => {
         is_active: category.is_active ?? true,
         parent_id: category.parent_id || "",
         is_parent: !category.parent_id,
+        // SEO fields
+        seo_title: (category as any).seo_title || "",
+        seo_title_bn: (category as any).seo_title_bn || "",
+        seo_description: (category as any).seo_description || "",
+        seo_description_bn: (category as any).seo_description_bn || "",
+        seo_keywords: (category as any).seo_keywords || "",
+        seo_keywords_bn: (category as any).seo_keywords_bn || "",
+        og_image: (category as any).og_image || "",
       });
     } else {
       if (!canCreate) {
@@ -560,6 +577,14 @@ const AdminCategories = () => {
         is_active: true,
         parent_id: parentIdForNew || "",
         is_parent: !parentIdForNew,
+        // SEO fields
+        seo_title: "",
+        seo_title_bn: "",
+        seo_description: "",
+        seo_description_bn: "",
+        seo_keywords: "",
+        seo_keywords_bn: "",
+        og_image: "",
       });
     }
     setDialogOpen(true);
@@ -590,6 +615,14 @@ const AdminCategories = () => {
         is_active: formData.is_active,
         parent_id: formData.is_parent ? null : formData.parent_id,
         is_parent: formData.is_parent,
+        // SEO fields
+        seo_title: formData.seo_title || null,
+        seo_title_bn: formData.seo_title_bn || null,
+        seo_description: formData.seo_description || null,
+        seo_description_bn: formData.seo_description_bn || null,
+        seo_keywords: formData.seo_keywords || null,
+        seo_keywords_bn: formData.seo_keywords_bn || null,
+        og_image: formData.og_image || null,
       };
 
       if (editingCategory) {
@@ -1011,6 +1044,26 @@ const AdminCategories = () => {
                         onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                       />
                     </div>
+
+                    {/* SEO Settings */}
+                    <SEOFieldsSection
+                      seoTitle={formData.seo_title}
+                      seoTitleBn={formData.seo_title_bn}
+                      seoDescription={formData.seo_description}
+                      seoDescriptionBn={formData.seo_description_bn}
+                      seoKeywords={formData.seo_keywords}
+                      seoKeywordsBn={formData.seo_keywords_bn}
+                      ogImage={formData.og_image}
+                      onSeoTitleChange={(value) => setFormData({ ...formData, seo_title: value })}
+                      onSeoTitleBnChange={(value) => setFormData({ ...formData, seo_title_bn: value })}
+                      onSeoDescriptionChange={(value) => setFormData({ ...formData, seo_description: value })}
+                      onSeoDescriptionBnChange={(value) => setFormData({ ...formData, seo_description_bn: value })}
+                      onSeoKeywordsChange={(value) => setFormData({ ...formData, seo_keywords: value })}
+                      onSeoKeywordsBnChange={(value) => setFormData({ ...formData, seo_keywords_bn: value })}
+                      onOgImageChange={(value) => setFormData({ ...formData, og_image: value })}
+                      language={language}
+                      entityType="category"
+                    />
                   </div>
                   <div className="flex-shrink-0 flex justify-end gap-2 pt-4 border-t border-border">
                     <Button variant="outline" onClick={() => setDialogOpen(false)}>
