@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { BilingualSEO, BASE_URL, DEFAULT_OG_IMAGE } from "./BilingualSEO";
+import { BilingualSEO, BASE_URL } from "./BilingualSEO";
+import { getProductOgImage, DEFAULT_OG_IMAGE } from "@/lib/ogImageUtils";
 
 interface ProductSEOProps {
   product: {
@@ -70,18 +70,12 @@ export const ProductSEO = ({ product, category, language }: ProductSEOProps) => 
     return product.seo_keywords || "";
   };
 
-  // Get OG image - use product og_image, first product image, or default
-  const getOgImage = () => {
-    if (product.og_image) return product.og_image;
-    if (product.image_url) return product.image_url;
-    if (product.images && product.images.length > 0) return product.images[0];
-    return DEFAULT_OG_IMAGE;
-  };
+  // Get OG image using utility function - prioritizes og_image > image_url > images[0] > default
+  const ogImage = getProductOgImage(product);
 
   const title = getTitle();
   const description = getDescription();
   const keywords = getKeywords();
-  const ogImage = getOgImage();
 
   // Truncate description to 160 chars for meta tag
   const truncatedDescription = description.length > 160 

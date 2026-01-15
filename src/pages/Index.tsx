@@ -28,6 +28,7 @@ import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import Testimonials from "@/components/homepage/Testimonials";
 import HeroSlider from "@/components/homepage/HeroSlider";
 import { useQueryClient } from "@tanstack/react-query";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 // Trust signals data - speaks to both B2B and B2C (bilingual)
 const trustSignals = {
@@ -218,6 +219,17 @@ const Index = () => {
 
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/"
+        fallbackTitle={{
+          en: "ST International - Scientific & Industrial Equipment in Bangladesh",
+          bn: "ST International - বাংলাদেশে বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি"
+        }}
+        fallbackDescription={{
+          en: "Your trusted partner for scientific, laboratory, industrial, and educational equipment in Bangladesh. Quality products with expert support since 2005.",
+          bn: "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি, শিল্প এবং শিক্ষামূলক যন্ত্রপাতির আপনার বিশ্বস্ত অংশীদার। ২০০৫ সাল থেকে বিশেষজ্ঞ সহায়তা সহ মানসম্পন্ন পণ্য।"
+        }}
+      />
       <PullToRefresh onRefresh={handleRefresh}>
         <PageTransition>
           {/* Hero Slider Section */}

@@ -1,8 +1,20 @@
 import Layout from "@/components/layout/Layout";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const PrivacyPolicy = () => {
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/privacy-policy"
+        fallbackTitle={{
+          en: "Privacy Policy - ST International",
+          bn: "গোপনীয়তা নীতি - ST International"
+        }}
+        fallbackDescription={{
+          en: "Read our privacy policy to understand how we collect, use, and protect your personal information.",
+          bn: "আমরা কীভাবে আপনার ব্যক্তিগত তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষা করি তা বুঝতে আমাদের গোপনীয়তা নীতি পড়ুন।"
+        }}
+      />
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-12 md:py-16">
           <h1 className="text-3xl md:text-4xl font-bold">Privacy Policy</h1>

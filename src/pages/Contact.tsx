@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const Contact = () => {
   const { t, language } = useLanguage();
@@ -121,6 +122,17 @@ const Contact = () => {
 
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/contact"
+        fallbackTitle={{
+          en: "Contact Us - ST International | Get in Touch for Equipment Inquiries",
+          bn: "যোগাযোগ করুন - ST International | যন্ত্রপাতি সম্পর্কে জানতে যোগাযোগ করুন"
+        }}
+        fallbackDescription={{
+          en: "Contact ST International for scientific and industrial equipment inquiries. Visit our Dhaka office or reach us via phone and email.",
+          bn: "বৈজ্ঞানিক এবং শিল্প যন্ত্রপাতি সম্পর্কে জানতে ST International-এ যোগাযোগ করুন।"
+        }}
+      />
       {/* Hero Section */}
       <section className="hero-gradient text-primary-foreground">
         <div className={`container-premium py-16 md:py-20 ${fontClass}`}>

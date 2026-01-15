@@ -1,8 +1,20 @@
 import Layout from "@/components/layout/Layout";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const TermsConditions = () => {
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/terms-conditions"
+        fallbackTitle={{
+          en: "Terms & Conditions - ST International",
+          bn: "শর্তাবলী - ST International"
+        }}
+        fallbackDescription={{
+          en: "Read our terms and conditions for using ST International's website and services.",
+          bn: "ST International-এর ওয়েবসাইট এবং সেবা ব্যবহারের জন্য আমাদের শর্তাবলী পড়ুন।"
+        }}
+      />
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-12 md:py-16">
           <h1 className="text-3xl md:text-4xl font-bold">Terms & Conditions</h1>
