@@ -19,7 +19,8 @@ import {
   PanelLeft,
   Users,
   Search,
-  Activity
+  Activity,
+  Image as ImageIcon
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/testimonials", label: t.nav.testimonials, icon: Quote, module: "testimonials", group: "content" },
     { href: "/admin/page-seo", label: language === "bn" ? "পেজ SEO" : "Page SEO", icon: Search, module: "seo", group: "seo" },
     { href: "/admin/seo-health", label: language === "bn" ? "SEO স্বাস্থ্য" : "SEO Health", icon: Activity, module: "seo", group: "seo" },
+    { href: "/admin/og-preview", label: language === "bn" ? "OG প্রিভিউ" : "OG Preview", icon: ImageIcon, module: "seo", group: "seo" },
     { href: "/admin/ux-insights", label: t.nav.uxInsights, icon: BarChart3, module: "ux-insights", group: "analytics" },
     { href: "/admin/users", label: language === "bn" ? "ব্যবহারকারী" : "Users", icon: Users, module: "users", group: "settings" },
     { href: "/admin/roles", label: t.nav.roles, icon: Shield, module: "roles", group: "settings" },
