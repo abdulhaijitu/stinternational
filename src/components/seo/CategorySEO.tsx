@@ -1,4 +1,5 @@
-import { BilingualSEO, BASE_URL, DEFAULT_OG_IMAGE } from "./BilingualSEO";
+import { BilingualSEO, BASE_URL } from "./BilingualSEO";
+import { getCategoryOgImage } from "@/lib/ogImageUtils";
 
 interface CategorySEOProps {
   category: {
@@ -69,17 +70,12 @@ export const CategorySEO = ({ category, parentCategory, productCount, language }
     return category.seo_keywords || "";
   };
 
-  // Get OG image
-  const getOgImage = () => {
-    if (category.og_image) return category.og_image;
-    if (category.image_url) return category.image_url;
-    return DEFAULT_OG_IMAGE;
-  };
+  // Get OG image using utility function - prioritizes og_image > image_url > default
+  const ogImage = getCategoryOgImage(category);
 
   const title = getTitle();
   const description = getDescription();
   const keywords = getKeywords();
-  const ogImage = getOgImage();
 
   // Truncate description to 160 chars for meta tag
   const truncatedDescription = description.length > 160 

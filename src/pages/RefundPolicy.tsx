@@ -1,8 +1,20 @@
 import Layout from "@/components/layout/Layout";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const RefundPolicy = () => {
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/refund-policy"
+        fallbackTitle={{
+          en: "Refund Policy - ST International",
+          bn: "ফেরত নীতি - ST International"
+        }}
+        fallbackDescription={{
+          en: "Learn about our refund and return policy for product purchases.",
+          bn: "পণ্য ক্রয়ের জন্য আমাদের ফেরত এবং রিটার্ন নীতি সম্পর্কে জানুন।"
+        }}
+      />
       <section className="bg-muted/50 border-b border-border">
         <div className="container-premium py-12 md:py-16">
           <h1 className="text-3xl md:text-4xl font-bold">Refund Policy</h1>

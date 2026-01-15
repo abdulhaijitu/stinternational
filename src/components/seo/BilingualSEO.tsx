@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { 
+  DEFAULT_OG_IMAGE as OG_DEFAULT,
+  ensureAbsoluteUrl,
+  BASE_URL as OG_BASE_URL 
+} from "@/lib/ogImageUtils";
 
 interface SEOConfig {
   title: { en: string; bn: string };
@@ -185,8 +190,8 @@ const defaultSEO: SEOConfig = {
   ogType: "website",
 };
 
-export const BASE_URL = "https://stinternational.lovable.app";
-export const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+export const BASE_URL = OG_BASE_URL;
+export const DEFAULT_OG_IMAGE = OG_DEFAULT;
 
 interface BilingualSEOProps {
   customTitle?: { en: string; bn: string };
@@ -276,6 +281,7 @@ export const BilingualSEO = ({
     updateMetaTag('meta[property="og:image"]', ogImage, true);
     updateMetaTag('meta[property="og:image:width"]', "1200", true);
     updateMetaTag('meta[property="og:image:height"]', "630", true);
+    updateMetaTag('meta[property="og:image:alt"]', title, true);
     updateMetaTag('meta[property="og:type"]', ogType === "product" ? "product" : "website", true);
     updateMetaTag('meta[property="og:site_name"]', "ST International", true);
     updateMetaTag('meta[property="og:locale"]', language === "bn" ? "bn_BD" : "en_US", true);
@@ -286,6 +292,7 @@ export const BilingualSEO = ({
     updateMetaTag('meta[name="twitter:title"]', title);
     updateMetaTag('meta[name="twitter:description"]', description);
     updateMetaTag('meta[name="twitter:image"]', ogImage);
+    updateMetaTag('meta[name="twitter:image:alt"]', title);
     updateMetaTag('meta[name="twitter:site"]', "@STInternational");
 
     // Update HTML lang attribute

@@ -3,6 +3,7 @@ import { CheckCircle, Users, Award, Building2, Target, ArrowRight } from "lucide
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const About = () => {
   const { t, language } = useLanguage();
@@ -42,6 +43,17 @@ const About = () => {
 
   return (
     <Layout>
+      <PageSEO 
+        pageSlug="/about"
+        fallbackTitle={{
+          en: "About Us - ST International | Scientific Equipment Supplier Since 2005",
+          bn: "আমাদের সম্পর্কে - ST International | ২০০৫ সাল থেকে বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী"
+        }}
+        fallbackDescription={{
+          en: "Learn about ST International's 19+ years of experience as Bangladesh's trusted supplier of scientific and industrial equipment.",
+          bn: "বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী হিসেবে ST International-এর ১৯+ বছরের অভিজ্ঞতা সম্পর্কে জানুন।"
+        }}
+      />
       {/* Hero Section */}
       <section className="hero-gradient text-primary-foreground">
         <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
