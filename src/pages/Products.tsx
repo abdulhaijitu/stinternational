@@ -40,6 +40,7 @@ import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { cn } from "@/lib/utils";
+import heroDefault from "@/assets/fallbacks/hero-default.jpg";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
@@ -423,9 +424,20 @@ const Products = () => {
             maxItems={maxItems}
           />
 
-      {/* Page Header */}
-      <section className="bg-muted/40 border-b">
-        <div className="container-premium py-8 md:py-10">
+      {/* Page Header with Hero Image */}
+      <section className="relative border-b border-border overflow-hidden">
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={heroDefault}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/70" />
+        </div>
+        
+        <div className="container-premium py-8 md:py-10 relative z-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-4">{t.products.allProducts}</h1>
 
           {/* Search Bar */}
@@ -436,7 +448,7 @@ const Products = () => {
                 placeholder={t.products.searchProducts}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 h-11 bg-background"
+                className="pl-10 h-11 bg-background/80 backdrop-blur-sm"
               />
             </div>
             <Button type="submit" size="lg" className="h-11">
