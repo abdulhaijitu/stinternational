@@ -817,6 +817,7 @@ export type Database = {
         | "super_admin"
         | "accounts"
         | "sales"
+        | "employee"
       order_status:
         | "pending_payment"
         | "paid"
@@ -959,6 +960,7 @@ export const Constants = {
         "super_admin",
         "accounts",
         "sales",
+        "employee",
       ],
       order_status: [
         "pending_payment",

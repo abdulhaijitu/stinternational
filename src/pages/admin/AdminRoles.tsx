@@ -23,9 +23,9 @@ interface RolePermission {
   permission_id: string;
 }
 
-type AppRole = "super_admin" | "admin" | "accounts" | "sales" | "user" | "moderator";
+type AppRole = "super_admin" | "admin" | "accounts" | "sales" | "employee" | "user" | "moderator";
 
-const ROLES: AppRole[] = ["super_admin", "admin", "accounts", "sales"];
+const ROLES: AppRole[] = ["super_admin", "admin", "accounts", "sales", "employee"];
 
 const AdminRoles = () => {
   const { t, language } = useAdminLanguage();
@@ -102,6 +102,7 @@ const AdminRoles = () => {
       admin: t.roles.admin,
       accounts: t.roles.accounts,
       sales: t.roles.sales,
+      employee: t.roles.employee || "Employee",
       user: t.roles.user,
       moderator: t.roles.moderator,
     };
@@ -115,10 +116,11 @@ const AdminRoles = () => {
 
   const getRoleBadgeColor = (role: AppRole) => {
     switch (role) {
-      case "super_admin": return "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400";
+      case "super_admin": return "bg-primary/10 text-primary border-primary/20";
       case "admin": return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400";
       case "accounts": return "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400";
       case "sales": return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400";
+      case "employee": return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400";
       default: return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300";
     }
   };
@@ -166,7 +168,7 @@ const AdminRoles = () => {
               <ScrollArea className="h-[600px]">
                 <div className="min-w-[800px]">
                   {/* Table Header */}
-                  <div className="grid grid-cols-[200px_repeat(4,1fr)] border-b border-border bg-muted/50 sticky top-0 z-10">
+                  <div className="grid grid-cols-[200px_repeat(5,1fr)] border-b border-border bg-muted/50 sticky top-0 z-10">
                     <div className="p-4 font-semibold text-sm">{t.roles.module}</div>
                     {ROLES.map(role => (
                       <div key={role} className="p-4 text-center">
@@ -181,7 +183,7 @@ const AdminRoles = () => {
                   {modules.map(module => (
                     <div key={module} className="border-b border-border last:border-b-0">
                       {/* Module Header */}
-                      <div className="grid grid-cols-[200px_repeat(4,1fr)] bg-muted/30">
+                      <div className="grid grid-cols-[200px_repeat(5,1fr)] bg-muted/30">
                         <div className="p-4 font-semibold capitalize text-sm">
                           {module.replace(/_/g, " ")}
                         </div>
@@ -194,7 +196,7 @@ const AdminRoles = () => {
                       {groupedPermissions[module].map(permission => (
                         <div 
                           key={permission.id} 
-                          className="grid grid-cols-[200px_repeat(4,1fr)] hover:bg-muted/20 transition-colors"
+                          className="grid grid-cols-[200px_repeat(5,1fr)] hover:bg-muted/20 transition-colors"
                         >
                           <div className="p-4 pl-8 text-sm">
                             <div className="font-medium capitalize">

@@ -14,8 +14,10 @@ import {
   Trash2,
   Filter,
   Mail,
-  Info
+  Info,
+  UserPlus as UserPlusIcon
 } from "lucide-react";
+import AddUserDialog from "@/components/admin/AddUserDialog";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
@@ -70,7 +72,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-type AppRole = "super_admin" | "admin" | "accounts" | "sales";
+type AppRole = "super_admin" | "admin" | "accounts" | "sales" | "employee";
 
 interface UserWithRole {
   id: string;
@@ -82,7 +84,7 @@ interface UserWithRole {
   role: AppRole | null;
 }
 
-const ADMIN_ROLES: AppRole[] = ["super_admin", "admin", "accounts", "sales"];
+const ADMIN_ROLES: AppRole[] = ["super_admin", "admin", "accounts", "sales", "employee"];
 
 const AdminUsers = () => {
   const { t, language } = useAdminLanguage();
@@ -103,6 +105,7 @@ const AdminUsers = () => {
   const [processing, setProcessing] = useState(false);
   const [editRole, setEditRole] = useState<AppRole | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -166,6 +169,7 @@ const AdminUsers = () => {
       admin: 0,
       accounts: 0,
       sales: 0,
+      employee: 0,
     };
     users.forEach(user => {
       if (user.role && counts[user.role] !== undefined) {
@@ -182,6 +186,7 @@ const AdminUsers = () => {
       admin: t.roles.admin,
       accounts: t.roles.accounts,
       sales: t.roles.sales,
+      employee: t.users.employee || "Employee",
     };
     return labels[role] || role;
   };
@@ -193,6 +198,7 @@ const AdminUsers = () => {
       case "admin": return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
       case "accounts": return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
       case "sales": return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+      case "employee": return "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20";
       default: return "bg-muted text-muted-foreground border-border";
     }
   };
@@ -366,24 +372,18 @@ const AdminUsers = () => {
           title={t.users.title} 
           subtitle={t.users.subtitle}
         >
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Button disabled className="gap-2 cursor-not-allowed opacity-60">
-                    <UserPlus className="h-4 w-4" />
-                    {t.users.addUser}
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 mt-0.5 shrink-0" />
-                  <span>{t.users.inviteViaEmail}</span>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button onClick={() => setAddUserDialogOpen(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            {t.users.addUser}
+          </Button>
+        </AdminPageHeader>
+
+        {/* Add User Dialog */}
+        <AddUserDialog
+          open={addUserDialogOpen}
+          onOpenChange={setAddUserDialogOpen}
+          onUserAdded={fetchUsers}
+        />
         </AdminPageHeader>
 
         {/* Stats Cards - Real data binding */}
