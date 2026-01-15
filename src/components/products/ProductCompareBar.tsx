@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DBProduct } from "@/hooks/useProducts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 interface ProductCompareBarProps {
   products: DBProduct[];
@@ -48,7 +49,12 @@ const ProductCompareBar = ({
                 >
                   <div className="w-12 h-12 rounded-md border border-border bg-muted/30 overflow-hidden">
                     <img
-                      src={product.image_url || product.images?.[0] || "/placeholder.svg"}
+                      src={getProductImageWithFallback(
+                        product.image_url,
+                        product.images,
+                        product.category?.slug,
+                        product.category?.name
+                      )}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />

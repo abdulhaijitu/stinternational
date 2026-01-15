@@ -9,6 +9,7 @@ import WishlistButton from "./WishlistButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { cn } from "@/lib/utils";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 interface RecentlyViewedProductsProps {
   excludeProductId?: string;
@@ -70,7 +71,12 @@ const RecentlyViewedProducts = ({
         {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
           {products.map((product) => {
-            const imageUrl = product.image_url || "/placeholder.svg";
+            const imageUrl = getProductImageWithFallback(
+              product.image_url,
+              null,
+              product.category?.slug,
+              product.category?.name
+            );
             const discount = product.compare_price
               ? Math.round((1 - product.price / product.compare_price) * 100)
               : 0;

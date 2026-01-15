@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { formatPrice } from "@/lib/formatPrice";
 import { cn } from "@/lib/utils";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 interface ProductCompareModalProps {
   products: DBProduct[];
@@ -78,7 +79,12 @@ const ProductCompareModal = ({
                     <div className="text-center">
                       <div className="aspect-square w-full max-w-[160px] mx-auto mb-3 rounded-lg border border-border bg-muted/30 overflow-hidden">
                         <img
-                          src={product.image_url || product.images?.[0] || "/placeholder.svg"}
+                          src={getProductImageWithFallback(
+                            product.image_url,
+                            product.images,
+                            product.category?.slug,
+                            product.category?.name
+                          )}
                           alt={fields.name}
                           className="w-full h-full object-cover"
                         />
