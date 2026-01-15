@@ -34,6 +34,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
 import IconPicker from "@/components/admin/IconPicker";
 import SEOFieldsSection from "@/components/admin/SEOFieldsSection";
+import { SEOPreviewCard } from "@/components/admin/SEOPreviewCard";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -1217,6 +1218,14 @@ const AdminProductEditor = () => {
             onOgImageChange={(value) => handleFieldChange("og_image", value)}
             language={language}
             entityType="product"
+          />
+
+          {/* SEO Preview */}
+          <SEOPreviewCard
+            title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || formData.name)}
+            description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : (formData.seo_description || formData.short_description)}
+            url={`https://stinternational.lovable.app/products/${formData.slug}`}
+            language={language}
           />
 
           {/* Actions */}
