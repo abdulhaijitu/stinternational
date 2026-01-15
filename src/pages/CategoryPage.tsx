@@ -18,6 +18,7 @@ import { useProductCompare } from "@/hooks/useProductCompare";
 import { useProductsByCategory } from "@/hooks/useCategoryProducts";
 import { useCategoryBySlug, useParentCategoryWithSubs, useSubCategoryBySlug } from "@/hooks/useCategories";
 import { getCategoryIcon } from "@/lib/categoryIcons";
+import { getCategoryHeroImage } from "@/lib/productFallbackImages";
 import { cn } from "@/lib/utils";
 
 const CategoryPage = () => {
@@ -169,12 +170,23 @@ const CategoryPage = () => {
           </div>
         </div>
 
-        {/* Page Header */}
-        <section className="bg-muted/30 border-b border-border">
-          <div className={`container-premium py-8 md:py-12 ${fontClass}`}>
+        {/* Page Header with Hero Image */}
+        <section className="relative border-b border-border overflow-hidden">
+          {/* Hero Background Image */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src={getCategoryHeroImage(parentData.slug, parentData.name, parentData.parent_group)} 
+              alt=""
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
+          </div>
+          
+          <div className={`container-premium py-10 md:py-16 relative z-10 ${fontClass}`}>
             <div className="flex items-start gap-4">
               {ParentIcon && (
-                <div className="w-16 h-16 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0">
+                <div className="w-16 h-16 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0 shadow-lg">
                   <ParentIcon className="h-8 w-8" />
                 </div>
               )}
@@ -183,7 +195,7 @@ const CategoryPage = () => {
                   <h1 className="text-2xl md:text-3xl font-bold">
                     {parentCatFields.name}
                   </h1>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs bg-background/50 backdrop-blur-sm">
                     <FolderOpen className="h-3 w-3 mr-1" />
                     Parent Category
                   </Badge>
@@ -339,12 +351,23 @@ const CategoryPage = () => {
         </div>
       </div>
 
-      {/* Page Header */}
-      <section className="bg-muted/30 border-b border-border">
-        <div className={`container-premium py-8 md:py-12 ${fontClass}`}>
+      {/* Page Header with Hero Image */}
+      <section className="relative border-b border-border overflow-hidden">
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={getCategoryHeroImage(activeCategory?.slug, activeCategory?.name, activeCategory?.parent_group)} 
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
+        </div>
+        
+        <div className={`container-premium py-10 md:py-16 relative z-10 ${fontClass}`}>
           <div className="flex items-start gap-4">
             {CategoryIcon && (
-              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0 shadow-lg">
                 <CategoryIcon className="h-8 w-8" />
               </div>
             )}
