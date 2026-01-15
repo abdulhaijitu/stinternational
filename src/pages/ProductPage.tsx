@@ -22,6 +22,7 @@ import RelatedProducts from "@/components/products/RelatedProducts";
 import ProductImageGallery from "@/components/products/ProductImageGallery";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import RichTextContent from "@/components/products/RichTextContent";
+import ProductSEO from "@/components/seo/ProductSEO";
 import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { formatPrice } from "@/lib/formatPrice";
@@ -120,6 +121,18 @@ const ProductPage = () => {
     );
   }
 
+  // Render SEO component
+  const renderSEO = () => {
+    if (!product) return null;
+    return (
+      <ProductSEO
+        product={product}
+        category={product.category}
+        language={language}
+      />
+    );
+  };
+
   if (error || !product || !productFields) {
     return (
       <Layout>
@@ -159,6 +172,9 @@ const ProductPage = () => {
 
   return (
     <Layout>
+      {/* SEO */}
+      {renderSEO()}
+      
       {/* Breadcrumb with full hierarchy */}
       <div className="bg-muted/30 border-b border-border">
         <div className="container-premium py-3">
