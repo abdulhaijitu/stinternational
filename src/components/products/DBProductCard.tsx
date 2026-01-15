@@ -12,6 +12,7 @@ import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -60,7 +61,12 @@ const DBProductCard = ({
     }
   };
 
-  const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
+  const imageUrl = getProductImageWithFallback(
+    product.image_url,
+    product.images,
+    product.category?.slug,
+    product.category?.name
+  );
   const discountPercent = product.compare_price 
     ? Math.round((1 - product.price / product.compare_price) * 100)
     : 0;

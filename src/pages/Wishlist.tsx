@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 const Wishlist = () => {
   const { user } = useAuth();
@@ -103,7 +104,12 @@ const Wishlist = () => {
                 const product = item.product;
                 if (!product) return null;
 
-                const imageUrl = product.image_url || product.images?.[0] || "/placeholder.svg";
+                const imageUrl = getProductImageWithFallback(
+                  product.image_url,
+                  product.images,
+                  product.category?.slug,
+                  product.category?.name
+                );
                 const discount = product.compare_price
                   ? Math.round((1 - product.price / product.compare_price) * 100)
                   : 0;

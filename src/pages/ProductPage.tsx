@@ -31,6 +31,7 @@ import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useActiveCategories } from "@/hooks/useCategories";
+import { getProductFallbackImage } from "@/lib/productFallbackImages";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -253,6 +254,7 @@ const ProductPage = () => {
                 images={product.images || []}
                 mainImage={product.image_url}
                 productName={productFields.name}
+                fallbackImage={getProductFallbackImage(product.category?.slug, product.category?.name)}
               />
             </div>
 

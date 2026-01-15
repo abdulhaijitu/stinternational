@@ -8,6 +8,7 @@ import { DBProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
+import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
 interface ProductQuickViewProps {
   product: DBProduct | null;
@@ -22,11 +23,18 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
 
   if (!product) return null;
 
+  const fallbackImage = getProductImageWithFallback(
+    product.image_url,
+    product.images,
+    product.category?.slug,
+    product.category?.name
+  );
+  
   const images = product.images?.length > 0 
-    ? product.images 
-    : product.image_url 
+    ? product.images.filter(img => img && !img.includes('placeholder'))
+    : product.image_url && !product.image_url.includes('placeholder')
       ? [product.image_url] 
-      : ["/placeholder.svg"];
+      : [fallbackImage];
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {

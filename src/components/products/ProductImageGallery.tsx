@@ -7,26 +7,33 @@ import {
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
+import { DEFAULT_PRODUCT_IMAGE } from "@/lib/productFallbackImages";
 
 interface ProductImageGalleryProps {
   images: string[];
   mainImage?: string | null;
   productName: string;
+  fallbackImage?: string;
 }
 
-const ProductImageGallery = ({ images, mainImage, productName }: ProductImageGalleryProps) => {
-  // Combine main image with gallery images, removing duplicates
-  const allImages = mainImage 
-    ? [mainImage, ...images.filter(img => img !== mainImage)]
-    : images.length > 0 
-      ? images 
-      : ["/placeholder.svg"];
+const ProductImageGallery = ({ images, mainImage, productName, fallbackImage }: ProductImageGalleryProps) => {
+  const defaultFallback = fallbackImage || DEFAULT_PRODUCT_IMAGE;
+  
+  // Filter out placeholder images and combine with main image
+  const validImages = images.filter(img => img && !img.includes('placeholder'));
+  const validMainImage = mainImage && !mainImage.includes('placeholder') ? mainImage : null;
+  
+  const allImages = validMainImage 
+    ? [validMainImage, ...validImages.filter(img => img !== validMainImage)]
+    : validImages.length > 0 
+      ? validImages 
+      : [defaultFallback];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  const currentImage = allImages[selectedIndex] || "/placeholder.svg";
+  const currentImage = allImages[selectedIndex] || defaultFallback;
 
   const goToPrevious = useCallback(() => {
     setSelectedIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
