@@ -3,6 +3,7 @@ import { ArrowRight, Loader2, ChevronRight, FolderOpen } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { useActiveCategories, DBCategory } from "@/hooks/useCategories";
 import { getCategoryIcon } from "@/lib/categoryIcons";
+import { getCategoryHeroImage } from "@/lib/productFallbackImages";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import heroDefault from "@/assets/fallbacks/hero-default.jpg";
 
 interface ParentWithSubs extends DBCategory {
   subCategories: DBCategory[];
@@ -87,9 +89,20 @@ const Categories = () => {
 
   return (
     <Layout>
-      {/* Page Header */}
-      <section className="bg-muted/50 border-b border-border">
-        <div className={`container-premium py-12 md:py-16 ${fontClass}`}>
+      {/* Page Header with Hero Image */}
+      <section className="relative border-b border-border overflow-hidden">
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={heroDefault}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/70" />
+        </div>
+        
+        <div className={`container-premium py-12 md:py-16 relative z-10 ${fontClass}`}>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             {language === "bn" ? "পণ্য ক্যাটাগরি" : "Product Categories"}
           </h1>
@@ -125,11 +138,20 @@ const Categories = () => {
 
                 return (
                   <div key={parent.id} className="bg-card border border-border rounded-lg overflow-hidden">
-                    {/* Parent Category Header */}
+                    {/* Parent Category Header with Background */}
                     <Collapsible open={isExpanded} onOpenChange={() => toggleParent(parent.id)}>
                       <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-                          <div className="flex items-center gap-4">
+                        <div className="relative flex items-center justify-between p-6 hover:bg-muted/50 transition-colors cursor-pointer overflow-hidden">
+                          {/* Subtle background image */}
+                          <div className="absolute inset-0 z-0 opacity-10">
+                            <img 
+                              src={getCategoryHeroImage(parent.slug, parent.name, parent.parent_group)} 
+                              alt=""
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="relative z-10 flex items-center gap-4">
                             <div className="w-14 h-14 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
                               <ParentIcon className="h-7 w-7" />
                             </div>
@@ -151,7 +173,7 @@ const Categories = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="relative z-10 flex items-center gap-3">
                             {!hasSubCategories && (
                               <Link
                                 to={`/category/${parent.slug}`}
