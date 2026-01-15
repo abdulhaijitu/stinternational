@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import IconPicker from "@/components/admin/IconPicker";
 import SEOFieldsSection from "@/components/admin/SEOFieldsSection";
+import { SEOPreviewCard } from "@/components/admin/SEOPreviewCard";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
@@ -1063,6 +1064,14 @@ const AdminCategories = () => {
                       onOgImageChange={(value) => setFormData({ ...formData, og_image: value })}
                       language={language}
                       entityType="category"
+                    />
+
+                    {/* SEO Preview */}
+                    <SEOPreviewCard
+                      title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || formData.name)}
+                      description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : (formData.seo_description || formData.description || '')}
+                      url={`https://stinternational.lovable.app/category/${formData.slug}`}
+                      language={language}
                     />
                   </div>
                   <div className="flex-shrink-0 flex justify-end gap-2 pt-4 border-t border-border">

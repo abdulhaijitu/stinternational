@@ -27,6 +27,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { SEOPreviewCard } from "@/components/admin/SEOPreviewCard";
 
 interface PageSEO {
   id: string;
@@ -313,6 +314,14 @@ const AdminPageSEO = () => {
                   folder="seo/pages"
                 />
               </div>
+
+              {/* SEO Preview */}
+              <SEOPreviewCard
+                title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || editingPage?.page_name || '')}
+                description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : formData.seo_description}
+                url={`https://stinternational.lovable.app/${editingPage?.page_slug || ''}`}
+                language={language}
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t">
