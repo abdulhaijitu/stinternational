@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
 import IconPicker from "@/components/admin/IconPicker";
+import SEOFieldsSection from "@/components/admin/SEOFieldsSection";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -1197,6 +1198,26 @@ const AdminProductEditor = () => {
               className={getInputClass()}
             />
           </div>
+
+          {/* SEO Settings */}
+          <SEOFieldsSection
+            seoTitle={formData.seo_title}
+            seoTitleBn={formData.seo_title_bn}
+            seoDescription={formData.seo_description}
+            seoDescriptionBn={formData.seo_description_bn}
+            seoKeywords={formData.seo_keywords}
+            seoKeywordsBn={formData.seo_keywords_bn}
+            ogImage={formData.og_image}
+            onSeoTitleChange={(value) => handleFieldChange("seo_title", value)}
+            onSeoTitleBnChange={(value) => handleFieldChange("seo_title_bn", value)}
+            onSeoDescriptionChange={(value) => handleFieldChange("seo_description", value)}
+            onSeoDescriptionBnChange={(value) => handleFieldChange("seo_description_bn", value)}
+            onSeoKeywordsChange={(value) => handleFieldChange("seo_keywords", value)}
+            onSeoKeywordsBnChange={(value) => handleFieldChange("seo_keywords_bn", value)}
+            onOgImageChange={(value) => handleFieldChange("og_image", value)}
+            language={language}
+            entityType="product"
+          />
 
           {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-border">
