@@ -15,9 +15,12 @@ export interface DBCategory {
 export interface DBProduct {
   id: string;
   name: string;
+  name_bn?: string | null;
   slug: string;
   description: string | null;
+  description_bn?: string | null;
   short_description: string | null;
+  short_description_bn?: string | null;
   price: number;
   compare_price: number | null;
   sku: string | null;
@@ -30,7 +33,28 @@ export interface DBProduct {
   stock_quantity: number;
   is_featured: boolean;
   is_active: boolean;
-  category?: { id: string; name: string; name_bn?: string; slug: string; description?: string; description_bn?: string; parent_id: string | null } | null;
+  // SEO fields
+  seo_title?: string | null;
+  seo_title_bn?: string | null;
+  seo_description?: string | null;
+  seo_description_bn?: string | null;
+  seo_keywords?: string | null;
+  seo_keywords_bn?: string | null;
+  og_image?: string | null;
+  category?: { 
+    id: string; 
+    name: string; 
+    name_bn?: string | null; 
+    slug: string; 
+    description?: string | null; 
+    description_bn?: string | null; 
+    parent_id: string | null;
+    // SEO fields on category
+    seo_title?: string | null;
+    seo_title_bn?: string | null;
+    seo_description?: string | null;
+    seo_description_bn?: string | null;
+  } | null;
 }
 
 export const useCategories = () => {

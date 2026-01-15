@@ -54,8 +54,15 @@ export type Database = {
           is_parent: boolean | null
           name: string
           name_bn: string | null
+          og_image: string | null
           parent_group: string | null
           parent_id: string | null
+          seo_description: string | null
+          seo_description_bn: string | null
+          seo_keywords: string | null
+          seo_keywords_bn: string | null
+          seo_title: string | null
+          seo_title_bn: string | null
           slug: string
           updated_at: string
         }
@@ -71,8 +78,15 @@ export type Database = {
           is_parent?: boolean | null
           name: string
           name_bn?: string | null
+          og_image?: string | null
           parent_group?: string | null
           parent_id?: string | null
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
           slug: string
           updated_at?: string
         }
@@ -88,8 +102,15 @@ export type Database = {
           is_parent?: boolean | null
           name?: string
           name_bn?: string | null
+          og_image?: string | null
           parent_group?: string | null
           parent_id?: string | null
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
           slug?: string
           updated_at?: string
         }
@@ -350,7 +371,14 @@ export type Database = {
           is_featured: boolean | null
           name: string
           name_bn: string | null
+          og_image: string | null
           price: number
+          seo_description: string | null
+          seo_description_bn: string | null
+          seo_keywords: string | null
+          seo_keywords_bn: string | null
+          seo_title: string | null
+          seo_title_bn: string | null
           short_description: string | null
           short_description_bn: string | null
           sku: string | null
@@ -374,7 +402,14 @@ export type Database = {
           is_featured?: boolean | null
           name: string
           name_bn?: string | null
+          og_image?: string | null
           price: number
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
           short_description?: string | null
           short_description_bn?: string | null
           sku?: string | null
@@ -398,7 +433,14 @@ export type Database = {
           is_featured?: boolean | null
           name?: string
           name_bn?: string | null
+          og_image?: string | null
           price?: number
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
           short_description?: string | null
           short_description_bn?: string | null
           sku?: string | null

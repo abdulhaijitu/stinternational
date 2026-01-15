@@ -7,6 +7,7 @@ import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
 import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
+import CategorySEO from "@/components/seo/CategorySEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -142,6 +143,13 @@ const CategoryPage = () => {
 
     return (
       <>
+        {/* Category SEO */}
+        <CategorySEO
+          category={parentData}
+          productCount={subs.length}
+          language={language}
+        />
+        
         {/* Breadcrumb */}
         <div className="bg-muted/50 border-b border-border">
           <div className={`container-premium py-4 ${fontClass}`}>
@@ -273,6 +281,16 @@ const CategoryPage = () => {
 
   return (
     <Layout>
+      {/* Category SEO */}
+      {activeCategory && (
+        <CategorySEO
+          category={activeCategory}
+          parentCategory={parentCategory || undefined}
+          productCount={products.length}
+          language={language}
+        />
+      )}
+      
       {/* Compare Modal */}
       <ProductCompareModal
         products={compareProducts}

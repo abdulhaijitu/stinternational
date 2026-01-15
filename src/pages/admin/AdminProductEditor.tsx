@@ -75,6 +75,14 @@ const initialFormData = {
   is_active: true,
   specifications: "",
   features: "",
+  // SEO fields
+  seo_title: "",
+  seo_title_bn: "",
+  seo_description: "",
+  seo_description_bn: "",
+  seo_keywords: "",
+  seo_keywords_bn: "",
+  og_image: "",
 };
 
 const AdminProductEditor = () => {
@@ -316,6 +324,14 @@ const AdminProductEditor = () => {
         is_active: data.is_active,
         specifications: data.specifications ? JSON.stringify(data.specifications, null, 2) : "",
         features: data.features ? data.features.join("\n") : "",
+        // SEO fields
+        seo_title: data.seo_title || "",
+        seo_title_bn: data.seo_title_bn || "",
+        seo_description: data.seo_description || "",
+        seo_description_bn: data.seo_description_bn || "",
+        seo_keywords: data.seo_keywords || "",
+        seo_keywords_bn: data.seo_keywords_bn || "",
+        og_image: data.og_image || "",
       };
 
       setFormData(loadedData);
@@ -339,8 +355,9 @@ const AdminProductEditor = () => {
   const handleRestoreDraft = useCallback(() => {
     const draftData = loadDraft();
     if (draftData) {
-      // Handle backwards compatibility - add parent_category_id if missing
+      // Handle backwards compatibility - add missing fields
       const restoredData = {
+        ...initialFormData,
         ...draftData,
         parent_category_id: draftData.parent_category_id || "",
       };
@@ -394,7 +411,7 @@ const AdminProductEditor = () => {
       name: formData.name.trim(),
       slug: formData.slug.trim(),
       price: parseFloat(formData.price),
-      category_id: formData.category_id || null, // Optional - can be null
+      category_id: formData.category_id || null,
       image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
       images: formData.images,
       in_stock: formData.in_stock,
@@ -405,12 +422,19 @@ const AdminProductEditor = () => {
       features,
       sku: formData.sku.trim() || null,
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
-      // Include all language fields
       name_bn: formData.name_bn.trim() || null,
       description: formData.description.trim() || null,
       description_bn: formData.description_bn.trim() || null,
       short_description: formData.short_description.trim() || null,
       short_description_bn: formData.short_description_bn.trim() || null,
+      // SEO fields
+      seo_title: formData.seo_title.trim() || null,
+      seo_title_bn: formData.seo_title_bn.trim() || null,
+      seo_description: formData.seo_description.trim() || null,
+      seo_description_bn: formData.seo_description_bn.trim() || null,
+      seo_keywords: formData.seo_keywords.trim() || null,
+      seo_keywords_bn: formData.seo_keywords_bn.trim() || null,
+      og_image: formData.og_image.trim() || null,
     };
 
     setSaving(true);
