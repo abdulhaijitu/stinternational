@@ -331,6 +331,54 @@ export type Database = {
         }
         Relationships: []
       }
+      page_seo: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          og_image: string | null
+          page_name: string
+          page_slug: string
+          seo_description: string | null
+          seo_description_bn: string | null
+          seo_keywords: string | null
+          seo_keywords_bn: string | null
+          seo_title: string | null
+          seo_title_bn: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          og_image?: string | null
+          page_name: string
+          page_slug: string
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          og_image?: string | null
+          page_name?: string
+          page_slug?: string
+          seo_description?: string | null
+          seo_description_bn?: string | null
+          seo_keywords?: string | null
+          seo_keywords_bn?: string | null
+          seo_title?: string | null
+          seo_title_bn?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       permissions: {
         Row: {
           action: string
