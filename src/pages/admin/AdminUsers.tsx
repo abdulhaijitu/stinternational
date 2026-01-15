@@ -384,7 +384,6 @@ const AdminUsers = () => {
           onOpenChange={setAddUserDialogOpen}
           onUserAdded={fetchUsers}
         />
-        </AdminPageHeader>
 
         {/* Stats Cards - Real data binding */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
