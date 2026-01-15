@@ -45,6 +45,8 @@ import AdminRoles from "./pages/admin/AdminRoles";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminOrderCreate from "./pages/admin/AdminOrderCreate";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPageSEO from "./pages/admin/AdminPageSEO";
+import AdminSEOHealth from "./pages/admin/AdminSEOHealth";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +102,8 @@ const App = () => (
                         <Route path="/admin/ux-insights" element={<AdminUXInsights />} />
                         <Route path="/admin/roles" element={<AdminRoles />} />
                         <Route path="/admin/users" element={<AdminUsers />} />
+                        <Route path="/admin/page-seo" element={<AdminPageSEO />} />
+                        <Route path="/admin/seo-health" element={<AdminSEOHealth />} />
                         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>

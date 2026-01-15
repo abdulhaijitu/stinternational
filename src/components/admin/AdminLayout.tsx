@@ -17,7 +17,9 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
-  Users
+  Users,
+  Search,
+  Activity
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -98,6 +100,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/quotes", label: t.nav.quotes, icon: FileText, module: "quotes", group: "sales", badgeKey: "pendingQuotes" },
     { href: "/admin/logos", label: t.nav.logos, icon: Building2, module: "logos", group: "content" },
     { href: "/admin/testimonials", label: t.nav.testimonials, icon: Quote, module: "testimonials", group: "content" },
+    { href: "/admin/page-seo", label: language === "bn" ? "পেজ SEO" : "Page SEO", icon: Search, module: "seo", group: "seo" },
+    { href: "/admin/seo-health", label: language === "bn" ? "SEO স্বাস্থ্য" : "SEO Health", icon: Activity, module: "seo", group: "seo" },
     { href: "/admin/ux-insights", label: t.nav.uxInsights, icon: BarChart3, module: "ux-insights", group: "analytics" },
     { href: "/admin/users", label: language === "bn" ? "ব্যবহারকারী" : "Users", icon: Users, module: "users", group: "settings" },
     { href: "/admin/roles", label: t.nav.roles, icon: Shield, module: "roles", group: "settings" },
@@ -109,6 +113,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     catalog: { en: "Catalog", bn: "ক্যাটালগ" },
     sales: { en: "Sales", bn: "বিক্রয়" },
     content: { en: "Content", bn: "কন্টেন্ট" },
+    seo: { en: "SEO", bn: "SEO" },
     analytics: { en: "Analytics", bn: "অ্যানালিটিক্স" },
     settings: { en: "Settings", bn: "সেটিংস" },
   };
@@ -119,6 +124,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (item.module === "dashboard") return true;
     if (item.module === "roles") return isSuperAdmin;
     if (item.module === "users") return isSuperAdmin;
+    if (item.module === "seo") return isSuperAdmin || canAccessModule("seo");
     return canAccessModule(item.module);
   });
 
