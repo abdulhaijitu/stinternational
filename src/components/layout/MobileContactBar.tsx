@@ -30,10 +30,12 @@ const MobileContactBar = () => {
     },
   ];
 
+  // Contact bar sits at 64px (above bottom nav)
+  // Height: 48px
   return (
     <div 
       className={cn(
-        "fixed bottom-[64px] left-0 right-0 z-40 lg:hidden",
+        "fixed bottom-[64px] left-0 right-0 z-[42] lg:hidden",
         "bg-background/95 backdrop-blur-md border-t border-border",
         "safe-area-bottom"
       )}

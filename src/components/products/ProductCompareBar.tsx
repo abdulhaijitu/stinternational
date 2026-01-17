@@ -2,6 +2,7 @@ import { X, GitCompare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DBProduct } from "@/hooks/useProducts";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { getProductImageWithFallback } from "@/lib/productFallbackImages";
 
@@ -13,6 +14,14 @@ interface ProductCompareBarProps {
   maxItems: number;
 }
 
+/**
+ * Product Compare Bar
+ * Z-Index: 41 (below Mobile Bottom Nav and Contact Bar)
+ * 
+ * Positioning:
+ * - Desktop: Fixed at bottom
+ * - Mobile: Above bottom nav + contact bar (64 + 48 = 112px)
+ */
 const ProductCompareBar = ({
   products,
   onRemove,
@@ -21,16 +30,23 @@ const ProductCompareBar = ({
   maxItems,
 }: ProductCompareBarProps) => {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
 
   if (products.length === 0) return null;
 
+  // Mobile: position above bottom nav (64px) + contact bar (48px) = 112px
+  const bottomPosition = isMobile ? 112 : 0;
+
   return (
-    <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-40",
-      "bg-background/95 backdrop-blur-md border-t border-border",
-      "shadow-lg shadow-foreground/5",
-      "animate-fade-in"
-    )}>
+    <div 
+      style={{ bottom: bottomPosition }}
+      className={cn(
+        "fixed left-0 right-0 z-[41]",
+        "bg-background/95 backdrop-blur-md border-t border-border",
+        "shadow-lg shadow-foreground/5",
+        "animate-fade-in"
+      )}
+    >
       <div className="container-premium py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Product Thumbnails */}
