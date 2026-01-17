@@ -31,6 +31,7 @@ const ROLES: AppRole[] = ["super_admin", "admin", "accounts", "sales", "employee
 const MODULE_STRUCTURE = [
   {
     group: "Dashboard",
+    groupBn: "ড্যাশবোর্ড",
     modules: [
       { key: "dashboard", label: "Dashboard", labelBn: "ড্যাশবোর্ড" }
     ]
@@ -70,6 +71,7 @@ const MODULE_STRUCTURE = [
     group: "Settings",
     groupBn: "সেটিংস",
     modules: [
+      { key: "users", label: "User Management", labelBn: "ব্যবহারকারী ম্যানেজমেন্ট" },
       { key: "roles", label: "Roles & Permissions", labelBn: "রোল ও পারমিশন" }
     ]
   }
