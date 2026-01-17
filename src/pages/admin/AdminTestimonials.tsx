@@ -28,14 +28,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Star, MessageSquare, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Star, MessageSquare, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { BulkDeleteDialog } from "@/components/admin/BulkDeleteDialog";
 import { SortableRow } from "@/components/admin/SortableRow";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface Testimonial {
   id: string;
@@ -51,6 +53,7 @@ interface Testimonial {
 
 const AdminTestimonials = () => {
   const { language, t } = useAdminLanguage();
+  const { hasPermission, isSuperAdmin } = useAdmin();
   const isBangla = language === "bn";
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -69,6 +72,12 @@ const AdminTestimonials = () => {
     rating: 5,
     is_active: true,
   });
+
+  // Permission checks - use "edit" to match DB action names
+  const canCreate = isSuperAdmin || hasPermission("testimonials", "create");
+  const canEdit = isSuperAdmin || hasPermission("testimonials", "edit");
+  const canDelete = isSuperAdmin || hasPermission("testimonials", "delete");
+  const canReorder = isSuperAdmin || hasPermission("testimonials", "reorder");
 
   const { data: testimonials, isLoading } = useQuery({
     queryKey: ["admin-testimonials"],

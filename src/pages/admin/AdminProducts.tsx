@@ -64,9 +64,9 @@ const AdminProducts = () => {
   const deleteProduct = useDeleteProduct();
   const invalidateProducts = useInvalidateProducts();
   
-  // Permission checks
+  // Permission checks - use "edit" not "update" to match DB
   const canCreate = isSuperAdmin || hasPermission("products", "create");
-  const canEdit = isSuperAdmin || hasPermission("products", "update");
+  const canEdit = isSuperAdmin || hasPermission("products", "edit");
   const canDelete = isSuperAdmin || hasPermission("products", "delete");
 
   // Fetch categories with product counts
