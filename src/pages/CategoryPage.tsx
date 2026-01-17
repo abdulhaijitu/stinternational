@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { ChevronRight, FolderOpen } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import DBProductCard from "@/components/products/DBProductCard";
-import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
+import { ProductGridSkeleton } from "@/components/products/ProductGridSkeleton";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
 import GridDensityToggle from "@/components/products/GridDensityToggle";
@@ -17,6 +17,7 @@ import { useGridDensity } from "@/hooks/useGridDensity";
 import { useProductCompare } from "@/hooks/useProductCompare";
 import { useProductsByCategory } from "@/hooks/useCategoryProducts";
 import { useCategoryBySlug, useParentCategoryWithSubs, useSubCategoryBySlug } from "@/hooks/useCategories";
+import { useProductImagePreload } from "@/hooks/useImagePreload";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { getCategoryHeroImage } from "@/lib/productFallbackImages";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,9 @@ const CategoryPage = () => {
   const { data: products = [], isLoading: productsLoading } = useProductsByCategory(
     isParentCategoryPage ? '' : (activeCategory?.id || '')
   );
+
+  // Preload above-the-fold product images (first 4-6 products)
+  useProductImagePreload(products, 6);
 
   // Get bilingual category fields
   const categoryFields = activeCategory ? getCategoryFields({
@@ -426,11 +430,11 @@ const CategoryPage = () => {
 
               {/* Products */}
               {isLoading || productsLoading ? (
-                <div className={gridClasses}>
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
-                  ))}
-                </div>
+                <ProductGridSkeleton 
+                  count={8} 
+                  variant={density === 'compact' ? 'compact' : 'default'}
+                  className={gridClasses}
+                />
               ) : products.length > 0 ? (
                 <div className={gridClasses}>
                   {products.map((product) => (
