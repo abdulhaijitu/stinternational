@@ -29,7 +29,7 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DBProductCard from "@/components/products/DBProductCard";
-import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
+import { ProductGridSkeleton, ProductCardSkeleton } from "@/components/products/ProductGridSkeleton";
 import ProductQuickView from "@/components/products/ProductQuickView";
 import ProductCompareBar from "@/components/products/ProductCompareBar";
 import ProductCompareModal from "@/components/products/ProductCompareModal";
@@ -39,6 +39,7 @@ import { useProductCompare } from "@/hooks/useProductCompare";
 import StickyCategorySidebar from "@/components/products/StickyCategorySidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
+import { useProductImagePreload } from "@/hooks/useImagePreload";
 import { cn } from "@/lib/utils";
 import heroDefault from "@/assets/fallbacks/hero-default.jpg";
 
@@ -193,6 +194,9 @@ const Products = () => {
 
   const totalPages = Math.ceil(filteredProducts.length / perPage);
   const hasMore = infiniteScroll && visibleCount < filteredProducts.length;
+
+  // Preload above-the-fold product images for faster LCP
+  useProductImagePreload(displayedProducts, 6);
 
   // Infinite scroll observer
   useEffect(() => {

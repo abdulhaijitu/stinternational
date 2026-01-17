@@ -21,8 +21,9 @@ import Layout from "@/components/layout/Layout";
 import PageTransition from "@/components/layout/PageTransition";
 import PullToRefresh from "@/components/layout/PullToRefresh";
 import DBProductCard from "@/components/products/DBProductCard";
+import { ProductGridSkeleton } from "@/components/products/ProductGridSkeleton";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useProductImagePreload } from "@/hooks/useImagePreload";
 import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 import QuickRfqForm from "@/components/homepage/QuickRfqForm";
 import Testimonials from "@/components/homepage/Testimonials";
@@ -186,24 +187,16 @@ const stats = {
   ],
 };
 
-// Product card skeleton for loading state
-const ProductSkeleton = () => (
-  <div className="bg-card border border-border rounded-lg overflow-hidden">
-    <Skeleton className="aspect-square w-full" />
-    <div className="p-4 space-y-3">
-      <Skeleton className="h-4 w-20" />
-      <Skeleton className="h-5 w-full" />
-      <Skeleton className="h-4 w-24" />
-      <Skeleton className="h-6 w-28" />
-    </div>
-  </div>
-);
+// Product card skeleton removed - using ProductGridSkeleton component instead
 
 const Index = () => {
   const { groups, isLoading: categoriesLoading } = useActiveCategoriesByGroup();
   const { data: featuredProducts, isLoading: productsLoading } = useFeaturedProducts();
   const { language, t } = useLanguage();
   const queryClient = useQueryClient();
+  
+  // Preload above-the-fold product images for faster LCP
+  useProductImagePreload(featuredProducts, 4);
   
   // Get language-specific content
   const currentTrustSignals = trustSignals[language];
@@ -385,11 +378,10 @@ const Index = () => {
           
           {/* Products Grid - 2 cols mobile, 3 cols tablet, 4 cols desktop */}
           {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {[...Array(8)].map((_, i) => (
-                <ProductSkeleton key={i} />
-              ))}
-            </div>
+            <ProductGridSkeleton 
+              count={8} 
+              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
+            />
           ) : featuredProducts && featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.slice(0, 8).map((product) => (
