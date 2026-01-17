@@ -4,6 +4,7 @@ import BackToTop from "./BackToTop";
 import MobileBottomNav from "./MobileBottomNav";
 import MobileContactBar from "./MobileContactBar";
 import FloatingWhatsApp from "./FloatingWhatsApp";
+import TawkToChat from "./TawkToChat";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ const Layout = ({ children }: LayoutProps) => {
       <MobileContactBar />
       <MobileBottomNav />
       <FloatingWhatsApp />
+      <TawkToChat />
     </div>
   );
 };
