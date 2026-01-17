@@ -73,6 +73,11 @@
         justify-content: center;
         background: #fff;
         z-index: 9999;
+        transition: opacity 0.2s ease-out;
+      }
+      .initial-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
       }
       .initial-loader .spinner {
         width: 32px;
@@ -85,9 +90,6 @@
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
-      /* Hide loader once React mounts */
-      #root:not(:empty) + .initial-loader,
-      .initial-loader:has(~ #root:not(:empty)) { display: none; }
     </style>
   </head>
 

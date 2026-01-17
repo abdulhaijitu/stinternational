@@ -98,6 +98,15 @@ const App = () => {
   useEffect(() => {
     // Temporary boot logs for preview debugging
     console.log("[boot] App mounted");
+    
+    // Hide the initial loader from index.html
+    const loader = document.querySelector('.initial-loader');
+    if (loader) {
+      loader.classList.add('hidden');
+      // Remove from DOM after transition
+      setTimeout(() => loader.remove(), 300);
+    }
+    
     setClientReady(true);
   }, []);
 

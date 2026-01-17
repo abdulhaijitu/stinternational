@@ -24,16 +24,8 @@ type NestedKeyOf<ObjectType extends object> = {
 }[keyof ObjectType & (string | number)];
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    // Get from localStorage on initial load
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'en' || stored === 'bn') {
-        return stored;
-      }
-    }
-    return 'en'; // Default to English
-  });
+  // Default to English first, then hydrate from localStorage in useEffect
+  const [language, setLanguageState] = useState<Language>('en');
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
@@ -65,13 +57,23 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Initialize on mount
+  // Hydrate from localStorage on mount (client-only)
   useEffect(() => {
-    document.documentElement.lang = language;
-    if (language === 'bn') {
+    if (typeof window === 'undefined') return;
+    
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'en' || stored === 'bn') {
+      setLanguageState(stored);
+    }
+    
+    // Apply initial language settings
+    document.documentElement.lang = stored === 'bn' ? 'bn' : 'en';
+    if (stored === 'bn') {
       document.documentElement.classList.add('font-bangla');
+      document.documentElement.classList.remove('font-english');
     } else {
       document.documentElement.classList.add('font-english');
+      document.documentElement.classList.remove('font-bangla');
     }
   }, []);
 
