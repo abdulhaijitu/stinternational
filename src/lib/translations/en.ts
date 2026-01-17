@@ -119,6 +119,7 @@ export const en = {
     noProductsFound: "No products found",
     filterBy: "Filter by",
     sortBy: "Sort by",
+    displayMode: "Display Mode",
     priceRange: "Price Range",
     availability: "Availability",
     // Product card actions

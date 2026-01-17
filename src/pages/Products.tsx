@@ -347,7 +347,7 @@ const Products = () => {
 
       {/* Stock Filter */}
       <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">Availability</h4>
+        <h4 className="text-sm font-semibold text-foreground">{t.products.availability}</h4>
         <label className="flex items-center gap-3 cursor-pointer group">
           <Checkbox
             checked={inStockOnly}
@@ -364,7 +364,7 @@ const Products = () => {
 
       {/* Scroll Mode */}
       <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">Display Mode</h4>
+        <h4 className="text-sm font-semibold text-foreground">{t.products.displayMode}</h4>
         <label className="flex items-center justify-between cursor-pointer">
           <span className="text-sm text-muted-foreground">{t.products.infiniteScroll}</span>
           <Switch
