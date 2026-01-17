@@ -366,9 +366,9 @@ const AdminCategories = () => {
   const { hasPermission, isSuperAdmin } = useAdmin();
   const { t, language } = useAdminLanguage();
   
-  // Permission checks
+  // Permission checks - use "edit" not "update" to match DB
   const canCreate = isSuperAdmin || hasPermission("categories", "create");
-  const canEdit = isSuperAdmin || hasPermission("categories", "update");
+  const canEdit = isSuperAdmin || hasPermission("categories", "edit");
   const canDelete = isSuperAdmin || hasPermission("categories", "delete");
 
   // Helper for text class

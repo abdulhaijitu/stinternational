@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Image } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Image, Lock } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -30,11 +30,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { BulkDeleteDialog } from "@/components/admin/BulkDeleteDialog";
 import { SortableRow } from "@/components/admin/SortableRow";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface InstitutionLogo {
   id: string;
@@ -47,6 +49,7 @@ interface InstitutionLogo {
 
 const AdminLogos = () => {
   const { language, t } = useAdminLanguage();
+  const { hasPermission, isSuperAdmin } = useAdmin();
   const isBangla = language === "bn";
   const [logos, setLogos] = useState<InstitutionLogo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +68,12 @@ const AdminLogos = () => {
     logo_url: "",
     is_active: true,
   });
+
+  // Permission checks - use "edit" to match DB action names
+  const canCreate = isSuperAdmin || hasPermission("logos", "create");
+  const canEdit = isSuperAdmin || hasPermission("logos", "edit");
+  const canDelete = isSuperAdmin || hasPermission("logos", "delete");
+  const canReorder = isSuperAdmin || hasPermission("logos", "reorder");
 
   useEffect(() => {
     fetchLogos();

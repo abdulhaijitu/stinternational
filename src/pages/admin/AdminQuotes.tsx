@@ -49,6 +49,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
 import { useAdminQuotes, AdminQuote, ADMIN_QUOTES_QUERY_KEY } from "@/hooks/useAdminQuotes";
 
@@ -84,12 +85,17 @@ const statusColors: Record<string, string> = {
 
 const AdminQuotes = () => {
   const { language, t } = useAdminLanguage();
+  const { hasPermission, isSuperAdmin } = useAdmin();
   const isBangla = language === "bn";
   const queryClient = useQueryClient();
   const [selectedQuote, setSelectedQuote] = useState<QuoteRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+
+  // Permission checks - use "edit" to match DB action names
+  const canEdit = isSuperAdmin || hasPermission("quotes", "edit");
+  const canDelete = isSuperAdmin || hasPermission("quotes", "delete");
 
   // Get translated labels
   const getCompanyTypeLabel = (type: string) => {

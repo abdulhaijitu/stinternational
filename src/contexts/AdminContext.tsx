@@ -125,11 +125,50 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user]);
 
+  // Fetch permissions when auth loading completes or user changes
   useEffect(() => {
     if (!authLoading) {
       fetchPermissions();
     }
-  }, [authLoading, fetchPermissions]);
+  }, [authLoading, fetchPermissions, user?.id]);
+
+  // Listen for role_permissions changes to refresh permissions in real-time
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('role-permissions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'role_permissions'
+        },
+        () => {
+          // Re-fetch permissions when role_permissions table changes
+          fetchPermissions();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_roles',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          // Re-fetch permissions when user's roles change
+          fetchPermissions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, fetchPermissions]);
 
   const hasRole = useCallback((role: AppRole): boolean => {
     return roles.includes(role) || roles.includes("super_admin");
@@ -146,9 +185,9 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     // Map the nav module to permission module
     const permModule = MODULE_PERMISSION_MAP[module] || module;
     
-    // Check if user has any permission for this module
-    return permissions.some(p => p.module === permModule);
-  }, [roles, permissions]);
+    // User must have at least "view" permission to access the module
+    return hasPermission(permModule, "view");
+  }, [roles, hasPermission]);
 
   const isSuperAdmin = roles.includes("super_admin");
 

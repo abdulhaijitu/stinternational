@@ -127,17 +127,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     settings: { en: "Settings", bn: "সেটিংস" },
   };
 
-  // Filter nav items based on permissions
+  // Filter nav items based on "view" permission - hide completely if no access
   const navItems = allNavItems.filter(item => {
     // Super admin sees everything
     if (isSuperAdmin) return true;
-    // Dashboard is always visible to admin users
-    if (item.module === "dashboard") return true;
-    // Roles and users pages are super admin only
-    if (item.module === "roles" || item.module === "users") return false;
-    // SEO module - check if user has SEO permissions or is admin
-    if (item.module === "seo") return canAccessModule("products") || canAccessModule("categories");
-    // Check module permission
+    // Roles and users pages are super admin only - check permission as well
+    if (item.module === "roles" || item.module === "users") {
+      return canAccessModule(item.module);
+    }
+    // SEO module - check if user has SEO permissions
+    if (item.module === "seo") {
+      return canAccessModule("seo") || canAccessModule("products") || canAccessModule("categories");
+    }
+    // Check module permission - must have "view" permission
     return canAccessModule(item.module);
   });
 
