@@ -129,11 +129,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   // Filter nav items based on permissions
   const navItems = allNavItems.filter(item => {
+    // Super admin sees everything
     if (isSuperAdmin) return true;
+    // Dashboard is always visible to admin users
     if (item.module === "dashboard") return true;
-    if (item.module === "roles") return isSuperAdmin;
-    if (item.module === "users") return isSuperAdmin;
-    if (item.module === "seo") return isSuperAdmin || canAccessModule("seo");
+    // Roles and users pages are super admin only
+    if (item.module === "roles" || item.module === "users") return false;
+    // SEO module - check if user has SEO permissions or is admin
+    if (item.module === "seo") return canAccessModule("products") || canAccessModule("categories");
+    // Check module permission
     return canAccessModule(item.module);
   });
 
@@ -349,7 +353,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   };
 
   const renderNavGroups = () => {
-    const groupOrder = ["main", "catalog", "sales", "content", "analytics", "settings"];
+    const groupOrder = ["main", "catalog", "sales", "content", "seo", "analytics", "settings"];
     let globalIndex = 0;
     
     return groupOrder.map((groupKey, index) => {
