@@ -276,33 +276,9 @@ const HeroSlider = () => {
         />
       </div>
 
-      {/* Background Images with Gradient Overlays */}
-      {heroSlides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={cn(
-            "absolute inset-0 transition-opacity duration-700 ease-in-out",
-            currentSlide === index ? "opacity-100" : "opacity-0"
-          )}
-          aria-hidden="true"
-        >
-          {/* Lazy load non-first slides */}
-          <img
-            src={heroImageMap[slide.visual]}
-            alt=""
-            loading={index === 0 ? "eager" : "lazy"}
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-          {/* Gradient overlay for text readability - left to right gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/95 to-primary/60" />
-          {/* Additional top-bottom gradient for depth */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-transparent to-primary/50" />
-        </div>
-      ))}
-      
-      {/* Subtle accent glow effects */}
+      {/* Background gradient */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px] transform translate-x-1/2" />
+        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[120px] transform translate-x-1/2" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
       </div>
 
@@ -380,11 +356,33 @@ const HeroSlider = () => {
             ))}
           </div>
 
-          {/* Right Column - Stats Cards (optional floating elements) */}
-          <div className="hidden lg:flex relative h-[400px] items-center justify-center" aria-hidden="true">
+          {/* Right Column - Image Container */}
+          <div className="hidden lg:block relative h-[400px]" aria-hidden="true">
+            {/* Image container with rounded corners */}
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-primary-foreground/5 border border-primary-foreground/10">
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={slide.id}
+                  className={cn(
+                    "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                    currentSlide === index ? "opacity-100" : "opacity-0"
+                  )}
+                >
+                  <img
+                    src={heroImageMap[slide.visual]}
+                    alt=""
+                    loading={index === 0 ? "eager" : "lazy"}
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                  />
+                  {/* Subtle gradient overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/30" />
+                </div>
+              ))}
+            </div>
+            
             {/* Stats card - Products count */}
             <div className={cn(
-              "absolute top-16 right-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500",
+              "absolute -top-2 -right-4 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 z-10",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             )}>
               <div className="text-2xl font-bold text-foreground">5000+</div>
@@ -393,7 +391,7 @@ const HeroSlider = () => {
             
             {/* Experience card */}
             <div className={cn(
-              "absolute bottom-16 left-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-150",
+              "absolute -bottom-2 -left-4 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-150 z-10",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
               <div className="text-2xl font-bold text-foreground">19+</div>
