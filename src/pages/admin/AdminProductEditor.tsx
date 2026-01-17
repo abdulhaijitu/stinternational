@@ -294,19 +294,35 @@ const AdminProductEditor = () => {
 
       if (error) throw error;
 
-      // If product has a category_id, find its parent
+      // If product has a category_id, find its parent to properly populate both dropdowns
       let parentCategoryId = "";
+      let subCategoryId = "";
+      
       if (data.category_id) {
         const { data: categoryData } = await supabase
           .from("categories")
-          .select("parent_id")
+          .select("id, parent_id")
           .eq("id", data.category_id)
           .single();
         
-        if (categoryData?.parent_id) {
-          parentCategoryId = categoryData.parent_id;
+        if (categoryData) {
+          if (categoryData.parent_id) {
+            // This is a sub-category - set both parent and sub-category
+            parentCategoryId = categoryData.parent_id;
+            subCategoryId = categoryData.id;
+          } else {
+            // This is a parent category - set only parent category
+            parentCategoryId = categoryData.id;
+            subCategoryId = "";
+          }
         }
       }
+
+      console.log("Fetched product category data:", { 
+        productCategoryId: data.category_id, 
+        parentCategoryId, 
+        subCategoryId 
+      });
 
       const loadedData = {
         name: data.name,
@@ -320,7 +336,7 @@ const AdminProductEditor = () => {
         compare_price: data.compare_price ? String(data.compare_price) : "",
         sku: data.sku || "",
         parent_category_id: parentCategoryId,
-        category_id: data.category_id || "",
+        category_id: subCategoryId,
         image_url: data.image_url || "",
         images: data.images || [],
         in_stock: data.in_stock,
@@ -411,12 +427,20 @@ const AdminProductEditor = () => {
       : [];
 
     // Build product data payload with proper typing
-    // category_id is optional - can be null if no sub-category selected
+    // Determine the final category_id: use sub-category if selected, otherwise use parent category
+    const finalCategoryId = formData.category_id || formData.parent_category_id || null;
+    
+    console.log("Saving with category:", {
+      parent_category_id: formData.parent_category_id,
+      category_id: formData.category_id,
+      finalCategoryId
+    });
+    
     const baseProductData = {
       name: formData.name.trim(),
       slug: formData.slug.trim(),
       price: parseFloat(formData.price),
-      category_id: formData.category_id || null,
+      category_id: finalCategoryId,
       image_url: formData.image_url || (formData.images.length > 0 ? formData.images[0] : null),
       images: formData.images,
       in_stock: formData.in_stock,
