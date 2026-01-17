@@ -356,10 +356,10 @@ const HeroSlider = () => {
             ))}
           </div>
 
-          {/* Right Column - Image Container */}
-          <div className="hidden lg:block relative h-[400px]" aria-hidden="true">
+          {/* Right Column / Mobile Bottom - Image Container */}
+          <div className="relative h-[200px] sm:h-[250px] lg:h-[400px] mt-8 lg:mt-0" aria-hidden="true">
             {/* Image container with rounded corners */}
-            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl">
+            <div className="relative w-full h-full rounded-xl lg:rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl">
               {heroSlides.map((slide, index) => (
                 <div
                   key={slide.id}
@@ -372,7 +372,7 @@ const HeroSlider = () => {
                     src={heroImageMap[slide.visual]}
                     alt=""
                     loading={index === 0 ? "eager" : "lazy"}
-                    className="absolute inset-0 w-full h-full object-cover object-right"
+                    className="absolute inset-0 w-full h-full object-cover object-center lg:object-right"
                   />
                 </div>
               ))}
@@ -380,20 +380,20 @@ const HeroSlider = () => {
             
             {/* Stats card - Products count */}
             <div className={cn(
-              "absolute -top-2 -right-4 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 z-10",
+              "absolute -top-2 -right-2 lg:-right-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 lg:p-4 shadow-lg border border-border transition-all duration-500 z-10",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             )}>
-              <div className="text-2xl font-bold text-foreground">5000+</div>
-              <div className="text-xs text-muted-foreground">{t.hero.productsCount}</div>
+              <div className="text-xl lg:text-2xl font-bold text-foreground">5000+</div>
+              <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.productsCount}</div>
             </div>
             
             {/* Experience card */}
             <div className={cn(
-              "absolute -bottom-2 -left-4 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-150 z-10",
+              "absolute -bottom-2 -left-2 lg:-left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 lg:p-4 shadow-lg border border-border transition-all duration-500 delay-150 z-10",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
-              <div className="text-2xl font-bold text-foreground">19+</div>
-              <div className="text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
+              <div className="text-xl lg:text-2xl font-bold text-foreground">19+</div>
+              <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
             </div>
           </div>
         </div>
