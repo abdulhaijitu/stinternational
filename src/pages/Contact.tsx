@@ -36,12 +36,10 @@ const Contact = () => {
       icon: Phone,
       title: t.contact.callUs,
       details: [
-        "+880 2-7165562 (Office)",
         "01715-575665",
         "01713-297170"
       ],
       links: [
-        { href: "tel:+88027165562", text: "+880 2-7165562" },
         { href: "tel:+8801715575665", text: "01715-575665" },
         { href: "tel:+8801713297170", text: "01713-297170" }
       ],
@@ -190,10 +188,10 @@ const Contact = () => {
             </span>
             <span className="hidden md:block text-muted-foreground">•</span>
             <a 
-              href="tel:+88027165562" 
+              href="tel:+8801715575665" 
               className="text-sm text-primary hover:text-accent transition-colors"
             >
-              +880 2-7165562
+              01715-575665
             </a>
           </div>
         </div>
