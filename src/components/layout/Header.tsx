@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useClientOnly } from "@/components/ClientOnly";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -41,6 +42,7 @@ const Header = () => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuContentRef = useRef<HTMLDivElement>(null);
   const closeMethodRef = useRef<MobileMenuCloseMethod>('button');
+  const hasMounted = useClientOnly();
   const { getItemCount } = useCart();
   const { user } = useAuth();
   const { wishlist } = useWishlist();
@@ -395,9 +397,10 @@ const Header = () => {
         {/* Mobile menu rendered outside <header> to avoid transform + fixed-positioning issues */}
       </header>
 
-      {/* Mobile Menu (mobile only) */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
+      {/* Mobile Menu (mobile only) - Only render after client mount */}
+      {hasMounted && (
+        <AnimatePresence>
+          {isMobileMenuOpen && (
           <>
             <motion.div
               key="mobile-menu-overlay"
@@ -487,8 +490,9 @@ const Header = () => {
               </div>
             </motion.div>
           </>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 };
