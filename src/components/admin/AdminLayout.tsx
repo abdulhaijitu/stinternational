@@ -213,6 +213,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return t.nav.admin;
   };
 
+  const getRoleBadgeStyles = () => {
+    if (isSuperAdmin) return "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400";
+    if (roles.includes("admin")) return "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary/50";
+    if (roles.includes("accounts")) return "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400";
+    if (roles.includes("sales")) return "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-blue-400";
+    if (roles.includes("moderator")) return "bg-gradient-to-r from-purple-500 to-violet-500 text-white border-purple-400";
+    return "bg-muted text-muted-foreground";
+  };
+
   const getBadgeCount = (item: NavItem) => {
     if (!item.badgeKey) return 0;
     return notifications[item.badgeKey] || 0;
@@ -450,16 +459,24 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             
             <div className="h-6 w-px bg-border mx-1" />
             
-            {/* User Profile */}
-            <div className="flex items-center gap-2 pl-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium shrink-0">
+            {/* User Profile with Role Badge */}
+            <div className="flex items-center gap-2.5 pl-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-sm font-semibold shrink-0 shadow-sm">
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
-              <div className="hidden xl:block min-w-0">
+              <div className="hidden xl:flex flex-col items-start gap-0.5 min-w-0">
                 <p className="text-sm font-medium leading-tight truncate max-w-[120px]">
                   {user?.email?.split('@')[0]}
                 </p>
-                <p className="text-[11px] text-muted-foreground truncate">{getPrimaryRoleLabel()}</p>
+                <Badge 
+                  className={cn(
+                    "h-5 px-2 text-[10px] font-semibold border shadow-sm",
+                    getRoleBadgeStyles()
+                  )}
+                >
+                  {isSuperAdmin && <Shield className="h-3 w-3 mr-1" />}
+                  {getPrimaryRoleLabel()}
+                </Badge>
               </div>
             </div>
           </div>
@@ -553,12 +570,20 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               {!collapsed && (
                 <div className="lg:hidden p-3 border-b border-border">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-xs font-semibold">
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-xs font-semibold shadow-sm">
                       {user?.email?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{user?.email?.split('@')[0]}</p>
-                      <p className="text-[11px] text-muted-foreground">{getPrimaryRoleLabel()}</p>
+                      <Badge 
+                        className={cn(
+                          "h-5 px-2 text-[10px] font-semibold border shadow-sm mt-0.5",
+                          getRoleBadgeStyles()
+                        )}
+                      >
+                        {isSuperAdmin && <Shield className="h-3 w-3 mr-1" />}
+                        {getPrimaryRoleLabel()}
+                      </Badge>
                     </div>
                   </div>
                 </div>
