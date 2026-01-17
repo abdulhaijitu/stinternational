@@ -7,6 +7,20 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 
+// Import hero images
+import heroLaboratory from "@/assets/hero/hero-laboratory.jpg";
+import heroMeasurement from "@/assets/hero/hero-measurement.jpg";
+import heroEngineering from "@/assets/hero/hero-engineering.jpg";
+import heroInstitution from "@/assets/hero/hero-institution.jpg";
+
+// Hero image map by visual type
+const heroImageMap: Record<string, string> = {
+  laboratory: heroLaboratory,
+  measurement: heroMeasurement,
+  engineering: heroEngineering,
+  general: heroInstitution,
+};
+
 // Slide animation types for each industry
 type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
 
@@ -86,97 +100,6 @@ const getSlideAnimationClasses = (animation: SlideAnimation, isActive: boolean) 
     default:
       return cn(baseClasses, "opacity-0 translate-y-4 absolute inset-0 pointer-events-none");
   }
-};
-
-// Visual animation classes based on slide type
-const getVisualAnimationClasses = (animation: SlideAnimation, isActive: boolean) => {
-  const baseClasses = "absolute inset-0 transition-all duration-700 ease-out";
-  
-  if (isActive) {
-    return cn(baseClasses, "opacity-100 translate-x-0 translate-y-0 scale-100");
-  }
-  
-  switch (animation) {
-    case "fade-up":
-      return cn(baseClasses, "opacity-0 translate-y-8");
-    case "fade-right":
-      return cn(baseClasses, "opacity-0 translate-x-8");
-    case "fade-left":
-      return cn(baseClasses, "opacity-0 -translate-x-8");
-    case "zoom-in":
-      return cn(baseClasses, "opacity-0 scale-90");
-    default:
-      return cn(baseClasses, "opacity-0");
-  }
-};
-
-// Abstract visual components for each industry
-const SlideVisual = ({ type, isActive, animation, t }: { 
-  type: string; 
-  isActive: boolean; 
-  animation: SlideAnimation;
-  t: ReturnType<typeof useLanguage>['t'];
-}) => {
-  const visualClasses = getVisualAnimationClasses(animation, isActive);
-
-  const iconMap: Record<string, typeof FlaskConical> = {
-    laboratory: FlaskConical,
-    measurement: Gauge,
-    engineering: HardHat,
-    general: Building2,
-  };
-
-  const Icon = iconMap[type] || Building2;
-
-  return (
-    <div className={visualClasses}>
-      {/* Abstract geometric shapes */}
-      <div className="relative w-full h-full">
-        {/* Main floating card */}
-        <div className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary-foreground/10 rounded-2xl backdrop-blur-sm border border-primary-foreground/20 shadow-2xl flex items-center justify-center transition-transform duration-700 delay-100",
-          isActive ? "rotate-0" : "rotate-3"
-        )}>
-          <Icon className={cn(
-            "h-24 w-24 text-primary-foreground/40 transition-all duration-500 delay-200",
-            isActive ? "scale-100 opacity-100" : "scale-90 opacity-0"
-          )} strokeWidth={1} />
-        </div>
-        
-        {/* Floating accent elements with staggered animations */}
-        <div className={cn(
-          "absolute top-1/4 right-1/4 w-20 h-20 bg-accent/30 rounded-xl backdrop-blur-sm transition-all duration-500 delay-150",
-          isActive ? "rotate-12 opacity-100 translate-y-0" : "rotate-0 opacity-0 translate-y-4"
-        )} />
-        <div className={cn(
-          "absolute bottom-1/3 left-1/4 w-16 h-16 bg-primary-foreground/15 rounded-lg transition-all duration-500 delay-200",
-          isActive ? "-rotate-6 opacity-100 translate-x-0" : "rotate-0 opacity-0 -translate-x-4"
-        )} />
-        <div className={cn(
-          "absolute top-1/3 left-1/3 w-12 h-12 bg-accent/20 rounded-full transition-all duration-500 delay-250",
-          isActive ? "opacity-100 scale-100" : "opacity-0 scale-75"
-        )} />
-        
-        {/* Stats card */}
-        <div className={cn(
-          "absolute top-16 right-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-300",
-          isActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-        )}>
-          <div className="text-2xl font-bold text-foreground">5000+</div>
-          <div className="text-xs text-muted-foreground">{t.hero.productsCount}</div>
-        </div>
-        
-        {/* Experience card */}
-        <div className={cn(
-          "absolute bottom-16 left-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-350",
-          isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        )}>
-          <div className="text-2xl font-bold text-foreground">19+</div>
-          <div className="text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 // Custom hook for swipe gestures
@@ -353,22 +276,34 @@ const HeroSlider = () => {
         />
       </div>
 
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[120px] transform translate-x-1/2" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-y-0 right-0 w-1/2 opacity-[0.02]">
-          <svg viewBox="0 0 400 400" className="w-full h-full">
-            <defs>
-              <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-grid)" />
-          </svg>
+      {/* Background Images with Gradient Overlays */}
+      {heroSlides.map((slide, index) => (
+        <div
+          key={slide.id}
+          className={cn(
+            "absolute inset-0 transition-opacity duration-700 ease-in-out",
+            currentSlide === index ? "opacity-100" : "opacity-0"
+          )}
+          aria-hidden="true"
+        >
+          {/* Lazy load non-first slides */}
+          <img
+            src={heroImageMap[slide.visual]}
+            alt=""
+            loading={index === 0 ? "eager" : "lazy"}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Gradient overlay for text readability - left to right gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/95 to-primary/60" />
+          {/* Additional top-bottom gradient for depth */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-transparent to-primary/50" />
         </div>
+      ))}
+      
+      {/* Subtle accent glow effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px] transform translate-x-1/2" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
       </div>
 
       <div className="container-premium py-16 md:py-20 lg:py-24 relative">
@@ -445,17 +380,25 @@ const HeroSlider = () => {
             ))}
           </div>
 
-          {/* Right Column - Visual */}
-          <div className="hidden lg:block relative h-[400px]" aria-hidden="true">
-            {heroSlides.map((slide, index) => (
-              <SlideVisual 
-                key={slide.id} 
-                type={slide.visual} 
-                isActive={currentSlide === index}
-                animation={slide.animation}
-                t={t}
-              />
-            ))}
+          {/* Right Column - Stats Cards (optional floating elements) */}
+          <div className="hidden lg:flex relative h-[400px] items-center justify-center" aria-hidden="true">
+            {/* Stats card - Products count */}
+            <div className={cn(
+              "absolute top-16 right-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500",
+              currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            )}>
+              <div className="text-2xl font-bold text-foreground">5000+</div>
+              <div className="text-xs text-muted-foreground">{t.hero.productsCount}</div>
+            </div>
+            
+            {/* Experience card */}
+            <div className={cn(
+              "absolute bottom-16 left-8 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-border transition-all duration-500 delay-150",
+              currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            )}>
+              <div className="text-2xl font-bold text-foreground">19+</div>
+              <div className="text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
+            </div>
           </div>
         </div>
 
