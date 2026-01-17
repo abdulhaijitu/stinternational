@@ -365,14 +365,14 @@ const Contact = () => {
             <div className="space-y-8">
               <div className="bg-card border border-border rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.2366881853287!2d90.40957897601694!3d23.727082778676587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8f03e5b1f5b%3A0x6b0b6f1d8a2b3c4d!2sHatkhola%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1704884400000!5m2!1sen!2sbd"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d913.0574095376736!2d90.41523496951752!3d23.72547099969478!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8ebf1bace9d%3A0x1b1acf3e1c3f8c8e!2sToyenbee%20Circular%20Rd%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1705000000000!5m2!1sen!2sbd"
                   width="100%"
                   height="300"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="ST International Location - Hatkhola, Tikatuli, Dhaka"
+                  title="ST International Location - Mamun Mansion, 52/2, Toyeanbee Circular Road, Hatkhola, Tikatuli, Dhaka-1203"
                   className="aspect-[4/3]"
                 />
               </div>
