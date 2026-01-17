@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense, useCallback } from "react";
+import { useEffect, useState, lazy, Suspense, useCallback, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Save, RotateCcw, Clock, X, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,7 +35,9 @@ import MultiImageUpload from "@/components/admin/MultiImageUpload";
 import IconPicker from "@/components/admin/IconPicker";
 import SEOFieldsSection from "@/components/admin/SEOFieldsSection";
 import { SEOPreviewCard } from "@/components/admin/SEOPreviewCard";
+import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProductDraft } from "@/hooks/useProductDraft";
@@ -92,6 +94,7 @@ const AdminProductEditor = () => {
   const { id } = useParams<{ id: string }>();
   const isNew = id === "new";
   const { t, language } = useAdminLanguage();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [loading, setLoading] = useState(!isNew);
@@ -452,10 +455,15 @@ const AdminProductEditor = () => {
 
     try {
       if (isNew) {
-        // CREATE - Insert new product
+        // CREATE - Insert new product with created_by audit field
+        const productDataWithCreatedBy = {
+          ...baseProductData,
+          created_by: user?.id || null,
+        };
+        
         const { data, error } = await supabase
           .from("products")
-          .insert([baseProductData])
+          .insert([productDataWithCreatedBy])
           .select()
           .single();
         
@@ -542,17 +550,31 @@ const AdminProductEditor = () => {
   };
 
   // Filter sub-categories based on selected parent
-  const filteredSubCategories = subCategories.filter(
-    (sub) => sub.parent_id === formData.parent_category_id
-  );
+  const filteredSubCategories = useMemo(() => {
+    return subCategories.filter((sub) => sub.parent_id === formData.parent_category_id);
+  }, [subCategories, formData.parent_category_id]);
+
+  // Searchable select options for parent categories
+  const parentCategoryOptions = useMemo(() => {
+    return parentCategories.map((cat) => ({
+      value: cat.id,
+      label: getCategoryName(cat),
+    }));
+  }, [parentCategories, language]);
+
+  // Searchable select options for sub-categories
+  const subCategoryOptions = useMemo(() => {
+    return filteredSubCategories.map((cat) => ({
+      value: cat.id,
+      label: getCategoryName(cat),
+    }));
+  }, [filteredSubCategories, language]);
 
   // Handle parent category change - reset sub-category when parent changes
   const handleParentCategoryChange = (parentId: string) => {
-    setFormData({
-      ...formData,
-      parent_category_id: parentId,
-      category_id: "", // Reset sub-category when parent changes
-    });
+    handleFieldChange("parent_category_id", parentId);
+    handleFieldChange("category_id", ""); // Reset sub-category when parent changes
+    setTouched(prev => ({ ...prev, parent_category_id: true }));
   };
 
   // Generate slug from name
@@ -985,37 +1007,26 @@ const AdminProductEditor = () => {
             </div>
           </div>
 
-          {/* Category Selection */}
+          {/* Category Selection - Searchable Dropdowns */}
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Parent Category */}
+            {/* Parent Category - Required */}
             <div className="space-y-1.5">
               <Label htmlFor="parent_category" className={getInputClass()}>
                 {t.categories.parentCategory} <span className="text-destructive">*</span>
               </Label>
               <div className="flex gap-2">
-                <Select
-                  value={formData.parent_category_id}
-                  onValueChange={(value) => {
-                    handleFieldChange("parent_category_id", value);
-                    handleFieldChange("category_id", ""); // Reset sub-category when parent changes
-                    setTouched(prev => ({ ...prev, parent_category_id: true }));
-                  }}
-                >
-                  <SelectTrigger className={cn(
-                    "flex-1", 
-                    getInputClass(),
-                    formErrors.parent_category_id && touched.parent_category_id && "border-destructive focus:ring-destructive"
-                  )}>
-                    <SelectValue placeholder={t.categories.selectParentCategory} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {parentCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
-                        {getCategoryName(cat)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex-1">
+                  <SearchableSelect
+                    options={parentCategoryOptions}
+                    value={formData.parent_category_id}
+                    onValueChange={handleParentCategoryChange}
+                    placeholder={t.categories.selectParentCategory}
+                    searchPlaceholder={language === "bn" ? "ক্যাটাগরি খুঁজুন..." : "Search categories..."}
+                    emptyMessage={language === "bn" ? "কোনো ক্যাটাগরি পাওয়া যায়নি" : "No categories found"}
+                    error={!!(formErrors.parent_category_id && touched.parent_category_id)}
+                    className={getInputClass()}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -1036,34 +1047,28 @@ const AdminProductEditor = () => {
               )}
             </div>
 
-            {/* Sub-Category (OPTIONAL) */}
+            {/* Sub-Category - Required for proper categorization */}
             <div className="space-y-1.5">
               <Label htmlFor="category" className={getInputClass()}>
-                {t.categories.subCategory} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
+                {t.categories.subCategory} <span className="text-destructive">*</span>
               </Label>
               <div className="flex gap-2">
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-                  disabled={!formData.parent_category_id}
-                >
-                  <SelectTrigger className={cn("flex-1", getInputClass())}>
-                    <SelectValue 
-                      placeholder={
-                        !formData.parent_category_id 
-                          ? (language === "bn" ? "প্রথমে প্যারেন্ট নির্বাচন করুন" : "Select parent first")
-                          : t.products.selectCategory
-                      } 
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredSubCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id} className={getInputClass()}>
-                        {getCategoryName(cat)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex-1">
+                  <SearchableSelect
+                    options={subCategoryOptions}
+                    value={formData.category_id}
+                    onValueChange={(value) => handleFieldChange("category_id", value)}
+                    placeholder={
+                      !formData.parent_category_id 
+                        ? (language === "bn" ? "প্রথমে প্যারেন্ট নির্বাচন করুন" : "Select parent first")
+                        : t.products.selectCategory
+                    }
+                    searchPlaceholder={language === "bn" ? "সাব-ক্যাটাগরি খুঁজুন..." : "Search sub-categories..."}
+                    emptyMessage={language === "bn" ? "কোনো সাব-ক্যাটাগরি পাওয়া যায়নি" : "No sub-categories found"}
+                    disabled={!formData.parent_category_id}
+                    className={getInputClass()}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="outline"
