@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, CheckSquare, Square, X, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, CheckSquare, Square, X, Filter, User } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ interface Product {
   image_url: string | null;
   category: { id: string; name: string } | null;
   created_by: string | null;
+  creator: { full_name: string | null } | null;
 }
 
 interface CategoryWithCount {
@@ -388,6 +389,7 @@ const AdminProducts = () => {
                       <th className="hidden lg:table-cell">{t.products.category}</th>
                       <th>{t.products.price}</th>
                       <th className="hidden sm:table-cell">{t.products.stock}</th>
+                      <th className="hidden xl:table-cell">{language === "bn" ? "তৈরি করেছেন" : "Created By"}</th>
                       <th>{t.common.status}</th>
                       <th className="text-right">{t.common.actions}</th>
                     </tr>
@@ -434,6 +436,16 @@ const AdminProducts = () => {
                             <span className="font-medium">{formatPrice(product.price, language)}</span>
                           </td>
                           <td className="hidden sm:table-cell">{product.stock_quantity}</td>
+                          <td className="hidden xl:table-cell">
+                            {product.creator?.full_name ? (
+                              <div className="flex items-center gap-1.5 text-sm">
+                                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="text-muted-foreground">{product.creator.full_name}</span>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </td>
                           <td>
                             <span className={cn("text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap", status.className)}>
                               {status.label}
