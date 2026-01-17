@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, Send, Building2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Building2, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -170,6 +170,36 @@ const Contact = () => {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WhatsApp CTA Section */}
+      <section className="py-10 bg-[#25D366]/10 border-y border-[#25D366]/20">
+        <div className={`container-premium ${fontClass}`}>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-center">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center">
+                <MessageCircle className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold text-foreground">
+                  {language === "bn" ? "দ্রুত যোগাযোগ করুন" : "Quick Contact"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {language === "bn" ? "হোয়াটসঅ্যাপে মেসেজ করুন" : "Message us on WhatsApp"}
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://wa.me/8801715575665?text=Hello%2C%20I%20would%20like%20to%20inquire%20about%20your%20products."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#25D366] hover:bg-[#1da851] text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+            >
+              <MessageCircle className="h-5 w-5" />
+              {language === "bn" ? "হোয়াটসঅ্যাপে চ্যাট করুন" : "Chat on WhatsApp"}
+            </a>
           </div>
         </div>
       </section>
