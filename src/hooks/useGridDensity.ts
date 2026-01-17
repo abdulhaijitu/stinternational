@@ -16,21 +16,32 @@ const getStorageKey = (device: DeviceType): string => {
 };
 
 export const useGridDensity = () => {
-  const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType);
+  const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
   
-  const [densities, setDensities] = useState<Record<DeviceType, GridDensity>>(() => {
-    if (typeof window === 'undefined') {
-      return { desktop: 'comfortable', mobile: 'comfortable' };
-    }
+  // Default values, hydrate from localStorage in useEffect
+  const [densities, setDensities] = useState<Record<DeviceType, GridDensity>>({
+    desktop: 'comfortable',
+    mobile: 'comfortable',
+  });
+  
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate from localStorage on mount (client-only)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    setDeviceType(getDeviceType());
     
     const desktopStored = localStorage.getItem(getStorageKey('desktop'));
     const mobileStored = localStorage.getItem(getStorageKey('mobile'));
     
-    return {
+    setDensities({
       desktop: (desktopStored === 'compact' ? 'compact' : 'comfortable') as GridDensity,
       mobile: (mobileStored === 'compact' ? 'compact' : 'comfortable') as GridDensity,
-    };
-  });
+    });
+    
+    setIsHydrated(true);
+  }, []);
 
   // Track device type changes
   useEffect(() => {
@@ -55,11 +66,12 @@ export const useGridDensity = () => {
     };
   }, [deviceType]);
 
-  // Persist to localStorage when densities change
+  // Persist to localStorage when densities change (only after hydration)
   useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem(getStorageKey('desktop'), densities.desktop);
     localStorage.setItem(getStorageKey('mobile'), densities.mobile);
-  }, [densities]);
+  }, [densities, isHydrated]);
 
   // Current density based on device type
   const density = useMemo(() => densities[deviceType], [densities, deviceType]);

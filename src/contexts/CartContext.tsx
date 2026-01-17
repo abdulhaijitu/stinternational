@@ -26,18 +26,30 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_STORAGE_KEY = "st-international-cart";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(CART_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
+  // Initialize with empty array, then hydrate from localStorage in useEffect
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Persist to localStorage
+  // Hydrate from localStorage on mount (client-only)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    if (saved) {
+      try {
+        setItems(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse cart from localStorage:", e);
+      }
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // Persist to localStorage - only after hydration to avoid overwriting
+  useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  }, [items, isHydrated]);
 
   const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
     // Track add to cart event

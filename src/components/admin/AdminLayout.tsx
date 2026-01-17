@@ -62,18 +62,25 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const notifications = useAdminNotifications();
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    return saved === "true";
-  });
+  const [collapsed, setCollapsed] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
   // Ref for nav container to enable auto-scroll to active item
   const navRef = useRef<HTMLElement>(null);
 
+  // Hydrate collapsed state from localStorage on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    if (saved === "true") {
+      setCollapsed(true);
+    }
+  }, []);
+
   // Save collapsed state to localStorage
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
   }, [collapsed]);
 
