@@ -142,6 +142,8 @@ const DBProductCard = ({
           <img
             src={imageUrl}
             alt={productFields.name}
+            width={400}
+            height={400}
             className={cn(
               "w-full h-full object-cover",
               "transition-transform duration-300 ease-out",
