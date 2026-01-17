@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, Send, Building2, MessageCircle, HelpCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Building2, MessageCircle, HelpCircle, Search } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,57 @@ const Contact = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [faqSearch, setFaqSearch] = useState("");
+
+  const faqItems = [
+    {
+      id: "item-1",
+      question: language === "bn" ? "আপনারা কি ধরনের পণ্য সরবরাহ করেন?" : "What types of products do you supply?",
+      answer: language === "bn"
+        ? "আমরা বৈজ্ঞানিক যন্ত্রপাতি, ল্যাবরেটরি সরঞ্জাম, পরিমাপ যন্ত্র, নিরাপত্তা সরঞ্জাম, টেক্সটাইল টেস্টিং মেশিন এবং আরও অনেক কিছু সরবরাহ করি। আমাদের পণ্য তালিকা দেখুন অথবা নির্দিষ্ট প্রয়োজনীয়তার জন্য যোগাযোগ করুন।"
+        : "We supply scientific instruments, laboratory equipment, measurement devices, safety equipment, textile testing machines, and much more. Browse our product catalog or contact us for specific requirements."
+    },
+    {
+      id: "item-2",
+      question: language === "bn" ? "আপনারা কি সারাদেশে ডেলিভারি দেন?" : "Do you deliver nationwide?",
+      answer: language === "bn"
+        ? "হ্যাঁ, আমরা বাংলাদেশের সকল জেলায় ডেলিভারি সেবা প্রদান করি। ঢাকার মধ্যে সাধারণত ২-৩ কর্মদিবসে এবং ঢাকার বাইরে ৫-৭ কর্মদিবসে ডেলিভারি হয়।"
+        : "Yes, we deliver to all districts in Bangladesh. Delivery within Dhaka typically takes 2-3 business days, and outside Dhaka takes 5-7 business days."
+    },
+    {
+      id: "item-3",
+      question: language === "bn" ? "পণ্যের ওয়ারেন্টি কেমন?" : "What warranty do you offer on products?",
+      answer: language === "bn"
+        ? "বেশিরভাগ পণ্যে ১-২ বছরের ম্যানুফ্যাকচারার ওয়ারেন্টি থাকে। ওয়ারেন্টি সময়কাল পণ্য অনুযায়ী ভিন্ন হয়। বিস্তারিত জানতে পণ্যের পেজ দেখুন অথবা আমাদের সাথে যোগাযোগ করুন।"
+        : "Most products come with 1-2 years manufacturer warranty. Warranty periods vary by product. Check individual product pages or contact us for specific warranty information."
+    },
+    {
+      id: "item-4",
+      question: language === "bn" ? "কোটেশন পেতে কতক্ষণ সময় লাগে?" : "How long does it take to receive a quotation?",
+      answer: language === "bn"
+        ? "সাধারণত আমরা ২৪-৪৮ ঘণ্টার মধ্যে কোটেশন প্রদান করি। জরুরি প্রয়োজনে সরাসরি ফোন বা WhatsApp-এ যোগাযোগ করুন দ্রুত সাড়া পেতে।"
+        : "We typically provide quotations within 24-48 hours. For urgent requirements, contact us directly via phone or WhatsApp for a faster response."
+    },
+    {
+      id: "item-5",
+      question: language === "bn" ? "কী কী পেমেন্ট মেথড গ্রহণযোগ্য?" : "What payment methods do you accept?",
+      answer: language === "bn"
+        ? "আমরা ক্যাশ অন ডেলিভারি, ব্যাংক ট্রান্সফার এবং অনলাইন পেমেন্ট গ্রহণ করি। বড় অর্ডারের জন্য কিস্তিতে পেমেন্টের সুবিধাও আছে। বিস্তারিত জানতে যোগাযোগ করুন।"
+        : "We accept Cash on Delivery, Bank Transfer, and Online Payment. For large orders, installment payment options are available. Contact us for more details."
+    },
+    {
+      id: "item-6",
+      question: language === "bn" ? "ইন্সটলেশন এবং ট্রেনিং সেবা কি পাওয়া যায়?" : "Do you provide installation and training services?",
+      answer: language === "bn"
+        ? "হ্যাঁ, নির্বাচিত পণ্যের জন্য আমরা বিনামূল্যে ইন্সটলেশন এবং অপারেটর ট্রেনিং প্রদান করি। বিশেষ করে ল্যাবরেটরি সরঞ্জাম এবং জটিল যন্ত্রপাতির ক্ষেত্রে এই সেবা পাওয়া যায়।"
+        : "Yes, we provide free installation and operator training for selected products, especially for laboratory equipment and complex machinery."
+    }
+  ];
+
+  const filteredFaqItems = faqItems.filter(item =>
+    item.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
+    item.answer.toLowerCase().includes(faqSearch.toLowerCase())
+  );
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -427,97 +478,42 @@ const Contact = () => {
               </p>
             </div>
 
-            <Accordion type="single" collapsible className="w-full space-y-3">
-              <AccordionItem value="item-1" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {language === "bn" 
-                    ? "আপনারা কি ধরনের পণ্য সরবরাহ করেন?" 
-                    : "What types of products do you supply?"
-                  }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "আমরা বৈজ্ঞানিক যন্ত্রপাতি, ল্যাবরেটরি সরঞ্জাম, পরিমাপ যন্ত্র, নিরাপত্তা সরঞ্জাম, টেক্সটাইল টেস্টিং মেশিন এবং আরও অনেক কিছু সরবরাহ করি। আমাদের পণ্য তালিকা দেখুন অথবা নির্দিষ্ট প্রয়োজনীয়তার জন্য যোগাযোগ করুন।"
-                    : "We supply scientific instruments, laboratory equipment, measurement devices, safety equipment, textile testing machines, and much more. Browse our product catalog or contact us for specific requirements."
-                  }
-                </AccordionContent>
-              </AccordionItem>
+            {/* FAQ Search Input */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                value={faqSearch}
+                onChange={(e) => setFaqSearch(e.target.value)}
+                placeholder={language === "bn" ? "প্রশ্ন অনুসন্ধান করুন..." : "Search questions..."}
+                className="pl-10"
+              />
+            </div>
 
-              <AccordionItem value="item-2" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
+            {filteredFaqItems.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full space-y-3">
+                {filteredFaqItems.map((item) => (
+                  <AccordionItem key={item.id} value={item.id} className="bg-card border border-border rounded-lg px-6">
+                    <AccordionTrigger className="text-left font-medium hover:no-underline">
+                      {item.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      {item.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <HelpCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>
                   {language === "bn" 
-                    ? "আপনারা কি সারাদেশে ডেলিভারি দেন?" 
-                    : "Do you deliver nationwide?"
+                    ? "কোনো প্রশ্ন পাওয়া যায়নি। অন্য কিছু অনুসন্ধান করুন।"
+                    : "No questions found. Try a different search term."
                   }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "হ্যাঁ, আমরা বাংলাদেশের সকল জেলায় ডেলিভারি সেবা প্রদান করি। ঢাকার মধ্যে সাধারণত ২-৩ কর্মদিবসে এবং ঢাকার বাইরে ৫-৭ কর্মদিবসে ডেলিভারি হয়।"
-                    : "Yes, we deliver to all districts in Bangladesh. Delivery within Dhaka typically takes 2-3 business days, and outside Dhaka takes 5-7 business days."
-                  }
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {language === "bn" 
-                    ? "পণ্যের ওয়ারেন্টি কেমন?" 
-                    : "What warranty do you offer on products?"
-                  }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "বেশিরভাগ পণ্যে ১-২ বছরের ম্যানুফ্যাকচারার ওয়ারেন্টি থাকে। ওয়ারেন্টি সময়কাল পণ্য অনুযায়ী ভিন্ন হয়। বিস্তারিত জানতে পণ্যের পেজ দেখুন অথবা আমাদের সাথে যোগাযোগ করুন।"
-                    : "Most products come with 1-2 years manufacturer warranty. Warranty periods vary by product. Check individual product pages or contact us for specific warranty information."
-                  }
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {language === "bn" 
-                    ? "কোটেশন পেতে কতক্ষণ সময় লাগে?" 
-                    : "How long does it take to receive a quotation?"
-                  }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "সাধারণত আমরা ২৪-৪৮ ঘণ্টার মধ্যে কোটেশন প্রদান করি। জরুরি প্রয়োজনে সরাসরি ফোন বা WhatsApp-এ যোগাযোগ করুন দ্রুত সাড়া পেতে।"
-                    : "We typically provide quotations within 24-48 hours. For urgent requirements, contact us directly via phone or WhatsApp for a faster response."
-                  }
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {language === "bn" 
-                    ? "কী কী পেমেন্ট মেথড গ্রহণযোগ্য?" 
-                    : "What payment methods do you accept?"
-                  }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "আমরা ক্যাশ অন ডেলিভারি, ব্যাংক ট্রান্সফার এবং অনলাইন পেমেন্ট গ্রহণ করি। বড় অর্ডারের জন্য কিস্তিতে পেমেন্টের সুবিধাও আছে। বিস্তারিত জানতে যোগাযোগ করুন।"
-                    : "We accept Cash on Delivery, Bank Transfer, and Online Payment. For large orders, installment payment options are available. Contact us for more details."
-                  }
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="bg-card border border-border rounded-lg px-6">
-                <AccordionTrigger className="text-left font-medium hover:no-underline">
-                  {language === "bn" 
-                    ? "ইন্সটলেশন এবং ট্রেনিং সেবা কি পাওয়া যায়?" 
-                    : "Do you provide installation and training services?"
-                  }
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {language === "bn"
-                    ? "হ্যাঁ, নির্বাচিত পণ্যের জন্য আমরা বিনামূল্যে ইন্সটলেশন এবং অপারেটর ট্রেনিং প্রদান করি। বিশেষ করে ল্যাবরেটরি সরঞ্জাম এবং জটিল যন্ত্রপাতির ক্ষেত্রে এই সেবা পাওয়া যায়।"
-                    : "Yes, we provide free installation and operator training for selected products, especially for laboratory equipment and complex machinery."
-                  }
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </p>
+              </div>
+            )}
 
             <div className="mt-8 text-center">
               <p className="text-muted-foreground mb-4">
