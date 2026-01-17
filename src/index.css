@@ -5,21 +5,13 @@
 /* ST International - Premium B2B Swiss Design System */
 
 /* 
- * CRITICAL: Font preloading is handled in index.html for LCP optimization
- * Fonts: Inter for English, Hind Siliguri for Bangla 
+ * CRITICAL: Fonts are loaded via index.html for optimal LCP
+ * - Preconnect to fonts.googleapis.com and fonts.gstatic.com
+ * - Preload critical font stylesheets
+ * - Font-display: swap is applied via the Google Fonts URL parameter
+ * 
+ * DO NOT add @import for fonts here - it blocks rendering!
  */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
-
-/* Font display optimization */
-@font-face {
-  font-family: 'Inter';
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Hind Siliguri';
-  font-display: swap;
-}
 
 @layer base {
   :root {
