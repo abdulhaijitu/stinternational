@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface ProgressiveImageProps {
@@ -16,8 +16,9 @@ interface ProgressiveImageProps {
 /**
  * Progressive image component with blur-up loading effect.
  * Shows a low-quality blurred placeholder that transitions smoothly to full resolution.
+ * Memoized for performance.
  */
-const ProgressiveImage = ({
+const ProgressiveImage = memo(({
   src,
   alt,
   width,
@@ -40,7 +41,8 @@ const ProgressiveImage = ({
 
   // Check if image is already cached/loaded
   useEffect(() => {
-    if (imgRef.current?.complete && imgRef.current?.naturalWidth > 0) {
+    const img = imgRef.current;
+    if (img?.complete && img?.naturalWidth > 0) {
       setIsLoaded(true);
       onLoad?.();
     }
@@ -63,24 +65,20 @@ const ProgressiveImage = ({
       )}
     >
       {/* Placeholder - shows while image is loading */}
-      <div 
-        className={cn(
-          "absolute inset-0 transition-opacity duration-500 ease-out",
-          placeholderColor,
-          isLoaded ? "opacity-0" : "opacity-100"
-        )}
-        aria-hidden="true"
-      >
-        {/* Shimmer effect */}
+      {!isLoaded && !hasError && (
         <div 
           className={cn(
             "absolute inset-0",
-            "bg-gradient-to-r from-transparent via-foreground/5 to-transparent",
-            "-translate-x-full animate-[shimmer_2s_infinite]",
-            isLoaded && "hidden"
+            placeholderColor
           )}
-        />
-      </div>
+          aria-hidden="true"
+        >
+          {/* Shimmer effect */}
+          <div 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-foreground/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"
+          />
+        </div>
+      )}
 
       {/* Main Image */}
       <img
@@ -95,8 +93,8 @@ const ProgressiveImage = ({
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
-          "transition-all duration-500 ease-out",
-          isLoaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-sm scale-[1.02]",
+          "transition-opacity duration-300 ease-out",
+          isLoaded ? "opacity-100" : "opacity-0",
           hasError && "hidden",
           className
         )}
@@ -115,6 +113,8 @@ const ProgressiveImage = ({
       )}
     </div>
   );
-};
+});
+
+ProgressiveImage.displayName = "ProgressiveImage";
 
 export default ProgressiveImage;
