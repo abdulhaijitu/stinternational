@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, CheckSquare, Square, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Lock, Package, CheckSquare, Square, X, Filter } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,9 @@ import { cn } from "@/lib/utils";
 import { useAdminProducts, useDeleteProduct, useInvalidateProducts } from "@/hooks/useAdminProducts";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { BulkProductDeleteDialog } from "@/components/admin/BulkProductDeleteDialog";
+import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 interface Product {
   id: string;
@@ -29,14 +31,24 @@ interface Product {
   stock_quantity: number;
   is_active: boolean;
   image_url: string | null;
-  category: { name: string } | null;
+  category: { id: string; name: string } | null;
+  created_by: string | null;
+}
+
+interface CategoryWithCount {
+  id: string;
+  name: string;
+  name_bn: string | null;
+  count: number;
 }
 
 const AdminProducts = () => {
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [categoriesWithCount, setCategoriesWithCount] = useState<CategoryWithCount[]>([]);
   
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -56,11 +68,62 @@ const AdminProducts = () => {
   const canEdit = isSuperAdmin || hasPermission("products", "update");
   const canDelete = isSuperAdmin || hasPermission("products", "delete");
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Fetch categories with product counts
+  useEffect(() => {
+    const fetchCategoriesWithCounts = async () => {
+      const { data: categories, error } = await supabase
+        .from("categories")
+        .select("id, name, name_bn")
+        .eq("is_active", true)
+        .order("display_order");
+      
+      if (error || !categories) return;
+      
+      // Count products per category from loaded products
+      const countMap = new Map<string, number>();
+      products.forEach(p => {
+        if (p.category?.id) {
+          countMap.set(p.category.id, (countMap.get(p.category.id) || 0) + 1);
+        }
+      });
+      
+      const categoriesWithCounts = categories
+        .map(cat => ({
+          ...cat,
+          count: countMap.get(cat.id) || 0,
+        }))
+        .filter(cat => cat.count > 0) // Only show categories with products
+        .sort((a, b) => b.count - a.count); // Sort by count descending
+      
+      setCategoriesWithCount(categoriesWithCounts);
+    };
+    
+    if (products.length > 0) {
+      fetchCategoriesWithCounts();
+    }
+  }, [products]);
+
+  // Category filter options for searchable select
+  const categoryOptions = useMemo(() => {
+    return [
+      { value: "", label: language === "bn" ? "সব ক্যাটাগরি" : "All Categories", count: products.length },
+      ...categoriesWithCount.map(cat => ({
+        value: cat.id,
+        label: language === "bn" && cat.name_bn ? cat.name_bn : cat.name,
+        count: cat.count,
+      })),
+    ];
+  }, [categoriesWithCount, products.length, language]);
+
+  // Filter products by search and category
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.sku?.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = !categoryFilter || p.category?.id === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, search, categoryFilter]);
 
   // Bulk selection handlers
   const handleSelectAll = useCallback(() => {
@@ -170,7 +233,12 @@ const AdminProducts = () => {
           {/* Page Header - Enterprise Standard */}
           <div className="admin-page-header">
             <div>
-              <h1 className="admin-page-title">{t.products.title}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="admin-page-title">{t.products.title}</h1>
+                <Badge variant="secondary" className="text-sm font-semibold">
+                  {products.length} {language === "bn" ? "টি পণ্য" : "products"}
+                </Badge>
+              </div>
               <p className="admin-page-subtitle">{t.products.subtitle}</p>
             </div>
             <div className="admin-action-bar">
@@ -201,50 +269,94 @@ const AdminProducts = () => {
             </div>
           </div>
 
-          {/* Search and Bulk Actions Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative max-w-sm w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t.products.searchProducts}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9"
-              />
-            </div>
-            
-            {/* Bulk Actions */}
-            {selectedIds.size > 0 && canDelete && (
-              <div className="flex items-center gap-3 bg-muted/50 border border-border rounded-lg px-4 py-2">
-                <span className="text-sm font-medium">
-                  {language === "bn" 
-                    ? `${selectedIds.size}টি নির্বাচিত` 
-                    : `${selectedIds.size} selected`}
-                </span>
+          {/* Search, Filter, and Bulk Actions Bar */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              {/* Search Input */}
+              <div className="relative max-w-xs w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={t.products.searchProducts}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+              
+              {/* Category Filter */}
+              <div className="w-full sm:w-64">
+                <SearchableSelect
+                  options={categoryOptions}
+                  value={categoryFilter}
+                  onValueChange={setCategoryFilter}
+                  placeholder={language === "bn" ? "ক্যাটাগরি ফিল্টার" : "Filter by Category"}
+                  searchPlaceholder={language === "bn" ? "ক্যাটাগরি খুঁজুন..." : "Search categories..."}
+                  emptyMessage={language === "bn" ? "কোনো ক্যাটাগরি পাওয়া যায়নি" : "No categories found"}
+                  showCount={true}
+                />
+              </div>
+              
+              {/* Active filters indicator */}
+              {(search || categoryFilter) && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={clearSelection}
-                  className="h-7 px-2"
+                  onClick={() => {
+                    setSearch("");
+                    setCategoryFilter("");
+                  }}
+                  className="h-9 text-muted-foreground"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 mr-1" />
+                  {language === "bn" ? "ফিল্টার মুছুন" : "Clear filters"}
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setBulkDeleteDialogOpen(true)}
-                  disabled={isBulkDeleting}
-                  className="h-7"
-                >
-                  {isBulkDeleting ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  ) : (
-                    <Trash2 className="h-4 w-4 mr-1" />
-                  )}
-                  {language === "bn" ? "মুছুন" : "Delete"}
-                </Button>
-              </div>
-            )}
+              )}
+            </div>
+            
+            {/* Results count and bulk actions */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {filteredProducts.length === products.length 
+                  ? (language === "bn" ? `মোট ${products.length} টি পণ্য` : `Showing all ${products.length} products`)
+                  : (language === "bn" 
+                      ? `${products.length} টির মধ্যে ${filteredProducts.length} টি পণ্য দেখাচ্ছে` 
+                      : `Showing ${filteredProducts.length} of ${products.length} products`)
+                }
+              </p>
+              
+              {/* Bulk Actions */}
+              {selectedIds.size > 0 && canDelete && (
+                <div className="flex items-center gap-3 bg-muted/50 border border-border rounded-lg px-4 py-2">
+                  <span className="text-sm font-medium">
+                    {language === "bn" 
+                      ? `${selectedIds.size}টি নির্বাচিত` 
+                      : `${selectedIds.size} selected`}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSelection}
+                    className="h-7 px-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDeleteDialogOpen(true)}
+                    disabled={isBulkDeleting}
+                    className="h-7"
+                  >
+                    {isBulkDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-1" />
+                    )}
+                    {language === "bn" ? "মুছুন" : "Delete"}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Products Table - Enterprise Standard */}

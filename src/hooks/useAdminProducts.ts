@@ -13,7 +13,8 @@ export interface AdminProduct {
   stock_quantity: number;
   is_active: boolean;
   image_url: string | null;
-  category: { name: string } | null;
+  category: { id: string; name: string } | null;
+  created_by: string | null;
 }
 
 export const ADMIN_PRODUCTS_QUERY_KEY = ["admin", "products"];
@@ -62,8 +63,8 @@ export const useAdminProducts = (showRealtimeToasts = true) => {
       const { data, error } = await supabase
         .from("products")
         .select(`
-          id, name, slug, price, sku, in_stock, stock_quantity, is_active, image_url,
-          category:categories(name)
+          id, name, slug, price, sku, in_stock, stock_quantity, is_active, image_url, created_by,
+          category:categories(id, name)
         `)
         .order("created_at", { ascending: false });
 
