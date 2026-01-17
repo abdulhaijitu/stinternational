@@ -2,6 +2,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import BackToTop from "./BackToTop";
 import MobileBottomNav from "./MobileBottomNav";
+import MobileContactBar from "./MobileContactBar";
 import FloatingWhatsApp from "./FloatingWhatsApp";
 
 interface LayoutProps {
@@ -17,6 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
       <Footer />
       <BackToTop />
+      <MobileContactBar />
       <MobileBottomNav />
       <FloatingWhatsApp />
     </div>

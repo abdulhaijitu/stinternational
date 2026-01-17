@@ -206,10 +206,10 @@ const MobileBottomNav = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Spacer to prevent content overlap with bottom nav */}
+      {/* Spacer to prevent content overlap with bottom nav + contact bar */}
       <div 
         className="lg:hidden" 
-        style={{ height: BOTTOM_NAV_HEIGHT }}
+        style={{ height: 64 + 48 }} // Bottom nav (64px) + Contact bar (48px)
         aria-hidden="true"
       />
     </>
