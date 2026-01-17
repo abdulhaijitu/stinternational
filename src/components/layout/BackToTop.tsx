@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -73,67 +74,81 @@ const BackToTop = () => {
   const bottomPosition = whatsappBottom + whatsappButtonHeight + gap;
 
   return (
-    <button
-      onClick={scrollToTop}
-      aria-label="Back to top"
-      style={{ 
-        bottom: bottomPosition,
-        width: size,
-        height: size
-      }}
-      className={cn(
-        "fixed right-4 md:right-6 z-[44]",
-        "rounded-full",
-        "bg-background/95 backdrop-blur-sm border border-border",
-        "shadow-md hover:shadow-lg",
-        "flex items-center justify-center",
-        "text-muted-foreground hover:text-foreground",
-        "transition-all duration-200 ease-out",
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-        "touch-manipulation",
-        isVisible
-          ? "opacity-100 translate-y-0 pointer-events-auto"
-          : "opacity-0 translate-y-4 pointer-events-none"
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          onClick={scrollToTop}
+          aria-label="Back to top"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 25,
+            duration: 0.3 
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          style={{ 
+            bottom: bottomPosition,
+            width: size,
+            height: size
+          }}
+          className={cn(
+            "fixed right-4 md:right-6 z-[44]",
+            "rounded-full",
+            "bg-background/95 backdrop-blur-sm border border-border",
+            "shadow-md hover:shadow-lg",
+            "flex items-center justify-center",
+            "text-muted-foreground hover:text-foreground",
+            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "touch-manipulation cursor-pointer"
+          )}
+        >
+          {/* Progress Ring SVG */}
+          <svg
+            className="absolute inset-0 -rotate-90"
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+          >
+            {/* Background circle */}
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              className="text-border"
+            />
+            {/* Progress circle */}
+            <motion.circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              className="text-primary"
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            />
+          </svg>
+          
+          {/* Arrow Icon */}
+          <ArrowUp className={cn(
+            "relative z-10",
+            isMobile ? "h-4 w-4" : "h-4.5 w-4.5"
+          )} />
+        </motion.button>
       )}
-    >
-      {/* Progress Ring SVG */}
-      <svg
-        className="absolute inset-0 -rotate-90"
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-      >
-        {/* Background circle */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-border"
-        />
-        {/* Progress circle */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          className="text-primary transition-all duration-150 ease-out"
-        />
-      </svg>
-      
-      {/* Arrow Icon */}
-      <ArrowUp className={cn(
-        "relative z-10",
-        isMobile ? "h-4 w-4" : "h-4.5 w-4.5"
-      )} />
-    </button>
+    </AnimatePresence>
   );
 };
 
