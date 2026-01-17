@@ -10,7 +10,12 @@ interface SmartHeaderState {
 const SCROLL_THRESHOLD = 10; // Minimum scroll distance to trigger direction change
 const HIDE_THRESHOLD = 200; // Minimum scroll position before header can hide
 
+/**
+ * SSR-safe smart header hook
+ * Returns safe defaults during SSR, updates after client mount
+ */
 export const useSmartHeader = (compactThreshold: number = 100) => {
+  const [hasMounted, setHasMounted] = useState(false);
   const [state, setState] = useState<SmartHeaderState>({
     isScrolled: false,
     isCompact: false,
@@ -22,7 +27,14 @@ export const useSmartHeader = (compactThreshold: number = 100) => {
   const lastDirectionChangeY = useRef(0);
   const ticking = useRef(false);
 
+  // Mark as mounted after first render
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const updateState = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - lastScrollY.current;
     const isAtTop = currentScrollY < 20;
@@ -74,6 +86,9 @@ export const useSmartHeader = (compactThreshold: number = 100) => {
   }, [compactThreshold]);
 
   useEffect(() => {
+    // Only attach listeners after mount
+    if (!hasMounted) return;
+    
     const handleScroll = () => {
       if (!ticking.current) {
         window.requestAnimationFrame(updateState);
@@ -87,7 +102,7 @@ export const useSmartHeader = (compactThreshold: number = 100) => {
     updateState();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [updateState]);
+  }, [updateState, hasMounted]);
 
   return state;
 };

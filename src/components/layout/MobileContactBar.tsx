@@ -1,9 +1,20 @@
+import { useState, useEffect } from "react";
 import { Phone, MessageCircle, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
+/**
+ * Mobile Contact Bar
+ * Client-only: Renders only after mount to prevent hydration issues
+ */
 const MobileContactBar = () => {
+  const [hasMounted, setHasMounted] = useState(false);
   const { language } = useLanguage();
+
+  // Client-only mount guard
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const contactActions = [
     {
@@ -23,12 +34,17 @@ const MobileContactBar = () => {
     },
     {
       icon: Mail,
-      label: language === "bn" ? "ইমেইল" : "Email",
+      label: language === "bn" ? "ইমেইล" : "Email",
       href: "mailto:info@stinternationalbd.com",
       bgColor: "bg-accent",
       hoverColor: "hover:bg-accent/90",
     },
   ];
+
+  // Don't render until client is ready
+  if (!hasMounted) {
+    return null;
+  }
 
   // Contact bar sits at 64px (above bottom nav)
   // Height: 48px

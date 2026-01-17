@@ -5,6 +5,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { triggerHaptic } from "@/hooks/useHapticFeedback";
+import { useHasMounted } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -22,6 +23,7 @@ import CategoryAwareSearch from "./CategoryAwareSearch";
 const BOTTOM_NAV_HEIGHT = 64; // px - optimized for thumb reach
 
 const MobileBottomNav = () => {
+  const hasMounted = useHasMounted();
   const location = useLocation();
   const { getItemCount } = useCart();
   const { t } = useLanguage();
@@ -98,6 +100,20 @@ const MobileBottomNav = () => {
       isLink: true 
     },
   ];
+
+  // Don't render until client is mounted to prevent hydration issues
+  if (!hasMounted) {
+    return (
+      <>
+        {/* Spacer to prevent content overlap with bottom nav + contact bar */}
+        <div 
+          className="lg:hidden" 
+          style={{ height: 64 + 48 }} // Bottom nav (64px) + Contact bar (48px)
+          aria-hidden="true"
+        />
+      </>
+    );
+  }
 
   // Bottom nav is the base fixed element at the bottom
   // Z-Index: 43 (above contact bar, below floating buttons)
