@@ -6,7 +6,12 @@ interface ScrollDirectionState {
   scrollDirection: 'up' | 'down' | 'none';
 }
 
+/**
+ * SSR-safe scroll direction hook
+ * Returns safe defaults during SSR, updates after client mount
+ */
 export function useScrollDirection(threshold: number = 10) {
+  const [hasMounted, setHasMounted] = useState(false);
   const [state, setState] = useState<ScrollDirectionState>({
     isVisible: true,
     scrollY: 0,
@@ -16,7 +21,14 @@ export function useScrollDirection(threshold: number = 10) {
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
+  // Mark as mounted after first render
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const updateState = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - lastScrollY.current;
     
@@ -40,6 +52,9 @@ export function useScrollDirection(threshold: number = 10) {
   }, [threshold]);
 
   useEffect(() => {
+    // Only attach listeners after mount
+    if (!hasMounted) return;
+    
     const handleScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(updateState);
@@ -49,7 +64,7 @@ export function useScrollDirection(threshold: number = 10) {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [updateState]);
+  }, [updateState, hasMounted]);
 
   return state;
 }
