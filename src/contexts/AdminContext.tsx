@@ -31,11 +31,10 @@ const MODULE_PERMISSION_MAP: Record<string, string> = {
   categories: "categories",
   orders: "orders",
   quotes: "quotes",
-  logos: "content",
-  testimonials: "content",
-  "ux-insights": "reports",
+  logos: "logos",
+  testimonials: "testimonials",
+  "ux-insights": "ux_insights",
   roles: "roles",
-  users: "users",
 };
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
