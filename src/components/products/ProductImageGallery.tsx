@@ -69,10 +69,13 @@ const ProductImageGallery = ({ images, mainImage, productName, fallbackImage }: 
         role="button"
         aria-label="Open image gallery"
       >
-        {/* Main Image */}
+        {/* Main Image - No lazy loading as it's above the fold */}
         <img
           src={currentImage}
           alt={productName}
+          width={600}
+          height={600}
+          fetchPriority="high"
           className={cn(
             "w-full h-full object-contain p-4",
             "transition-all duration-300 ease-out",
@@ -161,8 +164,11 @@ const ProductImageGallery = ({ images, mainImage, productName, fallbackImage }: 
               <img
                 src={image}
                 alt={`${productName} - Thumbnail ${index + 1}`}
+                width={80}
+                height={80}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
             </button>
           ))}
