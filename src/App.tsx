@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +13,7 @@ import { AdminThemeProvider } from "@/contexts/AdminThemeContext";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import BilingualSEO from "@/components/seo/BilingualSEO";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { areAnimationsEnabled } from "@/lib/runtimeFlags";
 
 // Critical pages - load immediately for fast initial render
 import Index from "./pages/Index";
@@ -68,10 +69,10 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading fallback
+// Static loading fallback (NO animations)
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+    <div className="text-sm text-muted-foreground">Loading…</div>
   </div>
 );
 
@@ -82,77 +83,107 @@ const LazyRoute = ({ component: Component }: { component: React.ComponentType })
   </Suspense>
 );
 
-// Main App Component
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <AdminProvider>
-          <AdminLanguageProvider>
-            <AdminThemeProvider>
-              <CartProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <ScrollToTop />
-                    <BilingualSEO />
-                    <ErrorBoundary>
-                      <Routes>
-                        {/* Critical routes - no lazy loading */}
-                        <Route path="/" element={<Index />} />
-                        
-                        {/* Public routes */}
-                        <Route path="/categories" element={<LazyRoute component={Categories} />} />
-                        <Route path="/products" element={<LazyRoute component={Products} />} />
-                        <Route path="/category/:slug" element={<LazyRoute component={CategoryPage} />} />
-                        <Route path="/category/:parentSlug/:subSlug" element={<LazyRoute component={CategoryPage} />} />
-                        <Route path="/product/:slug" element={<LazyRoute component={ProductPage} />} />
-                        <Route path="/about" element={<LazyRoute component={About} />} />
-                        <Route path="/contact" element={<LazyRoute component={Contact} />} />
-                        <Route path="/cart" element={<LazyRoute component={Cart} />} />
-                        <Route path="/checkout" element={<LazyRoute component={Checkout} />} />
-                        <Route path="/orders" element={<LazyRoute component={Orders} />} />
-                        <Route path="/orders/:id" element={<LazyRoute component={OrderDetail} />} />
-                        <Route path="/account" element={<LazyRoute component={Account} />} />
-                        <Route path="/account/orders" element={<LazyRoute component={Orders} />} />
-                        <Route path="/wishlist" element={<LazyRoute component={Wishlist} />} />
-                        <Route path="/request-quote" element={<LazyRoute component={RequestQuote} />} />
-                        <Route path="/track-order" element={<LazyRoute component={TrackOrder} />} />
-                        <Route path="/privacy-policy" element={<LazyRoute component={PrivacyPolicy} />} />
-                        <Route path="/terms-conditions" element={<LazyRoute component={TermsConditions} />} />
-                        <Route path="/refund-policy" element={<LazyRoute component={RefundPolicy} />} />
-                        
-                        {/* Admin routes */}
-                        <Route path="/admin" element={<LazyRoute component={AdminDashboard} />} />
-                        <Route path="/admin/products" element={<LazyRoute component={AdminProducts} />} />
-                        <Route path="/admin/products/:id" element={<LazyRoute component={AdminProductEditor} />} />
-                        <Route path="/admin/categories" element={<LazyRoute component={AdminCategories} />} />
-                        <Route path="/admin/orders" element={<LazyRoute component={AdminOrders} />} />
-                        <Route path="/admin/orders/new" element={<LazyRoute component={AdminOrderCreate} />} />
-                        <Route path="/admin/orders/:id" element={<LazyRoute component={AdminOrderDetail} />} />
-                        <Route path="/admin/quotes" element={<LazyRoute component={AdminQuotes} />} />
-                        <Route path="/admin/logos" element={<LazyRoute component={AdminLogos} />} />
-                        <Route path="/admin/testimonials" element={<LazyRoute component={AdminTestimonials} />} />
-                        <Route path="/admin/ux-insights" element={<LazyRoute component={AdminUXInsights} />} />
-                        <Route path="/admin/roles" element={<LazyRoute component={AdminRoles} />} />
-                        <Route path="/admin/users" element={<LazyRoute component={AdminUsers} />} />
-                        <Route path="/admin/page-seo" element={<LazyRoute component={AdminPageSEO} />} />
-                        <Route path="/admin/seo-health" element={<LazyRoute component={AdminSEOHealth} />} />
-                        <Route path="/admin/og-preview" element={<LazyRoute component={AdminOGPreview} />} />
-                        
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </ErrorBoundary>
-                  </BrowserRouter>
-                </TooltipProvider>
-              </CartProvider>
-            </AdminThemeProvider>
-          </AdminLanguageProvider>
-        </AdminProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+const BootFallback = () => (
+  <div className="min-h-screen bg-background text-foreground">
+    <div className="container-premium py-10">
+      <div className="text-sm text-muted-foreground">Starting…</div>
+    </div>
+  </div>
 );
 
+// Main App Component
+const App = () => {
+  const [clientReady, setClientReady] = useState(false);
+
+  useEffect(() => {
+    // Temporary boot logs for preview debugging
+    console.log("[boot] App mounted");
+    setClientReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!clientReady) return;
+    console.log("[boot] Client ready");
+    console.log(`[boot] Animations enabled: ${areAnimationsEnabled()}`);
+  }, [clientReady]);
+
+  // HARD client-only guard: do not boot router/providers until mounted
+  if (!clientReady) {
+    return <BootFallback />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          <AdminProvider>
+            <AdminLanguageProvider>
+              <AdminThemeProvider>
+                <CartProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <ScrollToTop />
+                      <BilingualSEO />
+                      <ErrorBoundary>
+                        <Routes>
+                          {/* Critical routes - no lazy loading */}
+                          <Route path="/" element={<Index />} />
+
+                          {/* Public routes */}
+                          <Route path="/categories" element={<LazyRoute component={Categories} />} />
+                          <Route path="/products" element={<LazyRoute component={Products} />} />
+                          <Route path="/category/:slug" element={<LazyRoute component={CategoryPage} />} />
+                          <Route path="/category/:parentSlug/:subSlug" element={<LazyRoute component={CategoryPage} />} />
+                          <Route path="/product/:slug" element={<LazyRoute component={ProductPage} />} />
+                          <Route path="/about" element={<LazyRoute component={About} />} />
+                          <Route path="/contact" element={<LazyRoute component={Contact} />} />
+                          <Route path="/cart" element={<LazyRoute component={Cart} />} />
+                          <Route path="/checkout" element={<LazyRoute component={Checkout} />} />
+                          <Route path="/orders" element={<LazyRoute component={Orders} />} />
+                          <Route path="/orders/:id" element={<LazyRoute component={OrderDetail} />} />
+                          <Route path="/account" element={<LazyRoute component={Account} />} />
+                          <Route path="/account/orders" element={<LazyRoute component={Orders} />} />
+                          <Route path="/wishlist" element={<LazyRoute component={Wishlist} />} />
+                          <Route path="/request-quote" element={<LazyRoute component={RequestQuote} />} />
+                          <Route path="/track-order" element={<LazyRoute component={TrackOrder} />} />
+                          <Route path="/privacy-policy" element={<LazyRoute component={PrivacyPolicy} />} />
+                          <Route path="/terms-conditions" element={<LazyRoute component={TermsConditions} />} />
+                          <Route path="/refund-policy" element={<LazyRoute component={RefundPolicy} />} />
+
+                          {/* Admin routes */}
+                          <Route path="/admin" element={<LazyRoute component={AdminDashboard} />} />
+                          <Route path="/admin/products" element={<LazyRoute component={AdminProducts} />} />
+                          <Route path="/admin/products/:id" element={<LazyRoute component={AdminProductEditor} />} />
+                          <Route path="/admin/categories" element={<LazyRoute component={AdminCategories} />} />
+                          <Route path="/admin/orders" element={<LazyRoute component={AdminOrders} />} />
+                          <Route path="/admin/orders/new" element={<LazyRoute component={AdminOrderCreate} />} />
+                          <Route path="/admin/orders/:id" element={<LazyRoute component={AdminOrderDetail} />} />
+                          <Route path="/admin/quotes" element={<LazyRoute component={AdminQuotes} />} />
+                          <Route path="/admin/logos" element={<LazyRoute component={AdminLogos} />} />
+                          <Route path="/admin/testimonials" element={<LazyRoute component={AdminTestimonials} />} />
+                          <Route path="/admin/ux-insights" element={<LazyRoute component={AdminUXInsights} />} />
+                          <Route path="/admin/roles" element={<LazyRoute component={AdminRoles} />} />
+                          <Route path="/admin/users" element={<LazyRoute component={AdminUsers} />} />
+                          <Route path="/admin/page-seo" element={<LazyRoute component={AdminPageSEO} />} />
+                          <Route path="/admin/seo-health" element={<LazyRoute component={AdminSEOHealth} />} />
+                          <Route path="/admin/og-preview" element={<LazyRoute component={AdminOGPreview} />} />
+
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </ErrorBoundary>
+                    </BrowserRouter>
+                  </TooltipProvider>
+                </CartProvider>
+              </AdminThemeProvider>
+            </AdminLanguageProvider>
+          </AdminProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  );
+};
+
 export default App;
+
