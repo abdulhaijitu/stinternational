@@ -8,6 +8,7 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
 import { DEFAULT_PRODUCT_IMAGE } from "@/lib/productFallbackImages";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -69,28 +70,21 @@ const ProductImageGallery = ({ images, mainImage, productName, fallbackImage }: 
         role="button"
         aria-label="Open image gallery"
       >
-        {/* Main Image - No lazy loading as it's above the fold */}
-        <img
+        {/* Main Image with progressive loading */}
+        <ProgressiveImage
           src={currentImage}
           alt={productName}
           width={600}
           height={600}
-          fetchPriority="high"
+          priority
+          containerClassName="w-full h-full"
           className={cn(
             "w-full h-full object-contain p-4",
             "transition-all duration-300 ease-out",
-            "group-hover:scale-[1.02]",
-            !isImageLoaded && "opacity-0"
+            "group-hover:scale-[1.02]"
           )}
           onLoad={() => setIsImageLoaded(true)}
         />
-        
-        {/* Loading placeholder */}
-        {!isImageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
         
         {/* Zoom Indicator */}
         <div className={cn(
@@ -161,14 +155,13 @@ const ProductImageGallery = ({ images, mainImage, productName, fallbackImage }: 
               aria-label={`View image ${index + 1}`}
               aria-current={selectedIndex === index ? "true" : "false"}
             >
-              <img
+              <ProgressiveImage
                 src={image}
                 alt={`${productName} - Thumbnail ${index + 1}`}
                 width={80}
                 height={80}
+                containerClassName="w-full h-full"
                 className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
               />
             </button>
           ))}

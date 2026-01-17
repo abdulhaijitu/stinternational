@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 import { getProductImageWithFallback } from "@/lib/productFallbackImages";
+import ProgressiveImage from "@/components/ui/ProgressiveImage";
 
 interface DBProductCardProps {
   product: DBProduct;
@@ -133,24 +134,23 @@ const DBProductCard = ({
           </div>
         </div>
 
-        {/* Product Image with lazy loading */}
+        {/* Product Image with progressive loading */}
         <Link 
           to={`/product/${product.slug}`} 
           className="block w-full h-full"
           onClick={() => trackProductClick(product.slug, productFields.name, 'card')}
         >
-          <img
+          <ProgressiveImage
             src={imageUrl}
             alt={productFields.name}
             width={400}
             height={400}
+            containerClassName="w-full h-full"
             className={cn(
               "w-full h-full object-cover",
               "transition-transform duration-300 ease-out",
               "group-hover:scale-[1.03]"
             )}
-            loading="lazy"
-            decoding="async"
           />
         </Link>
 

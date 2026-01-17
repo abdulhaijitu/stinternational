@@ -677,3 +677,13 @@
     -webkit-touch-callout: none;
   }
 }
+
+/* Progressive Image Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
