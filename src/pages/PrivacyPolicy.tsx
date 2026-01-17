@@ -81,7 +81,7 @@ const PrivacyPolicy = () => {
                 <p className="text-muted-foreground leading-relaxed">
                   If you have questions about this Privacy Policy, please contact us at:<br />
                   Email: info@stinternationalbd.com<br />
-                  Phone: +880 2-7165562, 01715-575665<br />
+                  Phone: 01715-575665<br />
                   Address: Mamun Mansion, 52/2, Toyeanbee Circular Road, Hatkhola, Tikatuli, Dhaka-1203, Bangladesh
                 </p>
               </div>
