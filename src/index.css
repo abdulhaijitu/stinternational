@@ -13,6 +13,42 @@
  * DO NOT add @import for fonts here - it blocks rendering!
  */
 
+/*
+ * ========================================
+ * Z-INDEX HIERARCHY (Global Convention)
+ * ========================================
+ * 
+ * This project uses a structured z-index system to prevent
+ * floating element collisions and ensure proper stacking.
+ * 
+ * Priority (highest to lowest):
+ * ----------------------------------------
+ * z-[60]   : Modals, Dialogs, Alerts (highest priority)
+ * z-50     : Header, Drawer overlays, Navigation menus
+ * z-[45]   : WhatsApp button (primary floating CTA)
+ * z-[44]   : Back to Top button (above WhatsApp)
+ * z-[43]   : Mobile Bottom Nav (fixed navigation)
+ * z-[42]   : Mobile Contact Bar (above bottom nav)
+ * z-40     : Tooltips, Popovers
+ * z-30     : Sticky sidebars, Filters
+ * z-20     : Floating labels, Badges
+ * z-10     : Elevated content, Cards on hover
+ * z-0      : Base content layer
+ * 
+ * Mobile Floating Stack (bottom to top):
+ * ----------------------------------------
+ * bottom-0       : Mobile Bottom Nav (64px height)
+ * bottom-64px    : Mobile Contact Bar (48px height)
+ * bottom-128px   : WhatsApp Button
+ * bottom-192px+  : Back to Top Button
+ * 
+ * RULES:
+ * - Never use arbitrary high z-index values (e.g., z-[9999])
+ * - Floating CTAs must never overlap each other
+ * - Modals always take highest priority
+ * - Content should never block fixed navigation
+ */
+
 @layer base {
   :root {
     /* 

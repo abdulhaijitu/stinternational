@@ -99,12 +99,14 @@ const MobileBottomNav = () => {
     },
   ];
 
+  // Bottom nav is the base fixed element at the bottom
+  // Z-Index: 43 (above contact bar, below floating buttons)
   return (
     <>
       {/* Bottom Navigation Bar */}
       <nav 
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 lg:hidden",
+          "fixed bottom-0 left-0 right-0 z-[43] lg:hidden",
           "bg-background/95 backdrop-blur-md border-t border-border",
           "transition-transform duration-200 ease-out",
           "safe-area-bottom",
