@@ -119,6 +119,7 @@ export const bn = {
     noProductsFound: "কোনো পণ্য পাওয়া যায়নি",
     filterBy: "ফিল্টার করুন",
     sortBy: "সাজান",
+    displayMode: "ডিসপ্লে মোড",
     priceRange: "মূল্য সীমা",
     availability: "প্রাপ্যতা",
     // Product card actions

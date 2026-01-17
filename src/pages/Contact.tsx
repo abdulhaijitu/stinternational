@@ -160,12 +160,39 @@ const Contact = () => {
     
     setSubmitting(true);
     
-    // Simulate submission
+    // Build mailto URL with form data
+    const subjectMap: Record<string, string> = {
+      inquiry: language === "bn" ? "পণ্য সম্পর্কে জিজ্ঞাসা" : "Product Inquiry",
+      quote: language === "bn" ? "কোটেশন অনুরোধ" : "Quote Request",
+      bulk: language === "bn" ? "বাল্ক অর্ডার" : "Bulk Order",
+      support: language === "bn" ? "টেকনিক্যাল সাপোর্ট" : "Technical Support",
+      other: language === "bn" ? "অন্যান্য" : "Other",
+    };
+    
+    const emailSubject = encodeURIComponent(`[Contact Form] ${subjectMap[formData.subject] || formData.subject}`);
+    const emailBody = encodeURIComponent(
+      `Name: ${formData.name}\n` +
+      `Email: ${formData.email}\n` +
+      `Phone: ${formData.phone || 'Not provided'}\n` +
+      `Company: ${formData.company || 'Not provided'}\n\n` +
+      `Message:\n${formData.message}`
+    );
+    
+    const mailtoUrl = `mailto:info@stinternationalbd.com?subject=${emailSubject}&body=${emailBody}`;
+    
+    // Open email client
+    window.location.href = mailtoUrl;
+    
+    // Show info toast and reset form
     setTimeout(() => {
-      toast.success(language === "bn" ? "বার্তা পাঠানো হয়েছে!" : "Message sent successfully!");
+      toast.success(
+        language === "bn" 
+          ? "ইমেইল ক্লায়েন্ট খোলা হয়েছে। অনুগ্রহ করে ইমেইল পাঠান।" 
+          : "Email client opened. Please send the email to complete your message."
+      );
       setFormData({ name: "", email: "", phone: "", company: "", subject: "", message: "" });
       setSubmitting(false);
-    }, 1000);
+    }, 500);
   };
 
   const handleChange = (field: string, value: string) => {
