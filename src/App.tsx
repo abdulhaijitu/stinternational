@@ -13,7 +13,6 @@ import { AdminThemeProvider } from "@/contexts/AdminThemeContext";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import BilingualSEO from "@/components/seo/BilingualSEO";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { areAnimationsEnabled } from "@/lib/runtimeFlags";
 
 // Critical pages - load immediately for fast initial render
 import Index from "./pages/Index";
@@ -96,25 +95,14 @@ const App = () => {
   const [clientReady, setClientReady] = useState(false);
 
   useEffect(() => {
-    // Temporary boot logs for preview debugging
-    console.log("[boot] App mounted");
-    
     // Hide the initial loader from index.html
     const loader = document.querySelector('.initial-loader');
     if (loader) {
       loader.classList.add('hidden');
-      // Remove from DOM after transition
       setTimeout(() => loader.remove(), 300);
     }
-    
     setClientReady(true);
   }, []);
-
-  useEffect(() => {
-    if (!clientReady) return;
-    console.log("[boot] Client ready");
-    console.log(`[boot] Animations enabled: ${areAnimationsEnabled()}`);
-  }, [clientReady]);
 
   // HARD client-only guard: do not boot router/providers until mounted
   if (!clientReady) {
