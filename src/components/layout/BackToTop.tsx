@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowUp } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -9,14 +8,9 @@ const SCROLL_THRESHOLD = 400;
 
 /**
  * Back to Top Button
- * Priority: 2 (Secondary floating element - positioned ABOVE WhatsApp)
- * Z-Index: 44 (Below WhatsApp, below modals/header)
- * 
- * Smart positioning:
- * - Mobile: Above WhatsApp button with 16px gap
- * - Desktop: Above WhatsApp button with 20px gap
- * 
- * Client-Only: Renders only after mount to prevent hydration issues
+ *
+ * Critical fix: STATIC render only (no framer-motion / AnimatePresence)
+ * so preview boot can never be blocked by animations.
  */
 const BackToTop = () => {
   const [hasMounted, setHasMounted] = useState(false);
@@ -34,9 +28,9 @@ const BackToTop = () => {
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    
+
     const progress = docHeight > 0 ? Math.min((scrollY / docHeight) * 100, 100) : 0;
-    
+
     setScrollProgress(progress);
     setIsVisible(scrollY > SCROLL_THRESHOLD);
   }, []);
@@ -56,12 +50,12 @@ const BackToTop = () => {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     handleScroll();
-    
+
     return () => window.removeEventListener("scroll", onScroll);
   }, [handleScroll, hasMounted]);
 
   const scrollToTop = useCallback(() => {
-    trackUtility('back_to_top');
+    trackUtility("back_to_top");
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -69,7 +63,7 @@ const BackToTop = () => {
   }, [trackUtility]);
 
   // Don't render until client is ready
-  if (!hasMounted) {
+  if (!hasMounted || !isVisible) {
     return null;
   }
 
@@ -89,79 +83,64 @@ const BackToTop = () => {
   const bottomPosition = whatsappBottom + whatsappButtonHeight + gap;
 
   return (
-    <AnimatePresence mode="wait">
-      {isVisible && (
-        <motion.button
-          key="back-to-top"
-          onClick={scrollToTop}
-          aria-label="Back to top"
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 300, 
-            damping: 25 
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          style={{ 
-            bottom: bottomPosition,
-            width: size,
-            height: size
-          }}
-          className={cn(
-            "fixed right-4 md:right-6 z-[44]",
-            "rounded-full",
-            "bg-background/95 backdrop-blur-sm border border-border",
-            "shadow-md hover:shadow-lg",
-            "flex items-center justify-center",
-            "text-muted-foreground hover:text-foreground",
-            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            "touch-manipulation cursor-pointer"
-          )}
-        >
-          {/* Progress Ring SVG */}
-          <svg
-            className="absolute inset-0 -rotate-90"
-            width={size}
-            height={size}
-            viewBox={`0 0 ${size} ${size}`}
-          >
-            {/* Background circle */}
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              className="text-border"
-            />
-            {/* Progress circle */}
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              className="text-primary transition-[stroke-dashoffset] duration-150 ease-out"
-            />
-          </svg>
-          
-          {/* Arrow Icon */}
-          <ArrowUp className={cn(
-            "relative z-10",
-            isMobile ? "h-4 w-4" : "h-4.5 w-4.5"
-          )} />
-        </motion.button>
+    <button
+      onClick={scrollToTop}
+      aria-label="Back to top"
+      style={{
+        bottom: bottomPosition,
+        width: size,
+        height: size,
+      }}
+      className={cn(
+        "fixed right-4 md:right-6 z-[44]",
+        "rounded-full",
+        "bg-background/95 backdrop-blur-sm border border-border",
+        "shadow-md hover:shadow-lg",
+        "flex items-center justify-center",
+        "text-muted-foreground hover:text-foreground",
+        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "touch-manipulation cursor-pointer"
       )}
-    </AnimatePresence>
+    >
+      {/* Progress Ring SVG */}
+      <svg
+        className="absolute inset-0 -rotate-90"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+      >
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-border"
+        />
+        {/* Progress circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="text-primary transition-[stroke-dashoffset] duration-150 ease-out"
+        />
+      </svg>
+
+      {/* Arrow Icon */}
+      <ArrowUp
+        className={cn("relative z-10", isMobile ? "h-4 w-4" : "h-4.5 w-4.5")}
+      />
+    </button>
   );
 };
 
 export default BackToTop;
+
