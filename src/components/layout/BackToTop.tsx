@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -15,12 +15,21 @@ const SCROLL_THRESHOLD = 400;
  * Smart positioning:
  * - Mobile: Above WhatsApp button with 16px gap
  * - Desktop: Above WhatsApp button with 20px gap
+ * 
+ * Client-Only: Renders only after mount to prevent hydration issues
  */
 const BackToTop = () => {
+  const [hasMounted, setHasMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const { trackUtility } = useUXTelemetry();
   const isMobile = useIsMobile();
+  const tickingRef = useRef(false);
+
+  // Client-only mount guard
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY;
@@ -33,14 +42,15 @@ const BackToTop = () => {
   }, []);
 
   useEffect(() => {
-    let ticking = false;
+    if (!hasMounted) return;
+
     const onScroll = () => {
-      if (!ticking) {
+      if (!tickingRef.current) {
         window.requestAnimationFrame(() => {
           handleScroll();
-          ticking = false;
+          tickingRef.current = false;
         });
-        ticking = true;
+        tickingRef.current = true;
       }
     };
 
@@ -48,15 +58,20 @@ const BackToTop = () => {
     handleScroll();
     
     return () => window.removeEventListener("scroll", onScroll);
-  }, [handleScroll]);
+  }, [handleScroll, hasMounted]);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     trackUtility('back_to_top');
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  };
+  }, [trackUtility]);
+
+  // Don't render until client is ready
+  if (!hasMounted) {
+    return null;
+  }
 
   // Circle properties for progress ring
   const size = isMobile ? 40 : 44;
@@ -74,9 +89,10 @@ const BackToTop = () => {
   const bottomPosition = whatsappBottom + whatsappButtonHeight + gap;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isVisible && (
         <motion.button
+          key="back-to-top"
           onClick={scrollToTop}
           aria-label="Back to top"
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -85,8 +101,7 @@ const BackToTop = () => {
           transition={{ 
             type: "spring", 
             stiffness: 300, 
-            damping: 25,
-            duration: 0.3 
+            damping: 25 
           }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -124,7 +139,7 @@ const BackToTop = () => {
               className="text-border"
             />
             {/* Progress circle */}
-            <motion.circle
+            <circle
               cx={size / 2}
               cy={size / 2}
               r={radius}
@@ -134,10 +149,7 @@ const BackToTop = () => {
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
-              className="text-primary"
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="text-primary transition-[stroke-dashoffset] duration-150 ease-out"
             />
           </svg>
           

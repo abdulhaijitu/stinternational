@@ -1,10 +1,13 @@
+import { lazy, Suspense } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import BackToTop from "./BackToTop";
-import MobileBottomNav from "./MobileBottomNav";
-import MobileContactBar from "./MobileContactBar";
-import FloatingWhatsApp from "./FloatingWhatsApp";
-import TawkToChat from "./TawkToChat";
+
+// Lazy load floating elements - they are not critical for initial render
+const BackToTop = lazy(() => import("./BackToTop"));
+const MobileBottomNav = lazy(() => import("./MobileBottomNav"));
+const MobileContactBar = lazy(() => import("./MobileContactBar"));
+const FloatingWhatsApp = lazy(() => import("./FloatingWhatsApp"));
+const TawkToChat = lazy(() => import("./TawkToChat"));
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +22,8 @@ interface LayoutProps {
  * 3. FloatingWhatsApp (z-45) - Primary floating CTA
  * 4. BackToTop (z-44) - Above WhatsApp button
  * 5. TawkToChat - Third-party widget (manages own z-index)
+ * 
+ * All floating elements are lazy-loaded to prevent blocking initial render
  */
 const Layout = ({ children }: LayoutProps) => {
   return (
@@ -29,17 +34,19 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
       <Footer />
       
-      {/* Floating Elements - Order matters for proper stacking context */}
-      {/* Mobile fixed bars first */}
-      <MobileContactBar />
-      <MobileBottomNav />
-      
-      {/* Floating buttons - WhatsApp is primary, BackToTop is above it */}
-      <FloatingWhatsApp />
-      <BackToTop />
-      
-      {/* Third-party chat widget */}
-      <TawkToChat />
+      {/* Floating Elements - Lazy loaded, non-blocking */}
+      <Suspense fallback={null}>
+        {/* Mobile fixed bars first */}
+        <MobileContactBar />
+        <MobileBottomNav />
+        
+        {/* Floating buttons - WhatsApp is primary, BackToTop is above it */}
+        <FloatingWhatsApp />
+        <BackToTop />
+        
+        {/* Third-party chat widget */}
+        <TawkToChat />
+      </Suspense>
     </div>
   );
 };
