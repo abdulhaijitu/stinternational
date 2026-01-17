@@ -359,7 +359,7 @@ const HeroSlider = () => {
           {/* Right Column - Image Container */}
           <div className="hidden lg:block relative h-[400px]" aria-hidden="true">
             {/* Image container with rounded corners */}
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-primary-foreground/5 border border-primary-foreground/10">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl">
               {heroSlides.map((slide, index) => (
                 <div
                   key={slide.id}
@@ -372,10 +372,8 @@ const HeroSlider = () => {
                     src={heroImageMap[slide.visual]}
                     alt=""
                     loading={index === 0 ? "eager" : "lazy"}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    className="absolute inset-0 w-full h-full object-cover object-right"
                   />
-                  {/* Subtle gradient overlay for depth */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/30" />
                 </div>
               ))}
             </div>
