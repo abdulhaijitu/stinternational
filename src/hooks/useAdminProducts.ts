@@ -15,6 +15,7 @@ export interface AdminProduct {
   image_url: string | null;
   category: { id: string; name: string } | null;
   created_by: string | null;
+  creator: { full_name: string | null } | null;
 }
 
 export const ADMIN_PRODUCTS_QUERY_KEY = ["admin", "products"];
@@ -69,8 +70,30 @@ export const useAdminProducts = (showRealtimeToasts = true) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      
+      // Fetch creator profiles for products that have created_by
+      const creatorIds = [...new Set(data?.filter(p => p.created_by).map(p => p.created_by) || [])];
+      let creatorMap = new Map<string, { full_name: string | null }>();
+      
+      if (creatorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", creatorIds);
+        
+        profiles?.forEach(p => {
+          creatorMap.set(p.user_id, { full_name: p.full_name });
+        });
+      }
+      
+      // Attach creator info to products
+      const productsWithCreators = (data || []).map(p => ({
+        ...p,
+        creator: p.created_by ? creatorMap.get(p.created_by) || null : null,
+      }));
+      
       initialLoadDone.current = true;
-      return (data || []) as AdminProduct[];
+      return productsWithCreators as AdminProduct[];
     },
     staleTime: 0,
     refetchOnMount: true,
