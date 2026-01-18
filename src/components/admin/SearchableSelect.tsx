@@ -60,9 +60,10 @@ export function SearchableSelect({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "w-full justify-between font-normal",
+            "w-full justify-between font-normal h-10 transition-colors duration-150",
             !value && "text-muted-foreground",
-            error && "border-destructive focus:ring-destructive",
+            error && "border-destructive focus-visible:ring-destructive ring-destructive/20",
+            disabled && "opacity-50 cursor-not-allowed",
             className
           )}
         >
@@ -74,16 +75,22 @@ export function SearchableSelect({
               )}
             </span>
           ) : (
-            placeholder
+            <span className="truncate">{placeholder}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent 
+        className="w-[--radix-popover-trigger-width] p-0" 
+        align="start"
+        sideOffset={4}
+      >
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+          <CommandInput placeholder={searchPlaceholder} className="h-9" />
+          <CommandList className="max-h-[200px]">
+            <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">
+              {emptyMessage}
+            </CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
@@ -93,16 +100,19 @@ export function SearchableSelect({
                     onValueChange(option.value === value ? "" : option.value);
                     setOpen(false);
                   }}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 flex-shrink-0 transition-opacity duration-150",
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <span className="truncate flex-1">{option.label}</span>
                   {showCount && option.count !== undefined && (
-                    <span className="ml-2 text-xs text-muted-foreground">({option.count})</span>
+                    <span className="ml-2 text-xs text-muted-foreground flex-shrink-0">
+                      ({option.count})
+                    </span>
                   )}
                 </CommandItem>
               ))}
