@@ -235,7 +235,7 @@ const HeroSlider = () => {
     setIsManuallyPaused(prev => !prev);
   }, []);
 
-  const SLIDE_INTERVAL = 6000; // 6 seconds
+  const SLIDE_INTERVAL = 5000; // 5 seconds
   const TRANSITION_DURATION = 400; // 400ms
   const PROGRESS_UPDATE_INTERVAL = 50; // Update progress every 50ms
 
