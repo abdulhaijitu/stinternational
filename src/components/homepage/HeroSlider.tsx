@@ -25,42 +25,57 @@ const heroImageMap: Record<string, string> = {
 // Slide animation types for each industry
 type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
 
-// Slide gradient themes for visual variety
+// Slide gradient themes for visual variety - Premium multi-layer design
 interface SlideTheme {
   gradient: string;
   overlayColor: string;
   accentGlow: string;
+  secondaryGlow: string;
+  imageOverlay: string;
   statBg: string;
+  trustBadgeGlow: string;
 }
 
 const slideThemes: SlideTheme[] = [
   {
-    // Slide 1: Navy to subtle gold accent
-    gradient: "from-[hsl(220,50%,12%)] via-[hsl(220,45%,18%)] to-[hsl(220,40%,22%)]",
-    overlayColor: "bg-gradient-to-br from-amber-500/10 via-transparent to-blue-900/20",
-    accentGlow: "bg-amber-500/20",
-    statBg: "bg-amber-500/10",
+    // Slide 1: Deep navy with amber/gold accent
+    gradient: "from-[hsl(220,55%,8%)] via-[hsl(225,50%,14%)] to-[hsl(235,45%,18%)]",
+    overlayColor: "bg-[radial-gradient(ellipse_120%_80%_at_80%_20%,hsl(38,90%,50%,0.08),transparent_60%),radial-gradient(ellipse_100%_100%_at_20%_80%,hsl(220,80%,50%,0.12),transparent_50%)]",
+    accentGlow: "bg-amber-500/25",
+    secondaryGlow: "bg-indigo-600/20",
+    imageOverlay: "bg-gradient-to-br from-amber-900/30 via-transparent to-indigo-950/40",
+    statBg: "bg-gradient-to-br from-amber-500/15 to-amber-600/10",
+    trustBadgeGlow: "shadow-[0_0_20px_hsl(38,90%,50%,0.2)]",
   },
   {
-    // Slide 2: Teal/Cyan scientific tone
-    gradient: "from-[hsl(200,50%,12%)] via-[hsl(195,45%,16%)] to-[hsl(210,40%,20%)]",
-    overlayColor: "bg-gradient-to-br from-cyan-500/15 via-transparent to-teal-900/20",
-    accentGlow: "bg-cyan-500/20",
-    statBg: "bg-cyan-500/10",
+    // Slide 2: Teal/Cyan scientific with blue undertone
+    gradient: "from-[hsl(200,55%,8%)] via-[hsl(210,50%,12%)] to-[hsl(220,45%,16%)]",
+    overlayColor: "bg-[radial-gradient(ellipse_100%_80%_at_70%_30%,hsl(185,80%,45%,0.10),transparent_55%),radial-gradient(ellipse_80%_100%_at_10%_90%,hsl(230,70%,50%,0.12),transparent_50%)]",
+    accentGlow: "bg-cyan-500/25",
+    secondaryGlow: "bg-blue-600/20",
+    imageOverlay: "bg-gradient-to-br from-teal-900/30 via-transparent to-blue-950/40",
+    statBg: "bg-gradient-to-br from-cyan-500/15 to-teal-600/10",
+    trustBadgeGlow: "shadow-[0_0_20px_hsl(185,80%,45%,0.2)]",
   },
   {
-    // Slide 3: Indigo/Deep purple innovation tone
-    gradient: "from-[hsl(240,40%,14%)] via-[hsl(250,35%,18%)] to-[hsl(220,45%,20%)]",
-    overlayColor: "bg-gradient-to-br from-indigo-500/12 via-transparent to-purple-900/15",
-    accentGlow: "bg-indigo-500/20",
-    statBg: "bg-indigo-500/10",
+    // Slide 3: Indigo/Purple innovation with electric blue
+    gradient: "from-[hsl(250,50%,10%)] via-[hsl(260,45%,14%)] to-[hsl(240,50%,18%)]",
+    overlayColor: "bg-[radial-gradient(ellipse_100%_80%_at_75%_25%,hsl(270,70%,55%,0.10),transparent_55%),radial-gradient(ellipse_90%_90%_at_15%_85%,hsl(220,90%,55%,0.12),transparent_50%)]",
+    accentGlow: "bg-violet-500/25",
+    secondaryGlow: "bg-blue-500/20",
+    imageOverlay: "bg-gradient-to-br from-purple-900/30 via-transparent to-indigo-950/40",
+    statBg: "bg-gradient-to-br from-violet-500/15 to-indigo-600/10",
+    trustBadgeGlow: "shadow-[0_0_20px_hsl(270,70%,55%,0.2)]",
   },
   {
-    // Slide 4: Classic navy with warm accent
-    gradient: "from-[hsl(215,50%,12%)] via-[hsl(220,48%,16%)] to-[hsl(225,42%,22%)]",
-    overlayColor: "bg-gradient-to-br from-orange-500/10 via-transparent to-slate-900/20",
-    accentGlow: "bg-orange-500/20",
-    statBg: "bg-orange-500/10",
+    // Slide 4: Deep navy with warm orange accent
+    gradient: "from-[hsl(215,55%,8%)] via-[hsl(220,52%,12%)] to-[hsl(230,48%,16%)]",
+    overlayColor: "bg-[radial-gradient(ellipse_110%_80%_at_80%_30%,hsl(25,90%,50%,0.08),transparent_55%),radial-gradient(ellipse_80%_90%_at_15%_85%,hsl(210,80%,50%,0.10),transparent_50%)]",
+    accentGlow: "bg-orange-500/25",
+    secondaryGlow: "bg-sky-600/20",
+    imageOverlay: "bg-gradient-to-br from-orange-900/25 via-transparent to-slate-950/40",
+    statBg: "bg-gradient-to-br from-orange-500/15 to-amber-600/10",
+    trustBadgeGlow: "shadow-[0_0_20px_hsl(25,90%,50%,0.2)]",
   },
 ];
 
@@ -316,42 +331,58 @@ const HeroSlider = () => {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Dynamic Slide Background Gradients */}
+      {/* Dynamic Slide Background Gradients - Premium Multi-layer */}
       {heroSlides.map((slide, index) => (
         <div
           key={`bg-${slide.id}`}
           className={cn(
-            "absolute inset-0 bg-gradient-to-br transition-opacity duration-[400ms] ease-out",
+            "absolute inset-0 bg-gradient-to-br transition-opacity duration-[600ms] ease-out",
             slide.theme.gradient,
             currentSlide === index ? "opacity-100" : "opacity-0"
           )}
         />
       ))}
 
-      {/* Progress Bar */}
+      {/* Premium Color Overlay Layer - Soft multi-color wash */}
+      {heroSlides.map((slide, index) => (
+        <div
+          key={`overlay-${slide.id}`}
+          className={cn(
+            "absolute inset-0 transition-opacity duration-[600ms] ease-out",
+            slide.theme.overlayColor,
+            currentSlide === index ? "opacity-100" : "opacity-0"
+          )}
+        />
+      ))}
+
+      {/* Progress Bar - Enhanced with gradient glow */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-primary-foreground/10 z-20">
         <div 
-          className="h-full bg-gradient-to-r from-accent via-accent to-amber-400 transition-all duration-100 ease-linear"
+          className="h-full bg-gradient-to-r from-accent via-accent to-amber-400 transition-all duration-100 ease-linear shadow-[0_0_12px_hsl(38,90%,50%,0.4)]"
           style={{ width: `${effectivePaused ? progress : progress}%` }}
         />
       </div>
 
-      {/* Enhanced Background Effects */}
+      {/* Enhanced Background Effects - Premium glow system */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Primary accent glow - animates with slide */}
+        {/* Primary accent glow - Large radial */}
         <div className={cn(
-          "absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full blur-[120px] transform translate-x-1/2 transition-all duration-700",
+          "absolute top-0 right-0 w-[700px] h-[700px] md:w-[900px] md:h-[900px] rounded-full blur-[150px] md:blur-[180px] transform translate-x-1/3 -translate-y-1/4 transition-all duration-700",
           currentTheme.accentGlow
         )} />
-        {/* Secondary subtle glow */}
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
-        {/* Left side subtle accent */}
+        {/* Secondary glow - Bottom left */}
         <div className={cn(
-          "absolute top-1/2 -left-32 w-[300px] h-[300px] rounded-full blur-[100px] transition-all duration-700",
-          currentTheme.accentGlow,
-          "opacity-50"
+          "absolute bottom-0 left-0 w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full blur-[120px] md:blur-[150px] transform -translate-x-1/4 translate-y-1/4 transition-all duration-700",
+          currentTheme.secondaryGlow
         )} />
+        {/* Center ambient glow */}
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground/[0.03] rounded-full blur-[100px] transform -translate-x-1/2 -translate-y-1/2" />
+        {/* Subtle noise texture overlay for premium feel */}
+        <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
       </div>
+      
+      {/* Gradient fade divider at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none z-10" />
 
       <div className="container-premium py-16 md:py-20 lg:py-24 relative">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[400px]">
@@ -367,9 +398,12 @@ const HeroSlider = () => {
                 aria-hidden={currentSlide !== index}
                 className={getSlideAnimationClasses(slide.animation, currentSlide === index)}
               >
-                {/* Trust Badge - Enhanced with left border accent */}
+                {/* Trust Badge - Enhanced with soft glow and tinted border */}
                 <motion.div 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full text-sm mb-6 md:mb-8 border-l-2 border-accent shadow-sm"
+                  className={cn(
+                    "inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 backdrop-blur-md rounded-full text-sm mb-6 md:mb-8 border border-accent/30 transition-shadow duration-500",
+                    currentSlide === index && slide.theme.trustBadgeGlow
+                  )}
                   initial={{ opacity: 0, y: -20 }}
                   animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
                   transition={{ duration: 0.4, delay: 0.1 }}
@@ -378,28 +412,28 @@ const HeroSlider = () => {
                     animate={currentSlide === index ? { rotate: [0, 360] } : {}}
                     transition={{ duration: 0.6, delay: 0.2 }}
                   >
-                    <CheckCircle className="h-4 w-4 text-accent" />
+                    <CheckCircle className="h-4 w-4 text-accent drop-shadow-[0_0_4px_hsl(38,90%,50%,0.5)]" />
                   </motion.div>
-                  <span className="font-medium">{slide.trustBadge}</span>
+                  <span className="font-medium text-primary-foreground/95">{slide.trustBadge}</span>
                 </motion.div>
                 
-                {/* Headline - with highlighted accent */}
+                {/* Headline - Two-tone color design with tighter typography */}
                 <motion.h1 
-                  className="text-balance mb-4 md:mb-6"
+                  className="text-balance mb-4 md:mb-6 leading-[1.1] tracking-[-0.02em]"
                   initial={{ opacity: 0, y: 30 }}
                   animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  {slide.headline}{" "}
+                  <span className="text-primary-foreground/95">{slide.headline}</span>{" "}
                   <motion.span 
-                    className="text-accent relative inline-block"
+                    className="text-accent relative inline-block drop-shadow-[0_0_20px_hsl(38,90%,50%,0.3)]"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={currentSlide === index ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.4, delay: 0.4 }}
                   >
                     {slide.headlineAccent}
                     <motion.span 
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-accent/80 to-transparent rounded-full"
+                      className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-accent via-accent/80 to-transparent rounded-full shadow-[0_0_8px_hsl(38,90%,50%,0.4)]"
                       initial={{ scaleX: 0 }}
                       animate={currentSlide === index ? { scaleX: 1 } : { scaleX: 0 }}
                       transition={{ duration: 0.5, delay: 0.6 }}
@@ -505,16 +539,16 @@ const HeroSlider = () => {
 
           {/* Right Column / Mobile Bottom - Image Container */}
           <div className="relative h-[200px] sm:h-[250px] lg:h-[400px] mt-8 lg:mt-0" aria-hidden="true">
-            {/* Image container with rounded corners and color overlay */}
-            <div className="relative w-full h-full rounded-xl lg:rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl">
+            {/* Image container with rounded corners, premium border and color overlay */}
+            <div className="relative w-full h-full rounded-xl lg:rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl shadow-black/30">
               {heroSlides.map((slide, index) => (
                 <div
                   key={slide.id}
                   className={cn(
-                    "absolute inset-0 transition-all duration-[400ms] ease-out",
+                    "absolute inset-0 transition-all duration-[500ms] ease-out",
                     currentSlide === index 
-                      ? "opacity-100 translate-x-0" 
-                      : "opacity-0 translate-x-3"
+                      ? "opacity-100 translate-x-0 scale-100" 
+                      : "opacity-0 translate-x-3 scale-[1.02]"
                   )}
                 >
                   <img
@@ -523,25 +557,30 @@ const HeroSlider = () => {
                     loading={index === 0 ? "eager" : "lazy"}
                     className="absolute inset-0 w-full h-full object-cover object-center lg:object-right"
                   />
-                  {/* Color overlay matching slide theme */}
+                  {/* Premium color overlay matching slide theme */}
                   <div className={cn(
                     "absolute inset-0 transition-opacity duration-500",
-                    slide.theme.overlayColor,
+                    slide.theme.imageOverlay,
                     currentSlide === index ? "opacity-100" : "opacity-0"
                   )} />
+                  {/* Soft edge fade for natural blending */}
+                  <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[hsl(220,50%,10%,0.4)] md:to-[hsl(220,50%,10%,0.3)]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220,50%,10%,0.3)] via-transparent to-transparent" />
                 </div>
               ))}
               
-              {/* Subtle inner shadow for depth */}
-              <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.3)] pointer-events-none" />
+              {/* Premium inner shadow for depth */}
+              <div className="absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.4)] pointer-events-none" />
+              {/* Subtle inner glow at edges */}
+              <div className="absolute inset-0 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] pointer-events-none rounded-xl lg:rounded-2xl" />
             </div>
             
-            {/* Stats card - Products count with tinted background */}
+            {/* Stats card - Products count with enhanced tinted background */}
             <motion.div 
               className={cn(
-                "absolute -top-2 -right-2 lg:-right-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 z-10",
+                "absolute -top-2 -right-2 lg:-right-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-xl border border-primary-foreground/20 z-10",
                 currentTheme.statBg,
-                "bg-background/90"
+                "bg-background/85"
               )}
               initial={{ opacity: 0, y: -20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -556,15 +595,17 @@ const HeroSlider = () => {
               >
                 5000+
               </motion.div>
-              <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.productsCount}</div>
+              <div className="text-[10px] lg:text-xs text-muted-foreground font-medium">{t.hero.productsCount}</div>
+              {/* Subtle gradient border glow */}
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary-foreground/10 to-transparent opacity-50 pointer-events-none" />
             </motion.div>
             
-            {/* Experience card with tinted background */}
+            {/* Experience card with enhanced tinted background */}
             <motion.div 
               className={cn(
-                "absolute -bottom-2 -left-2 lg:-left-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 z-10",
+                "absolute -bottom-2 -left-2 lg:-left-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-xl border border-primary-foreground/20 z-10",
                 currentTheme.statBg,
-                "bg-background/90"
+                "bg-background/85"
               )}
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -579,10 +620,15 @@ const HeroSlider = () => {
               >
                 10+
               </motion.div>
-              <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
+              <div className="text-[10px] lg:text-xs text-muted-foreground font-medium">{t.hero.yearsExperience}</div>
+              {/* Subtle gradient border glow */}
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary-foreground/10 to-transparent opacity-50 pointer-events-none" />
             </motion.div>
           </div>
         </div>
+
+        {/* Gradient divider line instead of solid */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-20 w-24 h-px bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
 
         {/* Navigation Controls */}
         <div className="flex items-center justify-between mt-8 md:mt-12">
