@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2, Play, Pause } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -367,64 +368,137 @@ const HeroSlider = () => {
                 className={getSlideAnimationClasses(slide.animation, currentSlide === index)}
               >
                 {/* Trust Badge - Enhanced with left border accent */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full text-sm mb-6 md:mb-8 border-l-2 border-accent shadow-sm">
-                  <CheckCircle className="h-4 w-4 text-accent" />
+                <motion.div 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full text-sm mb-6 md:mb-8 border-l-2 border-accent shadow-sm"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
+                  <motion.div
+                    animate={currentSlide === index ? { rotate: [0, 360] } : {}}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
+                    <CheckCircle className="h-4 w-4 text-accent" />
+                  </motion.div>
                   <span className="font-medium">{slide.trustBadge}</span>
-                </div>
+                </motion.div>
                 
                 {/* Headline - with highlighted accent */}
-                <h1 className="text-balance mb-4 md:mb-6">
+                <motion.h1 
+                  className="text-balance mb-4 md:mb-6"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
                   {slide.headline}{" "}
-                  <span className="text-accent relative">
+                  <motion.span 
+                    className="text-accent relative inline-block"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={currentSlide === index ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.4, delay: 0.4 }}
+                  >
                     {slide.headlineAccent}
-                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-accent/80 to-transparent rounded-full" />
-                  </span>
-                </h1>
+                    <motion.span 
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-accent/80 to-transparent rounded-full"
+                      initial={{ scaleX: 0 }}
+                      animate={currentSlide === index ? { scaleX: 1 } : { scaleX: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 }}
+                      style={{ originX: 0 }}
+                    />
+                  </motion.span>
+                </motion.h1>
                 
                 {/* Description */}
-                <p className="text-base md:text-lg text-primary-foreground/80 max-w-xl mb-8 md:mb-10 leading-relaxed mx-auto lg:mx-0">
+                <motion.p 
+                  className="text-base md:text-lg text-primary-foreground/80 max-w-xl mb-8 md:mb-10 leading-relaxed mx-auto lg:mx-0"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
                   {slide.description}
-                </p>
+                </motion.p>
                 
                 {/* CTAs - Enhanced with better hover states */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button 
-                    asChild 
-                    size="lg" 
-                    className="bg-gradient-to-r from-accent to-amber-500 hover:from-accent/90 hover:to-amber-400 text-accent-foreground shadow-lg hover:shadow-xl hover:shadow-accent/20 transition-all duration-300 group"
-                    onClick={() => trackHeroSlide(index, 'click')}
+                <motion.div 
+                  className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={currentSlide === index ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <Link to={slide.primaryCta.href}>
-                      <span>{slide.primaryCta.label}</span>
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-                    </Link>
-                  </Button>
+                    <Button 
+                      asChild 
+                      size="lg" 
+                      className="bg-gradient-to-r from-accent to-amber-500 hover:from-accent/90 hover:to-amber-400 text-accent-foreground shadow-lg hover:shadow-xl hover:shadow-accent/20 transition-all duration-300 group relative overflow-hidden"
+                      onClick={() => trackHeroSlide(index, 'click')}
+                    >
+                      <Link to={slide.primaryCta.href}>
+                        <motion.span
+                          className="absolute inset-0 bg-white/20"
+                          animate={{
+                            x: ["-100%", "100%"]
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatDelay: 3,
+                            ease: "easeInOut"
+                          }}
+                        />
+                        <span className="relative">{slide.primaryCta.label}</span>
+                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200 relative" />
+                      </Link>
+                    </Button>
+                  </motion.div>
                   
-                  <Button 
-                    asChild 
-                    variant="outline" 
-                    size="lg" 
-                    className="border-primary-foreground/30 text-primary-foreground hover:bg-accent/20 hover:border-accent/50 hover:text-accent transition-all duration-300 group"
-                    onClick={() => trackHeroSlide(index, 'click')}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <Link to={slide.secondaryCta.href}>
-                      <FileText className="mr-2 h-4 w-4 group-hover:text-accent transition-colors" />
-                      <span>{slide.secondaryCta.label}</span>
-                    </Link>
-                  </Button>
-                </div>
+                    <Button 
+                      asChild 
+                      variant="outline" 
+                      size="lg" 
+                      className="border-primary-foreground/30 text-primary-foreground hover:bg-accent/20 hover:border-accent/50 hover:text-accent transition-all duration-300 group"
+                      onClick={() => trackHeroSlide(index, 'click')}
+                    >
+                      <Link to={slide.secondaryCta.href}>
+                        <FileText className="mr-2 h-4 w-4 group-hover:text-accent transition-colors" />
+                        <span>{slide.secondaryCta.label}</span>
+                      </Link>
+                    </Button>
+                  </motion.div>
+                </motion.div>
 
                 {/* B2B+B2C indicators */}
-                <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 justify-center lg:justify-start text-sm text-primary-foreground/70">
+                <motion.div 
+                  className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 justify-center lg:justify-start text-sm text-primary-foreground/70"
+                  initial={{ opacity: 0 }}
+                  animate={currentSlide === index ? { opacity: 1 } : { opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                >
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent" />
+                    <motion.span 
+                      className="w-2 h-2 rounded-full bg-accent"
+                      animate={currentSlide === index ? { scale: [1, 1.3, 1] } : {}}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
                     <span>{t.hero.directPurchase}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary-foreground/50" />
+                    <motion.span 
+                      className="w-2 h-2 rounded-full bg-primary-foreground/50"
+                      animate={currentSlide === index ? { scale: [1, 1.3, 1] } : {}}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                    />
                     <span>{t.hero.bulkPricing}</span>
                   </div>
-                </div>
+                </motion.div>
               </div>
             ))}
           </div>
@@ -463,26 +537,50 @@ const HeroSlider = () => {
             </div>
             
             {/* Stats card - Products count with tinted background */}
-            <div className={cn(
-              "absolute -top-2 -right-2 lg:-right-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 transition-all duration-500 z-10",
-              currentTheme.statBg,
-              "bg-background/90",
-              currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-            )}>
-              <div className="text-xl lg:text-2xl font-bold text-foreground">5000+</div>
+            <motion.div 
+              className={cn(
+                "absolute -top-2 -right-2 lg:-right-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 z-10",
+                currentTheme.statBg,
+                "bg-background/90"
+              )}
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3, type: "spring", stiffness: 200 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <motion.div 
+                className="text-xl lg:text-2xl font-bold text-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                5000+
+              </motion.div>
               <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.productsCount}</div>
-            </div>
+            </motion.div>
             
             {/* Experience card with tinted background */}
-            <div className={cn(
-              "absolute -bottom-2 -left-2 lg:-left-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 transition-all duration-500 delay-150 z-10",
-              currentTheme.statBg,
-              "bg-background/90",
-              currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            )}>
-              <div className="text-xl lg:text-2xl font-bold text-foreground">10+</div>
+            <motion.div 
+              className={cn(
+                "absolute -bottom-2 -left-2 lg:-left-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 z-10",
+                currentTheme.statBg,
+                "bg-background/90"
+              )}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5, type: "spring", stiffness: 200 }}
+              whileHover={{ scale: 1.05, y: 5 }}
+            >
+              <motion.div 
+                className="text-xl lg:text-2xl font-bold text-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                10+
+              </motion.div>
               <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
