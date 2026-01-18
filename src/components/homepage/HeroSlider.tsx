@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2, Play, Pause } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -247,6 +247,21 @@ const HeroSlider = () => {
   // Computed pause state (either hover or manual)
   const effectivePaused = isPaused || isManuallyPaused;
 
+  // Parallax scroll effect for background elements
+  const { scrollY } = useScroll();
+  
+  // Primary glow - moves faster (parallax factor 0.15)
+  const parallaxPrimary = useTransform(scrollY, [0, 500], [0, 75]);
+  const parallaxPrimaryY = useTransform(scrollY, [0, 500], [0, 50]);
+  
+  // Secondary glow - moves slower (parallax factor 0.08)
+  const parallaxSecondary = useTransform(scrollY, [0, 500], [0, -40]);
+  const parallaxSecondaryY = useTransform(scrollY, [0, 500], [0, -30]);
+  
+  // Center glow - subtle movement (parallax factor 0.05)
+  const parallaxCenter = useTransform(scrollY, [0, 500], [0, 25]);
+  const parallaxCenterY = useTransform(scrollY, [0, 500], [0, 35]);
+
   const toggleAutoplay = useCallback(() => {
     setIsManuallyPaused(prev => !prev);
   }, []);
@@ -363,20 +378,44 @@ const HeroSlider = () => {
         />
       </div>
 
-      {/* Enhanced Background Effects - Premium glow system */}
+      {/* Enhanced Background Effects - Premium glow system with parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Primary accent glow - Large radial */}
-        <div className={cn(
-          "absolute top-0 right-0 w-[700px] h-[700px] md:w-[900px] md:h-[900px] rounded-full blur-[150px] md:blur-[180px] transform translate-x-1/3 -translate-y-1/4 transition-all duration-700",
-          currentTheme.accentGlow
-        )} />
-        {/* Secondary glow - Bottom left */}
-        <div className={cn(
-          "absolute bottom-0 left-0 w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full blur-[120px] md:blur-[150px] transform -translate-x-1/4 translate-y-1/4 transition-all duration-700",
-          currentTheme.secondaryGlow
-        )} />
-        {/* Center ambient glow */}
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground/[0.03] rounded-full blur-[100px] transform -translate-x-1/2 -translate-y-1/2" />
+        {/* Primary accent glow - Large radial with parallax */}
+        <motion.div 
+          className={cn(
+            "absolute top-0 right-0 w-[700px] h-[700px] md:w-[900px] md:h-[900px] rounded-full blur-[150px] md:blur-[180px] transition-colors duration-700",
+            currentTheme.accentGlow
+          )}
+          style={{ 
+            x: parallaxPrimary,
+            y: parallaxPrimaryY,
+            translateX: "33%",
+            translateY: "-25%"
+          }}
+        />
+        {/* Secondary glow - Bottom left with parallax (slower) */}
+        <motion.div 
+          className={cn(
+            "absolute bottom-0 left-0 w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full blur-[120px] md:blur-[150px] transition-colors duration-700",
+            currentTheme.secondaryGlow
+          )}
+          style={{ 
+            x: parallaxSecondary,
+            y: parallaxSecondaryY,
+            translateX: "-25%",
+            translateY: "25%"
+          }}
+        />
+        {/* Center ambient glow with subtle parallax */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground/[0.03] rounded-full blur-[100px]"
+          style={{ 
+            x: parallaxCenter,
+            y: parallaxCenterY,
+            translateX: "-50%",
+            translateY: "-50%"
+          }}
+        />
         {/* Subtle noise texture overlay for premium feel */}
         <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
       </div>
