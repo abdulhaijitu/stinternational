@@ -536,29 +536,36 @@
   /* ===========================================
    * ADMIN PANEL - Enterprise SaaS Design System
    * Global ecommerce standards enforcement
+   * Uses spacing tokens: space-1 → space-16
+   * Uses radius tokens: radius-sm, radius-md, radius-lg, radius-xl
    * =========================================== */
 
-  /* Admin Card - Consistent elevation */
+  /* Admin Card - Consistent elevation with radius-lg */
   .admin-card {
-    @apply bg-card border border-border rounded-lg shadow-sm;
+    @apply bg-card border border-border shadow-sm;
+    border-radius: var(--radius-lg);
   }
 
-  /* Admin Page Header - Unified spacing */
+  /* Admin Page Header - Unified spacing with tokens */
   .admin-page-header {
-    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 
   .admin-page-title {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-2xl font-semibold tracking-tight text-foreground;
   }
 
   .admin-page-subtitle {
-    @apply text-sm text-muted-foreground mt-0.5;
+    @apply text-sm text-muted-foreground;
+    margin-top: var(--space-1);
   }
 
-  /* Admin Table - Enterprise Standard */
+  /* Admin Table - Enterprise Standard with token spacing */
   .admin-table-wrapper {
-    @apply bg-card border border-border rounded-lg overflow-hidden;
+    @apply bg-card border border-border overflow-hidden;
+    border-radius: var(--radius-lg);
   }
 
   .admin-table {
@@ -570,42 +577,53 @@
   }
 
   .admin-table th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap;
+    @apply text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap;
+    padding: var(--space-3) var(--space-4);
+    height: 48px; /* Fixed row height for consistency */
   }
 
   .admin-table td {
-    @apply px-4 py-3 text-sm border-t border-border align-middle;
+    @apply text-sm border-t border-border align-middle;
+    padding: var(--space-3) var(--space-4);
+    height: 56px; /* Fixed row height for consistency */
   }
 
   .admin-table tbody tr {
-    @apply transition-colors duration-100;
+    @apply transition-colors duration-150;
   }
 
   .admin-table tbody tr:hover {
     @apply bg-muted/30;
   }
 
-  /* Admin Table Action Column */
+  /* Admin Table Action Column - Consistent placement */
   .admin-table-actions {
-    @apply flex items-center gap-1 justify-end;
+    @apply flex items-center justify-end;
+    gap: var(--space-1);
   }
 
-  /* Admin Empty State */
+  /* Admin Empty State - Token spacing */
   .admin-empty-state {
-    @apply py-16 px-4 text-center;
+    @apply text-center;
+    padding: var(--space-16) var(--space-4);
   }
 
   .admin-empty-state-icon {
-    @apply h-12 w-12 mx-auto text-muted-foreground/50 mb-4;
+    @apply mx-auto text-muted-foreground/50;
+    height: 48px;
+    width: 48px;
+    margin-bottom: var(--space-4);
   }
 
   .admin-empty-state-text {
     @apply text-muted-foreground text-sm;
   }
 
-  /* Admin Form - Consistent Layout */
+  /* Admin Form - Consistent Layout with token spacing */
   .admin-form-group {
-    @apply space-y-2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .admin-form-label {
@@ -618,25 +636,39 @@
   }
 
   .admin-form-hint {
-    @apply text-xs text-muted-foreground mt-1;
+    @apply text-xs text-muted-foreground;
+    margin-top: var(--space-1);
   }
 
   .admin-form-error {
-    @apply text-xs text-destructive mt-1 flex items-center gap-1;
+    @apply text-xs text-destructive flex items-center;
+    margin-top: var(--space-1);
+    gap: var(--space-1);
   }
 
-  /* Admin Dialog - Consistent Modal */
+  /* Admin Dialog - Consistent Modal with radius-xl */
+  .admin-dialog-content {
+    border-radius: var(--radius-xl);
+  }
+
   .admin-dialog-header {
-    @apply pb-4 border-b border-border mb-4;
+    @apply border-b border-border;
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
   .admin-dialog-footer {
-    @apply pt-4 border-t border-border mt-4 flex items-center justify-end gap-3;
+    @apply border-t border-border flex items-center justify-end;
+    padding-top: var(--space-4);
+    margin-top: var(--space-4);
+    gap: var(--space-3);
   }
 
-  /* Admin Stats Card */
+  /* Admin Stats Card - Token spacing */
   .admin-stats-card {
-    @apply bg-card border border-border rounded-lg p-4 flex flex-col;
+    @apply bg-card border border-border flex flex-col;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
   }
 
   .admin-stats-label {
@@ -644,12 +676,14 @@
   }
 
   .admin-stats-value {
-    @apply text-2xl font-bold mt-1;
+    @apply text-2xl font-bold;
+    margin-top: var(--space-1);
   }
 
-  /* Admin Action Button Groups */
+  /* Admin Action Button Groups - Token spacing */
   .admin-action-bar {
-    @apply flex items-center gap-2 flex-wrap;
+    @apply flex items-center flex-wrap;
+    gap: var(--space-2);
   }
 
   /* Unified Button States - 150ms max transition */
@@ -664,25 +698,64 @@
     letter-spacing: 0.01em;
   }
 
-  /* Admin Status Badges */
+  /* Admin Status Badges - Using semantic colors only */
   .admin-badge-success {
     @apply bg-success/10 text-success border border-success/20;
+    border-radius: var(--radius-sm);
   }
 
   .admin-badge-warning {
-    @apply bg-amber-500/10 text-amber-600 border border-amber-500/20;
+    @apply bg-warning/10 text-warning border border-warning/20;
+    border-radius: var(--radius-sm);
   }
 
   .admin-badge-danger {
     @apply bg-destructive/10 text-destructive border border-destructive/20;
+    border-radius: var(--radius-sm);
   }
 
   .admin-badge-info {
-    @apply bg-primary/10 text-primary border border-primary/20;
+    @apply bg-info/10 text-info border border-info/20;
+    border-radius: var(--radius-sm);
   }
 
   .admin-badge-neutral {
     @apply bg-muted text-muted-foreground border border-border;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Admin Input Consistency - radius-sm for all inputs */
+  .admin-input {
+    border-radius: var(--radius-sm);
+  }
+
+  /* Admin Button Consistency - radius-md for all buttons */
+  .admin-btn {
+    border-radius: var(--radius-md);
+  }
+
+  /* Admin Info Box - Token spacing */
+  .admin-info-box {
+    @apply bg-muted/50 border border-border text-sm text-muted-foreground;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+
+  /* Admin Bulk Action Bar - Token spacing */
+  .admin-bulk-action-bar {
+    @apply bg-muted/50 border border-border flex items-center justify-between;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+
+  /* Admin Section Spacing */
+  .admin-section {
+    margin-bottom: var(--space-6);
+  }
+
+  .admin-section-title {
+    @apply text-lg font-semibold;
+    margin-bottom: var(--space-4);
   }
 }
 

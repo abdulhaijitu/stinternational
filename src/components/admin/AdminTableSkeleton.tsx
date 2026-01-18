@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AdminTableSkeletonProps {
   columns?: number;
@@ -17,21 +17,21 @@ const AdminTableSkeleton = ({
   title,
 }: AdminTableSkeletonProps) => {
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-2">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      {/* Header Skeleton - Using admin-page-header pattern */}
+      <div className="admin-page-header">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           {title ? (
-            <h1 className="text-2xl font-bold">{title}</h1>
+            <h1 className="admin-page-title">{title}</h1>
           ) : (
             <Skeleton className="h-8 w-48" />
           )}
           <Skeleton className="h-4 w-72" />
         </div>
         {showActions && (
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-28" />
-            <Skeleton className="h-10 w-32" />
+          <div className="admin-action-bar">
+            <Skeleton className="h-10 w-28" style={{ borderRadius: 'var(--radius-md)' }} />
+            <Skeleton className="h-10 w-32" style={{ borderRadius: 'var(--radius-md)' }} />
           </div>
         )}
       </div>
@@ -39,15 +39,15 @@ const AdminTableSkeleton = ({
       {/* Search Skeleton */}
       {showSearch && (
         <div className="max-w-md">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" style={{ borderRadius: 'var(--radius-sm)' }} />
         </div>
       )}
 
-      {/* Table Skeleton */}
-      <Card className="border-border/50 overflow-hidden">
+      {/* Table Skeleton - Using admin-table-wrapper */}
+      <Card className="admin-table-wrapper">
         <CardContent className="p-0">
-          {/* Table Header */}
-          <div className="bg-muted/50 p-4 flex gap-4 border-b border-border/50">
+          {/* Table Header - Fixed height 48px */}
+          <div className="bg-muted/50 flex border-b border-border" style={{ padding: 'var(--space-3) var(--space-4)', gap: 'var(--space-4)', height: '48px', alignItems: 'center' }}>
             {[...Array(columns)].map((_, index) => (
               <Skeleton 
                 key={index} 
@@ -57,18 +57,19 @@ const AdminTableSkeleton = ({
             ))}
           </div>
           
-          {/* Table Rows */}
+          {/* Table Rows - Fixed height 56px for consistency */}
           {[...Array(rows)].map((_, rowIndex) => (
             <div
               key={rowIndex}
-              className="p-4 border-b border-border/50 last:border-b-0 flex items-center gap-4"
+              className="border-b border-border last:border-b-0 flex items-center"
+              style={{ padding: 'var(--space-3) var(--space-4)', gap: 'var(--space-4)', height: '56px' }}
             >
               {[...Array(columns)].map((_, colIndex) => {
                 // First column might have image
                 if (colIndex === 0) {
                   return (
-                    <div key={colIndex} className="flex items-center gap-3">
-                      <Skeleton className="h-10 w-10 rounded shrink-0" />
+                    <div key={colIndex} className="flex items-center" style={{ gap: 'var(--space-3)' }}>
+                      <Skeleton className="h-10 w-10 shrink-0" style={{ borderRadius: 'var(--radius-sm)' }} />
                       <Skeleton className="h-4 w-32" />
                     </div>
                   );
@@ -76,15 +77,15 @@ const AdminTableSkeleton = ({
                 // Status column
                 if (colIndex === columns - 2) {
                   return (
-                    <Skeleton key={colIndex} className="h-6 w-20 rounded-full" />
+                    <Skeleton key={colIndex} className="h-6 w-20" style={{ borderRadius: 'var(--radius-full)' }} />
                   );
                 }
                 // Actions column
                 if (colIndex === columns - 1) {
                   return (
-                    <div key={colIndex} className="flex items-center gap-2 ml-auto">
-                      <Skeleton className="h-8 w-8 rounded" />
-                      <Skeleton className="h-8 w-8 rounded" />
+                    <div key={colIndex} className="flex items-center ml-auto" style={{ gap: 'var(--space-2)' }}>
+                      <Skeleton className="h-8 w-8" style={{ borderRadius: 'var(--radius-md)' }} />
+                      <Skeleton className="h-8 w-8" style={{ borderRadius: 'var(--radius-md)' }} />
                     </div>
                   );
                 }

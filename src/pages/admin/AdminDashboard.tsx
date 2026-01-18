@@ -91,11 +91,12 @@ const AdminDashboard = () => {
     }
   };
 
+  // Using semantic color tokens only - no arbitrary hex values
   const statCards = [
-    { label: t.dashboard.totalProducts, value: stats.totalProducts, icon: Package, color: "text-blue-600", bgColor: "bg-blue-50 dark:bg-blue-950/30" },
-    { label: t.dashboard.totalOrders, value: stats.totalOrders, icon: ShoppingCart, color: "text-green-600", bgColor: "bg-green-50 dark:bg-green-950/30" },
-    { label: t.dashboard.quoteRequests, value: stats.totalQuotes, icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50 dark:bg-purple-950/30" },
-    { label: t.dashboard.totalRevenue, value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-amber-600", bgColor: "bg-amber-50 dark:bg-amber-950/30" },
+    { label: t.dashboard.totalProducts, value: stats.totalProducts, icon: Package, color: "text-info", bgColor: "bg-info/10" },
+    { label: t.dashboard.totalOrders, value: stats.totalOrders, icon: ShoppingCart, color: "text-success", bgColor: "bg-success/10" },
+    { label: t.dashboard.quoteRequests, value: stats.totalQuotes, icon: FileText, color: "text-primary", bgColor: "bg-primary/10" },
+    { label: t.dashboard.totalRevenue, value: formatPrice(stats.totalRevenue), icon: DollarSign, color: "text-warning", bgColor: "bg-warning/10" },
   ];
 
   const getStatusLabel = (status: string) => {
@@ -112,22 +113,22 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className={cn("space-y-6", language === "bn" && "font-siliguri")}>
+      <div className={cn(language === "bn" && "font-siliguri")} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
         <AdminPageHeader 
           title={t.dashboard.title} 
           subtitle={t.dashboard.subtitle}
         />
 
-        {/* Stats Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stats Cards - Using token spacing */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 'var(--space-4)' }}>
           {statCards.map((stat, index) => (
             <div key={index} className="admin-stats-card">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                  <p className="text-2xl font-bold" style={{ marginTop: 'var(--space-1)' }}>{stat.value}</p>
                 </div>
-                <div className={cn("p-3 rounded-lg", stat.bgColor, stat.color)}>
+                <div className={cn("flex items-center justify-center", stat.bgColor, stat.color)} style={{ padding: 'var(--space-3)', borderRadius: 'var(--radius-lg)' }}>
                   <stat.icon className="h-6 w-6" />
                 </div>
               </div>
@@ -135,47 +136,47 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* B2B vs B2C Summary */}
-        <div className="grid md:grid-cols-2 gap-4">
+        {/* B2B vs B2C Summary - Using semantic colors */}
+        <div className="grid md:grid-cols-2" style={{ gap: 'var(--space-4)' }}>
           <div className="admin-stats-card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                <User className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center" style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+              <div className="bg-info/10" style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-lg)' }}>
+                <User className="h-5 w-5 text-info" />
               </div>
               <div>
                 <h3 className="font-semibold">{t.dashboard.b2cDirect}</h3>
                 <p className="text-sm text-muted-foreground">{t.dashboard.b2cDescription}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-green-600">{stats.b2cOrders}</p>
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-4)' }}>
+              <div className="bg-muted/50 text-center" style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)' }}>
+                <p className="text-2xl font-bold text-success">{stats.b2cOrders}</p>
                 <p className="text-xs text-muted-foreground">{t.dashboard.totalOrders2}</p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-amber-600">{stats.pendingOrders}</p>
+              <div className="bg-muted/50 text-center" style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)' }}>
+                <p className="text-2xl font-bold text-warning">{stats.pendingOrders}</p>
                 <p className="text-xs text-muted-foreground">{t.dashboard.pending}</p>
               </div>
             </div>
           </div>
 
           <div className="admin-stats-card">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
-                <Building2 className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center" style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+              <div className="bg-primary/10" style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-lg)' }}>
+                <Building2 className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">{t.dashboard.b2bInstitutional}</h3>
                 <p className="text-sm text-muted-foreground">{t.dashboard.b2bDescription}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-purple-600">{stats.totalQuotes}</p>
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-4)' }}>
+              <div className="bg-muted/50 text-center" style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)' }}>
+                <p className="text-2xl font-bold text-primary">{stats.totalQuotes}</p>
                 <p className="text-xs text-muted-foreground">{t.dashboard.totalQuotes}</p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-amber-600">{stats.pendingQuotes}</p>
+              <div className="bg-muted/50 text-center" style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)' }}>
+                <p className="text-2xl font-bold text-warning">{stats.pendingQuotes}</p>
                 <p className="text-xs text-muted-foreground">{t.dashboard.pending}</p>
               </div>
             </div>
@@ -183,12 +184,12 @@ const AdminDashboard = () => {
         </div>
 
         {/* Two Column Layout for Recent Activity */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2" style={{ gap: 'var(--space-6)' }}>
           {/* Recent Orders (B2C) */}
           <div className="admin-table-wrapper">
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-green-600" />
+            <div className="flex items-center justify-between border-b border-border" style={{ padding: 'var(--space-4)' }}>
+              <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
+                <ShoppingCart className="h-5 w-5 text-success" />
                 <h2 className="font-semibold">{t.dashboard.recentOrders}</h2>
               </div>
               <Link to="/admin/orders" className="text-sm text-primary hover:underline">
@@ -197,7 +198,7 @@ const AdminDashboard = () => {
             </div>
             <div className="overflow-x-auto">
               {recentOrders.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">{t.dashboard.noOrders}</div>
+                <div className="text-center text-muted-foreground" style={{ padding: 'var(--space-8)' }}>{t.dashboard.noOrders}</div>
               ) : (
                 <table className="admin-table">
                   <thead>
@@ -210,9 +211,9 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
-                      <tr key={order.id} className="border-t border-border">
-                        <td className="p-4 text-sm font-medium">{order.order_number}</td>
-                        <td className="p-4 text-sm">
+                      <tr key={order.id}>
+                        <td className="font-medium">{order.order_number}</td>
+                        <td>
                           <div>
                             {order.customer_name}
                             {order.company_name && (
@@ -220,15 +221,15 @@ const AdminDashboard = () => {
                             )}
                           </div>
                         </td>
-                        <td className="p-4 text-sm font-medium">{formatPrice(order.total)}</td>
-                        <td className="p-4">
+                        <td className="font-medium">{formatPrice(order.total)}</td>
+                        <td>
                           <span className={cn(
-                            "text-xs px-2 py-1 rounded-full",
-                            order.status === "pending_payment" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-                            order.status === "paid" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-                            order.status === "cancelled" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-                            !["pending_payment", "paid", "cancelled"].includes(order.status) && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                          )}>
+                            "text-xs px-2 py-1",
+                            order.status === "pending_payment" && "admin-badge-warning",
+                            order.status === "paid" && "admin-badge-success",
+                            order.status === "cancelled" && "admin-badge-danger",
+                            !["pending_payment", "paid", "cancelled"].includes(order.status) && "admin-badge-info"
+                          )} style={{ borderRadius: 'var(--radius-full)' }}>
                             {getStatusLabel(order.status)}
                           </span>
                         </td>
@@ -242,9 +243,9 @@ const AdminDashboard = () => {
 
           {/* Recent Quotes (B2B) */}
           <div className="admin-table-wrapper">
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center justify-between border-b border-border" style={{ padding: 'var(--space-4)' }}>
+              <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
+                <FileText className="h-5 w-5 text-primary" />
                 <h2 className="font-semibold">{t.dashboard.recentQuotes}</h2>
               </div>
               <Link to="/admin/quotes" className="text-sm text-primary hover:underline">
@@ -253,7 +254,7 @@ const AdminDashboard = () => {
             </div>
             <div className="overflow-x-auto">
               {recentQuotes.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">{t.dashboard.noQuotes}</div>
+                <div className="text-center text-muted-foreground" style={{ padding: 'var(--space-8)' }}>{t.dashboard.noQuotes}</div>
               ) : (
                 <table className="admin-table">
                   <thead>
@@ -265,20 +266,20 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {recentQuotes.map((quote) => (
-                      <tr key={quote.id} className="border-t border-border">
-                        <td className="p-4 text-sm">
+                      <tr key={quote.id}>
+                        <td>
                           <div className="font-medium">{quote.company_name}</div>
                           <div className="text-xs text-muted-foreground">{quote.contact_person}</div>
                         </td>
-                        <td className="p-4 text-sm capitalize">{quote.product_category}</td>
-                        <td className="p-4">
+                        <td className="capitalize">{quote.product_category}</td>
+                        <td>
                           <span className={cn(
-                            "text-xs px-2 py-1 rounded-full",
-                            quote.status === "pending" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-                            quote.status === "quoted" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-                            quote.status === "reviewed" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-                            !["pending", "quoted", "reviewed"].includes(quote.status) && "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
-                          )}>
+                            "text-xs px-2 py-1",
+                            quote.status === "pending" && "admin-badge-warning",
+                            quote.status === "quoted" && "admin-badge-success",
+                            quote.status === "reviewed" && "admin-badge-info",
+                            !["pending", "quoted", "reviewed"].includes(quote.status) && "admin-badge-neutral"
+                          )} style={{ borderRadius: 'var(--radius-full)' }}>
                             {getStatusLabel(quote.status)}
                           </span>
                         </td>

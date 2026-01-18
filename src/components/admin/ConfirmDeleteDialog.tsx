@@ -85,19 +85,19 @@ export const ConfirmDeleteDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent className={cn("admin-dialog-header", language === "bn" && "font-siliguri")}>
+      <AlertDialogContent className={cn("admin-dialog-content", language === "bn" && "font-siliguri")}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+          <AlertDialogTitle className="flex items-center text-destructive" style={{ gap: 'var(--space-2)' }}>
             <AlertTriangle className="h-5 w-5" />
             {translations.title || defaultTitle}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <p className="text-muted-foreground">
                 {translations.description || defaultDescription}
               </p>
               {requireConfirmation && (
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                   <Label htmlFor="confirm-delete-input">
                     {translations.typeToConfirm || defaultTypeToConfirm}
                   </Label>
@@ -125,7 +125,7 @@ export const ConfirmDeleteDialog = ({
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 'var(--space-2)' }} />
                 {translations.deleting || defaultDeleting}
               </>
             ) : (

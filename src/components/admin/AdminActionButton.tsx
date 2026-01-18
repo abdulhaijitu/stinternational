@@ -29,10 +29,15 @@ export const AdminActionButton = ({
       size={size}
       disabled={disabled || loading}
       className={cn(
-        "gap-1.5 h-8 px-2.5",
+        "h-8 transition-colors duration-150",
         destructive && "text-destructive hover:text-destructive hover:bg-destructive/10",
         className
       )}
+      style={{ 
+        gap: 'var(--space-1)', 
+        paddingLeft: 'var(--space-2)', 
+        paddingRight: 'var(--space-2)' 
+      }}
       {...props}
     >
       {loading ? (
