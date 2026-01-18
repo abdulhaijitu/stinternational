@@ -122,14 +122,31 @@ const About = () => {
       />
 
       {/* Hero Section */}
-      <section className="hero-gradient text-primary-foreground">
+      <section className="hero-gradient text-primary-foreground overflow-hidden">
         <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
-          <div className="max-w-3xl">
-            <h1 className="mb-6">{t.about.title}</h1>
-            <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed">
+          <motion.div 
+            className="max-w-3xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <motion.h1 
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {t.about.title}
+            </motion.h1>
+            <motion.p 
+              className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               {t.about.subtitle}
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
         </div>
       </section>
 
@@ -388,23 +405,84 @@ const About = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-primary text-primary-foreground">
-        <div className={`container-premium text-center ${fontClass}`}>
-          <h2 className="mb-4">{t.about.readyToPartner}</h2>
-          <p className="text-primary-foreground/70 max-w-2xl mx-auto mb-8">
+      <section className="py-16 md:py-24 bg-primary text-primary-foreground relative overflow-hidden">
+        {/* Animated Background Glow */}
+        <motion.div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: "radial-gradient(circle at 50% 50%, hsl(var(--primary-foreground) / 0.15) 0%, transparent 60%)"
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.35, 0.2]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        <div className={`container-premium text-center relative z-10 ${fontClass}`}>
+          <motion.h2 
+            className="mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            {t.about.readyToPartner}
+          </motion.h2>
+          <motion.p 
+            className="text-primary-foreground/70 max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             {t.about.partnerSubtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg" asChild>
-              <Link to="/products">
-                {t.about.exploreProducts}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button variant="hero-secondary" size="lg" asChild>
-              <Link to="/contact">{t.about.contactUs}</Link>
-            </Button>
-          </div>
+          </motion.p>
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button variant="hero" size="lg" asChild className="relative overflow-hidden group">
+                <Link to="/products">
+                  <motion.span
+                    className="absolute inset-0 bg-white/10"
+                    animate={{
+                      x: ["-100%", "100%"]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  {t.about.exploreProducts}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button variant="hero-secondary" size="lg" asChild>
+                <Link to="/contact">{t.about.contactUs}</Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </Layout>
