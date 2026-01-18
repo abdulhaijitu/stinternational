@@ -216,13 +216,13 @@ export const AdminGlobalSearch = () => {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+        <DialogContent className="max-w-2xl p-0 overflow-hidden" style={{ borderRadius: 'var(--radius-xl)' }}>
           <DialogHeader className="sr-only">
             <DialogTitle>
               {language === "bn" ? "অনুসন্ধান" : "Global Search"}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex items-center border-b px-4">
+          <div className="flex items-center border-b" style={{ padding: '0 var(--space-4)' }}>
             <Search className="h-5 w-5 text-muted-foreground shrink-0" />
             <Input
               ref={inputRef}
@@ -247,7 +247,7 @@ export const AdminGlobalSearch = () => {
 
           {results.length > 0 ? (
             <ScrollArea className="max-h-[400px]">
-              <div className="p-2">
+              <div style={{ padding: 'var(--space-2)' }}>
                 {results.map((result, index) => {
                   const Icon = getIcon(result.type);
                   return (
@@ -255,13 +255,14 @@ export const AdminGlobalSearch = () => {
                       key={`${result.type}-${result.id}`}
                       onClick={() => handleSelect(result)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
+                        "w-full flex items-center text-left transition-colors duration-150",
                         index === selectedIndex
                           ? "bg-accent text-accent-foreground"
                           : "hover:bg-muted"
                       )}
+                      style={{ gap: 'var(--space-3)', padding: 'var(--space-3)', borderRadius: 'var(--radius-lg)' }}
                     >
-                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 bg-muted flex items-center justify-center shrink-0" style={{ borderRadius: 'var(--radius-lg)' }}>
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -270,7 +271,7 @@ export const AdminGlobalSearch = () => {
                           {result.subtitle}
                         </p>
                       </div>
-                      <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground">
+                      <span className="text-xs bg-muted text-muted-foreground" style={{ padding: 'var(--space-1) var(--space-2)', borderRadius: 'var(--radius-md)' }}>
                         {getTypeLabel(result.type)}
                       </span>
                     </button>
@@ -279,32 +280,32 @@ export const AdminGlobalSearch = () => {
               </div>
             </ScrollArea>
           ) : query.length >= 2 && !loading ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <div className="text-center text-muted-foreground" style={{ padding: 'var(--space-8)' }}>
+              <Search className="h-12 w-12 mx-auto opacity-50" style={{ marginBottom: 'var(--space-3)' }} />
               <p>{language === "bn" ? "কোনো ফলাফল পাওয়া যায়নি" : "No results found"}</p>
             </div>
           ) : query.length < 2 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <div className="text-center text-muted-foreground" style={{ padding: 'var(--space-8)' }}>
+              <Search className="h-12 w-12 mx-auto opacity-50" style={{ marginBottom: 'var(--space-3)' }} />
               <p>{language === "bn" ? "অনুসন্ধান শুরু করতে টাইপ করুন" : "Start typing to search"}</p>
-              <p className="text-sm mt-2">
+              <p className="text-sm" style={{ marginTop: 'var(--space-2)' }}>
                 {language === "bn" ? "পণ্য, অর্ডার, কোটেশন ও ব্যবহারকারী জুড়ে খুঁজুন" : "Search across products, orders, quotes & users"}
               </p>
             </div>
           ) : null}
 
-          <div className="border-t p-2 flex items-center justify-between text-xs text-muted-foreground bg-muted/50">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border bg-background">↑↓</kbd>
+          <div className="border-t bg-muted/50 flex items-center justify-between text-xs text-muted-foreground" style={{ padding: 'var(--space-2)' }}>
+            <div className="flex items-center" style={{ gap: 'var(--space-4)' }}>
+              <span className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                <kbd className="border bg-background" style={{ padding: 'var(--space-1)', borderRadius: 'var(--radius-sm)' }}>↑↓</kbd>
                 {language === "bn" ? "নেভিগেট" : "Navigate"}
               </span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border bg-background">↵</kbd>
+              <span className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                <kbd className="border bg-background" style={{ padding: 'var(--space-1)', borderRadius: 'var(--radius-sm)' }}>↵</kbd>
                 {language === "bn" ? "নির্বাচন" : "Select"}
               </span>
-              <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border bg-background">Esc</kbd>
+              <span className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                <kbd className="border bg-background" style={{ padding: 'var(--space-1)', borderRadius: 'var(--radius-sm)' }}>Esc</kbd>
                 {language === "bn" ? "বন্ধ" : "Close"}
               </span>
             </div>

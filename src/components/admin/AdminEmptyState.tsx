@@ -24,7 +24,7 @@ export const AdminEmptyState = ({
     )}>
       <Icon className="admin-empty-state-icon" />
       {title && (
-        <h3 className="text-base font-medium text-foreground mb-1">
+        <h3 className="text-base font-medium text-foreground" style={{ marginBottom: 'var(--space-1)' }}>
           {title}
         </h3>
       )}
@@ -32,7 +32,7 @@ export const AdminEmptyState = ({
         {description || t.common.noData}
       </p>
       {action && (
-        <div className="mt-4">
+        <div style={{ marginTop: 'var(--space-4)' }}>
           {action}
         </div>
       )}

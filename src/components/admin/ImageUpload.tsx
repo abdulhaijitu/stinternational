@@ -83,7 +83,7 @@ const ImageUpload = ({
   const fontClass = language === "bn" ? "font-siliguri" : "";
 
   return (
-    <div className={`space-y-3 ${fontClass}`}>
+    <div className={fontClass} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
       <input
         ref={fileInputRef}
         type="file"
@@ -98,9 +98,13 @@ const ImageUpload = ({
           <img
             src={value}
             alt="Product"
-            className="w-full h-48 object-cover rounded-lg border border-border"
+            className="w-full h-48 object-cover border border-border"
+            style={{ borderRadius: 'var(--radius-lg)' }}
           />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+          <div 
+            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center"
+            style={{ borderRadius: 'var(--radius-lg)', gap: 'var(--space-2)' }}
+          >
             <Button
               type="button"
               variant="secondary"
@@ -113,7 +117,7 @@ const ImageUpload = ({
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              <span className="ml-1">{img?.changeImage || "Change"}</span>
+              <span style={{ marginLeft: 'var(--space-1)' }}>{img?.changeImage || "Change"}</span>
             </Button>
             <Button
               type="button"
@@ -130,7 +134,8 @@ const ImageUpload = ({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="w-full h-48 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-muted/50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-48 border-2 border-dashed border-border flex flex-col items-center justify-center hover:border-primary hover:bg-muted/50 transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ borderRadius: 'var(--radius-lg)', gap: 'var(--space-2)' }}
         >
           {uploading ? (
             <>
