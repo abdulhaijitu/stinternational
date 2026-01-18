@@ -73,19 +73,18 @@ const InlineFormField = React.forwardRef<
         {children}
       </div>
       
-      {/* Error message - appears directly under input */}
-      {error && (
-        <p className="text-xs font-medium text-destructive mt-1">
-          {error}
-        </p>
-      )}
-      
-      {/* Helper text - subtle and secondary */}
-      {hint && !error && (
-        <p className="text-xs text-muted-foreground mt-1">
-          {hint}
-        </p>
-      )}
+      {/* Error message with smooth appearance - fixed height container prevents layout jump */}
+      <div className="min-h-[18px]">
+        {error && (
+          <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">
+            {error}
+          </p>
+        )}
+        {/* Helper text - subtle and secondary */}
+        {hint && !error && (
+          <p className="text-xs text-muted-foreground">{hint}</p>
+        )}
+      </div>
     </div>
   );
 });

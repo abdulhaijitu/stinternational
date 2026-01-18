@@ -897,9 +897,11 @@ const AdminProductEditor = () => {
                       placeholder={t.products.productNamePlaceholder}
                       className={cn(formErrors.name && touched.name && "border-destructive focus-visible:ring-destructive")}
                     />
-                    {formErrors.name && touched.name && (
-                      <p className="text-xs font-medium text-destructive">{formErrors.name}</p>
-                    )}
+                    <div className="min-h-[18px]">
+                      {formErrors.name && touched.name && (
+                        <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{formErrors.name}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="slug">{t.products.slug} <span className="text-destructive">*</span></Label>
@@ -911,9 +913,11 @@ const AdminProductEditor = () => {
                       placeholder={t.products.slugPlaceholder}
                       className={cn(formErrors.slug && touched.slug && "border-destructive focus-visible:ring-destructive")}
                     />
-                    {formErrors.slug && touched.slug && (
-                      <p className="text-xs font-medium text-destructive">{formErrors.slug}</p>
-                    )}
+                    <div className="min-h-[18px]">
+                      {formErrors.slug && touched.slug && (
+                        <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{formErrors.slug}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -1004,9 +1008,11 @@ const AdminProductEditor = () => {
                 onBlur={() => handleBlur("price")}
                 className={cn(formErrors.price && touched.price && "border-destructive focus-visible:ring-destructive")}
               />
-              {formErrors.price && touched.price && (
-                <p className="text-xs font-medium text-destructive">{formErrors.price}</p>
-              )}
+              <div className="min-h-[18px]">
+                {formErrors.price && touched.price && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{formErrors.price}</p>
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="compare_price" className={getInputClass()}>
@@ -1061,9 +1067,11 @@ const AdminProductEditor = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              {formErrors.parent_category_id && touched.parent_category_id && (
-                <p className="text-xs font-medium text-destructive">{formErrors.parent_category_id}</p>
-              )}
+              <div className="min-h-[18px]">
+                {formErrors.parent_category_id && touched.parent_category_id && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{formErrors.parent_category_id}</p>
+                )}
+              </div>
               {!formData.parent_category_id && parentCategories.length === 0 && (
                 <p className="text-xs text-muted-foreground">
                   {language === "bn" ? "কোনো প্যারেন্ট ক্যাটাগরি নেই। নতুন তৈরি করতে + বাটনে ক্লিক করুন।" : "No parent categories. Click + to create one."}
@@ -1209,9 +1217,11 @@ const AdminProductEditor = () => {
               placeholder={t.products.specificationsPlaceholder}
               className={cn("font-mono text-sm", formErrors.specifications && touched.specifications && "border-destructive focus-visible:ring-destructive")}
             />
-            {formErrors.specifications && touched.specifications && (
-              <p className="text-xs font-medium text-destructive">{formErrors.specifications}</p>
-            )}
+            <div className="min-h-[18px]">
+              {formErrors.specifications && touched.specifications && (
+                <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{formErrors.specifications}</p>
+              )}
+            </div>
           </div>
 
           {/* Features */}
@@ -1296,9 +1306,9 @@ const AdminProductEditor = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_cat_name" className={cn(getInputClass(), subCategoryErrors.name && "text-destructive")}>
-                {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
+                {language === "bn" ? "নাম (ইংরেজি)" : "Name (English)"} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="new_cat_name"
@@ -1316,13 +1326,15 @@ const AdminProductEditor = () => {
                 placeholder={language === "bn" ? "যেমন: Digital Scales" : "e.g., Digital Scales"}
                 className={cn(subCategoryErrors.name && "border-destructive focus-visible:ring-destructive")}
               />
-              {subCategoryErrors.name && (
-                <p className="text-sm text-destructive">{subCategoryErrors.name}</p>
-              )}
+              <div className="min-h-[18px]">
+                {subCategoryErrors.name && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{subCategoryErrors.name}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_cat_name_bn" className="font-siliguri">
-                {language === "bn" ? "নাম (বাংলা)" : "Name (Bangla)"}
+                {language === "bn" ? "নাম (বাংলা)" : "Name (Bangla)"} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <Input
                 id="new_cat_name_bn"
@@ -1335,9 +1347,9 @@ const AdminProductEditor = () => {
                 className="font-siliguri"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_cat_slug" className={cn(getInputClass(), subCategoryErrors.slug && "text-destructive")}>
-                {language === "bn" ? "স্লাগ *" : "Slug *"}
+                {language === "bn" ? "স্লাগ" : "Slug"} <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -1364,13 +1376,15 @@ const AdminProductEditor = () => {
                   </div>
                 )}
               </div>
-              {subCategoryErrors.slug && (
-                <p className="text-sm text-destructive">{subCategoryErrors.slug}</p>
-              )}
+              <div className="min-h-[18px]">
+                {subCategoryErrors.slug && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{subCategoryErrors.slug}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label className={getInputClass()}>
-                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"}
+                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <ImageUpload
                 value={newSubCategory.image_url}
@@ -1424,9 +1438,9 @@ const AdminProductEditor = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-4 py-4 min-h-0">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_parent_name" className={cn(getInputClass(), parentCategoryErrors.name && "text-destructive")}>
-                {language === "bn" ? "নাম (ইংরেজি) *" : "Name (English) *"}
+                {language === "bn" ? "নাম (ইংরেজি)" : "Name (English)"} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="new_parent_name"
@@ -1444,13 +1458,15 @@ const AdminProductEditor = () => {
                 placeholder={language === "bn" ? "যেমন: Laboratory Equipment" : "e.g., Laboratory Equipment"}
                 className={cn(parentCategoryErrors.name && "border-destructive focus-visible:ring-destructive")}
               />
-              {parentCategoryErrors.name && (
-                <p className="text-sm text-destructive">{parentCategoryErrors.name}</p>
-              )}
+              <div className="min-h-[18px]">
+                {parentCategoryErrors.name && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{parentCategoryErrors.name}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_parent_name_bn" className="font-siliguri">
-                {language === "bn" ? "নাম (বাংলা)" : "Name (Bangla)"}
+                {language === "bn" ? "নাম (বাংলা)" : "Name (Bangla)"} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <Input
                 id="new_parent_name_bn"
@@ -1463,9 +1479,9 @@ const AdminProductEditor = () => {
                 className="font-siliguri"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="new_parent_slug" className={cn(getInputClass(), parentCategoryErrors.slug && "text-destructive")}>
-                {language === "bn" ? "স্লাগ *" : "Slug *"}
+                {language === "bn" ? "স্লাগ" : "Slug"} <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -1492,13 +1508,15 @@ const AdminProductEditor = () => {
                   </div>
                 )}
               </div>
-              {parentCategoryErrors.slug && (
-                <p className="text-sm text-destructive">{parentCategoryErrors.slug}</p>
-              )}
+              <div className="min-h-[18px]">
+                {parentCategoryErrors.slug && (
+                  <p className="text-xs font-medium text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-150">{parentCategoryErrors.slug}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label className={getInputClass()}>
-                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"}
+                {language === "bn" ? "ক্যাটাগরি ছবি" : "Category Image"} <span className="text-muted-foreground text-xs font-normal">({language === "bn" ? "ঐচ্ছিক" : "Optional"})</span>
               </Label>
               <ImageUpload
                 value={newParentCategory.image_url}
