@@ -260,16 +260,31 @@ const About = () => {
           
           <div className="grid md:grid-cols-3 gap-6">
             {trustFeatures.map((feature, index) => (
-              <div 
+              <motion.div 
                 key={index} 
-                className="bg-card border border-border rounded-lg p-8 text-center transition-all duration-200 hover:shadow-md hover:border-primary/20"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: index * 0.15 }}
+                className="bg-card border border-border rounded-lg p-8 text-center transition-all duration-200 hover:shadow-md hover:border-primary/20 group"
               >
-                <div className="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <feature.icon className="h-7 w-7 text-accent" />
-                </div>
+                <motion.div 
+                  className="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    whileInView={{ scale: 1, rotate: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.15 + 0.2, type: "spring", stiffness: 150 }}
+                  >
+                    <feature.icon className="h-7 w-7 text-accent transition-transform duration-200 group-hover:scale-110" />
+                  </motion.div>
+                </motion.div>
                 <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -286,16 +301,25 @@ const About = () => {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <div 
+              <motion.div 
                 key={index} 
-                className="bg-card border border-border rounded-lg p-6 text-center transition-all duration-200 hover:shadow-md hover:border-primary/20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                className="bg-card border border-border rounded-lg p-6 text-center transition-shadow duration-200 hover:shadow-lg hover:border-primary/20 group cursor-pointer"
               >
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold mb-2">{value.title}</h3>
+                <motion.div 
+                  className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-4"
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <value.icon className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
+                </motion.div>
+                <h3 className="font-semibold mb-2 transition-colors duration-200 group-hover:text-primary">{value.title}</h3>
                 <p className="text-sm text-muted-foreground">{value.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -305,26 +329,57 @@ const About = () => {
       <section className="py-16 md:py-24">
         <div className={`container-premium ${fontClass}`}>
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-center mb-12">{t.about.ourJourney}</h2>
+            <motion.h2 
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+            >
+              {t.about.ourJourney}
+            </motion.h2>
             <div className="relative">
               {/* Timeline Line */}
-              <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-px" />
+              <motion.div 
+                className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-px origin-top"
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
               
               {/* Timeline Items */}
               <div className="space-y-8">
                 {milestones.map((milestone, index) => (
-                  <div
+                  <motion.div
                     key={index}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
                     className={`relative flex items-start gap-6 ${
                       index % 2 === 0 ? "md:flex-row-reverse" : ""
                     }`}
                   >
-                    <div className="absolute left-4 md:left-1/2 w-3 h-3 bg-primary rounded-full -translate-x-1.5 md:-translate-x-1.5 mt-1.5" />
+                    <motion.div 
+                      className="absolute left-4 md:left-1/2 w-3 h-3 bg-primary rounded-full -translate-x-1.5 md:-translate-x-1.5 mt-1.5"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: index * 0.1 + 0.2, type: "spring", stiffness: 300 }}
+                      whileHover={{ scale: 1.5 }}
+                    />
                     <div className={`ml-10 md:ml-0 md:w-1/2 ${index % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
-                      <span className="text-sm font-semibold text-accent">{milestone.year}</span>
+                      <motion.span 
+                        className="text-sm font-semibold text-accent inline-block"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {milestone.year}
+                      </motion.span>
                       <p className="text-foreground">{milestone.event}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
