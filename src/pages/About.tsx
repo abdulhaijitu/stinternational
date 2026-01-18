@@ -18,6 +18,7 @@ import {
   Wrench,
   BookOpen
 } from "lucide-react";
+import { motion } from "framer-motion";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -195,26 +196,53 @@ const About = () => {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {howItWorksSteps.map((step, index) => (
-              <div 
+              <motion.div 
                 key={index} 
-                className="relative bg-card border border-border rounded-lg p-6 transition-all duration-200 hover:shadow-md hover:border-primary/20"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="relative bg-card border border-border rounded-lg p-6 transition-all duration-200 hover:shadow-md hover:border-primary/20 group"
               >
                 {/* Step Number */}
-                <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                <motion.div 
+                  className="absolute -top-3 -left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: index * 0.1 + 0.2, type: "spring", stiffness: 200 }}
+                >
                   {step.step}
-                </div>
+                </motion.div>
                 
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mt-2">
-                  <step.icon className="h-6 w-6 text-primary" />
-                </div>
+                <motion.div 
+                  className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mt-2"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.1 + 0.3 }}
+                  >
+                    <step.icon className="h-6 w-6 text-primary transition-transform duration-200 group-hover:scale-110" />
+                  </motion.div>
+                </motion.div>
                 <h3 className="font-semibold mb-2">{step.title}</h3>
                 <p className="text-sm text-muted-foreground">{step.description}</p>
                 
                 {/* Connector Line (hidden on last item and mobile) */}
                 {index < howItWorksSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-px bg-border" />
+                  <motion.div 
+                    className="hidden lg:block absolute top-1/2 -right-3 w-6 h-px bg-border"
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.1 + 0.4 }}
+                  />
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
