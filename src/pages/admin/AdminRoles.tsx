@@ -61,6 +61,13 @@ const MODULE_STRUCTURE = [
     ]
   },
   {
+    group: "SEO",
+    groupBn: "এসইও",
+    modules: [
+      { key: "seo", label: "SEO Management", labelBn: "এসইও ম্যানেজমেন্ট" }
+    ]
+  },
+  {
     group: "Analytics",
     groupBn: "অ্যানালিটিক্স",
     modules: [
