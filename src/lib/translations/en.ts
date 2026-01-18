@@ -617,7 +617,43 @@ export const en = {
   // About page
   about: {
     title: "About ST International",
-    subtitle: "For nearly two decades, ST International has been Bangladesh's trusted partner for scientific, industrial, and educational equipment. We bridge the gap between global technology and local expertise.",
+    subtitle: "Your trusted partner for scientific, industrial, and educational equipment in Bangladesh. We combine global technology with local expertise to serve institutions nationwide.",
+    
+    // Platform Section
+    aboutPlatform: "About the Platform",
+    platformDescription: "ST International provides comprehensive access to scientific and industrial equipment through a modern digital platform. We offer direct purchase options, subscription-based services, and custom quotations for institutional buyers.",
+    
+    // What We Offer
+    whatWeOffer: "What We Offer",
+    productTypes: [
+      "Laboratory & Scientific Equipment",
+      "Measurement & Precision Instruments",
+      "Industrial & Engineering Tools",
+      "Educational Supplies & Documentation",
+    ],
+    
+    // How It Works
+    howItWorks: "How It Works",
+    step1Title: "Browse & Select",
+    step1Desc: "Explore our catalog of 5000+ products across multiple categories. Filter by type, brand, or specification.",
+    step2Title: "Request Quote or Purchase",
+    step2Desc: "Add items to cart for direct purchase, or request a custom quote for bulk and institutional orders.",
+    step3Title: "Secure Payment",
+    step3Desc: "Choose from multiple payment options including bank transfer, cash on delivery, or credit terms for institutions.",
+    step4Title: "Delivery & Support",
+    step4Desc: "Nationwide delivery with installation support. All products come with warranty and after-sales service.",
+    
+    // Trust Section
+    trustTitle: "Trust & Transparency",
+    trustSubtitle: "We prioritize security, clarity, and user experience in every interaction",
+    securePayments: "Secure Payments",
+    securePaymentsDesc: "All transactions are protected with industry-standard security. Multiple payment options for your convenience.",
+    clearAccessRules: "Clear Access Rules",
+    clearAccessRulesDesc: "Transparent pricing, warranty terms, and return policies. No hidden fees or surprises.",
+    userFocusedDesign: "User-Focused Design",
+    userFocusedDesignDesc: "Easy navigation, fast checkout, and dedicated support to make your procurement process seamless.",
+    
+    // Legacy content
     ourMission: "Our Mission",
     missionText: "To empower Bangladesh's educational institutions, research laboratories, and industrial facilities with world-class equipment and unwavering support. We believe that access to quality scientific instruments is fundamental to progress and innovation.",
     ourVision: "Our Vision",
@@ -639,10 +675,12 @@ export const en = {
     milestone2015: "Opened dedicated service center",
     milestone2018: "Reached 1000+ institutional clients",
     milestone2024: "Launched online ordering platform",
-    readyToPartner: "Ready to Partner With Us?",
+    readyToPartner: "Ready to Get Started?",
     partnerSubtitle: "Whether you need a single instrument or complete laboratory setup, our team is ready to help you find the right solutions.",
     contactUs: "Contact Us",
     browseProducts: "Browse Products",
+    exploreProducts: "Explore Products",
+    getStarted: "Get Started Today",
   },
 
   // Trust Badges

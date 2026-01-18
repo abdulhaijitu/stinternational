@@ -1,5 +1,23 @@
 import { Link } from "react-router-dom";
-import { CheckCircle, Users, Award, Building2, Target, ArrowRight } from "lucide-react";
+import { 
+  CheckCircle, 
+  Users, 
+  Award, 
+  Building2, 
+  Target, 
+  ArrowRight,
+  ShoppingCart,
+  FileText,
+  CreditCard,
+  Truck,
+  Shield,
+  Eye,
+  Heart,
+  FlaskConical,
+  Ruler,
+  Wrench,
+  BookOpen
+} from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -41,6 +59,53 @@ const About = () => {
     { year: "2024", event: t.about.milestone2024 },
   ];
 
+  const howItWorksSteps = [
+    {
+      icon: ShoppingCart,
+      title: t.about.step1Title,
+      description: t.about.step1Desc,
+      step: "01",
+    },
+    {
+      icon: FileText,
+      title: t.about.step2Title,
+      description: t.about.step2Desc,
+      step: "02",
+    },
+    {
+      icon: CreditCard,
+      title: t.about.step3Title,
+      description: t.about.step3Desc,
+      step: "03",
+    },
+    {
+      icon: Truck,
+      title: t.about.step4Title,
+      description: t.about.step4Desc,
+      step: "04",
+    },
+  ];
+
+  const trustFeatures = [
+    {
+      icon: Shield,
+      title: t.about.securePayments,
+      description: t.about.securePaymentsDesc,
+    },
+    {
+      icon: Eye,
+      title: t.about.clearAccessRules,
+      description: t.about.clearAccessRulesDesc,
+    },
+    {
+      icon: Heart,
+      title: t.about.userFocusedDesign,
+      description: t.about.userFocusedDesignDesc,
+    },
+  ];
+
+  const productTypeIcons = [FlaskConical, Ruler, Wrench, BookOpen];
+
   return (
     <Layout>
       <PageSEO 
@@ -54,6 +119,7 @@ const About = () => {
           bn: "বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী হিসেবে ST International-এর ১০+ বছরের অভিজ্ঞতা সম্পর্কে জানুন।"
         }}
       />
+
       {/* Hero Section */}
       <section className="hero-gradient text-primary-foreground">
         <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
@@ -66,28 +132,117 @@ const About = () => {
         </div>
       </section>
 
-      {/* Mission & Vision */}
+      {/* About the Platform */}
       <section className="py-16 md:py-24">
         <div className={`container-premium ${fontClass}`}>
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="bg-card border border-border rounded-lg p-8">
-              <div className="w-14 h-14 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mb-6">
-                <Target className="h-7 w-7" />
-              </div>
-              <h2 className="text-2xl font-bold mb-4">{t.about.ourMission}</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {t.about.missionText}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.about.aboutPlatform}</h2>
+              <p className="text-muted-foreground leading-relaxed text-lg mb-8">
+                {t.about.platformDescription}
               </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-8">
-              <div className="w-14 h-14 bg-accent text-accent-foreground rounded-lg flex items-center justify-center mb-6">
-                <Award className="h-7 w-7" />
+              
+              {/* What We Offer */}
+              <h3 className="text-xl font-semibold mb-4">{t.about.whatWeOffer}</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {(t.about.productTypes as readonly string[]).map((type, index) => {
+                  const IconComponent = productTypeIcons[index] || CheckCircle;
+                  return (
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg transition-colors duration-200 hover:bg-muted"
+                    >
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="h-5 w-5 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium">{type}</span>
+                    </div>
+                  );
+                })}
               </div>
-              <h2 className="text-2xl font-bold mb-4">{t.about.ourVision}</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {t.about.visionText}
-              </p>
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-lg p-6 text-center">
+                <div className="w-14 h-14 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Target className="h-7 w-7" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t.about.ourMission}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-4">
+                  {t.about.missionText}
+                </p>
+              </div>
+              <div className="bg-card border border-border rounded-lg p-6 text-center">
+                <div className="w-14 h-14 bg-accent text-accent-foreground rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-7 w-7" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t.about.ourVision}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-4">
+                  {t.about.visionText}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className={`container-premium ${fontClass}`}>
+          <div className="text-center mb-12">
+            <h2 className="mb-4">{t.about.howItWorks}</h2>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {howItWorksSteps.map((step, index) => (
+              <div 
+                key={index} 
+                className="relative bg-card border border-border rounded-lg p-6 transition-all duration-200 hover:shadow-md hover:border-primary/20"
+              >
+                {/* Step Number */}
+                <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                  {step.step}
+                </div>
+                
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mt-2">
+                  <step.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground">{step.description}</p>
+                
+                {/* Connector Line (hidden on last item and mobile) */}
+                {index < howItWorksSteps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-px bg-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Transparency */}
+      <section className="py-16 md:py-24">
+        <div className={`container-premium ${fontClass}`}>
+          <div className="text-center mb-12">
+            <h2 className="mb-4">{t.about.trustTitle}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              {t.about.trustSubtitle}
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {trustFeatures.map((feature, index) => (
+              <div 
+                key={index} 
+                className="bg-card border border-border rounded-lg p-8 text-center transition-all duration-200 hover:shadow-md hover:border-primary/20"
+              >
+                <div className="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <feature.icon className="h-7 w-7 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -103,7 +258,10 @@ const About = () => {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <div key={index} className="bg-card border border-border rounded-lg p-6 text-center">
+              <div 
+                key={index} 
+                className="bg-card border border-border rounded-lg p-6 text-center transition-all duration-200 hover:shadow-md hover:border-primary/20"
+              >
                 <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center mx-auto mb-4">
                   <value.icon className="h-6 w-6" />
                 </div>
@@ -155,13 +313,13 @@ const About = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
-              <Link to="/contact">
-                {t.about.contactUs}
+              <Link to="/products">
+                {t.about.exploreProducts}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button variant="hero-secondary" size="lg" asChild>
-              <Link to="/categories">{t.about.browseProducts}</Link>
+              <Link to="/contact">{t.about.contactUs}</Link>
             </Button>
           </div>
         </div>
