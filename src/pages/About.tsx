@@ -50,8 +50,8 @@ const About = () => {
           bn: "আমাদের সম্পর্কে - ST International | ২০০৫ সাল থেকে বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী"
         }}
         fallbackDescription={{
-          en: "Learn about ST International's 19+ years of experience as Bangladesh's trusted supplier of scientific and industrial equipment.",
-          bn: "বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী হিসেবে ST International-এর ১৯+ বছরের অভিজ্ঞতা সম্পর্কে জানুন।"
+          en: "Learn about ST International's 10+ years of experience as Bangladesh's trusted supplier of scientific and industrial equipment.",
+          bn: "বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী হিসেবে ST International-এর ১০+ বছরের অভিজ্ঞতা সম্পর্কে জানুন।"
         }}
       />
       {/* Hero Section */}

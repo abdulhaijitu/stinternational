@@ -606,7 +606,7 @@ export const en = {
     messagePlaceholder: "Tell us about your requirements...",
     sendButton: "Send Message",
     whyChoose: "Why Choose ST International?",
-    experience: "19+ years of experience in Bangladesh",
+    experience: "10+ years of experience in Bangladesh",
     authorized: "Authorized distributor for premium brands",
     nationwide: "Nationwide delivery and installation",
     afterSales: "Dedicated after-sales support",

@@ -174,13 +174,13 @@ const whyChooseUs = {
 // Stats data (bilingual)
 const stats = {
   en: [
-    { value: "19+", label: "Years of Experience" },
+    { value: "10+", label: "Years of Experience" },
     { value: "5000+", label: "Products Available" },
     { value: "2000+", label: "Satisfied Clients" },
     { value: "50+", label: "Trusted Brands" },
   ],
   bn: [
-    { value: "১৯+", label: "বছরের অভিজ্ঞতা" },
+    { value: "১০+", label: "বছরের অভিজ্ঞতা" },
     { value: "৫০০০+", label: "পণ্য উপলব্ধ" },
     { value: "২০০০+", label: "সন্তুষ্ট গ্রাহক" },
     { value: "৫০+", label: "বিশ্বস্ত ব্র্যান্ড" },

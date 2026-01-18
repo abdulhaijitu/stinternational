@@ -217,7 +217,7 @@ const DefaultVisual = () => (
     </div>
     
     <div className="absolute -bottom-4 -left-4 bg-background/95 backdrop-blur-sm rounded-lg shadow-xl p-4 border border-border">
-      <div className="text-2xl font-bold text-primary">19+</div>
+      <div className="text-2xl font-bold text-primary">10+</div>
       <div className="text-xs text-muted-foreground">Years Experience</div>
     </div>
   </div>

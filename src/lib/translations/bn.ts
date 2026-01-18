@@ -606,7 +606,7 @@ export const bn = {
     messagePlaceholder: "আপনার প্রয়োজনীয়তা সম্পর্কে বলুন...",
     sendButton: "মেসেজ পাঠান",
     whyChoose: "কেন ST International বেছে নেবেন?",
-    experience: "বাংলাদেশে ১৯+ বছরের অভিজ্ঞতা",
+    experience: "বাংলাদেশে ১০+ বছরের অভিজ্ঞতা",
     authorized: "প্রিমিয়াম ব্র্যান্ডের অনুমোদিত পরিবেশক",
     nationwide: "সারাদেশে ডেলিভারি এবং ইনস্টলেশন",
     afterSales: "নিবেদিত বিক্রয়োত্তর সাপোর্ট",

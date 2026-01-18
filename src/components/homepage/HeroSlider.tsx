@@ -392,7 +392,7 @@ const HeroSlider = () => {
               "absolute -bottom-2 -left-2 lg:-left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 lg:p-4 shadow-lg border border-border transition-all duration-500 delay-150 z-10",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
-              <div className="text-xl lg:text-2xl font-bold text-foreground">19+</div>
+              <div className="text-xl lg:text-2xl font-bold text-foreground">10+</div>
               <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.yearsExperience}</div>
             </div>
           </div>
