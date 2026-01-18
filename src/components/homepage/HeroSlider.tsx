@@ -125,7 +125,7 @@ const slideConfig: SlideData[] = [
 
 // Animation classes for different slide effects
 const getSlideAnimationClasses = (animation: SlideAnimation, isActive: boolean) => {
-  const baseClasses = "transition-all duration-500 ease-out";
+  const baseClasses = "transition-all duration-[400ms] ease-out";
   
   if (isActive) {
     return cn(baseClasses, "opacity-100 translate-x-0 translate-y-0 scale-100 relative");
@@ -236,7 +236,7 @@ const HeroSlider = () => {
   }, []);
 
   const SLIDE_INTERVAL = 6000; // 6 seconds
-  const TRANSITION_DURATION = 500; // 500ms
+  const TRANSITION_DURATION = 400; // 400ms
   const PROGRESS_UPDATE_INTERVAL = 50; // Update progress every 50ms
 
   const goToSlide = useCallback((index: number) => {
@@ -320,7 +320,7 @@ const HeroSlider = () => {
         <div
           key={`bg-${slide.id}`}
           className={cn(
-            "absolute inset-0 bg-gradient-to-br transition-opacity duration-500 ease-out",
+            "absolute inset-0 bg-gradient-to-br transition-opacity duration-[400ms] ease-out",
             slide.theme.gradient,
             currentSlide === index ? "opacity-100" : "opacity-0"
           )}
@@ -437,7 +437,7 @@ const HeroSlider = () => {
                 <div
                   key={slide.id}
                   className={cn(
-                    "absolute inset-0 transition-all duration-500 ease-out",
+                    "absolute inset-0 transition-all duration-[400ms] ease-out",
                     currentSlide === index 
                       ? "opacity-100 translate-x-0" 
                       : "opacity-0 translate-x-3"
