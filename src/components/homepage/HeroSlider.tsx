@@ -24,6 +24,45 @@ const heroImageMap: Record<string, string> = {
 // Slide animation types for each industry
 type SlideAnimation = "fade-up" | "fade-right" | "zoom-in" | "fade-left";
 
+// Slide gradient themes for visual variety
+interface SlideTheme {
+  gradient: string;
+  overlayColor: string;
+  accentGlow: string;
+  statBg: string;
+}
+
+const slideThemes: SlideTheme[] = [
+  {
+    // Slide 1: Navy to subtle gold accent
+    gradient: "from-[hsl(220,50%,12%)] via-[hsl(220,45%,18%)] to-[hsl(220,40%,22%)]",
+    overlayColor: "bg-gradient-to-br from-amber-500/10 via-transparent to-blue-900/20",
+    accentGlow: "bg-amber-500/20",
+    statBg: "bg-amber-500/10",
+  },
+  {
+    // Slide 2: Teal/Cyan scientific tone
+    gradient: "from-[hsl(200,50%,12%)] via-[hsl(195,45%,16%)] to-[hsl(210,40%,20%)]",
+    overlayColor: "bg-gradient-to-br from-cyan-500/15 via-transparent to-teal-900/20",
+    accentGlow: "bg-cyan-500/20",
+    statBg: "bg-cyan-500/10",
+  },
+  {
+    // Slide 3: Indigo/Deep purple innovation tone
+    gradient: "from-[hsl(240,40%,14%)] via-[hsl(250,35%,18%)] to-[hsl(220,45%,20%)]",
+    overlayColor: "bg-gradient-to-br from-indigo-500/12 via-transparent to-purple-900/15",
+    accentGlow: "bg-indigo-500/20",
+    statBg: "bg-indigo-500/10",
+  },
+  {
+    // Slide 4: Classic navy with warm accent
+    gradient: "from-[hsl(215,50%,12%)] via-[hsl(220,48%,16%)] to-[hsl(225,42%,22%)]",
+    overlayColor: "bg-gradient-to-br from-orange-500/10 via-transparent to-slate-900/20",
+    accentGlow: "bg-orange-500/20",
+    statBg: "bg-orange-500/10",
+  },
+];
+
 interface SlideData {
   id: number;
   trustBadgeKey: 'trustedSupplier' | 'certifiedQuality' | 'industrialGrade' | 'institutionsTrust';
@@ -33,6 +72,7 @@ interface SlideData {
   visual: string;
   icon: typeof FlaskConical;
   animation: SlideAnimation;
+  theme: SlideTheme;
 }
 
 // Slide configuration - references translation keys
@@ -46,6 +86,7 @@ const slideConfig: SlideData[] = [
     visual: "laboratory",
     icon: FlaskConical,
     animation: "fade-up",
+    theme: slideThemes[0],
   },
   {
     id: 2,
@@ -56,6 +97,7 @@ const slideConfig: SlideData[] = [
     visual: "measurement",
     icon: Gauge,
     animation: "fade-right",
+    theme: slideThemes[1],
   },
   {
     id: 3,
@@ -66,6 +108,7 @@ const slideConfig: SlideData[] = [
     visual: "engineering",
     icon: HardHat,
     animation: "zoom-in",
+    theme: slideThemes[2],
   },
   {
     id: 4,
@@ -76,6 +119,7 @@ const slideConfig: SlideData[] = [
     visual: "general",
     icon: Building2,
     animation: "fade-left",
+    theme: slideThemes[3],
   },
 ];
 
@@ -252,6 +296,9 @@ const HeroSlider = () => {
     };
   }, [effectivePaused, nextSlide, currentSlide]);
 
+  // Get current slide theme
+  const currentTheme = heroSlides[currentSlide]?.theme || slideThemes[0];
+
   return (
     <section 
       ref={sliderRef}
@@ -259,7 +306,7 @@ const HeroSlider = () => {
       role="region"
       aria-roledescription="carousel"
       aria-label="Hero slider - Use arrow keys to navigate"
-      className="hero-gradient text-primary-foreground relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+      className="relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary text-primary-foreground"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onFocus={() => setIsFocused(true)}
@@ -268,18 +315,41 @@ const HeroSlider = () => {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      {/* Dynamic Slide Background Gradients */}
+      {heroSlides.map((slide, index) => (
+        <div
+          key={`bg-${slide.id}`}
+          className={cn(
+            "absolute inset-0 bg-gradient-to-br transition-opacity duration-500 ease-out",
+            slide.theme.gradient,
+            currentSlide === index ? "opacity-100" : "opacity-0"
+          )}
+        />
+      ))}
+
       {/* Progress Bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-primary-foreground/10 z-20">
         <div 
-          className="h-full bg-accent transition-all duration-100 ease-linear"
+          className="h-full bg-gradient-to-r from-accent via-accent to-amber-400 transition-all duration-100 ease-linear"
           style={{ width: `${effectivePaused ? progress : progress}%` }}
         />
       </div>
 
-      {/* Background gradient */}
+      {/* Enhanced Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[120px] transform translate-x-1/2" />
+        {/* Primary accent glow - animates with slide */}
+        <div className={cn(
+          "absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full blur-[120px] transform translate-x-1/2 transition-all duration-700",
+          currentTheme.accentGlow
+        )} />
+        {/* Secondary subtle glow */}
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary-foreground/5 rounded-full blur-[80px]" />
+        {/* Left side subtle accent */}
+        <div className={cn(
+          "absolute top-1/2 -left-32 w-[300px] h-[300px] rounded-full blur-[100px] transition-all duration-700",
+          currentTheme.accentGlow,
+          "opacity-50"
+        )} />
       </div>
 
       <div className="container-premium py-16 md:py-20 lg:py-24 relative">
@@ -296,16 +366,19 @@ const HeroSlider = () => {
                 aria-hidden={currentSlide !== index}
                 className={getSlideAnimationClasses(slide.animation, currentSlide === index)}
               >
-                {/* Trust Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm mb-6 md:mb-8">
+                {/* Trust Badge - Enhanced with left border accent */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full text-sm mb-6 md:mb-8 border-l-2 border-accent shadow-sm">
                   <CheckCircle className="h-4 w-4 text-accent" />
                   <span className="font-medium">{slide.trustBadge}</span>
                 </div>
                 
-                {/* Headline */}
+                {/* Headline - with highlighted accent */}
                 <h1 className="text-balance mb-4 md:mb-6">
                   {slide.headline}{" "}
-                  <span className="text-accent">{slide.headlineAccent}</span>
+                  <span className="text-accent relative">
+                    {slide.headlineAccent}
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-accent/80 to-transparent rounded-full" />
+                  </span>
                 </h1>
                 
                 {/* Description */}
@@ -313,12 +386,12 @@ const HeroSlider = () => {
                   {slide.description}
                 </p>
                 
-                {/* CTAs */}
+                {/* CTAs - Enhanced with better hover states */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Button 
                     asChild 
                     size="lg" 
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-200 group"
+                    className="bg-gradient-to-r from-accent to-amber-500 hover:from-accent/90 hover:to-amber-400 text-accent-foreground shadow-lg hover:shadow-xl hover:shadow-accent/20 transition-all duration-300 group"
                     onClick={() => trackHeroSlide(index, 'click')}
                   >
                     <Link to={slide.primaryCta.href}>
@@ -331,11 +404,11 @@ const HeroSlider = () => {
                     asChild 
                     variant="outline" 
                     size="lg" 
-                    className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/50 transition-all duration-200"
+                    className="border-primary-foreground/30 text-primary-foreground hover:bg-accent/20 hover:border-accent/50 hover:text-accent transition-all duration-300 group"
                     onClick={() => trackHeroSlide(index, 'click')}
                   >
                     <Link to={slide.secondaryCta.href}>
-                      <FileText className="mr-2 h-4 w-4" />
+                      <FileText className="mr-2 h-4 w-4 group-hover:text-accent transition-colors" />
                       <span>{slide.secondaryCta.label}</span>
                     </Link>
                   </Button>
@@ -358,14 +431,16 @@ const HeroSlider = () => {
 
           {/* Right Column / Mobile Bottom - Image Container */}
           <div className="relative h-[200px] sm:h-[250px] lg:h-[400px] mt-8 lg:mt-0" aria-hidden="true">
-            {/* Image container with rounded corners */}
+            {/* Image container with rounded corners and color overlay */}
             <div className="relative w-full h-full rounded-xl lg:rounded-2xl overflow-hidden border border-primary-foreground/20 shadow-2xl">
               {heroSlides.map((slide, index) => (
                 <div
                   key={slide.id}
                   className={cn(
-                    "absolute inset-0 transition-opacity duration-700 ease-in-out",
-                    currentSlide === index ? "opacity-100" : "opacity-0"
+                    "absolute inset-0 transition-all duration-500 ease-out",
+                    currentSlide === index 
+                      ? "opacity-100 translate-x-0" 
+                      : "opacity-0 translate-x-3"
                   )}
                 >
                   <img
@@ -374,22 +449,35 @@ const HeroSlider = () => {
                     loading={index === 0 ? "eager" : "lazy"}
                     className="absolute inset-0 w-full h-full object-cover object-center lg:object-right"
                   />
+                  {/* Color overlay matching slide theme */}
+                  <div className={cn(
+                    "absolute inset-0 transition-opacity duration-500",
+                    slide.theme.overlayColor,
+                    currentSlide === index ? "opacity-100" : "opacity-0"
+                  )} />
                 </div>
               ))}
+              
+              {/* Subtle inner shadow for depth */}
+              <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.3)] pointer-events-none" />
             </div>
             
-            {/* Stats card - Products count */}
+            {/* Stats card - Products count with tinted background */}
             <div className={cn(
-              "absolute -top-2 -right-2 lg:-right-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 lg:p-4 shadow-lg border border-border transition-all duration-500 z-10",
+              "absolute -top-2 -right-2 lg:-right-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 transition-all duration-500 z-10",
+              currentTheme.statBg,
+              "bg-background/90",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             )}>
               <div className="text-xl lg:text-2xl font-bold text-foreground">5000+</div>
               <div className="text-[10px] lg:text-xs text-muted-foreground">{t.hero.productsCount}</div>
             </div>
             
-            {/* Experience card */}
+            {/* Experience card with tinted background */}
             <div className={cn(
-              "absolute -bottom-2 -left-2 lg:-left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 lg:p-4 shadow-lg border border-border transition-all duration-500 delay-150 z-10",
+              "absolute -bottom-2 -left-2 lg:-left-4 backdrop-blur-md rounded-lg p-3 lg:p-4 shadow-lg border border-border/50 transition-all duration-500 delay-150 z-10",
+              currentTheme.statBg,
+              "bg-background/90",
               currentSlide >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
               <div className="text-xl lg:text-2xl font-bold text-foreground">10+</div>
