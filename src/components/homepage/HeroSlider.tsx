@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText, ChevronLeft, ChevronRight, CheckCircle, FlaskConical, Gauge, HardHat, Building2, Play, Pause } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -234,6 +234,20 @@ const HeroSlider = () => {
   const progressRef = useRef<NodeJS.Timeout | null>(null);
   const lastTrackedSlideRef = useRef<number>(-1);
 
+  // Mouse follow glow effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springConfig = { damping: 25, stiffness: 150 };
+  const glowX = useSpring(mouseX, springConfig);
+  const glowY = useSpring(mouseY, springConfig);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (!sliderRef.current) return;
+    const rect = sliderRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  }, [mouseX, mouseY]);
+
   // Generate translated slide data
   const heroSlides = useMemo(() => slideConfig.map(slide => ({
     ...slide,
@@ -341,6 +355,7 @@ const HeroSlider = () => {
       className="relative overflow-hidden min-h-[600px] md:min-h-[650px] touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary text-primary-foreground"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onMouseMove={handleMouseMove}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       onTouchStart={onTouchStart}
@@ -423,6 +438,27 @@ const HeroSlider = () => {
 
       {/* Floating Particles Effect - Subtle animated shapes */}
       <FloatingParticles count={12} />
+
+      {/* Mouse-follow glow effect - Interactive depth */}
+      <motion.div
+        className="absolute pointer-events-none hidden md:block"
+        style={{
+          x: glowX,
+          y: glowY,
+          translateX: "-50%",
+          translateY: "-50%",
+        }}
+      >
+        {/* Primary glow - follows cursor */}
+        <div className={cn(
+          "w-[300px] h-[300px] rounded-full blur-[80px] opacity-20 transition-colors duration-500",
+          currentTheme.accentGlow
+        )} />
+        {/* Secondary inner glow */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-[150px] h-[150px] rounded-full bg-primary-foreground/10 blur-[40px]" />
+        </div>
+      </motion.div>
       
       {/* Gradient fade divider at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none z-10" />
