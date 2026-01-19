@@ -210,6 +210,11 @@ export default {
             'background-size': '200% 200%',
             'background-position': 'right center'
           }
+        },
+        shimmer: {
+          '100%': {
+            transform: 'translateX(100%)'
+          }
         }
       },
       animation: {
