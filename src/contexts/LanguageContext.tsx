@@ -10,6 +10,7 @@ interface LanguageContextType {
   t: TranslationKeys;
   isRTL: boolean;
   languageNames: typeof languageNames;
+  isTransitioning: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -26,36 +27,50 @@ type NestedKeyOf<ObjectType extends object> = {
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Default to English first, then hydrate from localStorage in useEffect
   const [language, setLanguageState] = useState<Language>('en');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
+    if (lang === language) return;
     
-    // Track language switch
-    try {
-      const telemetry = getUXTelemetry();
-      telemetry.trackEvent({
-        event_type: 'language_switch',
-        event_category: 'utility',
-        event_action: 'switch',
-        event_value: lang,
-      });
-    } catch (e) {
-      // Telemetry should not break the app
-    }
+    // Start transition animation
+    setIsTransitioning(true);
     
-    // Update document lang attribute for accessibility
-    document.documentElement.lang = lang;
-    
-    // Update font family based on language
-    if (lang === 'bn') {
-      document.documentElement.classList.add('font-bangla');
-      document.documentElement.classList.remove('font-english');
-    } else {
-      document.documentElement.classList.add('font-english');
-      document.documentElement.classList.remove('font-bangla');
-    }
-  }, []);
+    // Wait for fade out, then change language
+    setTimeout(() => {
+      setLanguageState(lang);
+      localStorage.setItem(STORAGE_KEY, lang);
+      
+      // Track language switch
+      try {
+        const telemetry = getUXTelemetry();
+        telemetry.trackEvent({
+          event_type: 'language_switch',
+          event_category: 'utility',
+          event_action: 'switch',
+          event_value: lang,
+        });
+      } catch (e) {
+        // Telemetry should not break the app
+      }
+      
+      // Update document lang attribute for accessibility
+      document.documentElement.lang = lang;
+      
+      // Update font family based on language
+      if (lang === 'bn') {
+        document.documentElement.classList.add('font-bangla');
+        document.documentElement.classList.remove('font-english');
+      } else {
+        document.documentElement.classList.add('font-english');
+        document.documentElement.classList.remove('font-bangla');
+      }
+      
+      // End transition animation after fade in
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 200);
+    }, 150);
+  }, [language]);
 
   // Hydrate from localStorage on mount (client-only)
   useEffect(() => {
@@ -81,7 +96,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const isRTL = false; // Bangla is LTR
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL, languageNames }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL, languageNames, isTransitioning }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -99,6 +114,7 @@ export const useLanguage = () => {
       t: translations['en'],
       isRTL: false,
       languageNames,
+      isTransitioning: false,
     };
   }
   return context;

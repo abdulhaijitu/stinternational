@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 // Lazy load floating elements - they are not critical for initial render
 const BackToTop = lazy(() => import("./BackToTop"));
@@ -26,10 +28,19 @@ interface LayoutProps {
  * All floating elements are lazy-loaded to prevent blocking initial render
  */
 const Layout = ({ children }: LayoutProps) => {
+  const { isTransitioning } = useLanguage();
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main id="main-content" className="flex-1" tabIndex={-1}>
+      <main 
+        id="main-content" 
+        className={cn(
+          "flex-1 transition-all duration-200 ease-out",
+          isTransitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+        )} 
+        tabIndex={-1}
+      >
         {children}
       </main>
       <Footer />
