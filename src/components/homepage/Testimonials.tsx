@@ -99,6 +99,7 @@ const Testimonials = () => {
     loop: true,
     align: "start",
     skipSnaps: false,
+    slidesToScroll: isMobile ? 1 : 1,
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -187,72 +188,66 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Mobile Carousel */}
-        {isMobile ? (
-          <div className="relative">
-            <div className="overflow-hidden" ref={emblaRef}>
-              <div className="flex gap-4">
-                {testimonials.map((testimonial) => (
-                  <div 
-                    key={testimonial.id} 
-                    className="flex-[0_0_85%] min-w-0 pl-1 pt-4"
-                  >
-                    <TestimonialCard testimonial={testimonial} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex items-center justify-center gap-4 mt-6">
-              <button
-                onClick={scrollPrev}
-                className={cn(
-                  "w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center transition-colors",
-                  canScrollPrev || true ? "hover:bg-primary hover:text-primary-foreground" : "opacity-50 cursor-not-allowed"
-                )}
-                aria-label="Previous testimonial"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              {/* Dot Indicators */}
-              <div className="flex items-center gap-2">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => scrollTo(index)}
-                    className={cn(
-                      "w-2 h-2 rounded-full transition-all duration-300",
-                      selectedIndex === index 
-                        ? "bg-primary w-6" 
-                        : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                    )}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={scrollNext}
-                className={cn(
-                  "w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center transition-colors",
-                  canScrollNext || true ? "hover:bg-primary hover:text-primary-foreground" : "opacity-50 cursor-not-allowed"
-                )}
-                aria-label="Next testimonial"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+        {/* Carousel for both Mobile and Desktop */}
+        <div className="relative">
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-6">
+              {testimonials.map((testimonial) => (
+                <div 
+                  key={testimonial.id} 
+                  className={cn(
+                    "min-w-0 pl-1 pt-4",
+                    isMobile ? "flex-[0_0_85%]" : "flex-[0_0_calc(33.333%-16px)]"
+                  )}
+                >
+                  <TestimonialCard testimonial={testimonial} />
+                </div>
+              ))}
             </div>
           </div>
-        ) : (
-          /* Desktop Grid */
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {testimonials.map((testimonial) => (
-              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-            ))}
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button
+              onClick={scrollPrev}
+              className={cn(
+                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card flex items-center justify-center transition-all duration-200",
+                "hover:bg-primary hover:text-primary-foreground hover:scale-105 active:scale-95"
+              )}
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+            
+            {/* Dot Indicators */}
+            <div className="flex items-center gap-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollTo(index)}
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300",
+                    selectedIndex === index 
+                      ? "bg-primary w-6 md:w-8" 
+                      : "bg-muted-foreground/30 hover:bg-muted-foreground/50 w-2"
+                  )}
+                  aria-label={`Go to testimonial ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={scrollNext}
+              className={cn(
+                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card flex items-center justify-center transition-all duration-200",
+                "hover:bg-primary hover:text-primary-foreground hover:scale-105 active:scale-95"
+              )}
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
