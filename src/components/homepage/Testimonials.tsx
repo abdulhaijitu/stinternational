@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote, Star, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import inarsLogo from "@/assets/logos/inars-logo.png";
+import bcsirLogo from "@/assets/logos/bcsir-logo.png";
 
 interface Testimonial {
   id: string;
@@ -12,6 +14,18 @@ interface Testimonial {
   avatar_url: string | null;
   rating: number;
 }
+
+// Map institution names to their logos
+const getInstitutionLogo = (companyName: string): string | null => {
+  const lowerName = companyName.toLowerCase();
+  if (lowerName.includes('inars') || lowerName.includes('national analytical')) {
+    return inarsLogo;
+  }
+  if (lowerName.includes('bcsir') || lowerName.includes('council of scientific')) {
+    return bcsirLogo;
+  }
+  return null;
+};
 
 const Testimonials = () => {
   const { data: testimonials, isLoading } = useQuery({
@@ -100,17 +114,28 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-border">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  {testimonial.avatar_url ? (
-                    <img
-                      src={testimonial.avatar_url}
-                      alt={testimonial.client_name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Building2 className="h-5 w-5 text-primary" />
-                  )}
-                </div>
+                {(() => {
+                  const institutionLogo = getInstitutionLogo(testimonial.company_name);
+                  return (
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-white border border-border/50 shadow-sm">
+                      {institutionLogo ? (
+                        <img
+                          src={institutionLogo}
+                          alt={testimonial.company_name}
+                          className="w-10 h-10 object-contain"
+                        />
+                      ) : testimonial.avatar_url ? (
+                        <img
+                          src={testimonial.avatar_url}
+                          alt={testimonial.client_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <Building2 className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                  );
+                })()}
                 <div>
                   <p className="font-semibold text-foreground">
                     {testimonial.client_name}
