@@ -435,7 +435,7 @@ const Contact = () => {
                   )}
                 </div>
 
-                <Button type="submit" variant="accent" size="lg" className="w-full sm:w-auto" disabled={submitting}>
+                <Button type="submit" variant="default" size="lg" className="w-full sm:w-auto" disabled={submitting}>
                   <Send className="h-4 w-4" />
                   {submitting 
                     ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...") 

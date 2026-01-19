@@ -30,7 +30,7 @@ const AnimatedGradientButton = ({
       <div className={cn(
         "absolute -inset-[2px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-[1px]",
         isPrimary 
-          ? "bg-gradient-to-r from-accent via-accent/80 to-accent animate-gradient-x" 
+          ? "bg-gradient-to-r from-primary via-primary/80 to-primary animate-gradient-x" 
           : "bg-gradient-to-r from-white/40 via-white/60 to-white/40 animate-gradient-x"
       )} />
       
@@ -38,7 +38,7 @@ const AnimatedGradientButton = ({
       <div className={cn(
         "absolute -inset-[2px] rounded-lg opacity-0 group-hover:opacity-60 transition-opacity duration-500 blur-md",
         isPrimary 
-          ? "bg-accent" 
+          ? "bg-primary" 
           : "bg-white/30"
       )} />
       
@@ -84,7 +84,7 @@ const CTAButton = ({
         className={cn(
           "relative flex items-center justify-center gap-2.5 h-14 px-8 md:px-10 rounded-lg text-lg font-semibold transition-all duration-300",
           isPrimary
-            ? "bg-accent text-accent-foreground shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/35"
+            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35"
             : "bg-white/10 text-white border border-white/20 backdrop-blur-sm hover:bg-white/15"
         )}
       >
@@ -152,7 +152,7 @@ const HeroCta = () => {
         >
           <div className="flex items-center gap-2 group">
             <motion.span 
-              className="w-2 h-2 bg-accent rounded-full shadow-sm shadow-accent/50"
+              className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50"
               whileHover={{ scale: 1.3 }}
               transition={{ type: "spring", stiffness: 400 }}
             />
@@ -161,7 +161,7 @@ const HeroCta = () => {
           <div className="hidden sm:block w-px h-4 bg-gradient-to-b from-transparent via-primary-foreground/30 to-transparent" />
           <div className="flex items-center gap-2 group">
             <motion.span 
-              className="w-2 h-2 bg-accent rounded-full shadow-sm shadow-accent/50"
+              className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50"
               whileHover={{ scale: 1.3 }}
               transition={{ type: "spring", stiffness: 400 }}
             />
@@ -201,7 +201,7 @@ const HeroCta = () => {
       >
         <div className="flex items-center gap-2 group">
           <motion.span 
-            className="w-2 h-2 bg-accent rounded-full shadow-sm shadow-accent/50"
+            className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50"
             whileHover={{ scale: 1.3 }}
             transition={{ type: "spring", stiffness: 400 }}
           />
@@ -210,7 +210,7 @@ const HeroCta = () => {
         <div className="hidden sm:block w-px h-4 bg-gradient-to-b from-transparent via-primary-foreground/30 to-transparent" />
         <div className="flex items-center gap-2 group">
           <motion.span 
-            className="w-2 h-2 bg-accent rounded-full shadow-sm shadow-accent/50"
+            className="w-2 h-2 bg-primary rounded-full shadow-sm shadow-primary/50"
             whileHover={{ scale: 1.3 }}
             transition={{ type: "spring", stiffness: 400 }}
           />

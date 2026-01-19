@@ -55,7 +55,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </Link>
           </Button>
           <Button 
-            variant="accent" 
+            variant="default" 
             size="sm" 
             className="flex-1" 
             disabled={!product.inStock}

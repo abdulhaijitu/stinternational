@@ -29,7 +29,7 @@ const Cart = () => {
             <p className="text-muted-foreground mb-8">
               {t.cart.cartEmptyMessage}
             </p>
-            <Button variant="accent" size="lg" asChild>
+            <Button variant="default" size="lg" asChild>
               <Link to="/categories">
                 {t.cart.continueShopping}
                 <ArrowRight className="h-4 w-4" />
@@ -155,7 +155,7 @@ const Cart = () => {
                   </div>
                 </div>
                 <Button
-                  variant="accent"
+                  variant="default"
                   size="lg"
                   className="w-full mb-4"
                   onClick={() => navigate("/checkout")}
