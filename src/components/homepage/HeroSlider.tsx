@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
+import FloatingParticles from "./FloatingParticles";
 
 // Import hero images
 import heroLaboratory from "@/assets/hero/hero-laboratory.jpg";
@@ -419,6 +420,9 @@ const HeroSlider = () => {
         {/* Subtle noise texture overlay for premium feel */}
         <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
       </div>
+
+      {/* Floating Particles Effect - Subtle animated shapes */}
+      <FloatingParticles count={12} />
       
       {/* Gradient fade divider at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none z-10" />
