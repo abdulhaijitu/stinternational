@@ -104,6 +104,9 @@
     /* Primary Brand - Warm Orange */
     --primary: 20 90% 48%;
     --primary-foreground: 33 100% 96%;
+    
+    /* Dark contrast text for gradient buttons */
+    --primary-contrast: 20 80% 18%;
 
     /* Background & Surface - Clean White */
     --background: 0 0% 96%;
@@ -253,6 +256,7 @@
     /* Primary - Brighter for dark mode */
     --primary: 27 95% 60%;
     --primary-foreground: 12 81% 14%;
+    --primary-contrast: 20 80% 18%;
 
     /* Accent */
     --accent: 20 91% 14%;

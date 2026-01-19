@@ -82,9 +82,9 @@ const CTAButton = ({
         to={to}
         onClick={onClick}
         className={cn(
-          "relative flex items-center justify-center gap-2.5 h-14 px-8 md:px-10 rounded-lg text-lg font-semibold transition-all duration-300",
+          "relative flex items-center justify-center gap-2.5 h-14 px-8 md:px-10 rounded-lg text-lg font-semibold transition-all duration-200",
           isPrimary
-            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35"
+            ? "bg-primary text-primary-contrast shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 hover:bg-primary/90 hover:text-primary-foreground"
             : "bg-white/10 text-white border border-white/20 backdrop-blur-sm hover:bg-white/15"
         )}
       >
