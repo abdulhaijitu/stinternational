@@ -711,7 +711,7 @@ const RequestQuote = () => {
                   </Button>
                 ) : (
                   <Button 
-                    variant="accent" 
+                    variant="default" 
                     onClick={handleSubmit} 
                     disabled={isSubmitting}
                     className="active:scale-95"

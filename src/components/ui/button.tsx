@@ -18,7 +18,7 @@ const buttonVariants = cva(
         // Premium B2B Variants
         accent: "bg-accent text-accent-foreground shadow-sm hover:bg-accent/90 active:scale-95 transition-all duration-200",
         "accent-outline": "border-2 border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-200",
-        hero: "bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 hover:shadow-xl active:scale-95 transition-all duration-200",
+        hero: "bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-xl active:scale-95 transition-all duration-200",
         "hero-secondary": "bg-white/10 text-white border border-white/20 backdrop-blur-sm hover:bg-white/20 active:scale-95 transition-all duration-200",
         success: "bg-success text-success-foreground shadow-sm hover:bg-success/90 active:scale-95 transition-all duration-200",
       },
