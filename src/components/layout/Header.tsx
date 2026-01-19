@@ -47,7 +47,7 @@ const Header = () => {
   const { wishlist } = useWishlist();
   const location = useLocation();
   const { isScrolled, isCompact, isVisible, scrollDirection } = useSmartHeader(100);
-  const { t } = useLanguage();
+  const { t, isTransitioning } = useLanguage();
   const { lightTap, mediumTap } = useHapticFeedback();
   const { trackMobileMenu } = useUXTelemetry();
   
@@ -222,11 +222,17 @@ const Header = () => {
       >
         {/* Top Bar */}
         <div 
-          className="bg-primary text-primary-foreground"
+          className={cn(
+            "bg-primary text-primary-foreground transition-opacity duration-200",
+            isTransitioning ? "opacity-50" : "opacity-100"
+          )}
           style={{ height: TOP_BAR_HEIGHT }}
         >
           <div className="container-premium h-full">
-            <div className="flex items-center justify-between h-full text-sm">
+            <div className={cn(
+              "flex items-center justify-between h-full text-sm transition-all duration-200",
+              isTransitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+            )}>
               <div className="hidden md:flex items-center gap-6">
                 <a href="tel:+8801715575665" className="flex items-center gap-2 hover:text-accent transition-colors">
                   <Phone className="h-3.5 w-3.5" />
@@ -362,7 +368,10 @@ const Header = () => {
           style={{ height: NAV_HEIGHT }}
         >
           <div className="container-premium h-full">
-            <div className="flex items-center gap-8 h-full">
+            <div className={cn(
+              "flex items-center gap-8 h-full transition-all duration-200",
+              isTransitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+            )}>
               <MegaMenu isCompact={isCompact} />
 
               <Link 
