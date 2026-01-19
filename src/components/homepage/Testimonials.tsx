@@ -220,13 +220,13 @@ const Testimonials = () => {
         {/* Carousel for both Mobile and Desktop */}
         <div className="relative">
           <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4 md:gap-6">
+            <div className="flex">
               {testimonials.map((testimonial) => (
                 <div 
                   key={testimonial.id} 
                   className={cn(
-                    "min-w-0 pl-1 pt-4",
-                    isMobile ? "flex-[0_0_85%]" : "flex-[0_0_calc(33.333%-16px)]"
+                    "min-w-0 pt-4 px-3",
+                    isMobile ? "flex-[0_0_90%]" : "flex-[0_0_33.333%]"
                   )}
                 >
                   <TestimonialCard testimonial={testimonial} />
