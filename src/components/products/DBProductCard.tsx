@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart, ArrowRight, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DBProduct } from "@/hooks/useProducts";
@@ -76,16 +77,27 @@ const DBProductCard = ({
   const showCompareCheckbox = !!onToggleCompare;
 
   return (
-    <article 
+    <motion.article 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
         "group relative bg-card rounded-lg border border-border overflow-hidden",
-        "transition-all duration-200 ease-out",
-        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-0.5",
+        "transition-all duration-300 ease-out",
+        "hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20",
         isInCompare && "ring-2 ring-primary",
         // Ensure consistent card height and minimum width
         "min-w-0 h-full flex flex-col"
       )}
     >
+      {/* Gradient glow effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      
+      {/* Animated border glow */}
+      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute inset-[-1px] rounded-lg bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-sm" />
+      </div>
       {/* Image Container - Fixed aspect ratio for CLS optimization */}
       <div 
         className={cn(
@@ -148,10 +160,12 @@ const DBProductCard = ({
             containerClassName="w-full h-full"
             className={cn(
               "w-full h-full object-cover",
-              "transition-transform duration-300 ease-out",
-              "group-hover:scale-[1.03]"
+              "transition-all duration-500 ease-out",
+              "group-hover:scale-105 group-hover:brightness-105"
             )}
           />
+          {/* Image overlay shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         </Link>
 
         {/* Out of Stock Overlay */}
@@ -290,28 +304,43 @@ const DBProductCard = ({
 
             {/* Desktop: Side-by-side buttons - Always visible */}
             <div className="mt-4 hidden sm:flex gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                className="flex-1 h-9 text-sm font-medium active:scale-[0.97] transition-transform"
-                asChild
+              <motion.div 
+                className="flex-1"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Link to={`/product/${product.slug}`}>
-                  {t.products.view}
-                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-                </Link>
-              </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="w-full h-9 text-sm font-medium relative overflow-hidden group/btn"
+                  asChild
+                >
+                  <Link to={`/product/${product.slug}`}>
+                    <span className="relative z-10 flex items-center">
+                      {t.products.view}
+                      <ArrowRight className="h-3.5 w-3.5 ml-1.5 transition-transform group-hover/btn:translate-x-0.5" />
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-accent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                  </Link>
+                </Button>
+              </motion.div>
               
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-3 active:scale-[0.97] transition-transform"
-                disabled={!product.in_stock}
-                onClick={handleAddToCart}
-                title={t.common.addToCart}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ShoppingCart className="h-4 w-4" />
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 relative overflow-hidden group/cart"
+                  disabled={!product.in_stock}
+                  onClick={handleAddToCart}
+                  title={t.common.addToCart}
+                >
+                  <ShoppingCart className="h-4 w-4 transition-transform group-hover/cart:scale-110" />
+                  <span className="absolute inset-0 bg-primary/10 opacity-0 group-hover/cart:opacity-100 transition-opacity duration-300" />
+                </Button>
+              </motion.div>
             </div>
           </>
         )}
@@ -330,7 +359,7 @@ const DBProductCard = ({
           </Link>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 };
 

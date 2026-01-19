@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUXTelemetry } from "@/hooks/useUXTelemetry";
 import FloatingParticles from "./FloatingParticles";
+import MorphingBlobs from "./MorphingBlobs";
 
 // Import hero images
 import heroLaboratory from "@/assets/hero/hero-laboratory.jpg";
@@ -459,6 +460,9 @@ const HeroSlider = () => {
           <div className="w-[150px] h-[150px] rounded-full bg-primary-foreground/10 blur-[40px]" />
         </div>
       </motion.div>
+
+      {/* Morphing Blobs - Organic fluid background */}
+      <MorphingBlobs />
       
       {/* Gradient fade divider at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none z-10" />
