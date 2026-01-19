@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Quote, Star, Building2 } from "lucide-react";
+import { Quote, Star, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import useEmblaCarousel from "embla-carousel-react";
+import { useCallback, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import inarsLogo from "@/assets/logos/inars-logo.png";
 import bcsirLogo from "@/assets/logos/bcsir-logo.png";
 
@@ -27,7 +31,79 @@ const getInstitutionLogo = (companyName: string): string | null => {
   return null;
 };
 
+const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
+  const institutionLogo = getInstitutionLogo(testimonial.company_name);
+  
+  return (
+    <div className="bg-card border border-border rounded-lg p-6 md:p-8 relative group hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+      {/* Quote Icon */}
+      <div className="absolute -top-3 -left-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+        <Quote className="h-5 w-5 text-primary-foreground" />
+      </div>
+
+      {/* Rating */}
+      <div className="flex items-center gap-1 mb-4 pt-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${
+              i < testimonial.rating
+                ? "text-accent fill-accent"
+                : "text-muted-foreground/30"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Quote */}
+      <blockquote className="text-foreground/90 leading-relaxed mb-6 flex-grow">
+        "{testimonial.quote}"
+      </blockquote>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 pt-4 border-t border-border mt-auto">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-white border border-border/50 shadow-sm flex-shrink-0">
+          {institutionLogo ? (
+            <img
+              src={institutionLogo}
+              alt={testimonial.company_name}
+              className="w-10 h-10 object-contain"
+            />
+          ) : testimonial.avatar_url ? (
+            <img
+              src={testimonial.avatar_url}
+              alt={testimonial.client_name}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+          ) : (
+            <Building2 className="h-5 w-5 text-primary" />
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground truncate">
+            {testimonial.client_name}
+          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {testimonial.designation && `${testimonial.designation}, `}
+            {testimonial.company_name}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Testimonials = () => {
+  const isMobile = useIsMobile();
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true,
+    align: "start",
+    skipSnaps: false,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
   const { data: testimonials, isLoading } = useQuery({
     queryKey: ["testimonials"],
     queryFn: async () => {
@@ -42,6 +118,36 @@ const Testimonials = () => {
       return data as Testimonial[];
     },
   });
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (emblaApi) emblaApi.scrollTo(index);
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   if (isLoading) {
     return (
@@ -81,74 +187,72 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {testimonials.map((testimonial) => (
-            <div
-              key={testimonial.id}
-              className="bg-card border border-border rounded-lg p-6 md:p-8 relative group hover:shadow-lg transition-shadow duration-300"
-            >
-              {/* Quote Icon */}
-              <div className="absolute -top-3 -left-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Quote className="h-5 w-5 text-primary-foreground" />
+        {/* Mobile Carousel */}
+        {isMobile ? (
+          <div className="relative">
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex gap-4">
+                {testimonials.map((testimonial) => (
+                  <div 
+                    key={testimonial.id} 
+                    className="flex-[0_0_85%] min-w-0 pl-1 pt-4"
+                  >
+                    <TestimonialCard testimonial={testimonial} />
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* Rating */}
-              <div className="flex items-center gap-1 mb-4 pt-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < testimonial.rating
-                        ? "text-accent fill-accent"
-                        : "text-muted-foreground/30"
-                    }`}
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <button
+                onClick={scrollPrev}
+                className={cn(
+                  "w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center transition-colors",
+                  canScrollPrev || true ? "hover:bg-primary hover:text-primary-foreground" : "opacity-50 cursor-not-allowed"
+                )}
+                aria-label="Previous testimonial"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              
+              {/* Dot Indicators */}
+              <div className="flex items-center gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollTo(index)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      selectedIndex === index 
+                        ? "bg-primary w-6" 
+                        : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    )}
+                    aria-label={`Go to testimonial ${index + 1}`}
                   />
                 ))}
               </div>
 
-              {/* Quote */}
-              <blockquote className="text-foreground/90 leading-relaxed mb-6 min-h-[100px]">
-                "{testimonial.quote}"
-              </blockquote>
-
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-4 border-t border-border">
-                {(() => {
-                  const institutionLogo = getInstitutionLogo(testimonial.company_name);
-                  return (
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-white border border-border/50 shadow-sm">
-                      {institutionLogo ? (
-                        <img
-                          src={institutionLogo}
-                          alt={testimonial.company_name}
-                          className="w-10 h-10 object-contain"
-                        />
-                      ) : testimonial.avatar_url ? (
-                        <img
-                          src={testimonial.avatar_url}
-                          alt={testimonial.client_name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <Building2 className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                  );
-                })()}
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {testimonial.client_name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {testimonial.designation && `${testimonial.designation}, `}
-                    {testimonial.company_name}
-                  </p>
-                </div>
-              </div>
+              <button
+                onClick={scrollNext}
+                className={cn(
+                  "w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center transition-colors",
+                  canScrollNext || true ? "hover:bg-primary hover:text-primary-foreground" : "opacity-50 cursor-not-allowed"
+                )}
+                aria-label="Next testimonial"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          /* Desktop Grid */
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {testimonials.map((testimonial) => (
+              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
