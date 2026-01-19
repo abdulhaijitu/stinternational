@@ -1,14 +1,24 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Clock, Facebook, Linkedin, Youtube, Shield, Truck, CreditCard } from "lucide-react";
 import { categoryGroups } from "@/lib/categories";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 
 const Footer = () => {
+  const { isTransitioning } = useLanguage();
+  
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className={cn(
+      "bg-primary text-primary-foreground transition-opacity duration-200",
+      isTransitioning ? "opacity-50" : "opacity-100"
+    )}>
       {/* Trust Reinforcement Bar */}
       <div className="border-b border-primary-foreground/10">
-        <div className="container-premium py-6">
+        <div className={cn(
+          "container-premium py-6 transition-all duration-200",
+          isTransitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+        )}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
             <div className="flex items-center justify-center md:justify-start gap-3">
               <Shield className="h-5 w-5 text-accent" />
@@ -27,7 +37,10 @@ const Footer = () => {
       </div>
 
       {/* Main Footer */}
-      <div className="container-premium py-12 md:py-16">
+      <div className={cn(
+        "container-premium py-12 md:py-16 transition-all duration-200",
+        isTransitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
+      )}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Company Info */}
           <div className="lg:col-span-1">
