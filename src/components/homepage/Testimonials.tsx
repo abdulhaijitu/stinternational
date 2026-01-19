@@ -4,7 +4,8 @@ import { Quote, Star, Building2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import inarsLogo from "@/assets/logos/inars-logo.png";
 import bcsirLogo from "@/assets/logos/bcsir-logo.png";
@@ -95,15 +96,31 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
 
 const Testimonials = () => {
   const isMobile = useIsMobile();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: true,
-    align: "start",
-    skipSnaps: false,
-    slidesToScroll: isMobile ? 1 : 1,
-  });
+  
+  // Autoplay plugin with pause on hover/touch
+  const autoplayPlugin = useRef(
+    Autoplay({ 
+      delay: 4000, 
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      stopOnFocusIn: true,
+    })
+  );
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      align: "start",
+      skipSnaps: false,
+      slidesToScroll: 1,
+    },
+    [autoplayPlugin.current]
+  );
+  
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const { data: testimonials, isLoading } = useQuery({
     queryKey: ["testimonials"],
@@ -144,11 +161,23 @@ const Testimonials = () => {
     onSelect();
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
+    
     return () => {
       emblaApi.off("select", onSelect);
       emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  const toggleAutoplay = useCallback(() => {
+    const autoplay = autoplayPlugin.current;
+    if (isPlaying) {
+      autoplay.stop();
+      setIsPlaying(false);
+    } else {
+      autoplay.play();
+      setIsPlaying(true);
+    }
+  }, [isPlaying]);
 
   if (isLoading) {
     return (
