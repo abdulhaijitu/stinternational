@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Grid3X3, Search, ShoppingCart, User } from "lucide-react";
+import { Home, Grid3X3, Search, ShoppingCart, Globe } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -26,12 +26,18 @@ const MobileBottomNav = () => {
   const hasMounted = useHasMounted();
   const location = useLocation();
   const { getItemCount } = useCart();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { isVisible } = useScrollDirection(15);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   const cartItemCount = getItemCount();
+
+  // Language toggle handler
+  const handleLanguageToggle = useCallback(() => {
+    triggerHaptic('medium');
+    setLanguage(language === 'en' ? 'bn' : 'en');
+  }, [language, setLanguage]);
 
   // Close sheets on route change
   useEffect(() => {
@@ -94,10 +100,12 @@ const MobileBottomNav = () => {
       badge: cartItemCount > 0 ? (cartItemCount > 9 ? '9+' : cartItemCount) : null
     },
     { 
-      path: '/account', 
-      icon: User, 
-      label: t.nav.account,
-      isLink: true 
+      path: '/language', 
+      icon: Globe, 
+      label: language === 'en' ? 'বাং' : 'EN',
+      isLink: false,
+      action: handleLanguageToggle,
+      isLanguage: true
     },
   ];
 
@@ -137,19 +145,23 @@ const MobileBottomNav = () => {
             const Icon = item.icon;
             const active = isActive(item.path);
             
+            const isLanguageItem = (item as any).isLanguage;
+            
             const content = (
               <div className={cn(
                 "flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-w-[56px]",
                 "rounded-lg transition-colors duration-150",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-                active 
-                  ? "text-primary" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                isLanguageItem
+                  ? "text-primary bg-primary/10"
+                  : active 
+                    ? "text-primary" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}>
                 <div className="relative">
                   <Icon className={cn(
                     "h-5 w-5 transition-transform duration-150",
-                    active && "scale-110"
+                    (active || isLanguageItem) && "scale-110"
                   )} />
                   {item.badge && (
                     <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-accent text-accent-foreground text-[10px] font-semibold rounded-full flex items-center justify-center">
@@ -159,7 +171,8 @@ const MobileBottomNav = () => {
                 </div>
                 <span className={cn(
                   "text-[10px] font-medium leading-tight",
-                  active && "font-semibold"
+                  (active || isLanguageItem) && "font-semibold",
+                  isLanguageItem && language === 'en' && "font-siliguri"
                 )}>
                   {item.label}
                 </span>
