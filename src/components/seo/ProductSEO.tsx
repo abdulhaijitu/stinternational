@@ -33,21 +33,25 @@ interface ProductSEOProps {
 }
 
 export const ProductSEO = ({ product, category, language }: ProductSEOProps) => {
-  // Build SEO title - use custom SEO title or generate from product name
+  // Build SEO title - Product Title Format: "{{Product Name}} | ST International Bangladesh"
   const getTitle = () => {
     if (language === "bn") {
       if (product.seo_title_bn) return product.seo_title_bn;
       const productName = product.name_bn || product.name;
-      const categoryName = category?.name_bn || category?.name || "";
-      return categoryName 
-        ? `${productName} - ${categoryName} | ST International`
-        : `${productName} | ST International`;
+      // Truncate product name if needed to keep under 60 chars
+      const maxNameLength = 35; // "| ST International বাংলাদেশ" takes ~25 chars
+      const truncatedName = productName.length > maxNameLength 
+        ? productName.substring(0, maxNameLength - 3) + "..."
+        : productName;
+      return `${truncatedName} | ST International বাংলাদেশ`;
     }
     if (product.seo_title) return product.seo_title;
-    const categoryName = category?.name || "";
-    return categoryName 
-      ? `${product.name} - ${categoryName} | ST International`
-      : `${product.name} | ST International`;
+    // Truncate product name if needed to keep under 60 chars
+    const maxNameLength = 35; // " | ST International Bangladesh" takes ~30 chars
+    const truncatedName = product.name.length > maxNameLength 
+      ? product.name.substring(0, maxNameLength - 3) + "..."
+      : product.name;
+    return `${truncatedName} | ST International Bangladesh`;
   };
 
   // Build meta description - use custom SEO description or short description
