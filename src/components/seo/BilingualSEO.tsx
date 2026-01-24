@@ -2,10 +2,13 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { 
-  DEFAULT_OG_IMAGE as OG_DEFAULT,
+  HOMEPAGE_OG_IMAGE,
   ensureAbsoluteUrl,
   BASE_URL as OG_BASE_URL,
-  isPreviewDomain
+  isPreviewDomain,
+  OG_IMAGE_WIDTH,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE
 } from "@/lib/ogImageUtils";
 
 interface SEOConfig {
@@ -242,7 +245,7 @@ const defaultSEO: SEOConfig = {
 };
 
 export const BASE_URL = OG_BASE_URL;
-export const DEFAULT_OG_IMAGE = OG_DEFAULT;
+export const DEFAULT_OG_IMAGE = HOMEPAGE_OG_IMAGE;
 
 interface BilingualSEOProps {
   customTitle?: { en: string; bn: string };
@@ -325,13 +328,14 @@ export const BilingualSEO = ({
       removeMetaTag('meta[name="keywords"]');
     }
 
-    // Update Open Graph tags
+    // Update Open Graph tags - MANDATORY for all platforms
     updateMetaTag('meta[property="og:title"]', title, true);
     updateMetaTag('meta[property="og:description"]', description, true);
     updateMetaTag('meta[property="og:url"]', finalCanonicalUrl, true);
     updateMetaTag('meta[property="og:image"]', ogImage, true);
-    updateMetaTag('meta[property="og:image:width"]', "1200", true);
-    updateMetaTag('meta[property="og:image:height"]', "630", true);
+    updateMetaTag('meta[property="og:image:width"]', String(OG_IMAGE_WIDTH), true);
+    updateMetaTag('meta[property="og:image:height"]', String(OG_IMAGE_HEIGHT), true);
+    updateMetaTag('meta[property="og:image:type"]', OG_IMAGE_TYPE, true);
     updateMetaTag('meta[property="og:image:alt"]', title, true);
     updateMetaTag('meta[property="og:type"]', ogType === "product" ? "product" : "website", true);
     updateMetaTag('meta[property="og:site_name"]', "ST International", true);

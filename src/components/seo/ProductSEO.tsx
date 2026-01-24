@@ -1,5 +1,5 @@
 import { BilingualSEO, BASE_URL } from "./BilingualSEO";
-import { getProductOgImage, DEFAULT_OG_IMAGE } from "@/lib/ogImageUtils";
+import { getProductOgImage } from "@/lib/ogImageUtils";
 
 interface ProductSEOProps {
   product: {
@@ -28,6 +28,8 @@ interface ProductSEOProps {
     name: string;
     name_bn?: string | null;
     slug: string;
+    og_image?: string | null;
+    image_url?: string | null;
   } | null;
   language: "en" | "bn";
 }
@@ -74,8 +76,9 @@ export const ProductSEO = ({ product, category, language }: ProductSEOProps) => 
     return product.seo_keywords || "";
   };
 
-  // Get OG image using utility function - prioritizes og_image > image_url > images[0] > default
-  const ogImage = getProductOgImage(product);
+  // Get OG image with full fallback chain
+  // Priority: product og_image > product image_url > product images[0] > category image > homepage OG
+  const ogImage = getProductOgImage(product, category);
 
   const title = getTitle();
   const description = getDescription();
