@@ -24,8 +24,8 @@ const seoConfigs: Record<string, SEOConfig> = {
   // ===== HOMEPAGE =====
   "/": {
     title: {
-      en: "ST International | Scientific Equipment Supplier Bangladesh",
-      bn: "ST International | বাংলাদেশে বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী",
+      en: "ST International – Scientific & Industrial Equipment Supplier",
+      bn: "ST International – বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
     },
     description: {
       en: "Trusted supplier of scientific, laboratory, and industrial equipment in Bangladesh. Serving universities, research labs, and industries with certified products.",
@@ -234,8 +234,8 @@ const seoConfigs: Record<string, SEOConfig> = {
 // Default SEO for pages not explicitly configured
 const defaultSEO: SEOConfig = {
   title: {
-    en: "ST International | Scientific & Industrial Equipment Supplier",
-    bn: "ST International | বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
+    en: "ST International – Scientific & Industrial Equipment Supplier",
+    bn: "ST International – বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
   },
   description: {
     en: "Trusted supplier of scientific, laboratory, and industrial equipment in Bangladesh. Serving institutions with quality products and support.",
