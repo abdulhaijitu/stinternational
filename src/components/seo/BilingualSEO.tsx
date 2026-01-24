@@ -4,7 +4,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   DEFAULT_OG_IMAGE as OG_DEFAULT,
   ensureAbsoluteUrl,
-  BASE_URL as OG_BASE_URL 
+  BASE_URL as OG_BASE_URL,
+  isPreviewDomain
 } from "@/lib/ogImageUtils";
 
 interface SEOConfig {
@@ -15,64 +16,64 @@ interface SEOConfig {
   ogType?: string;
 }
 
-// SEO configurations for each page
+// SEO configurations for each page - Standardized B2B-focused titles (max 55-60 chars)
 const seoConfigs: Record<string, SEOConfig> = {
   "/": {
     title: {
-      en: "ST International - Scientific & Industrial Equipment in Bangladesh",
-      bn: "ST International - বাংলাদেশে বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি",
+      en: "ST International | Scientific & Industrial Equipment Supplier in Bangladesh",
+      bn: "ST International | বাংলাদেশে বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
     },
     description: {
-      en: "Your trusted partner for scientific, laboratory, industrial, and educational equipment in Bangladesh. Quality products with expert support since 2005.",
-      bn: "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি, শিল্প এবং শিক্ষামূলক যন্ত্রপাতির আপনার বিশ্বস্ত অংশীদার। ২০০৫ সাল থেকে বিশেষজ্ঞ সহায়তা সহ মানসম্পন্ন পণ্য।",
+      en: "Trusted supplier of scientific, laboratory, industrial, and educational equipment in Bangladesh. Serving institutions with quality products, documentation, and support.",
+      bn: "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি, শিল্প এবং শিক্ষামূলক যন্ত্রপাতির বিশ্বস্ত সরবরাহকারী। মানসম্পন্ন পণ্য, ডকুমেন্টেশন এবং সহায়তা সহ প্রতিষ্ঠানগুলিকে সেবা প্রদান।",
     },
     keywords: {
-      en: "scientific equipment, laboratory instruments, industrial equipment, Bangladesh, ST International",
-      bn: "বৈজ্ঞানিক যন্ত্রপাতি, ল্যাবরেটরি যন্ত্র, শিল্প যন্ত্রপাতি, বাংলাদেশ, ST International",
+      en: "scientific equipment Bangladesh, laboratory instruments, industrial equipment supplier, ST International",
+      bn: "বৈজ্ঞানিক যন্ত্রপাতি বাংলাদেশ, ল্যাবরেটরি যন্ত্র, শিল্প যন্ত্রপাতি সরবরাহকারী, ST International",
     },
     ogType: "website",
   },
   "/products": {
     title: {
-      en: "All Products - Scientific & Industrial Equipment | ST International",
-      bn: "সকল পণ্য - বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি | ST International",
+      en: "Products | ST International – Laboratory & Industrial Equipment",
+      bn: "পণ্য | ST International – ল্যাবরেটরি ও শিল্প যন্ত্রপাতি",
     },
     description: {
-      en: "Browse our complete range of scientific, laboratory, and industrial equipment. Quality instruments for research, education, and industry.",
-      bn: "আমাদের বৈজ্ঞানিক, ল্যাবরেটরি এবং শিল্প যন্ত্রপাতির সম্পূর্ণ পরিসর দেখুন। গবেষণা, শিক্ষা এবং শিল্পের জন্য মানসম্পন্ন যন্ত্র।",
+      en: "Browse scientific, laboratory, and industrial equipment from ST International. Quality instruments for research institutions and industries in Bangladesh.",
+      bn: "ST International থেকে বৈজ্ঞানিক, ল্যাবরেটরি এবং শিল্প যন্ত্রপাতি ব্রাউজ করুন। বাংলাদেশে গবেষণা প্রতিষ্ঠান ও শিল্পের জন্য মানসম্পন্ন যন্ত্র।",
     },
     ogType: "website",
   },
   "/categories": {
     title: {
-      en: "Product Categories - Laboratory & Industrial Equipment | ST International",
-      bn: "পণ্য ক্যাটাগরি - ল্যাবরেটরি ও শিল্প যন্ত্রপাতি | ST International",
+      en: "Categories | ST International – Equipment Categories",
+      bn: "ক্যাটাগরি | ST International – যন্ত্রপাতি ক্যাটাগরি",
     },
     description: {
-      en: "Explore our product categories including laboratory equipment, measurement instruments, industrial machinery, and educational supplies.",
-      bn: "ল্যাবরেটরি যন্ত্রপাতি, পরিমাপ যন্ত্র, শিল্প যন্ত্রপাতি এবং শিক্ষামূলক সরবরাহ সহ আমাদের পণ্য ক্যাটাগরি অন্বেষণ করুন।",
+      en: "Explore product categories including laboratory, measurement, and industrial equipment from ST International Bangladesh.",
+      bn: "ST International বাংলাদেশ থেকে ল্যাবরেটরি, পরিমাপ এবং শিল্প যন্ত্রপাতি সহ পণ্য ক্যাটাগরি অন্বেষণ করুন।",
     },
     ogType: "website",
   },
   "/about": {
     title: {
-      en: "About Us - ST International | Scientific Equipment Supplier Since 2005",
-      bn: "আমাদের সম্পর্কে - ST International | ২০০৫ সাল থেকে বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী",
+      en: "About ST International | Trusted Scientific Equipment Supplier",
+      bn: "ST International সম্পর্কে | বিশ্বস্ত বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী",
     },
     description: {
-      en: "Learn about ST International's 10+ years of experience as Bangladesh's trusted supplier of scientific and industrial equipment. Our mission, vision, and values.",
-      bn: "বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী হিসেবে ST International-এর ১০+ বছরের অভিজ্ঞতা সম্পর্কে জানুন। আমাদের মিশন, ভিশন এবং মূল্যবোধ।",
+      en: "ST International is Bangladesh's trusted supplier of scientific and industrial equipment, serving institutions with quality products and professional support.",
+      bn: "ST International বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী, মানসম্পন্ন পণ্য এবং পেশাদার সহায়তা সহ প্রতিষ্ঠানগুলিকে সেবা প্রদান করে।",
     },
     ogType: "website",
   },
   "/contact": {
     title: {
-      en: "Contact Us - ST International | Get in Touch for Equipment Inquiries",
-      bn: "যোগাযোগ করুন - ST International | যন্ত্রপাতি সম্পর্কে জানতে যোগাযোগ করুন",
+      en: "Contact ST International | Laboratory & Industrial Solutions",
+      bn: "ST International-এ যোগাযোগ | ল্যাবরেটরি ও শিল্প সমাধান",
     },
     description: {
-      en: "Contact ST International for scientific and industrial equipment inquiries. Visit our Dhaka office or reach us via phone and email.",
-      bn: "বৈজ্ঞানিক এবং শিল্প যন্ত্রপাতি সম্পর্কে জানতে ST International-এ যোগাযোগ করুন। আমাদের ঢাকা অফিসে আসুন বা ফোন ও ইমেইলে যোগাযোগ করুন।",
+      en: "Contact ST International for scientific and industrial equipment inquiries. Professional support for institutions across Bangladesh.",
+      bn: "বৈজ্ঞানিক এবং শিল্প যন্ত্রপাতি সম্পর্কে জানতে ST International-এ যোগাযোগ করুন। বাংলাদেশ জুড়ে প্রতিষ্ঠানগুলির জন্য পেশাদার সহায়তা।",
     },
     ogType: "website",
   },
@@ -180,12 +181,12 @@ const seoConfigs: Record<string, SEOConfig> = {
 // Default SEO for pages not explicitly configured
 const defaultSEO: SEOConfig = {
   title: {
-    en: "ST International - Scientific & Industrial Equipment",
-    bn: "ST International - বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি",
+    en: "ST International | Scientific & Industrial Equipment Supplier",
+    bn: "ST International | বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
   },
   description: {
-    en: "Your trusted partner for scientific, industrial, and educational equipment in Bangladesh.",
-    bn: "বাংলাদেশে বৈজ্ঞানিক, শিল্প এবং শিক্ষামূলক যন্ত্রপাতির আপনার বিশ্বস্ত অংশীদার।",
+    en: "Trusted supplier of scientific, laboratory, and industrial equipment in Bangladesh. Serving institutions with quality products and support.",
+    bn: "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি এবং শিল্প যন্ত্রপাতির বিশ্বস্ত সরবরাহকারী। মানসম্পন্ন পণ্য এবং সহায়তা সহ প্রতিষ্ঠানগুলিকে সেবা প্রদান।",
   },
   ogType: "website",
 };
@@ -326,23 +327,26 @@ export const BilingualSEO = ({
     }
     canonical.href = finalCanonicalUrl;
 
-    // Handle noindex for admin pages or as specified
+    // Handle noindex for admin pages, preview domains, or as specified
     const isAdminPage = pathname.startsWith("/admin");
+    const isPreview = isPreviewDomain();
     let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
-    if (noIndex || isAdminPage) {
+    
+    // Always noindex preview/staging domains and admin pages
+    if (noIndex || isAdminPage || isPreview) {
       if (!robots) {
         robots = document.createElement("meta");
         robots.name = "robots";
         document.head.appendChild(robots);
       }
       robots.content = "noindex, nofollow";
-    } else if (robots) {
-      robots.content = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
     } else {
-      robots = document.createElement("meta");
-      robots.name = "robots";
+      if (!robots) {
+        robots = document.createElement("meta");
+        robots.name = "robots";
+        document.head.appendChild(robots);
+      }
       robots.content = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
-      document.head.appendChild(robots);
     }
 
     // Add product structured data if product data is provided

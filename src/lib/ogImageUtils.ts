@@ -3,8 +3,26 @@
  * Handles resolution and fallback logic for Open Graph images
  */
 
-export const BASE_URL = "https://stinternational.lovable.app";
+// Primary production domain - all canonical URLs point here
+export const BASE_URL = "https://stinternationalbd.com";
 export const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
+
+// Preview domains that should NOT be indexed
+export const PREVIEW_DOMAINS = [
+  "stinternational.lovable.app",
+  "lovable.app",
+  "preview--",
+  "localhost"
+];
+
+/**
+ * Check if the current URL is a preview/staging domain
+ */
+export const isPreviewDomain = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const hostname = window.location.hostname;
+  return PREVIEW_DOMAINS.some(domain => hostname.includes(domain));
+};
 
 // OG image dimensions (standard for social sharing)
 export const OG_IMAGE_WIDTH = 1200;

@@ -33,7 +33,8 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const baseUrl = "https://stinternational.lovable.app";
+    // Primary production domain for all canonical URLs
+    const baseUrl = "https://stinternationalbd.com";
 
     // Fetch all active products
     const { data: products, error: productsError } = await supabase
