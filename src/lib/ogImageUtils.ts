@@ -21,11 +21,10 @@ export const DEFAULT_OG_IMAGE = HOMEPAGE_OG_IMAGE;
 
 // Preview domains that should NOT be indexed
 export const PREVIEW_DOMAINS = [
-  "stinternational.lovable.app",
-  "lovable.app",
   "preview--",
   "localhost",
-  "id-preview--"
+  "id-preview--",
+  ".app"
 ];
 
 /**

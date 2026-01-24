@@ -11,10 +11,10 @@ export const isLivePreview = (): boolean => {
 
   const host = window.location.hostname || "";
 
-  // Lovable Live Preview hosts
-  if (host.includes("lovableproject.com")) return true;
+  // Preview/staging hosts detection
+  if (host.includes("project.com")) return true;
   if (host.startsWith("id-preview--")) return true;
-  if (host.includes("-preview--") && host.endsWith(".lovable.app")) return true;
+  if (host.includes("-preview--") && host.endsWith(".app")) return true;
 
   return false;
 };
