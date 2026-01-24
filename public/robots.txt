@@ -1,6 +1,7 @@
 # ST International - Robots.txt
-# https://stinternational.lovable.app
+# Primary Domain: https://stinternationalbd.com
 
+# Allow all crawlers on main domain
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
@@ -33,11 +34,14 @@ Disallow: /orders
 Disallow: /cart
 Disallow: /wishlist
 
+# Primary Domain Sitemap
+Sitemap: https://stinternationalbd.com/sitemap.xml
+
 # Dynamic Sitemap (generated from database)
 Sitemap: https://tmdktmnoeqezkbdaaayh.supabase.co/functions/v1/generate-sitemap
 
-# Static Sitemap fallback
-Sitemap: https://stinternational.lovable.app/sitemap.xml
-
 # Crawl-delay for polite crawling
 Crawl-delay: 1
+
+# Block preview/staging domains from indexing
+# Note: Preview domains have noindex meta tags applied programmatically

@@ -1,59 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://stinternational.lovable.app/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/"/>
+    <loc>https://stinternationalbd.com/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://stinternationalbd.com/"/>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/products</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/products"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/products"/>
+    <loc>https://stinternationalbd.com/products</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/products"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/products"/>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/categories</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/categories"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/categories"/>
+    <loc>https://stinternationalbd.com/categories</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/categories"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/categories"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/about</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/about"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/about"/>
+    <loc>https://stinternationalbd.com/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/about"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/about"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/contact</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/contact"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/contact"/>
+    <loc>https://stinternationalbd.com/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/contact"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/request-quote</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://stinternational.lovable.app/request-quote"/>
-    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternational.lovable.app/request-quote"/>
+    <loc>https://stinternationalbd.com/request-quote</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stinternationalbd.com/request-quote"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://stinternationalbd.com/request-quote"/>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/privacy-policy</loc>
+    <loc>https://stinternationalbd.com/privacy-policy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/terms-conditions</loc>
+    <loc>https://stinternationalbd.com/terms-conditions</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://stinternational.lovable.app/refund-policy</loc>
+    <loc>https://stinternationalbd.com/refund-policy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
