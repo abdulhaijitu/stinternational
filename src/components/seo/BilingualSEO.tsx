@@ -16,163 +16,213 @@ interface SEOConfig {
   ogType?: string;
 }
 
-// SEO configurations for each page - Standardized B2B-focused titles (max 55-60 chars)
+// SEO configurations for each page - Production-ready B2B-focused titles (50-60 chars) and descriptions (140-160 chars)
 const seoConfigs: Record<string, SEOConfig> = {
+  // ===== HOMEPAGE =====
   "/": {
     title: {
-      en: "ST International | Scientific & Industrial Equipment Supplier in Bangladesh",
-      bn: "ST International | বাংলাদেশে বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী",
+      en: "ST International | Scientific Equipment Supplier Bangladesh",
+      bn: "ST International | বাংলাদেশে বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী",
     },
     description: {
-      en: "Trusted supplier of scientific, laboratory, industrial, and educational equipment in Bangladesh. Serving institutions with quality products, documentation, and support.",
-      bn: "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি, শিল্প এবং শিক্ষামূলক যন্ত্রপাতির বিশ্বস্ত সরবরাহকারী। মানসম্পন্ন পণ্য, ডকুমেন্টেশন এবং সহায়তা সহ প্রতিষ্ঠানগুলিকে সেবা প্রদান।",
+      en: "Trusted supplier of scientific, laboratory, and industrial equipment in Bangladesh. Serving universities, research labs, and industries with certified products.",
+      bn: "বাংলাদেশে বিশ্ববিদ্যালয়, গবেষণা ল্যাব এবং শিল্প প্রতিষ্ঠানে বৈজ্ঞানিক, ল্যাবরেটরি ও শিল্প যন্ত্রপাতির বিশ্বস্ত সরবরাহকারী।",
     },
     keywords: {
       en: "scientific equipment Bangladesh, laboratory instruments, industrial equipment supplier, ST International",
-      bn: "বৈজ্ঞানিক যন্ত্রপাতি বাংলাদেশ, ল্যাবরেটরি যন্ত্র, শিল্প যন্ত্রপাতি সরবরাহকারী, ST International",
+      bn: "বৈজ্ঞানিক যন্ত্রপাতি বাংলাদেশ, ল্যাবরেটরি যন্ত্র, শিল্প যন্ত্রপাতি সরবরাহকারী",
     },
     ogType: "website",
   },
+  // ===== ALL PRODUCTS =====
   "/products": {
     title: {
-      en: "Products | ST International – Laboratory & Industrial Equipment",
+      en: "Products | ST International – Lab & Industrial Equipment",
       bn: "পণ্য | ST International – ল্যাবরেটরি ও শিল্প যন্ত্রপাতি",
     },
     description: {
-      en: "Browse scientific, laboratory, and industrial equipment from ST International. Quality instruments for research institutions and industries in Bangladesh.",
-      bn: "ST International থেকে বৈজ্ঞানিক, ল্যাবরেটরি এবং শিল্প যন্ত্রপাতি ব্রাউজ করুন। বাংলাদেশে গবেষণা প্রতিষ্ঠান ও শিল্পের জন্য মানসম্পন্ন যন্ত্র।",
+      en: "Browse laboratory, measurement, and industrial equipment from ST International. Certified instruments for research institutions and industries in Bangladesh.",
+      bn: "ST International থেকে ল্যাবরেটরি, পরিমাপ ও শিল্প যন্ত্রপাতি ব্রাউজ করুন। বাংলাদেশে গবেষণা প্রতিষ্ঠান ও শিল্পের জন্য সার্টিফাইড যন্ত্র।",
     },
     ogType: "website",
   },
+  // ===== CATEGORIES =====
   "/categories": {
     title: {
-      en: "Categories | ST International – Equipment Categories",
-      bn: "ক্যাটাগরি | ST International – যন্ত্রপাতি ক্যাটাগরি",
+      en: "Equipment Categories | ST International Bangladesh",
+      bn: "যন্ত্রপাতি ক্যাটাগরি | ST International বাংলাদেশ",
     },
     description: {
-      en: "Explore product categories including laboratory, measurement, and industrial equipment from ST International Bangladesh.",
-      bn: "ST International বাংলাদেশ থেকে ল্যাবরেটরি, পরিমাপ এবং শিল্প যন্ত্রপাতি সহ পণ্য ক্যাটাগরি অন্বেষণ করুন।",
+      en: "Explore scientific and industrial equipment categories. Laboratory, measurement, textile, and safety equipment for institutions across Bangladesh.",
+      bn: "বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি ক্যাটাগরি অন্বেষণ করুন। বাংলাদেশে প্রতিষ্ঠানগুলির জন্য ল্যাবরেটরি, পরিমাপ, টেক্সটাইল ও সেফটি যন্ত্রপাতি।",
     },
     ogType: "website",
   },
-  "/about": {
-    title: {
-      en: "About ST International | Trusted Scientific Equipment Supplier",
-      bn: "ST International সম্পর্কে | বিশ্বস্ত বৈজ্ঞানিক যন্ত্রপাতি সরবরাহকারী",
-    },
-    description: {
-      en: "ST International is Bangladesh's trusted supplier of scientific and industrial equipment, serving institutions with quality products and professional support.",
-      bn: "ST International বাংলাদেশের বিশ্বস্ত বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহকারী, মানসম্পন্ন পণ্য এবং পেশাদার সহায়তা সহ প্রতিষ্ঠানগুলিকে সেবা প্রদান করে।",
-    },
-    ogType: "website",
-  },
-  "/contact": {
-    title: {
-      en: "Contact ST International | Laboratory & Industrial Solutions",
-      bn: "ST International-এ যোগাযোগ | ল্যাবরেটরি ও শিল্প সমাধান",
-    },
-    description: {
-      en: "Contact ST International for scientific and industrial equipment inquiries. Professional support for institutions across Bangladesh.",
-      bn: "বৈজ্ঞানিক এবং শিল্প যন্ত্রপাতি সম্পর্কে জানতে ST International-এ যোগাযোগ করুন। বাংলাদেশ জুড়ে প্রতিষ্ঠানগুলির জন্য পেশাদার সহায়তা।",
-    },
-    ogType: "website",
-  },
+  // ===== REQUEST A QUOTE =====
   "/request-quote": {
     title: {
-      en: "Request a Quote - Bulk Orders & Institutional Pricing | ST International",
-      bn: "মূল্য জানতে চান - বাল্ক অর্ডার ও প্রাতিষ্ঠানিক মূল্য | ST International",
+      en: "Request a Quote | ST International Bangladesh",
+      bn: "মূল্য জানুন | ST International বাংলাদেশ",
     },
     description: {
-      en: "Get personalized pricing for bulk orders and institutional purchases. Submit your requirements and receive a quote within 24 hours.",
-      bn: "বাল্ক অর্ডার এবং প্রাতিষ্ঠানিক ক্রয়ের জন্য ব্যক্তিগত মূল্য পান। আপনার প্রয়োজনীয়তা জমা দিন এবং ২৪ ঘন্টার মধ্যে কোটেশন পান।",
+      en: "Submit a quote request for bulk orders and institutional purchases. Receive customized pricing within 24 hours from ST International.",
+      bn: "বাল্ক অর্ডার ও প্রাতিষ্ঠানিক ক্রয়ের জন্য কোটেশন জমা দিন। ST International থেকে ২৪ ঘন্টায় কাস্টমাইজড মূল্য পান।",
     },
     ogType: "website",
   },
-  "/cart": {
+  // ===== ABOUT US =====
+  "/about": {
     title: {
-      en: "Shopping Cart - ST International",
-      bn: "শপিং কার্ট - ST International",
+      en: "About Us | ST International – Equipment Supplier",
+      bn: "আমাদের সম্পর্কে | ST International – যন্ত্রপাতি সরবরাহকারী",
     },
     description: {
-      en: "Review your shopping cart and proceed to checkout. Free delivery on orders over ৳10,000.",
-      bn: "আপনার শপিং কার্ট পর্যালোচনা করুন এবং চেকআউটে যান। ৳১০,০০০ এর উপরে অর্ডারে ফ্রি ডেলিভারি।",
+      en: "ST International supplies scientific and industrial equipment to universities, labs, and industries in Bangladesh. Professional support and documentation included.",
+      bn: "ST International বাংলাদেশে বিশ্ববিদ্যালয়, ল্যাব ও শিল্পে বৈজ্ঞানিক ও শিল্প যন্ত্রপাতি সরবরাহ করে। পেশাদার সহায়তা ও ডকুমেন্টেশন অন্তর্ভুক্ত।",
     },
     ogType: "website",
   },
-  "/checkout": {
+  // ===== CONTACT US =====
+  "/contact": {
     title: {
-      en: "Checkout - Complete Your Order | ST International",
-      bn: "চেকআউট - আপনার অর্ডার সম্পন্ন করুন | ST International",
+      en: "Contact Us | ST International Bangladesh",
+      bn: "যোগাযোগ করুন | ST International বাংলাদেশ",
     },
     description: {
-      en: "Complete your order with secure checkout. Cash on delivery and bank transfer payment options available.",
-      bn: "নিরাপদ চেকআউটের মাধ্যমে আপনার অর্ডার সম্পন্ন করুন। ক্যাশ অন ডেলিভারি এবং ব্যাংক ট্রান্সফার পেমেন্ট অপশন উপলব্ধ।",
+      en: "Reach ST International for equipment inquiries, technical support, and institutional orders. Located in Dhaka, serving all of Bangladesh.",
+      bn: "যন্ত্রপাতি সংক্রান্ত প্রশ্ন, প্রযুক্তিগত সহায়তা ও প্রাতিষ্ঠানিক অর্ডারের জন্য ST International-এ যোগাযোগ করুন। ঢাকায় অবস্থিত, সারা বাংলাদেশে সেবা।",
     },
     ogType: "website",
   },
+  // ===== LOGIN =====
+  "/login": {
+    title: {
+      en: "Login | ST International Account",
+      bn: "লগইন | ST International অ্যাকাউন্ট",
+    },
+    description: {
+      en: "Sign in to your ST International account to track orders, view purchase history, and manage your institutional profile.",
+      bn: "অর্ডার ট্র্যাক করতে, ক্রয়ের ইতিহাস দেখতে এবং প্রাতিষ্ঠানিক প্রোফাইল পরিচালনা করতে ST International অ্যাকাউন্টে সাইন ইন করুন।",
+    },
+    ogType: "website",
+  },
+  // ===== REGISTER =====
+  "/register": {
+    title: {
+      en: "Register | Create ST International Account",
+      bn: "নিবন্ধন | ST International অ্যাকাউন্ট তৈরি করুন",
+    },
+    description: {
+      en: "Create an ST International account to place orders, request quotes, and access order tracking for your institution.",
+      bn: "অর্ডার দিতে, কোটেশন অনুরোধ করতে এবং আপনার প্রতিষ্ঠানের জন্য অর্ডার ট্র্যাকিং অ্যাক্সেস করতে ST International অ্যাকাউন্ট তৈরি করুন।",
+    },
+    ogType: "website",
+  },
+  // ===== WISHLIST =====
   "/wishlist": {
     title: {
-      en: "My Wishlist - Saved Products | ST International",
-      bn: "আমার উইশলিস্ট - সংরক্ষিত পণ্য | ST International",
+      en: "Wishlist | ST International – Saved Products",
+      bn: "পছন্দের তালিকা | ST International – সংরক্ষিত পণ্য",
     },
     description: {
-      en: "View your saved products and add them to cart when you're ready to purchase.",
-      bn: "আপনার সংরক্ষিত পণ্য দেখুন এবং কেনার জন্য প্রস্তুত হলে কার্টে যোগ করুন।",
+      en: "View and manage your saved products. Add items to cart or request quotes for institutional purchases from ST International.",
+      bn: "সংরক্ষিত পণ্য দেখুন ও পরিচালনা করুন। ST International থেকে প্রাতিষ্ঠানিক ক্রয়ের জন্য কার্টে যোগ করুন বা কোটেশন অনুরোধ করুন।",
     },
     ogType: "website",
   },
-  "/account": {
+  // ===== CART =====
+  "/cart": {
     title: {
-      en: "My Account - ST International",
-      bn: "আমার অ্যাকাউন্ট - ST International",
+      en: "Shopping Cart | ST International",
+      bn: "শপিং কার্ট | ST International",
     },
     description: {
-      en: "Manage your account, view order history, and update your profile information.",
-      bn: "আপনার অ্যাকাউন্ট পরিচালনা করুন, অর্ডার ইতিহাস দেখুন এবং আপনার প্রোফাইল তথ্য আপডেট করুন।",
+      en: "Review items in your cart and proceed to checkout. Free delivery on orders above ৳10,000 within Bangladesh.",
+      bn: "কার্টে আইটেম পর্যালোচনা করুন এবং চেকআউটে যান। বাংলাদেশে ৳১০,০০০ এর উপরে অর্ডারে বিনামূল্যে ডেলিভারি।",
     },
     ogType: "website",
   },
-  "/orders": {
+  // ===== CHECKOUT =====
+  "/checkout": {
     title: {
-      en: "My Orders - Order History | ST International",
-      bn: "আমার অর্ডার - অর্ডার ইতিহাস | ST International",
+      en: "Checkout | ST International – Complete Order",
+      bn: "চেকআউট | ST International – অর্ডার সম্পন্ন করুন",
     },
     description: {
-      en: "View and track your order history. Check order status and delivery updates.",
-      bn: "আপনার অর্ডার ইতিহাস দেখুন এবং ট্র্যাক করুন। অর্ডার স্ট্যাটাস এবং ডেলিভারি আপডেট চেক করুন।",
+      en: "Complete your order securely. Payment options include cash on delivery and bank transfer for institutional buyers.",
+      bn: "নিরাপদে অর্ডার সম্পন্ন করুন। প্রাতিষ্ঠানিক ক্রেতাদের জন্য ক্যাশ অন ডেলিভারি ও ব্যাংক ট্রান্সফার পেমেন্ট অপশন আছে।",
     },
     ogType: "website",
   },
+  // ===== PRIVACY POLICY =====
   "/privacy-policy": {
     title: {
-      en: "Privacy Policy - ST International",
-      bn: "গোপনীয়তা নীতি - ST International",
+      en: "Privacy Policy | ST International",
+      bn: "গোপনীয়তা নীতি | ST International",
     },
     description: {
-      en: "Read our privacy policy to understand how we collect, use, and protect your personal information.",
-      bn: "আমরা কীভাবে আপনার ব্যক্তিগত তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষা করি তা বুঝতে আমাদের গোপনীয়তা নীতি পড়ুন।",
+      en: "Read how ST International collects, uses, and protects your data. Our commitment to privacy for all institutional and individual clients.",
+      bn: "ST International কীভাবে আপনার ডেটা সংগ্রহ, ব্যবহার ও সুরক্ষা করে তা পড়ুন। সকল প্রাতিষ্ঠানিক ও ব্যক্তিগত ক্লায়েন্টের জন্য গোপনীয়তার প্রতিশ্রুতি।",
     },
     ogType: "website",
   },
+  // ===== TERMS & CONDITIONS =====
   "/terms-conditions": {
     title: {
-      en: "Terms & Conditions - ST International",
-      bn: "শর্তাবলী - ST International",
+      en: "Terms & Conditions | ST International",
+      bn: "শর্তাবলী | ST International",
     },
     description: {
-      en: "Read our terms and conditions for using ST International's website and services.",
-      bn: "ST International-এর ওয়েবসাইট এবং সেবা ব্যবহারের জন্য আমাদের শর্তাবলী পড়ুন।",
+      en: "Review the terms and conditions for using ST International website, placing orders, and institutional purchasing agreements.",
+      bn: "ST International ওয়েবসাইট ব্যবহার, অর্ডার প্রদান এবং প্রাতিষ্ঠানিক ক্রয় চুক্তির শর্তাবলী পর্যালোচনা করুন।",
     },
     ogType: "website",
   },
+  // ===== RETURN & REFUND POLICY =====
   "/refund-policy": {
     title: {
-      en: "Refund Policy - ST International",
-      bn: "ফেরত নীতি - ST International",
+      en: "Refund & Return Policy | ST International",
+      bn: "ফেরত ও রিটার্ন নীতি | ST International",
     },
     description: {
-      en: "Learn about our refund and return policy for product purchases.",
-      bn: "পণ্য ক্রয়ের জন্য আমাদের ফেরত এবং রিটার্ন নীতি সম্পর্কে জানুন।",
+      en: "Understand ST International's refund and return policy for equipment purchases. Clear guidelines for institutional and individual buyers.",
+      bn: "যন্ত্রপাতি ক্রয়ের জন্য ST International-এর ফেরত ও রিটার্ন নীতি বুঝুন। প্রাতিষ্ঠানিক ও ব্যক্তিগত ক্রেতাদের জন্য স্পষ্ট নির্দেশিকা।",
+    },
+    ogType: "website",
+  },
+  // ===== MY ACCOUNT =====
+  "/account": {
+    title: {
+      en: "My Account | ST International",
+      bn: "আমার অ্যাকাউন্ট | ST International",
+    },
+    description: {
+      en: "Manage your ST International account. View orders, update profile details, and access your institutional purchase history.",
+      bn: "ST International অ্যাকাউন্ট পরিচালনা করুন। অর্ডার দেখুন, প্রোফাইল আপডেট করুন এবং প্রাতিষ্ঠানিক ক্রয়ের ইতিহাস অ্যাক্সেস করুন।",
+    },
+    ogType: "website",
+  },
+  // ===== MY ORDERS =====
+  "/orders": {
+    title: {
+      en: "My Orders | ST International – Order History",
+      bn: "আমার অর্ডার | ST International – অর্ডার ইতিহাস",
+    },
+    description: {
+      en: "Track and view your order history with ST International. Monitor delivery status and access purchase documentation.",
+      bn: "ST International-এ অর্ডার ইতিহাস ট্র্যাক করুন ও দেখুন। ডেলিভারি স্ট্যাটাস মনিটর করুন এবং ক্রয় ডকুমেন্টেশন অ্যাক্সেস করুন।",
+    },
+    ogType: "website",
+  },
+  // ===== TRACK ORDER =====
+  "/track-order": {
+    title: {
+      en: "Track Order | ST International",
+      bn: "অর্ডার ট্র্যাক করুন | ST International",
+    },
+    description: {
+      en: "Track your order status with ST International. Enter your order number to view real-time delivery updates.",
+      bn: "ST International-এ অর্ডার স্ট্যাটাস ট্র্যাক করুন। রিয়েল-টাইম ডেলিভারি আপডেট দেখতে অর্ডার নম্বর দিন।",
     },
     ogType: "website",
   },

@@ -28,23 +28,24 @@ interface CategorySEOProps {
 }
 
 export const CategorySEO = ({ category, parentCategory, productCount, language }: CategorySEOProps) => {
-  // Build SEO title
+  // Build SEO title - Category Format: "{{Category Name}} Equipment | ST International Bangladesh"
+  // Sub-Category Format: "{{Sub-Category Name}} | ST International Scientific Equipment"
   const getTitle = () => {
     if (language === "bn") {
       if (category.seo_title_bn) return category.seo_title_bn;
       const categoryName = category.name_bn || category.name;
-      const parentName = parentCategory?.name_bn || parentCategory?.name;
-      if (parentName) {
-        return `${categoryName} - ${parentName} | ST International`;
+      if (parentCategory) {
+        // Sub-category format
+        return `${categoryName} | ST International বৈজ্ঞানিক যন্ত্রপাতি`;
       }
-      return `${categoryName} - পণ্য ক্যাটাগরি | ST International`;
+      return `${categoryName} যন্ত্রপাতি | ST International বাংলাদেশ`;
     }
     if (category.seo_title) return category.seo_title;
-    const parentName = parentCategory?.name;
-    if (parentName) {
-      return `${category.name} - ${parentName} | ST International`;
+    if (parentCategory) {
+      // Sub-category format
+      return `${category.name} | ST International Scientific Equipment`;
     }
-    return `${category.name} - Product Category | ST International`;
+    return `${category.name} Equipment | ST International Bangladesh`;
   };
 
   // Build meta description
