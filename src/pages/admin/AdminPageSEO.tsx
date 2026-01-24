@@ -319,7 +319,7 @@ const AdminPageSEO = () => {
               <SEOPreviewCard
                 title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || editingPage?.page_name || '')}
                 description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : formData.seo_description}
-                url={`https://stinternational.lovable.app/${editingPage?.page_slug || ''}`}
+                url={`https://stinternationalbd.com/${editingPage?.page_slug || ''}`}
                 language={language}
               />
             </div>

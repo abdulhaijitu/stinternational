@@ -1070,7 +1070,7 @@ const AdminCategories = () => {
                     <SEOPreviewCard
                       title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || formData.name)}
                       description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : (formData.seo_description || formData.description || '')}
-                      url={`https://stinternational.lovable.app/category/${formData.slug}`}
+                      url={`https://stinternationalbd.com/category/${formData.slug}`}
                       language={language}
                     />
                   </div>

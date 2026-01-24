@@ -1263,7 +1263,7 @@ const AdminProductEditor = () => {
           <SEOPreviewCard
             title={language === "bn" && formData.seo_title_bn ? formData.seo_title_bn : (formData.seo_title || formData.name)}
             description={language === "bn" && formData.seo_description_bn ? formData.seo_description_bn : (formData.seo_description || formData.short_description)}
-            url={`https://stinternational.lovable.app/products/${formData.slug}`}
+            url={`https://stinternationalbd.com/products/${formData.slug}`}
             language={language}
           />
 
