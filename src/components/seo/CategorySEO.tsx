@@ -22,6 +22,8 @@ interface CategorySEOProps {
     name: string;
     name_bn?: string | null;
     slug: string;
+    og_image?: string | null;
+    image_url?: string | null;
   } | null;
   productCount?: number;
   language: "en" | "bn";
@@ -71,8 +73,9 @@ export const CategorySEO = ({ category, parentCategory, productCount, language }
     return category.seo_keywords || "";
   };
 
-  // Get OG image using utility function - prioritizes og_image > image_url > default
-  const ogImage = getCategoryOgImage(category);
+  // Get OG image using utility function with full fallback chain
+  // Priority: category og_image > category image_url > parent category image > homepage OG
+  const ogImage = getCategoryOgImage(category, parentCategory);
 
   const title = getTitle();
   const description = getDescription();
