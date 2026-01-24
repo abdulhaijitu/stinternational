@@ -71,7 +71,7 @@ export const SEOPreviewCard: React.FC<SEOPreviewCardProps> = ({
                 <Globe className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="text-xs text-muted-foreground truncate max-w-[300px]">
-                {displayUrl || 'stinternational.lovable.app'}
+                {displayUrl || 'stinternationalbd.com'}
               </div>
             </div>
             
