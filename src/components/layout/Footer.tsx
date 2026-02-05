@@ -250,15 +250,15 @@ const Footer = () => {
             <p>© 2026 ST International. All rights reserved.</p>
             {/* Adjusted spacing to avoid Back to Top button overlap */}
             <div className="flex items-center gap-2 text-center md:text-right md:pr-16">
-              <span>Design & Developed by</span>
-              <a 
-                href="http://creationtechbd.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary-foreground/80 hover:text-accent transition-colors duration-200 font-medium"
-              >
-                Creation Tech
-              </a>
+               <span>Design & Developed by </span>
+               <a 
+                 href="http://creationtechbd.com/" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="text-primary-foreground/80 hover:text-accent transition-colors duration-200 font-medium"
+               >
+                 Creation Tech
+               </a>
             </div>
           </div>
         </div>

@@ -24,7 +24,10 @@ export const PREVIEW_DOMAINS = [
   "preview--",
   "localhost",
   "id-preview--",
-  ".app"
+   ".app",
+   "staging",
+   "dev.",
+   "test."
 ];
 
 /**
