@@ -1,32 +1,26 @@
 
 
-## /contact পেইজ অডিট রিপোর্ট
+## /cart পেইজ অডিট রিপোর্ট
 
 ### চিহ্নিত সমস্যা
 
-#### সমস্যা ১: WhatsApp আইকনে জেনেরিক `MessageCircle` ব্যবহৃত (Moderate)
-**ফাইল:** `src/pages/Contact.tsx`
-
-| লাইন | স্থান | সমস্যা |
-|---|---|---|
-| 267 | WhatsApp CTA সেকশন — বৃত্তাকার আইকন | `MessageCircle` ব্যবহৃত |
-| 284 | WhatsApp CTA বাটন | `MessageCircle` ব্যবহৃত |
-| 558 | FAQ সেকশন — "আমাদের জিজ্ঞাসা করুন" বাটন | `MessageCircle` ব্যবহৃত |
-
-**ফিক্স:** তিনটি জায়গায় `MessageCircle` এর বদলে আসল WhatsApp SVG আইকন ব্যবহার করা (FloatingWhatsApp-এ যেটি যোগ করা হয়েছে সেই একই SVG)
+#### সমস্যা ১: `formatPrice()` — ভাষা প্যারামিটার পাস হচ্ছে না (Moderate)
+**ফাইল:** `src/pages/Cart.tsx` (line 97, 140, 145, 156)
+- `formatPrice(item.price)` কল করা হচ্ছে কিন্তু `language` পাস হচ্ছে না
+- ডিফল্ট `"bn"` — তাই ইংরেজি মোডেও বাংলা সংখ্যা (১,৫০০) দেখাচ্ছে
+- **ফিক্স:** চারটি `formatPrice()` কলে `language` যোগ করা: `formatPrice(price, language)`
 
 ### যা ঠিক আছে
-- ✅ সব ফর্ম লেবেল, ভ্যালিডেশন, প্লেসহোল্ডার — `t.contact.*` বা `language` চেক দিয়ে দ্বিভাষিক
-- ✅ FAQ সেকশন — সব প্রশ্ন ও উত্তর দ্বিভাষিক
-- ✅ Hero, WhatsApp CTA, FAQ — সব টেক্সট দ্বিভাষিক
-- ✅ কন্ট্রাস্ট ও কালার — সঠিক (hero-gradient, bg-primary, text-primary-foreground)
-- ✅ PageSEO — সঠিকভাবে ব্যবহৃত
+- ✅ সব টেক্সট `t.cart.*`, `t.common.*`, `t.checkout.*` দিয়ে দ্বিভাষিক
+- ✅ PageSEO — সঠিক fallbackTitle (en/bn) সহ ব্যবহৃত
 - ✅ fontClass — সব সেকশনে প্রয়োগ করা আছে
-- ✅ ঠিকানা — ভৌত ঠিকানা, ইংরেজিতে রাখা যুক্তিসঙ্গত
+- ✅ Empty state — দ্বিভাষিক ও সুন্দর ডিজাইন
+- ✅ কালার/কন্ট্রাস্ট — সব সঠিক
+- ✅ aria-label — সব বাটনে আছে
 
 ### বাস্তবায়ন পরিকল্পনা
 
 | ফাইল | কাজ |
 |---|---|
-| `src/pages/Contact.tsx` | একটি `WhatsAppIcon` কম্পোনেন্ট তৈরি করে L267, L284, L558-এ `MessageCircle` প্রতিস্থাপন। `MessageCircle` ইমপোর্ট থেকে সরানো। |
+| `src/pages/Cart.tsx` | L97, L140, L145, L156: `formatPrice(x)` → `formatPrice(x, language)` |
 
