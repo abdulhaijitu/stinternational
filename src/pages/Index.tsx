@@ -417,13 +417,13 @@ const Index = () => {
       <Testimonials />
 
       {/* Stats Section */}
-      <section className="py-16 md:py-20 bg-primary text-primary-foreground">
+      <section className="py-16 md:py-20 bg-muted text-foreground">
         <div className="container-premium">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {currentStats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-sm text-primary-foreground/70">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
