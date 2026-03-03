@@ -527,6 +527,17 @@ export const bn = {
     refundPolicy: "ফেরত নীতি",
     shippingInfo: "শিপিং তথ্য",
     faq: "সাধারণ প্রশ্ন",
+    productCategories: "পণ্যের বিভাগসমূহ",
+    contactUs: "যোগাযোগ করুন",
+    authenticProducts: "১০০% আসল পণ্য",
+    nationwideDelivery: "সারাদেশে ডেলিভারি",
+    securePayment: "নিরাপদ পেমেন্ট",
+    acceptedPayments: "গৃহীত পেমেন্ট পদ্ধতি",
+    aboutUs: "আমাদের সম্পর্কে",
+    contact: "যোগাযোগ",
+    allProducts: "সব পণ্য",
+    designBy: "ডিজাইন ও ডেভেলপমেন্ট",
+    businessHours: "শনি - বৃহঃ: সকাল ৯:০০ - সন্ধ্যা ৬:০০",
   },
 
   // Testimonials
