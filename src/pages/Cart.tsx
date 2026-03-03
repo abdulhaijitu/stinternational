@@ -94,7 +94,7 @@ const Cart = () => {
                     {item.sku && (
                       <p className="text-sm text-muted-foreground mt-1">{t.products.sku}: {item.sku}</p>
                     )}
-                    <p className="text-lg font-bold mt-2">{formatPrice(item.price)}</p>
+                    <p className="text-lg font-bold mt-2">{formatPrice(item.price, language)}</p>
                   </div>
 
                   {/* Actions */}
@@ -137,12 +137,12 @@ const Cart = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t.common.subtotal}</span>
-                    <span className="font-medium">{formatPrice(subtotal)}</span>
+                    <span className="font-medium">{formatPrice(subtotal, language)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t.common.shipping}</span>
                     <span className="font-medium">
-                      {shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost)}
+                      {shippingCost === 0 ? t.checkout.freeShipping : formatPrice(shippingCost, language)}
                     </span>
                   </div>
                   {subtotal < 10000 && (
@@ -153,7 +153,7 @@ const Cart = () => {
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between">
                       <span className="font-semibold">{t.common.total}</span>
-                      <span className="text-xl font-bold text-primary">{formatPrice(total)}</span>
+                      <span className="text-xl font-bold text-primary">{formatPrice(total, language)}</span>
                     </div>
                   </div>
                 </div>
