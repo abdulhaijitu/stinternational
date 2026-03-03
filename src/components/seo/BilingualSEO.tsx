@@ -445,11 +445,61 @@ export const BilingualSEO = ({
       if (existingScript) existingScript.remove();
     }
 
+    // Add Organization JSON-LD on homepage for Google Knowledge Panel
+    const existingOrgScript = document.querySelector('script[type="application/ld+json"][data-type="organization"]');
+    if (existingOrgScript) existingOrgScript.remove();
+
+    if (pathname === "/") {
+      const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "ST International",
+        alternateName: "ST International Bangladesh",
+        url: "https://stinternationalbd.com",
+        logo: "https://stinternationalbd.com/favicon.png",
+        image: "https://stinternationalbd.com/og-home.jpg",
+        description: language === "bn"
+          ? "বাংলাদেশে বৈজ্ঞানিক, ল্যাবরেটরি ও শিল্প যন্ত্রপাতির বিশ্বস্ত সরবরাহকারী।"
+          : "Trusted supplier of scientific, laboratory, and industrial equipment in Bangladesh.",
+        foundingDate: "2015",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Dhaka",
+          addressCountry: "BD",
+        },
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          availableLanguage: ["English", "Bengali"],
+        },
+        sameAs: [],
+        areaServed: {
+          "@type": "Country",
+          name: "Bangladesh",
+        },
+        knowsAbout: [
+          "Scientific Equipment",
+          "Laboratory Instruments",
+          "Industrial Equipment",
+          "Measurement Instruments",
+          "Textile Testing Equipment",
+          "Safety Equipment",
+        ],
+      };
+
+      const orgScript = document.createElement("script");
+      orgScript.type = "application/ld+json";
+      orgScript.setAttribute("data-type", "organization");
+      orgScript.textContent = JSON.stringify(organizationSchema);
+      document.head.appendChild(orgScript);
+    }
+
     // Cleanup function
     return () => {
-      // Cleanup product schema on unmount
       const productScript = document.querySelector('script[type="application/ld+json"][data-type="product"]');
       if (productScript) productScript.remove();
+      const orgScript = document.querySelector('script[type="application/ld+json"][data-type="organization"]');
+      if (orgScript) orgScript.remove();
     };
   }, [language, pathname, customTitle, customDescription, customKeywords, customOgImage, ogType, noIndex, canonicalUrl, productData]);
 
