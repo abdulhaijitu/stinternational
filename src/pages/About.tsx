@@ -191,7 +191,7 @@ const About = () => {
                 </p>
               </div>
               <div className="bg-card border border-border rounded-lg p-6 text-center">
-                <div className="w-14 h-14 bg-accent text-accent-foreground rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Award className="h-7 w-7" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{t.about.ourVision}</h3>
