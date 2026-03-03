@@ -117,7 +117,7 @@ const DBProductCard = ({
               <Badge 
                 variant="default" 
                 className={cn(
-                  "bg-accent text-accent-foreground font-semibold whitespace-nowrap",
+                  "bg-primary text-primary-foreground font-semibold whitespace-nowrap",
                   isCompact 
                     ? "text-[10px] px-1.5 py-0" 
                     : "text-[10px] sm:text-xs px-1.5 sm:px-2 py-0 sm:py-0.5"
@@ -320,7 +320,7 @@ const DBProductCard = ({
                       {t.products.view}
                       <ArrowRight className="h-3.5 w-3.5 ml-1.5 transition-transform group-hover/btn:translate-x-0.5" />
                     </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-accent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-primary/80 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
                   </Link>
                 </Button>
               </motion.div>

@@ -295,7 +295,7 @@ const ProductPage = () => {
                       <span className="text-lg text-muted-foreground line-through">
                         {formatPrice(product.compare_price)}
                       </span>
-                      <span className="bg-accent/10 text-accent-foreground text-sm font-semibold px-2.5 py-1 rounded-md border border-accent/20">
+                      <span className="bg-primary/10 text-primary text-sm font-semibold px-2.5 py-1 rounded-md border border-primary/20">
                         {discountPercent}% {t.products.off}
                       </span>
                     </>

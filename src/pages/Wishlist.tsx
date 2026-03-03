@@ -132,7 +132,7 @@ const Wishlist = () => {
                           className="w-full h-full object-cover"
                         />
                         {discount > 0 && (
-                          <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded">
+                          <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded">
                             {discount}% {t.products.off}
                           </span>
                         )}
