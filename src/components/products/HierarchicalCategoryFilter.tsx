@@ -33,7 +33,7 @@ const HierarchicalCategoryFilter = ({
 }: HierarchicalCategoryFilterProps) => {
   const { data: categories, isLoading } = useActiveCategories();
   const { getCategoryFields } = useBilingualContent();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
 
   // Organize categories into hierarchy
@@ -222,7 +222,7 @@ const HierarchicalCategoryFilter = ({
                             className="h-4 w-4 pointer-events-none"
                           />
                           <span className="flex-1 truncate">
-                            All {getCategoryName(parent)}
+                            {language === "bn" ? `সকল ${getCategoryName(parent)}` : `All ${getCategoryName(parent)}`}
                           </span>
                         </button>
                       </div>
