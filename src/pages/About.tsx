@@ -454,7 +454,7 @@ const About = () => {
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
             >
-              <Button variant="hero" size="lg" asChild className="relative overflow-hidden group">
+              <Button variant="default" size="lg" asChild className="relative overflow-hidden group bg-white text-primary hover:bg-white/90">
                 <Link to="/products">
                   <motion.span
                     className="absolute inset-0 bg-white/10"
