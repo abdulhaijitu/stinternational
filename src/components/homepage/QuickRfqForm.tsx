@@ -135,19 +135,23 @@ const QuickRfqForm = () => {
             <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-8 w-8 text-success" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Request Received</h3>
+            <h3 className="text-xl font-semibold mb-3">
+              {language === "bn" ? "অনুরোধ গৃহীত হয়েছে" : "Request Received"}
+            </h3>
             <p className="text-muted-foreground mb-4">
-              Thank you for your inquiry. Our team will review your requirements and contact you within 24 business hours.
+              {language === "bn" 
+                ? "আপনার অনুসন্ধানের জন্য ধন্যবাদ। আমাদের টিম আপনার প্রয়োজনীয়তা পর্যালোচনা করে ২৪ কর্মঘণ্টার মধ্যে যোগাযোগ করবে।"
+                : "Thank you for your inquiry. Our team will review your requirements and contact you within 24 business hours."}
             </p>
             <p className="text-xs text-muted-foreground mb-6">
-              Operated by ST International, Dhaka, Bangladesh
+              {language === "bn" ? "পরিচালিত: ST International, ঢাকা, বাংলাদেশ" : "Operated by ST International, Dhaka, Bangladesh"}
             </p>
             <Button
               variant="outline"
               onClick={() => setIsSuccess(false)}
               className="active:scale-95 transition-transform duration-200"
             >
-              Submit Another Request
+              {language === "bn" ? "আরেকটি অনুরোধ পাঠান" : "Submit Another Request"}
             </Button>
           </div>
         </div>
@@ -161,10 +165,12 @@ const QuickRfqForm = () => {
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-semibold mb-3">
-              Need Bulk Quantity or Institutional Pricing?
+              {language === "bn" ? "বাল্ক পরিমাণ বা প্রাতিষ্ঠানিক মূল্য দরকার?" : "Need Bulk Quantity or Institutional Pricing?"}
             </h2>
             <p className="text-muted-foreground">
-              Get a personalized quotation for your organization. Quick response guaranteed.
+              {language === "bn" 
+                ? "আপনার প্রতিষ্ঠানের জন্য ব্যক্তিগত কোটেশন পান। দ্রুত প্রতিক্রিয়া নিশ্চিত।"
+                : "Get a personalized quotation for your organization. Quick response guaranteed."}
             </p>
           </div>
 

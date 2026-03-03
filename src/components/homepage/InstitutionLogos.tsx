@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InstitutionLogo {
   id: string;
@@ -10,6 +11,7 @@ interface InstitutionLogo {
 }
 
 const InstitutionLogos = () => {
+  const { language } = useLanguage();
   const { data: logos, isLoading } = useQuery({
     queryKey: ["institution-logos"],
     queryFn: async () => {
@@ -50,10 +52,12 @@ const InstitutionLogos = () => {
       <div className="container-premium">
         <div className="text-center mb-10">
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            Trusted by Institutions & Professional Buyers
+            {language === "bn" ? "প্রতিষ্ঠান ও পেশাদার ক্রেতাদের আস্থাভাজন" : "Trusted by Institutions & Professional Buyers"}
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Leading research institutions, universities, and corporations rely on our equipment
+            {language === "bn" 
+              ? "শীর্ষ গবেষণা প্রতিষ্ঠান, বিশ্ববিদ্যালয় এবং কর্পোরেশনগুলো আমাদের যন্ত্রপাতির উপর নির্ভর করে"
+              : "Leading research institutions, universities, and corporations rely on our equipment"}
           </p>
         </div>
         

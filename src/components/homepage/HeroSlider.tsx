@@ -550,7 +550,7 @@ const HeroSlider = () => {
                     <Button 
                       asChild 
                       size="lg" 
-                      className="bg-gradient-to-r from-accent to-amber-500 hover:from-accent/90 hover:to-amber-400 text-accent-foreground shadow-lg hover:shadow-xl hover:shadow-accent/20 transition-all duration-300 group relative overflow-hidden"
+                      className="bg-gradient-to-r from-accent to-amber-500 hover:from-accent/90 hover:to-amber-400 text-primary-contrast shadow-lg hover:shadow-xl hover:shadow-accent/20 transition-all duration-300 group relative overflow-hidden"
                       onClick={() => trackHeroSlide(index, 'click')}
                     >
                       <Link to={slide.primaryCta.href}>

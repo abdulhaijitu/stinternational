@@ -7,6 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import inarsLogo from "@/assets/logos/inars-logo.png";
 import bcsirLogo from "@/assets/logos/bcsir-logo.png";
 
@@ -49,7 +50,7 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
             key={i}
             className={`h-4 w-4 ${
               i < testimonial.rating
-                ? "text-accent fill-accent"
+                ? "text-amber-500 fill-amber-500"
                 : "text-muted-foreground/30"
             }`}
           />
@@ -96,6 +97,7 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
 
 const Testimonials = () => {
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
   
   // Autoplay plugin with pause on hover/touch
   const autoplayPlugin = useRef(
@@ -207,13 +209,15 @@ const Testimonials = () => {
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
           <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
-            Client Testimonials
+            {language === "bn" ? "ক্লায়েন্ট প্রতিক্রিয়া" : "Client Testimonials"}
           </p>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Trusted by Leading Institutions
+            {language === "bn" ? "শীর্ষ প্রতিষ্ঠানের আস্থাভাজন" : "Trusted by Leading Institutions"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hear from our valued partners about their experience working with ST International
+            {language === "bn" 
+              ? "ST International-এর সাথে কাজ করার অভিজ্ঞতা সম্পর্কে আমাদের মূল্যবান অংশীদারদের মতামত"
+              : "Hear from our valued partners about their experience working with ST International"}
           </p>
         </div>
 
