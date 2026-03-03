@@ -380,12 +380,22 @@ const Index = () => {
       <RecentlyViewedProducts maxItems={6} />
 
       {/* Why Choose ST International */}
-      <section className="py-16 md:py-20 bg-muted/30">
-        <div className="container-premium">
-          <div className="text-center mb-12">
-            <h2 className="mb-4">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/40 relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        </div>
+        
+        <div className="container-premium relative z-10">
+          <div className="text-center mb-14">
+            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+              {language === 'bn' ? 'আমাদের সুবিধা' : 'Our Advantages'}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               {language === 'bn' ? 'কেন ST International বেছে নেবেন' : 'Why Choose ST International'}
             </h2>
+            <div className="w-12 h-1 bg-primary mx-auto mb-4 rounded-full" />
             <p className="text-muted-foreground max-w-2xl mx-auto">
               {language === 'bn' 
                 ? 'বাংলাদেশ জুড়ে ল্যাবরেটরি, কারখানা এবং প্রতিষ্ঠানের বিশ্বাসযোগ্য অংশীদার'
@@ -397,12 +407,12 @@ const Index = () => {
             {currentWhyChooseUs.map((item, index) => (
               <div 
                 key={index} 
-                className="bg-card border border-border rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                className="group bg-gradient-to-br from-card to-muted/20 border border-border rounded-xl p-6 text-center shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-primary/20 transition-all duration-300"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <item.icon className="h-6 w-6 text-primary" />
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-5 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                  <item.icon className="h-7 w-7 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
                 </div>
-                <h4 className="font-semibold mb-2">{item.title}</h4>
+                <h4 className="font-semibold text-foreground mb-2">{item.title}</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             ))}
