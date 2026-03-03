@@ -37,10 +37,10 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   const institutionLogo = getInstitutionLogo(testimonial.company_name);
   
   return (
-    <div className="bg-card border border-border rounded-lg p-6 md:p-8 relative group hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+    <div className="bg-gradient-to-br from-card to-muted/20 border border-border rounded-lg p-6 md:p-8 relative group shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/20 transition-all duration-300 h-full flex flex-col">
       {/* Quote Icon */}
-      <div className="absolute -top-3 -left-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-        <Quote className="h-5 w-5 text-primary-foreground" />
+      <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md">
+        <Quote className="h-4 w-4 text-primary-foreground" />
       </div>
 
       {/* Rating */}
@@ -58,12 +58,12 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
       </div>
 
       {/* Quote */}
-      <blockquote className="text-foreground/90 leading-relaxed mb-6 flex-grow">
+      <blockquote className="text-base md:text-lg text-foreground/90 leading-relaxed mb-6 flex-grow italic">
         "{testimonial.quote}"
       </blockquote>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-4 border-t border-border mt-auto">
+      <div className="flex items-center gap-3 pt-4 border-t border-dashed border-border mt-auto">
         <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-white border border-border/50 shadow-sm flex-shrink-0">
           {institutionLogo ? (
             <img
@@ -82,7 +82,7 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
           )}
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-foreground truncate">
+          <p className="font-semibold text-primary truncate">
             {testimonial.client_name}
           </p>
           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -204,7 +204,7 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/50">
       <div className="container-premium">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
@@ -214,6 +214,7 @@ const Testimonials = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {language === "bn" ? "শীর্ষ প্রতিষ্ঠানের আস্থাভাজন" : "Trusted by Leading Institutions"}
           </h2>
+          <div className="w-12 h-1 bg-primary mx-auto mb-4 rounded-full" />
           <p className="text-muted-foreground max-w-2xl mx-auto">
             {language === "bn" 
               ? "ST International-এর সাথে কাজ করার অভিজ্ঞতা সম্পর্কে আমাদের মূল্যবান অংশীদারদের মতামত"
@@ -244,7 +245,7 @@ const Testimonials = () => {
             <button
               onClick={scrollPrev}
               className={cn(
-                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card flex items-center justify-center transition-all duration-200",
+                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card shadow-sm flex items-center justify-center transition-all duration-200",
                 "hover:bg-primary hover:text-primary-foreground hover:scale-105 active:scale-95"
               )}
               aria-label="Previous testimonial"
@@ -272,7 +273,7 @@ const Testimonials = () => {
             <button
               onClick={scrollNext}
               className={cn(
-                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card flex items-center justify-center transition-all duration-200",
+                "w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-card shadow-sm flex items-center justify-center transition-all duration-200",
                 "hover:bg-primary hover:text-primary-foreground hover:scale-105 active:scale-95"
               )}
               aria-label="Next testimonial"
