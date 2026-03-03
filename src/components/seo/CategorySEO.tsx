@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BilingualSEO, BASE_URL } from "./BilingualSEO";
 import { getCategoryOgImage } from "@/lib/ogImageUtils";
 
@@ -93,6 +94,39 @@ export const CategorySEO = ({ category, parentCategory, productCount, language }
     }
     return `${BASE_URL}/category/${category.slug}`;
   };
+
+  // Inject BreadcrumbList JSON-LD
+  useEffect(() => {
+    const existing = document.querySelector('script[data-type="breadcrumb"]');
+    if (existing) existing.remove();
+
+    const items: any[] = [
+      { "@type": "ListItem", position: 1, name: language === "bn" ? "হোম" : "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: language === "bn" ? "ক্যাটাগরি" : "Categories", item: `${BASE_URL}/categories` },
+    ];
+
+    if (parentCategory) {
+      const parentName = language === "bn" ? (parentCategory.name_bn || parentCategory.name) : parentCategory.name;
+      items.push({ "@type": "ListItem", position: 3, name: parentName, item: `${BASE_URL}/category/${parentCategory.slug}` });
+      const catName = language === "bn" ? (category.name_bn || category.name) : category.name;
+      items.push({ "@type": "ListItem", position: 4, name: catName, item: getCanonicalUrl() });
+    } else {
+      const catName = language === "bn" ? (category.name_bn || category.name) : category.name;
+      items.push({ "@type": "ListItem", position: 3, name: catName, item: getCanonicalUrl() });
+    }
+
+    const schema = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: items };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-type", "breadcrumb");
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    return () => {
+      const s = document.querySelector('script[data-type="breadcrumb"]');
+      if (s) s.remove();
+    };
+  }, [category, parentCategory, language]);
 
   return (
     <BilingualSEO
