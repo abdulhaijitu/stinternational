@@ -238,10 +238,23 @@ const Index = () => {
       </section>
 
       {/* Product Category Entry Section */}
-      <section className="py-16 md:py-20">
-        <div className="container-premium">
-          <div className="text-center mb-12">
-            <h2 className="mb-4">{language === 'bn' ? 'পণ্য বিভাগ' : 'Product Categories'}</h2>
+      <section className="py-16 md:py-20 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container-premium relative z-10">
+          {/* Upgraded Header */}
+          <div className="text-center mb-14">
+            <span className="inline-block text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+              {language === 'bn' ? 'যন্ত্রপাতি ব্রাউজ করুন' : 'Browse Equipment'}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              {language === 'bn' ? 'পণ্য বিভাগ' : 'Product Categories'}
+            </h2>
+            <div className="w-12 h-1 bg-primary mx-auto mb-4 rounded-full" />
             <p className="text-muted-foreground max-w-2xl mx-auto">
               {language === 'bn' 
                 ? 'বৈজ্ঞানিক, পরিমাপ এবং শিল্প যন্ত্রপাতির ব্যাপক পরিসর ব্রাউজ করুন'
@@ -249,42 +262,59 @@ const Index = () => {
             </p>
           </div>
           
+          {/* Redesigned Category Cards */}
           <div className="grid md:grid-cols-3 gap-6">
-            {currentCategoryCards.map((category) => (
-              <Link
-                key={category.slug}
-                to={`/categories#${category.slug}`}
-                className="group bg-card border border-border rounded-lg p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="w-14 h-14 bg-primary/10 text-primary rounded-lg flex items-center justify-center mb-6">
-                  <category.icon className="h-7 w-7" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                  {category.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  {category.description}
-                </p>
-                <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:text-primary/70 transition-colors">
-                  {language === 'bn' ? 'পণ্য দেখুন' : 'View Products'}
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-                </span>
-              </Link>
-            ))}
+            {currentCategoryCards.map((category) => {
+              const matchingGroup = groups.find(g => g.slug === category.slug);
+              const productCount = matchingGroup?.categories?.length || 0;
+              return (
+                <Link
+                  key={category.slug}
+                  to={`/categories#${category.slug}`}
+                  className="group bg-gradient-to-br from-card to-muted/20 border border-border rounded-xl p-8 flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-primary/20"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary/15 to-primary/5 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                    <category.icon className="h-8 w-8 group-hover:text-primary-foreground transition-colors duration-300" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                    {category.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-5 flex-1">
+                    {category.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:text-primary/80 transition-colors">
+                      {language === 'bn' ? 'পণ্য দেখুন' : 'View Products'}
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1.5 transition-transform duration-200" />
+                    </span>
+                    {productCount > 0 && (
+                      <span className="text-xs bg-primary/10 text-primary font-medium px-2.5 py-1 rounded-full">
+                        {productCount} {language === 'bn' ? 'টি' : productCount === 1 ? 'type' : 'types'}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Subcategories Grid */}
+          {/* Redesigned Subcategories Grid */}
           {!categoriesLoading && groups.length > 0 && (
-            <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {groups.map((group) => (
-                <div key={group.slug} className="bg-muted/30 rounded-lg p-5">
-                  <h4 className="font-semibold text-sm mb-3">{group.name}</h4>
+                <div key={group.slug} className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow duration-200">
+                  <h4 className="font-semibold text-sm mb-4 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-primary/10 rounded-md flex items-center justify-center">
+                      <FlaskConical className="h-3.5 w-3.5 text-primary" />
+                    </span>
+                    {group.name}
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {group.categories.slice(0, 4).map((cat) => (
                       <Link
                         key={cat.id}
                         to={`/category/${cat.slug}`}
-                        className="text-xs bg-background px-3 py-1.5 rounded-md border border-border hover:border-primary hover:text-primary transition-colors duration-200"
+                        className="text-xs bg-muted/50 px-3 py-1.5 rounded-full border border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
                       >
                         {cat.name}
                       </Link>
@@ -292,9 +322,10 @@ const Index = () => {
                     {group.categories.length > 4 && (
                       <Link
                         to={`/categories#${group.slug}`}
-                        className="text-xs text-primary font-medium px-3 py-1.5"
+                        className="inline-flex items-center gap-1 text-xs text-primary font-medium px-3 py-1.5 hover:underline"
                       >
                         +{group.categories.length - 4} {language === 'bn' ? 'আরো' : 'more'}
+                        <ArrowRight className="h-3 w-3" />
                       </Link>
                     )}
                   </div>
@@ -302,6 +333,16 @@ const Index = () => {
               ))}
             </div>
           )}
+
+          {/* View All Categories CTA */}
+          <div className="mt-12 text-center">
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/categories">
+                {language === 'bn' ? 'সব ক্যাটাগরি দেখুন' : 'View All Categories'}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
