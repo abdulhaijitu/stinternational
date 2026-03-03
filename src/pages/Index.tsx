@@ -25,7 +25,7 @@ import { ProductGridSkeleton } from "@/components/products/ProductGridSkeleton";
 import RecentlyViewedProducts from "@/components/products/RecentlyViewedProducts";
 import { useProductImagePreload } from "@/hooks/useImagePreload";
 import InstitutionLogos from "@/components/homepage/InstitutionLogos";
-import QuickRfqForm from "@/components/homepage/QuickRfqForm";
+
 import Testimonials from "@/components/homepage/Testimonials";
 import HeroSlider from "@/components/homepage/HeroSlider";
 import { useQueryClient } from "@tanstack/react-query";
@@ -250,9 +250,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Institution Logos Section */}
-      <InstitutionLogos />
-
       {/* Product Category Entry Section */}
       <section className="py-16 md:py-20">
         <div className="container-premium">
@@ -321,6 +318,67 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Featured Products Section */}
+      <section className="py-12 md:py-24 bg-muted/20">
+        <div className="container-premium px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-10">
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
+                {language === 'bn' ? 'ফিচার্ড পণ্য' : 'Featured Products'}
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
+                {language === 'bn' 
+                  ? 'বাংলাদেশ জুড়ে পেশাদারদের বিশ্বাসযোগ্য শীর্ষ-রেটেড বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির নির্বাচিত সংগ্রহ'
+                  : 'Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.'}
+              </p>
+            </div>
+            <Link
+              to="/products"
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/70 transition-colors shrink-0"
+            >
+              {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          {productsLoading ? (
+            <ProductGridSkeleton 
+              count={8} 
+              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
+            />
+          ) : featuredProducts && featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {featuredProducts.slice(0, 8).map((product) => (
+                <DBProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 sm:py-16 bg-card rounded-xl border border-border">
+              <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+                {language === 'bn' ? 'কোনো ফিচার্ড পণ্য নেই' : 'No featured products available'}
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/products">
+                  {language === 'bn' ? 'সব পণ্য ব্রাউজ করুন' : 'Browse All Products'}
+                </Link>
+              </Button>
+            </div>
+          )}
+          
+          <div className="mt-6 sm:mt-10 text-center sm:hidden">
+            <Button variant="outline" size="default" asChild>
+              <Link to="/products">
+                {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Recently Viewed Products */}
+      <RecentlyViewedProducts maxItems={6} />
+
       {/* Why Choose ST International */}
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container-premium">
@@ -352,69 +410,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-12 md:py-24 bg-muted/20">
-        <div className="container-premium px-4 sm:px-6">
-          {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-10">
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
-                {language === 'bn' ? 'ফিচার্ড পণ্য' : 'Featured Products'}
-              </h2>
-              <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
-                {language === 'bn' 
-                  ? 'বাংলাদেশ জুড়ে পেশাদারদের বিশ্বাসযোগ্য শীর্ষ-রেটেড বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির নির্বাচিত সংগ্রহ'
-                  : 'Curated selection of top-rated scientific and industrial equipment trusted by professionals across Bangladesh.'}
-              </p>
-            </div>
-            <Link
-              to="/products"
-              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/70 transition-colors shrink-0"
-            >
-              {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          
-          {/* Products Grid - 2 cols mobile, 3 cols tablet, 4 cols desktop */}
-          {productsLoading ? (
-            <ProductGridSkeleton 
-              count={8} 
-              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
-            />
-          ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {featuredProducts.slice(0, 8).map((product) => (
-                <DBProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 sm:py-16 bg-card rounded-xl border border-border">
-              <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-                {language === 'bn' ? 'কোনো ফিচার্ড পণ্য নেই' : 'No featured products available'}
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/products">
-                  {language === 'bn' ? 'সব পণ্য ব্রাউজ করুন' : 'Browse All Products'}
-                </Link>
-              </Button>
-            </div>
-          )}
-          
-          {/* Mobile CTA */}
-          <div className="mt-6 sm:mt-10 text-center sm:hidden">
-            <Button variant="outline" size="default" asChild>
-              <Link to="/products">
-                {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Recently Viewed Products */}
-      <RecentlyViewedProducts maxItems={6} />
+      {/* Institution Logos Section */}
+      <InstitutionLogos />
 
       {/* Testimonials Section */}
       <Testimonials />
@@ -433,8 +430,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Quick RFQ Form Section */}
-      <QuickRfqForm />
         </PageTransition>
       </PullToRefresh>
     </Layout>
