@@ -1,46 +1,31 @@
 
 
-## Language Switcher এনহ্যান্সমেন্ট
+## /checkout পেইজ অডিট রিপোর্ট
 
-### বর্তমান অবস্থা
-- **Desktop topbar** (L251): default variant — দুটো আলাদা বাটন, `bg-muted/50` ব্যাকগ্রাউন্ড
-- **Mobile header** (L294): compact variant — সিঙ্গেল টগল বাটন
-- **Mobile bottom nav**: আলাদাভাবে Globe আইকন ব্যবহার করে (LanguageSwitcher নয়)
-- pill variant আছে কিন্তু কোথাও ব্যবহৃত নয়
+### চিহ্নিত সমস্যা
 
-### প্রস্তাবিত পরিবর্তন
+#### সমস্যা ১: হার্ডকোডেড ইংরেজি স্ট্রিং (Minor)
+**ফাইল:** `src/pages/Checkout.tsx` (line 311)
 
-**ফাইল:** `src/components/layout/LanguageSwitcher.tsx`
+| লাইন | টেক্সট | সমস্যা |
+|---|---|---|
+| 311 | `"Operated by ST International, Dhaka, Bangladesh"` | হার্ডকোডেড ইংরেজি — বাংলা মোডেও ইংরেজি দেখায় |
 
-| ভেরিয়েন্ট | পরিবর্তন |
-|---|---|
-| **default** (desktop topbar) | shadcn `Toggle`-স্টাইল ডিজাইন — `rounded-md` border, active বাটনে `bg-primary text-primary-foreground` সাবটল স্লাইডিং ইন্ডিকেটর (framer-motion), Globe আইকন সরিয়ে ক্লিনার লুক, সাইজ ছোট করা |
-| **compact** (mobile header) | shadcn Button ghost স্টাইল — `h-8 w-8` স্কয়ার বাটন, Globe আইকনের বদলে ভাষার কোড (`EN`/`বাং`) টেক্সট দিয়ে টগল, `border border-border rounded-md` |
-| pill variant | অব্যবহৃত — সরিয়ে দেওয়া হবে কোড ক্লিনআপের জন্য |
+**ফিক্স:** `language` চেক দিয়ে দ্বিভাষিক করা — `"পরিচালিত: ST International, ঢাকা, বাংলাদেশ"` / `"Operated by ST International, Dhaka, Bangladesh"`
 
-### ডিজাইন ডিটেইল
+### যা ঠিক আছে
+- ✅ সব ফর্ম লেবেল, ভ্যালিডেশন, প্লেসহোল্ডার — `t.checkout.*` বা `language` চেক দিয়ে দ্বিভাষিক
+- ✅ `formatPrice()` — সব কলে `language` পাস করা আছে (L573, L577, L586, L594, L601, L602, L608)
+- ✅ BilingualSEO — `noIndex={true}` সহ সঠিকভাবে ব্যবহৃত
+- ✅ fontClass — সব সেকশনে প্রয়োগ করা আছে
+- ✅ Payment method, bank info, notes — সব দ্বিভাষিক
+- ✅ Order confirmation — সব `t.checkout.*` দিয়ে দ্বিভাষিক
+- ✅ Guest checkout flow — সঠিকভাবে কাজ করছে
+- ✅ কালার/কন্ট্রাস্ট — সব সঠিক
 
-**Desktop (default):**
-```
-┌──────────────┐
-│ [EN] │ বাংলা │   ← active side gets bg-primary + text-primary-foreground
-└──────────────┘      sliding motion.div indicator underneath
-```
-- `h-8` height, `text-xs` font, `rounded-md`, `border border-border`
-- invertColors মোডে: `border-white/20`, active = `bg-white/20 text-white`
-
-**Mobile (compact):**
-```
-┌────┐
-│ বাং │   ← shows opposite language, tap to toggle
-└────┘
-```
-- `h-8 px-2.5 rounded-md border border-border text-xs font-medium`
-- AnimatePresence দিয়ে টেক্সট সুইচ অ্যানিমেশন বজায়
-
-### বাস্তবায়ন
+### বাস্তবায়ন পরিকল্পনা
 
 | ফাইল | কাজ |
 |---|---|
-| `src/components/layout/LanguageSwitcher.tsx` | সম্পূর্ণ রিডিজাইন — default ও compact ভেরিয়েন্ট এনহ্যান্স, pill সরানো, shadcn টোকেন ব্যবহার |
+| `src/pages/Checkout.tsx` | L311: হার্ডকোডেড স্ট্রিং → `language` চেক দিয়ে দ্বিভাষিক |
 
