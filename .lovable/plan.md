@@ -1,28 +1,31 @@
 
 
-## সমস্যা
+## Testimonials সেকশন ডিজাইন উন্নতি
 
-তিনটি পরপর সেকশন একই `bg-primary` (গাঢ় নেভি) কালার ব্যবহার করছে:
+### বর্তমান সমস্যা
+- কার্ড ডিজাইন ফ্ল্যাট, গ্র্যাডিয়েন্ট বা ডেপথ নেই
+- Quote আইকন ছোট ও সাধারণ
+- সেকশন ব্যাকগ্রাউন্ড `bg-muted/30` — খুব হালকা, আলাদা হয় না
+- কার্ডে হোভার ইফেক্ট শুধু shadow — কোন লিফট বা বর্ডার ইফেক্ট নেই
+- `fontClass` ব্যবহার হয়নি
 
-1. **Stats/Indicators** — `bg-primary` 
-2. **Footer Trust Bar** — `bg-primary` (Footer এর অংশ)
-3. **Footer Main** — `bg-primary`
+### প্রস্তাবিত পরিবর্তন
 
-ফলে তিনটি সেকশন মিশে যাচ্ছে, কোন ভিজুয়াল সেপারেশন নেই।
+**ফাইল:** `src/components/homepage/Testimonials.tsx`
 
-## সমাধান
+| সেকশন | পরিবর্তন |
+|---|---|
+| **সেকশন ব্যাকগ্রাউন্ড** | `bg-muted/30` → `bg-gradient-to-b from-background to-muted/50` — সূক্ষ্ম গ্র্যাডিয়েন্ট |
+| **হেডার** | সাবটাইটলে একটি ডেকোরেটিভ লাইন যোগ (`w-12 h-1 bg-primary mx-auto`); `fontClass` প্রয়োগ |
+| **কার্ড ডিজাইন** | `shadow-sm` ডিফল্ট যোগ; হোভারে `hover:shadow-xl hover:-translate-y-1 hover:border-primary/20` লিফট ইফেক্ট; ব্যাকগ্রাউন্ড সূক্ষ্ম গ্র্যাডিয়েন্ট `bg-gradient-to-br from-card to-muted/20` |
+| **Quote আইকন** | বৃত্তটি `w-10 h-10` → `w-8 h-8` করে আরও রিফাইন্ড; `shadow-md` যোগ |
+| **Quote টেক্সট** | `text-base md:text-lg` করে আরও পাঠযোগ্য; ইটালিক স্টাইল |
+| **Author সেকশন** | বর্ডার `border-dashed` করে সূক্ষ্ম; নাম `text-primary` হাইলাইট |
+| **নেভিগেশন বাটন** | `shadow-sm` যোগ করে ডেপথ |
 
-**Stats সেকশনের ব্যাকগ্রাউন্ড পরিবর্তন** — এটিকে `bg-muted` (লাইট গ্রে) করে টেক্সট কালার `text-foreground` করা হবে। এতে Footer এর গাঢ় ব্লক থেকে আলাদা দেখাবে এবং ভিজুয়াল ব্রেক তৈরি হবে।
-
-| সেকশন | বর্তমান | নতুন |
-|---|---|---|
-| Stats/Indicators | `bg-primary text-primary-foreground` | `bg-muted text-foreground` |
-| Footer Trust Bar | `bg-primary` | অপরিবর্তিত |
-| Footer | `bg-primary` | অপরিবর্তিত |
-
-### পরিবর্তন
+### বাস্তবায়ন
 
 | ফাইল | কাজ |
 |---|---|
-| `src/pages/Index.tsx` | L420: Stats section — `bg-primary text-primary-foreground` → `bg-muted text-foreground`; stat value কালার `text-white` → `text-primary font-bold` |
+| `src/components/homepage/Testimonials.tsx` | কার্ড, হেডার, ব্যাকগ্রাউন্ড ডিজাইন উন্নতি ও `fontClass` যোগ |
 
