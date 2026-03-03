@@ -562,7 +562,7 @@ const Products = () => {
                       className="text-xs h-7 text-destructive hover:text-destructive"
                     >
                       <X className="h-3 w-3 mr-1" />
-                      Clear All
+                      {t.products.clearFilters}
                     </Button>
                   )}
                 </div>
@@ -646,7 +646,7 @@ const Products = () => {
                     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                       <Search className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">No products found</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t.products.noProducts}</h3>
                     <p className="text-muted-foreground mb-6">
                       {hasActiveFilters
                         ? t.products.noProductsMessage
