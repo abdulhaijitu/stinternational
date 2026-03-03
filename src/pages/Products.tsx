@@ -42,6 +42,7 @@ import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useProductImagePreload } from "@/hooks/useImagePreload";
 import { cn } from "@/lib/utils";
 import heroDefault from "@/assets/fallbacks/hero-default.jpg";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
@@ -402,6 +403,11 @@ const Products = () => {
 
   return (
     <Layout>
+      <PageSEO
+        pageSlug="/products"
+        fallbackTitle={{ en: "All Products | ST International", bn: "সকল পণ্য | ST International" }}
+        fallbackDescription={{ en: "Browse our complete range of scientific and industrial equipment.", bn: "আমাদের বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির সম্পূর্ণ তালিকা দেখুন।" }}
+      />
       <PullToRefresh onRefresh={handleRefresh}>
         <PageTransition>
           {/* Quick View Modal */}

@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 interface Order {
   id: string;
@@ -78,6 +79,7 @@ const Orders = () => {
   if (authLoading || loading) {
     return (
       <Layout>
+        <PageSEO pageSlug="/orders" fallbackTitle={{ en: "My Orders | ST International", bn: "আমার অর্ডার | ST International" }} />
         <div className="container-premium py-16 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -88,6 +90,7 @@ const Orders = () => {
   if (!user) {
     return (
       <Layout>
+        <PageSEO pageSlug="/orders" fallbackTitle={{ en: "My Orders | ST International", bn: "আমার অর্ডার | ST International" }} />
         <div className={`container-premium py-16 text-center ${fontClass}`}>
           <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">{t.orders.login}</h1>
@@ -100,6 +103,7 @@ const Orders = () => {
 
   return (
     <Layout>
+      <PageSEO pageSlug="/orders" fallbackTitle={{ en: "My Orders | ST International", bn: "আমার অর্ডার | ST International" }} />
       <section className="bg-muted/50 border-b border-border">
         <div className={`container-premium py-6 md:py-8 ${fontClass}`}>
           <Link to="/account" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">

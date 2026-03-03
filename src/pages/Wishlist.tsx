@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { toast } from "sonner";
 import { getProductImageWithFallback } from "@/lib/productFallbackImages";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const Wishlist = () => {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ const Wishlist = () => {
   if (!user) {
     return (
       <Layout>
+        <PageSEO pageSlug="/wishlist" fallbackTitle={{ en: "Wishlist | ST International", bn: "উইশলিস্ট | ST International" }} />
         <section className={`py-16 md:py-24 ${fontClass}`}>
           <div className="container-premium text-center">
             <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
@@ -60,6 +62,7 @@ const Wishlist = () => {
   if (isLoading) {
     return (
       <Layout>
+        <PageSEO pageSlug="/wishlist" fallbackTitle={{ en: "Wishlist | ST International", bn: "উইশলিস্ট | ST International" }} />
         <section className="py-16 md:py-24">
           <div className="container-premium flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -71,6 +74,7 @@ const Wishlist = () => {
 
   return (
     <Layout>
+      <PageSEO pageSlug="/wishlist" fallbackTitle={{ en: "Wishlist | ST International", bn: "উইশলিস্ট | ST International" }} />
       {/* Page Header */}
       <section className={`bg-muted/50 border-b border-border ${fontClass}`}>
         <div className="container-premium py-8 md:py-12">

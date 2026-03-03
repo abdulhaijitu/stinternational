@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AuthForm from "@/components/auth/AuthForm";
+import { PageSEO } from "@/components/seo/PageSEO";
 import { toast } from "sonner";
 
 const Account = () => {
@@ -69,6 +70,7 @@ const Account = () => {
   if (loading) {
     return (
       <Layout>
+        <PageSEO pageSlug="/account" fallbackTitle={{ en: "My Account | ST International", bn: "আমার অ্যাকাউন্ট | ST International" }} />
         <div className="container-premium py-16 md:py-24 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -79,6 +81,7 @@ const Account = () => {
   if (!user) {
     return (
       <Layout>
+        <PageSEO pageSlug="/account" fallbackTitle={{ en: "My Account | ST International", bn: "আমার অ্যাকাউন্ট | ST International" }} />
         <div className={`container-premium py-16 md:py-24 ${fontClass}`}>
           <AuthForm />
           <p className="text-sm text-muted-foreground mt-8 text-center">
@@ -98,6 +101,7 @@ const Account = () => {
 
   return (
     <Layout>
+      <PageSEO pageSlug="/account" fallbackTitle={{ en: "My Account | ST International", bn: "আমার অ্যাকাউন্ট | ST International" }} />
       <section className={`bg-muted/50 border-b border-border ${fontClass}`}>
         <div className="container-premium py-8 md:py-12">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

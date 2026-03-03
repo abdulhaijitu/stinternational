@@ -15,6 +15,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import heroDefault from "@/assets/fallbacks/hero-default.jpg";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 interface ParentWithSubs extends DBCategory {
   subCategories: DBCategory[];
@@ -89,6 +90,11 @@ const Categories = () => {
 
   return (
     <Layout>
+      <PageSEO
+        pageSlug="/categories"
+        fallbackTitle={{ en: "Product Categories | ST International", bn: "পণ্য ক্যাটাগরি | ST International" }}
+        fallbackDescription={{ en: "Browse scientific and industrial equipment categories.", bn: "বৈজ্ঞানিক ও শিল্প যন্ত্রপাতির ক্যাটাগরি ব্রাউজ করুন।" }}
+      />
       {/* Page Header with Hero Image */}
       <section className="relative border-b border-border overflow-hidden">
         {/* Hero Background Image */}
