@@ -87,7 +87,7 @@ const DBProductCard = ({
       <div 
         className={cn(
           "relative bg-muted/30 overflow-hidden",
-          isCompact ? "aspect-[4/3]" : "aspect-[4/3] sm:aspect-square"
+          "aspect-[4/3]"
         )}
       >
         {/* Top Actions Row */}
@@ -272,7 +272,7 @@ const DBProductCard = ({
         {/* RFQ Link */}
         {!isCompact && (
           <Link
-            to={`/request-quote?product=${encodeURIComponent(product.name)}`}
+            to={`/request-quote?product=${encodeURIComponent(productFields.name)}`}
             className={cn(
               "mt-3 hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground",
               "hover:text-primary transition-colors duration-150"
