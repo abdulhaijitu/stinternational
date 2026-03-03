@@ -54,7 +54,7 @@ const ProductCardSkeleton = ({ variant = "default" }: { variant?: "default" | "c
       <Skeleton 
         className={cn(
           "w-full rounded-none",
-          isCompact ? "aspect-[4/3]" : "aspect-[4/3] sm:aspect-square"
+          "aspect-[4/3]"
         )} 
       />
       
@@ -91,22 +91,10 @@ const ProductCardSkeleton = ({ variant = "default" }: { variant?: "default" | "c
         </div>
         
         {/* CTA Button */}
-        {isCompact ? (
-          <Skeleton className="h-7 w-full mt-2" />
-        ) : (
-          <>
-            {/* Mobile button */}
-            <div className="mt-3 sm:hidden space-y-2">
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-            {/* Desktop buttons */}
-            <div className="mt-4 hidden sm:flex gap-2">
-              <Skeleton className="h-9 flex-1" />
-              <Skeleton className="h-9 w-11" />
-            </div>
-          </>
-        )}
+        <div className={cn("flex gap-2", isCompact ? "mt-2" : "mt-3")}>
+          <Skeleton className={cn("flex-1", isCompact ? "h-7" : "h-8 sm:h-9")} />
+          {!isCompact && <Skeleton className="h-8 sm:h-9 w-10" />}
+        </div>
         
         {/* RFQ link - only for default, hidden on mobile */}
         {!isCompact && <Skeleton className="hidden sm:block h-3 w-28 mt-3" />}

@@ -60,7 +60,7 @@ const WishlistButton = ({ productId, variant = "icon", size = "default", classNa
       disabled={isToggling}
       className={cn(
         "rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm",
-        "transition-all duration-200 hover:scale-110",
+        "transition-all duration-200 hover:scale-105",
         padding,
         inWishlist ? "text-red-500" : "text-muted-foreground hover:text-red-500",
         className
