@@ -281,7 +281,7 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                   {category.description}
                 </p>
-                <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:text-accent transition-colors">
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-primary group-hover:text-primary/70 transition-colors">
                   {language === 'bn' ? 'পণ্য দেখুন' : 'View Products'}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
                 </span>
@@ -369,7 +369,7 @@ const Index = () => {
             </div>
             <Link
               to="/products"
-              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent transition-colors shrink-0"
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/70 transition-colors shrink-0"
             >
               {language === 'bn' ? 'সব পণ্য দেখুন' : 'View All Products'}
               <ArrowRight className="h-4 w-4" />
@@ -425,7 +425,7 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {currentStats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-accent mb-2">{stat.value}</div>
+                <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
                 <div className="text-sm text-primary-foreground/70">{stat.label}</div>
               </div>
             ))}

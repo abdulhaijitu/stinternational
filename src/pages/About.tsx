@@ -296,7 +296,7 @@ const About = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.15 + 0.2, type: "spring", stiffness: 150 }}
                   >
-                    <feature.icon className="h-7 w-7 text-accent transition-transform duration-200 group-hover:scale-110" />
+                    <feature.icon className="h-7 w-7 text-primary transition-transform duration-200 group-hover:scale-110" />
                   </motion.div>
                 </motion.div>
                 <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
@@ -388,7 +388,7 @@ const About = () => {
                     />
                     <div className={`ml-10 md:ml-0 md:w-1/2 ${index % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
                       <motion.span 
-                        className="text-sm font-semibold text-accent inline-block"
+                        className="text-sm font-semibold text-primary inline-block"
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.2 }}
                       >
