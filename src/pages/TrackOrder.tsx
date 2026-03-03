@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/formatPrice";
 import { format } from "date-fns";
 import OrderStatusTimeline from "@/components/orders/OrderStatusTimeline";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 type OrderStatus = "pending_payment" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
 
@@ -165,6 +166,7 @@ const TrackOrder = () => {
 
   return (
     <Layout>
+      <PageSEO pageSlug="/track-order" fallbackTitle={{ en: "Track Order | ST International", bn: "অর্ডার ট্র্যাক করুন | ST International" }} />
       <div className={`container mx-auto px-4 py-8 max-w-4xl ${fontClass}`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">

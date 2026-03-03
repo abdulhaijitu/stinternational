@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatPrice } from "@/lib/formatPrice";
+import { PageSEO } from "@/components/seo/PageSEO";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
+        <PageSEO pageSlug="/cart" fallbackTitle={{ en: "Shopping Cart | ST International", bn: "শপিং কার্ট | ST International" }} />
         <div className={`container-premium py-16 md:py-24 text-center ${fontClass}`}>
           <div className="max-w-md mx-auto">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
@@ -43,6 +45,7 @@ const Cart = () => {
 
   return (
     <Layout>
+      <PageSEO pageSlug="/cart" fallbackTitle={{ en: "Shopping Cart | ST International", bn: "শপিং কার্ট | ST International" }} />
       {/* Page Header */}
       <section className="bg-muted/50 border-b border-border">
         <div className={`container-premium py-8 md:py-12 ${fontClass}`}>

@@ -25,6 +25,7 @@ import CheckoutLayout from "@/components/checkout/CheckoutLayout";
 import CheckoutLoginStep from "@/components/checkout/CheckoutLoginStep";
 import { CheckoutStep } from "@/components/checkout/CheckoutStepIndicator";
 import { cn } from "@/lib/utils";
+import { BilingualSEO } from "@/components/seo/BilingualSEO";
 
 type PaymentMethod = "cash_on_delivery" | "bank_transfer";
 
@@ -269,6 +270,7 @@ const Checkout = () => {
   if (items.length === 0 && !orderPlaced) {
     return (
       <CheckoutLayout currentStep="cart" isLoggedIn={!!user} showBackToCart={false}>
+        <BilingualSEO customTitle={{ en: "Checkout | ST International", bn: "চেকআউট | ST International" }} noIndex={true} />
         <div className={`py-8 text-center ${fontClass}`}>
           <h1 className="text-2xl font-bold mb-4">{t.cart.cartEmpty}</h1>
           <p className="text-muted-foreground mb-6">{t.checkout.addProductsToCheckout}</p>
@@ -373,6 +375,7 @@ const Checkout = () => {
   // Shipping & Payment Steps (combined for simplicity)
   return (
     <CheckoutLayout currentStep="shipping" isLoggedIn={true}>
+      <BilingualSEO customTitle={{ en: "Checkout | ST International", bn: "চেকআউট | ST International" }} noIndex={true} />
       <div className={fontClass}>
         <h1 className="text-2xl md:text-3xl font-bold mb-8">{t.checkout.checkout}</h1>
 
