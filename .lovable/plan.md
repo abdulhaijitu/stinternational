@@ -1,61 +1,61 @@
 
 
-## বাটন ভিজিবিলিটি অডিট ও ফিক্স প্ল্যান
+## সম্পূর্ণ অডিট রিপোর্ট ও ফিক্স প্ল্যান
 
 ### চিহ্নিত সমস্যা
 
-#### সমস্যা ১: About পেইজ CTA সেকশন — বাটন অদৃশ্য (Critical)
-**ফাইল:** `src/pages/About.tsx` (line 457)
-- সেকশনের ব্যাকগ্রাউন্ড `bg-primary` (orange)
-- বাটন ভ্যারিয়েন্ট `hero` = `bg-primary text-primary-foreground` (orange bg)
-- ফলাফল: **কমলা ব্যাকগ্রাউন্ডে কমলা বাটন — কোনো কন্ট্রাস্ট নেই**
-- **ফিক্স:** `hero` বাটনকে `variant="default"` + `className="bg-white text-primary hover:bg-white/90"` দিয়ে প্রতিস্থাপন করা, এবং `hero-secondary` বাটনকে ঠিক রাখা
+#### সমস্যা ১: `hover:text-accent` — লাইট ব্যাকগ্রাউন্ডে টেক্সট অদৃশ্য (Critical)
 
-#### সমস্যা ২: DBProductCard গ্র্যাডিয়েন্ট ওভারলে — টেক্সট অদৃশ্য হয় (Moderate)
-**ফাইল:** `src/components/products/DBProductCard.tsx` (line 323)
-- হোভারে গ্র্যাডিয়েন্ট: `from-primary via-primary to-accent`
-- Light mode-এ accent = `hsl(47 100% 96%)` (প্রায় সাদা)
-- বাটনের টেক্সট `primary-foreground` (cream) — সাদার উপর cream অদৃশ্য
-- **ফিক্স:** গ্র্যাডিয়েন্টে `to-accent` বদলে `to-primary/80` ব্যবহার করা
+Light mode-এ `--accent: 47 100% 96%` = প্রায় সাদা। তাই যেকোনো সাদা/ধূসর ব্যাকগ্রাউন্ডে `hover:text-accent` বা `text-accent` ব্যবহার করলে হোভারে টেক্সট অদৃশ্য হয়ে যায়।
 
-#### সমস্যা ৩: ডিসকাউন্ট ব্যাজ কন্ট্রাস্ট দুর্বল (Minor)
-**ফাইল:** `src/components/products/DBProductCard.tsx` (line 120-127)
-- `bg-accent text-accent-foreground` = হালকা হলুদ bg + অ্যাম্বার টেক্সট
-- WCAG কন্ট্রাস্ট রেশিও ~2.5:1 (minimum 4.5:1 প্রয়োজন)
-- **ফিক্স:** `bg-primary text-primary-foreground` ব্যবহার করা (orange bg + cream text)
+**প্রভাবিত ফাইল ও লাইন:**
 
-#### সমস্যা ৪: ProductPage ডিসকাউন্ট টেক্সট — একই কন্ট্রাস্ট সমস্যা
-**ফাইল:** `src/pages/ProductPage.tsx` (line 298)
-- `bg-accent/10 text-accent-foreground` — প্রায় transparent bg + amber text
-- **ফিক্স:** `bg-primary/10 text-primary font-semibold` ব্যবহার করা
+| ফাইল | লাইন | সমস্যা | ফিক্স |
+|---|---|---|---|
+| `src/pages/Index.tsx` | 284 | Category card "পণ্য দেখুন" লিঙ্ক `group-hover:text-accent` — হোভারে অদৃশ্য | `group-hover:text-primary/70` |
+| `src/pages/Index.tsx` | 372 | "সব পণ্য দেখুন" লিঙ্ক `hover:text-accent` — হোভারে অদৃশ্য | `hover:text-primary/70` |
+| `src/pages/Contact.tsx` | 306 | ফোন নম্বর লিঙ্ক `hover:text-accent` — হোভারে অদৃশ্য | `hover:text-primary/70` |
+| `src/pages/RequestQuote.tsx` | 735 | ফোন নম্বর লিঙ্ক `hover:text-accent` — হোভারে অদৃশ্য | `hover:text-primary/70` |
 
-#### সমস্যা ৫: Wishlist পেইজ — ডিসকাউন্ট ব্যাজ একই সমস্যা
-**ফাইল:** `src/pages/Wishlist.tsx` (line 135)
-- `bg-accent text-accent-foreground` — একই কন্ট্রাস্ট সমস্যা
-- **ফিক্স:** `bg-primary text-primary-foreground` ব্যবহার করা
+**দ্রষ্টব্য:** Header top bar ও Footer-এ `hover:text-accent` ঠিক আছে কারণ সেখানে ব্যাকগ্রাউন্ড `bg-primary` (orange) — cream/white হোভার সেখানে দৃশ্যমান।
+
+#### সমস্যা ২: Index Stats সেকশনে `text-accent` — Light mode-এ দুর্বল (Moderate)
+
+| ফাইল | লাইন | সমস্যা | ফিক্স |
+|---|---|---|---|
+| `src/pages/Index.tsx` | 428 | Stats values `text-accent` (near-white) on `bg-primary` (orange) — কন্ট্রাস্ট দুর্বল | `text-white` ব্যবহার করা |
+
+#### সমস্যা ৩: NotFound পেইজ — দ্বিভাষিক নয় (Minor)
+
+| ফাইল | সমস্যা | ফিক্স |
+|---|---|---|
+| `src/pages/NotFound.tsx` | "Oops! Page not found" ও "Return to Home" শুধু ইংরেজিতে | ভাষা অনুযায়ী বাংলা/ইংরেজি দেখানো |
+
+#### সমস্যা ৪: About পেইজ — `text-accent` আইকন লাইট ব্যাকগ্রাউন্ডে দুর্বল (Minor)
+
+| ফাইল | লাইন | সমস্যা | ফিক্স |
+|---|---|---|---|
+| `src/pages/About.tsx` | 299 | Feature icon `text-accent` (near-white) on card bg — অদৃশ্য | `text-primary` |
 
 ---
 
 ### বাস্তবায়ন পরিকল্পনা
 
-| ফাইল | পরিবর্তন |
+| ফাইল | কাজ |
 |---|---|
-| `src/pages/About.tsx` | CTA সেকশনে `hero` বাটনকে white bg + primary text দিয়ে প্রতিস্থাপন |
-| `src/components/products/DBProductCard.tsx` | গ্র্যাডিয়েন্ট `to-accent` → `to-primary/80`; ব্যাজ `bg-accent` → `bg-primary` |
-| `src/pages/ProductPage.tsx` | ডিসকাউন্ট ব্যাজে `bg-accent/10 text-accent-foreground` → `bg-primary/10 text-primary` |
-| `src/pages/Wishlist.tsx` | ডিসকাউন্ট ব্যাজে `bg-accent text-accent-foreground` → `bg-primary text-primary-foreground` |
+| `src/pages/Index.tsx` | L284: `group-hover:text-accent` → `group-hover:text-primary/70`; L372: `hover:text-accent` → `hover:text-primary/70`; L428: `text-accent` → `text-white` |
+| `src/pages/Contact.tsx` | L306: `hover:text-accent` → `hover:text-primary/70` |
+| `src/pages/RequestQuote.tsx` | L735: `hover:text-accent` → `hover:text-primary/70` |
+| `src/pages/About.tsx` | L299: `text-accent` → `text-primary` |
+| `src/pages/NotFound.tsx` | 404 টেক্সট দ্বিভাষিক করা (`useLanguage` হুক ব্যবহার করে) |
 
 ### যা ঠিক আছে (কোনো পদক্ষেপ নেই)
-- ✅ Cart পেইজ — সব বাটন `variant="default"` বা `variant="outline"`, সঠিক কন্ট্রাস্ট
-- ✅ Checkout পেইজ — সব বাটন সঠিক
-- ✅ Products পেইজ — সার্চ, ফিল্টার বাটন সঠিক
-- ✅ Contact পেইজ — ফর্ম সাবমিট বাটন সঠিক
-- ✅ Account পেইজ — সব বাটন সঠিক
-- ✅ RequestQuote পেইজ — সব বাটন সঠিক
-- ✅ Footer — `text-primary-foreground` on `bg-primary` — পর্যাপ্ত কন্ট্রাস্ট
-- ✅ Header — সব নেভিগেশন বাটন সঠিক
-- ✅ HeroCta — `text-primary-contrast` (dark brown) on orange — ভালো কন্ট্রাস্ট
-- ✅ NotFound পেইজ — সিম্পল লিঙ্ক, সঠিক
-- ✅ AuthForm — সব বাটন `variant="default"`, সঠিক
-- ✅ QuickRfqForm — সব বাটন সঠিক
+- ✅ Header top bar — `hover:text-accent` on `bg-primary` — ঠিক আছে (cream on orange = দৃশ্যমান)
+- ✅ Footer — `hover:text-accent` ও `text-accent` on `bg-primary` — ঠিক আছে
+- ✅ HeroSlider — dark gradient bg তে `hover:text-accent` — ঠিক আছে
+- ✅ Cart, Checkout, Products, Orders, Account — সব ঠিক
+- ✅ Button variants — সব সঠিক কন্ট্রাস্ট
+- ✅ Admin পেইজ — `hover:text-accent-foreground` ব্যবহৃত (amber, ঠিক আছে)
+- ✅ SEO — সব পেইজে PageSEO/BilingualSEO আছে
+- ✅ DBProductCard — আগের ফিক্সে ঠিক করা হয়েছে
 
