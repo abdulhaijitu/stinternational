@@ -308,7 +308,7 @@ const Checkout = () => {
             {t.checkout.orderConfirmationMessage}
           </p>
           <p className="text-xs text-muted-foreground mb-8">
-            Operated by ST International, Dhaka, Bangladesh
+            {language === 'bn' ? 'পরিচালিত: ST International, ঢাকা, বাংলাদেশ' : 'Operated by ST International, Dhaka, Bangladesh'}
           </p>
 
           {/* Create Account Prompt for Guest Users */}
