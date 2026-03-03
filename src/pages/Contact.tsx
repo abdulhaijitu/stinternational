@@ -303,7 +303,7 @@ const Contact = () => {
             <span className="hidden md:block text-muted-foreground">•</span>
             <a 
               href="tel:+8801715575665" 
-              className="text-sm text-primary hover:text-accent transition-colors"
+              className="text-sm text-primary hover:text-primary/70 transition-colors"
             >
               01715-575665
             </a>

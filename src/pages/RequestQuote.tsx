@@ -732,7 +732,7 @@ const RequestQuote = () => {
             {/* Contact Info */}
             <div className="mt-8 text-center text-sm text-muted-foreground">
               <p>{t.rfq.needAssistance}{" "}
-                <a href="tel:+8801715575665" className="text-primary hover:text-accent font-medium">
+                <a href="tel:+8801715575665" className="text-primary hover:text-primary/70 font-medium">
                   01715-575665
                 </a>
               </p>
