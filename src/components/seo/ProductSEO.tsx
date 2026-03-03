@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BilingualSEO, BASE_URL } from "./BilingualSEO";
 import { getProductOgImage } from "@/lib/ogImageUtils";
 
@@ -88,6 +89,39 @@ export const ProductSEO = ({ product, category, language }: ProductSEOProps) => 
   const truncatedDescription = description.length > 160 
     ? description.substring(0, 157) + "..."
     : description;
+
+  // Inject BreadcrumbList JSON-LD
+  useEffect(() => {
+    const existing = document.querySelector('script[data-type="breadcrumb"]');
+    if (existing) existing.remove();
+
+    const items: any[] = [
+      { "@type": "ListItem", position: 1, name: language === "bn" ? "হোম" : "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: language === "bn" ? "পণ্যসমূহ" : "Products", item: `${BASE_URL}/products` },
+    ];
+
+    if (category) {
+      const catName = language === "bn" ? (category.name_bn || category.name) : category.name;
+      items.push({ "@type": "ListItem", position: 3, name: catName, item: `${BASE_URL}/category/${category.slug}` });
+      const prodName = language === "bn" ? (product.name_bn || product.name) : product.name;
+      items.push({ "@type": "ListItem", position: 4, name: prodName, item: `${BASE_URL}/product/${product.slug}` });
+    } else {
+      const prodName = language === "bn" ? (product.name_bn || product.name) : product.name;
+      items.push({ "@type": "ListItem", position: 3, name: prodName, item: `${BASE_URL}/product/${product.slug}` });
+    }
+
+    const schema = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: items };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-type", "breadcrumb");
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    return () => {
+      const s = document.querySelector('script[data-type="breadcrumb"]');
+      if (s) s.remove();
+    };
+  }, [product, category, language]);
 
   return (
     <BilingualSEO
