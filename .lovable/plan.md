@@ -1,30 +1,37 @@
 
 
-## Product Card UI/UX অডিট ও ফিক্স
+## Product Categories সেকশন — UI/UX অডিট ও ফিক্স
 
-### সমস্যাসমূহ
+### বর্তমান সমস্যাসমূহ
 
-| # | সমস্যা | ফাইল |
-|---|---|---|
-| 1 | **Skeleton CTA mismatch** — Skeleton এখনও আলাদা mobile/desktop বাটন ব্লক দেখাচ্ছে (lines 98-108), কিন্তু কার্ড এখন unified single block ব্যবহার করে। এতে CLS (Cumulative Layout Shift) হয়। | `ProductGridSkeleton.tsx` |
-| 2 | **WishlistButton hover:scale-110** — ছোট কার্ডে scale-110 অতিরিক্ত, পাশের এলিমেন্টে overlap করতে পারে | `WishlistButton.tsx` |
-| 3 | **Image aspect ratio inconsistency** — Default variant এ `aspect-[4/3] sm:aspect-square` ব্যবহার হচ্ছে, যার ফলে mobile → desktop এ ইমেজ হাইট জাম্প করে। সব সাইজে `aspect-[4/3]` রাখলে consistent হবে | `DBProductCard.tsx` |
-| 4 | **RFQ link uses raw `product.name`** — bilingual `productFields.name` ব্যবহার করা উচিত, `product.name` নয় | `DBProductCard.tsx` line 275 |
-| 5 | **Compare+Wishlist always visible on mobile** — `opacity-100 sm:opacity-0` মানে মোবাইলে সবসময় দেখায়, ইমেজ এরিয়া crowded হয় | `DBProductCard.tsx` |
+| # | সমস্যা |
+|---|---|
+| 1 | **হেডার ব্ল্যান্ড** — শুধু h2 + p, কোন ডেকোরেটিভ এলিমেন্ট নেই (অন্য সেকশনগুলোতে badge + primary line আছে) |
+| 2 | **৩টি কার্ড — ভিজ্যুয়াল ওয়েট কম** — আইকন ছোট (14x14), কার্ডে কোন ইমেজ/গ্র্যাডিয়েন্ট নেই, ফ্ল্যাট দেখায় |
+| 3 | **Subcategory ব্লক — বিরক্তিকর** — `bg-muted/30` ফ্ল্যাট বক্স, ট্যাগ/চিপগুলো ছোট ও একঘেয়ে, গ্রুপ নাম ও ক্যাটাগরি একই স্টাইল |
+| 4 | **"View All Categories" CTA নেই** — ইউজার পুরো ক্যাটাগরি পেজে যেতে পারে না সরাসরি |
+| 5 | **কোন ব্যাকগ্রাউন্ড ট্রিটমেন্ট নেই** — সেকশন সাদা/ফ্ল্যাট, হোমপেজের অন্য সেকশনের সাথে ভিজ্যুয়াল কন্ট্রাস্ট নেই |
 
-### ফিক্স প্ল্যান
+### ফিক্স প্ল্যান — `src/pages/Index.tsx`
 
-**ফাইল ১: `src/components/products/ProductGridSkeleton.tsx`**
-- CTA skeleton কে unified করা: একটি `flex gap-2` ব্লক (View button flex-1 + Cart icon button) — mobile/desktop আলাদা সরানো
+**১. সেকশন ব্যাকগ্রাউন্ড**
+- `bg-gradient-to-b from-muted/30 to-background` যোগ করা (Why Choose সেকশনের মতো)
 
-**ফাইল ২: `src/components/products/DBProductCard.tsx`**
-- Image aspect ratio: `aspect-[4/3] sm:aspect-square` → `aspect-[4/3]` (consistent)
-- RFQ link: `product.name` → `productFields.name`
-- Wishlist/Compare visibility: mobile তেও hover-on-touch দিয়ে দেখানো (বা সবসময় দেখানো রাখা — মোবাইলে hover নেই তাই এটি ঠিক আছে, পরিবর্তন দরকার নেই)
+**২. হেডার আপগ্রেড**
+- ছোট badge/subtitle: "Browse Equipment" / "যন্ত্রপাতি ব্রাউজ করুন"
+- টাইটেলের নিচে ডেকোরেটিভ primary line (অন্য সেকশনের সাথে consistent)
 
-**ফাইল ৩: `src/components/products/WishlistButton.tsx`**
-- `hover:scale-110` → `hover:scale-105` (সূক্ষ্ম)
+**৩. Category কার্ড রিডিজাইন**
+- আইকন বড় করা (w-16 h-16) এবং gradient background দেওয়া (`bg-gradient-to-br from-primary/10 to-primary/5`)
+- কার্ডে product count badge যোগ করা (DB groups থেকে)
+- Arrow CTA বড় করা ও bottom-aligned করা
 
-### কোন পরিবর্তন নেই
-- Compare/Wishlist মোবাইলে always visible রাখা ঠিক আছে কারণ মোবাইলে hover সম্ভব নয়
+**৪. Subcategory গ্রিড রিডিজাইন**
+- প্রতিটি গ্রুপকে proper bordered card বানানো (`bg-card border border-border rounded-lg`)
+- গ্রুপ header এ আইকন যোগ (category icon)
+- চিপগুলোতে hover ইফেক্ট উন্নত করা — `hover:bg-primary hover:text-primary-foreground`
+- "+N more" লিংকে arrow icon যোগ
+
+**৫. "View All Categories" CTA বাটন**
+- সেকশনের নিচে centered ghost/outline বাটন: "সব ক্যাটাগরি দেখুন" → `/categories`
 
