@@ -201,14 +201,14 @@ const CategoryPage = () => {
                   </h1>
                   <Badge variant="outline" className="text-xs bg-background/50 backdrop-blur-sm">
                     <FolderOpen className="h-3 w-3 mr-1" />
-                    Parent Category
+                    {language === "bn" ? "প্যারেন্ট ক্যাটাগরি" : "Parent Category"}
                   </Badge>
                 </div>
                 {parentCatFields.description && (
                   <p className="text-muted-foreground max-w-2xl">{parentCatFields.description}</p>
                 )}
                 <p className="text-sm text-muted-foreground mt-2">
-                  {subs.length} sub-categories
+                  {subs.length} {language === "bn" ? "সাব-ক্যাটাগরি" : "sub-categories"}
                 </p>
               </div>
             </div>
@@ -226,11 +226,11 @@ const CategoryPage = () => {
 
               {/* Main Content */}
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-semibold mb-6">Browse Sub-Categories</h2>
+                <h2 className="text-xl font-semibold mb-6">{language === "bn" ? "সাব-ক্যাটাগরি ব্রাউজ করুন" : "Browse Sub-Categories"}</h2>
                 {subs.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-muted-foreground mb-4">
-                      No sub-categories found in this category.
+                      {language === "bn" ? "এই ক্যাটাগরিতে কোনো সাব-ক্যাটাগরি পাওয়া যায়নি।" : "No sub-categories found in this category."}
                     </p>
                     <Button variant="outline" asChild>
                       <Link to="/categories">{t.categories.browseAll}</Link>

@@ -7,7 +7,7 @@ import { getCategoryHeroImage } from "@/lib/productFallbackImages";
 import { useBilingualContent } from "@/hooks/useBilingualContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -62,7 +62,7 @@ const Categories = () => {
   }, [categories]);
 
   // Auto-expand all parents on initial load
-  useMemo(() => {
+  useEffect(() => {
     if (hierarchy.length > 0 && expandedParents.size === 0) {
       setExpandedParents(new Set(hierarchy.map(p => p.id)));
     }
