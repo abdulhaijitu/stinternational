@@ -1,34 +1,27 @@
 
 
-## /categories ও CategoryPage অডিট রিপোর্ট
+## /about পেইজ অডিট রিপোর্ট
 
 ### চিহ্নিত সমস্যা
 
-#### সমস্যা ১: CategoryPage — হার্ডকোডেড ইংরেজি টেক্সট (Moderate)
-**ফাইল:** `src/pages/CategoryPage.tsx`
-
-| লাইন | সমস্যা | ফিক্স |
-|---|---|---|
-| 204 | `"Parent Category"` ব্যাজ — হার্ডকোডেড | `language === "bn" ? "প্যারেন্ট ক্যাটাগরি" : "Parent Category"` |
-| 211 | `"sub-categories"` — হার্ডকোডেড | `language === "bn" ? "সাব-ক্যাটাগরি" : "sub-categories"` |
-| 229 | `"Browse Sub-Categories"` — হার্ডকোডেড | `language === "bn" ? "সাব-ক্যাটাগরি ব্রাউজ করুন" : "Browse Sub-Categories"` |
-| 233 | `"No sub-categories found..."` — হার্ডকোডেড | দ্বিভাষিক করা |
-
-#### সমস্যা ২: Categories পেইজ — `useMemo` দিয়ে `setState` কল (Minor)
-**ফাইল:** `src/pages/Categories.tsx` (line 65-69)
-- `useMemo` এর ভিতরে `setExpandedParents` কল করা হচ্ছে — এটি React anti-pattern
-- **ফিক্স:** `useEffect` ব্যবহার করা
+#### সমস্যা ১: Vision কার্ডের আইকন ব্যাকগ্রাউন্ড অদৃশ্য (Minor)
+**ফাইল:** `src/pages/About.tsx` (line 194)
+- `bg-accent` ব্যবহৃত — Light mode-এ `--accent: 47 100% 96%` (প্রায় সাদা)
+- সাদা কার্ড ব্যাকগ্রাউন্ডে আইকন কন্টেইনার কার্যত অদৃশ্য
+- **ফিক্স:** `bg-accent text-accent-foreground` → `bg-primary/10 text-primary` (Mission কার্ডের সাথে সামঞ্জস্যপূর্ণ স্টাইল)
 
 ### যা ঠিক আছে
-- ✅ Categories.tsx — সব হেডার, ব্যাজ, এরর মেসেজ দ্বিভাষিক
-- ✅ Categories.tsx — কন্ট্রাস্ট ও বাটন ভিজিবিলিটি সঠিক
-- ✅ CategoryPage — breadcrumb, product grid, SEO সব ঠিক
-- ✅ PageSEO / CategorySEO — সঠিকভাবে ব্যবহৃত
+- ✅ সব টেক্সট `t.about.*` দিয়ে দ্বিভাষিক — কোনো হার্ডকোডেড স্ট্রিং নেই
+- ✅ Trust আইকন `text-primary` — আগের অডিটে ফিক্স করা হয়েছে
+- ✅ Timeline year `text-primary` — আগের অডিটে ফিক্স করা হয়েছে
+- ✅ CTA সেকশন — `bg-primary` এ `text-primary-foreground` সঠিক
+- ✅ Hero সেকশন — `hero-gradient` এ `text-primary-foreground` সঠিক
+- ✅ PageSEO — সঠিকভাবে ব্যবহৃত
+- ✅ `fontClass` — সব সেকশনে প্রয়োগ করা আছে
 
 ### বাস্তবায়ন পরিকল্পনা
 
 | ফাইল | কাজ |
 |---|---|
-| `src/pages/CategoryPage.tsx` | ৪টি হার্ডকোডেড ইংরেজি স্ট্রিং দ্বিভাষিক করা |
-| `src/pages/Categories.tsx` | `useMemo` → `useEffect` পরিবর্তন (line 65-69) |
+| `src/pages/About.tsx` | L194: Vision কার্ডের আইকন `bg-accent text-accent-foreground` → `bg-primary/10 text-primary` |
 
