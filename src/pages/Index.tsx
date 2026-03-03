@@ -28,6 +28,7 @@ import InstitutionLogos from "@/components/homepage/InstitutionLogos";
 
 import Testimonials from "@/components/homepage/Testimonials";
 import HeroSlider from "@/components/homepage/HeroSlider";
+import StatsSection from "@/components/homepage/StatsSection";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageSEO } from "@/components/seo/PageSEO";
 
@@ -171,21 +172,7 @@ const whyChooseUs = {
   ],
 };
 
-// Stats data (bilingual)
-const stats = {
-  en: [
-    { value: "10+", label: "Years of Experience" },
-    { value: "5000+", label: "Products Available" },
-    { value: "2000+", label: "Satisfied Clients" },
-    { value: "50+", label: "Trusted Brands" },
-  ],
-  bn: [
-    { value: "১০+", label: "বছরের অভিজ্ঞতা" },
-    { value: "৫০০০+", label: "পণ্য উপলব্ধ" },
-    { value: "২০০০+", label: "সন্তুষ্ট গ্রাহক" },
-    { value: "৫০+", label: "বিশ্বস্ত ব্র্যান্ড" },
-  ],
-};
+// Stats data moved to StatsSection component
 
 // Product card skeleton removed - using ProductGridSkeleton component instead
 
@@ -202,7 +189,7 @@ const Index = () => {
   const currentTrustSignals = trustSignals[language];
   const currentCategoryCards = categoryCards[language];
   const currentWhyChooseUs = whyChooseUs[language];
-  const currentStats = stats[language];
+  
 
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
@@ -427,18 +414,7 @@ const Index = () => {
       <Testimonials />
 
       {/* Stats Section */}
-      <section className="py-16 md:py-20 bg-muted text-foreground">
-        <div className="container-premium">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {currentStats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <StatsSection />
 
         </PageTransition>
       </PullToRefresh>
