@@ -1,31 +1,25 @@
 
 
-## /checkout পেইজ অডিট রিপোর্ট
+## হোম পেইজ সেকশন রিঅর্ডার
 
-### চিহ্নিত সমস্যা
+### বর্তমান সিরিয়াল → নতুন সিরিয়াল
 
-#### সমস্যা ১: হার্ডকোডেড ইংরেজি স্ট্রিং (Minor)
-**ফাইল:** `src/pages/Checkout.tsx` (line 311)
-
-| লাইন | টেক্সট | সমস্যা |
+| # | বর্তমান | নতুন |
 |---|---|---|
-| 311 | `"Operated by ST International, Dhaka, Bangladesh"` | হার্ডকোডেড ইংরেজি — বাংলা মোডেও ইংরেজি দেখায় |
+| 1 | Hero Slider | Hero Slider ✅ |
+| 2 | Trust Signals | Trust Signals ✅ |
+| 3 | Institution Logos | **Product Categories** ↑ |
+| 4 | Product Categories | **Featured Products** ↑ |
+| 5 | Why Choose ST | **Recently Viewed** ↑ |
+| 6 | Featured Products | **Why Choose ST** ↓ |
+| 7 | Recently Viewed | **Institution Logos** ↓ |
+| 8 | Testimonials | **Testimonials** ✅ |
+| 9 | Stats (Indicators) | **Stats (Indicators)** ✅ |
+| 10 | Quick RFQ Form | **সরানো হবে** ❌ |
 
-**ফিক্স:** `language` চেক দিয়ে দ্বিভাষিক করা — `"পরিচালিত: ST International, ঢাকা, বাংলাদেশ"` / `"Operated by ST International, Dhaka, Bangladesh"`
-
-### যা ঠিক আছে
-- ✅ সব ফর্ম লেবেল, ভ্যালিডেশন, প্লেসহোল্ডার — `t.checkout.*` বা `language` চেক দিয়ে দ্বিভাষিক
-- ✅ `formatPrice()` — সব কলে `language` পাস করা আছে (L573, L577, L586, L594, L601, L602, L608)
-- ✅ BilingualSEO — `noIndex={true}` সহ সঠিকভাবে ব্যবহৃত
-- ✅ fontClass — সব সেকশনে প্রয়োগ করা আছে
-- ✅ Payment method, bank info, notes — সব দ্বিভাষিক
-- ✅ Order confirmation — সব `t.checkout.*` দিয়ে দ্বিভাষিক
-- ✅ Guest checkout flow — সঠিকভাবে কাজ করছে
-- ✅ কালার/কন্ট্রাস্ট — সব সঠিক
-
-### বাস্তবায়ন পরিকল্পনা
+### পরিবর্তন
 
 | ফাইল | কাজ |
 |---|---|
-| `src/pages/Checkout.tsx` | L311: হার্ডকোডেড স্ট্রিং → `language` চেক দিয়ে দ্বিভাষিক |
+| `src/pages/Index.tsx` | সেকশনগুলো রিঅর্ডার করা এবং `<QuickRfqForm />` সরিয়ে দেওয়া (import সহ) |
 
