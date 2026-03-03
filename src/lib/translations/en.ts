@@ -527,6 +527,17 @@ export const en = {
     refundPolicy: "Refund Policy",
     shippingInfo: "Shipping Information",
     faq: "FAQ",
+    productCategories: "Product Categories",
+    contactUs: "Contact Us",
+    authenticProducts: "100% Authentic Products",
+    nationwideDelivery: "Nationwide Delivery",
+    securePayment: "Secure Payment Options",
+    acceptedPayments: "Accepted Payment Methods",
+    aboutUs: "About Us",
+    contact: "Contact",
+    allProducts: "All Products",
+    designBy: "Design & Developed by",
+    businessHours: "Sat - Thu: 9:00 AM - 6:00 PM",
   },
 
   // Testimonials
