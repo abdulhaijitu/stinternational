@@ -72,6 +72,49 @@ serve(async (req) => {
       });
     }
 
+    // Input validation
+    const { order, items } = payload;
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    const phoneRegex = /^[\d\s\-\+\(\)]{7,20}$/;
+
+    if (!order.customer_name?.trim() || order.customer_name.length > 200) {
+      return new Response(JSON.stringify({ error: "Invalid customer name" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!emailRegex.test(order.customer_email)) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!phoneRegex.test(order.customer_phone)) {
+      return new Response(JSON.stringify({ error: "Invalid phone" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!order.shipping_address?.trim() || !order.shipping_city?.trim()) {
+      return new Response(JSON.stringify({ error: "Shipping address required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (typeof order.total !== "number" || order.total < 0 || typeof order.subtotal !== "number" || order.subtotal < 0) {
+      return new Response(JSON.stringify({ error: "Invalid order totals" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (items.length > 100) {
+      return new Response(JSON.stringify({ error: "Too many items" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    for (const item of items) {
+      if (!item.product_name?.trim() || typeof item.quantity !== "number" || item.quantity < 1 || typeof item.unit_price !== "number" || item.unit_price < 0) {
+        return new Response(JSON.stringify({ error: "Invalid order item" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Determine user_id from auth token (optional)
     let userId: string | null = null;
     if (authHeader?.toLowerCase().startsWith("bearer ")) {
