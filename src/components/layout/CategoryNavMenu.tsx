@@ -24,8 +24,8 @@ const CategoryNavMenu = ({ isCompact = false, onCategoryClick }: CategoryNavMenu
   
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const popoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const popoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categoryRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   
   const { groups, isLoading } = useActiveCategoriesByGroup();

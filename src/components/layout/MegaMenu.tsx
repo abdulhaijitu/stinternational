@@ -28,7 +28,7 @@ const MegaMenu = ({ isCompact = false, onCategoryClick }: MegaMenuProps) => {
   
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categoryRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const featuredRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   

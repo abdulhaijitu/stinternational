@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 
 interface RichTextContentProps {
@@ -14,6 +15,12 @@ const RichTextContent = ({ content, className, isBangla = false }: RichTextConte
   if (!content || content === '<p></p>') {
     return null;
   }
+
+  const sanitizedContent = DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'br', 'span', 'blockquote'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'colspan', 'rowspan', 'target', 'rel'],
+    ALLOW_DATA_ATTR: false,
+  });
 
   return (
     <div 
@@ -47,7 +54,7 @@ const RichTextContent = ({ content, className, isBangla = false }: RichTextConte
         isBangla && "font-siliguri",
         className
       )}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );
 };
