@@ -53,7 +53,7 @@ export const useGridDensity = () => {
     };
 
     // Throttled resize handler
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     const throttledResize = () => {
       clearTimeout(timeout);
       timeout = setTimeout(handleResize, 100);

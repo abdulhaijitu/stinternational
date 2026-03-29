@@ -231,8 +231,8 @@ const HeroSlider = () => {
   const [progress, setProgress] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const sliderRef = useRef<HTMLElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const progressRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTrackedSlideRef = useRef<number>(-1);
 
   // Mouse follow glow effect

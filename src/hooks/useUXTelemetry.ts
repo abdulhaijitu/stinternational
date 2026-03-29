@@ -76,7 +76,7 @@ let eventQueue: Array<{
   session_id: string;
 }> = [];
 
-let flushTimeout: NodeJS.Timeout | null = null;
+let flushTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const flushEvents = async () => {
   if (eventQueue.length === 0) return;
